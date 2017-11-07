@@ -1,0 +1,125 @@
+###
+#
+# LN
+#
+###
+
+# criacao do link simbolico, ln -s
+#
+cosmo@debian:~/myProject/lpi$ ln -s link.txt link_simbolico.txt
+
+# visualizacao do link simbolico
+#
+# quando o nome do arquivo de origem eh alterado, o link
+# eh quebrado.
+#
+# se por acaso o nome do arquivo de origem for renomeado para
+# o nome original, o link simbolico eh restabelecido.
+#
+cosmo@debian:~/myProject/lpi$ ls -l link_simbolico.txt 
+lrwxrwxrwx 1 cosmo cosmo 8 Jun  6 10:28 link_simbolico.txt -> link.txt
+
+# criacao do hard link
+#
+cosmo@debian:~/myProject/lpi$ ln link.txt link_hard.txt 
+
+# eh possivel notar que os arquivos possuem o mesmo inode (12062426)
+#
+cosmo@debian:~/myProject/lpi$ ls -i link_hard.txt 
+12062426 link_hard.txt
+cosmo@debian:~/myProject/lpi$ ls -i link.txt 
+12062426 link.txt
+
+# mesmo alterando o nome do arquivo, de link_hard.txt ṕara hard_link,
+# o inode continuou o mesmo.
+#
+# isso eh devido a utilizacao do inode como referencia e nao o nome
+# do arquivo. Ambos os arquivos apontam para o mesmo inode.
+#
+cosmo@debian:~/myProject/lpi$ mv link_hard.txt hard_link
+cosmo@debian:~/myProject/lpi$ ls -i link.txt 
+12062426 link.txt
+cosmo@debian:~/myProject/lpi$ ls -i hard_link 
+12062426 hard_link
+
+###
+#
+# LS
+#
+###
+
+# o comando ls tem por objetivo o de listar o conteudo de
+# um determinado diretorio. Ele tambem eh utilizado para
+# obter informacoes, como por exemplo, o tamanho do arquivo,
+# as permissoes do arquivo/diretorio, data de criacao e 
+# outras opcoes.
+#
+# ls [opcao] [arquivo/diretorio]
+#
+# opcao
+#	-l	mais informacoes sobre o arquivo ou diretorio
+#	-a	lista todos os arquivos/diretorios, inclusive ocultos
+#	-i	inodes
+#	-h	mostra o tamanho do arquivo em formato legivel por humanos
+#	-X	ordena de acordo com a extensao do arquivo
+#	-R	exibe de forma recursiva os diretorios e arquivos
+
+# informacoes detalhadas sobre o arquivo
+#
+cosmo@debian:~/myProject/lpi$ ls -l ls.txt 
+-rw-r--r-- 1 cosmo cosmo 1452 May 29 11:02 ls.txt
+
+# informacao sobre o inode do arquivo
+#
+cosmo@debian:~/myProject/lpi$ ls -i ls.txt 
+12059219 ls.txt
+
+# exibe o tamanho do arquivo no formato legivel por humanos
+#
+cosmo@debian:~/myProject/lpi$ ls -lh ls.txt 
+-rw-r--r-- 1 cosmo cosmo 1.5K May 29 11:02 ls.txt
+
+# uma serie de exemplos da utilizacao de regex junto
+# com o comando ls
+#
+
+cosmo@study:~/myProject/lpi$ mkdir pato pata pati pat1 pata2 pata0 pata10 pata100
+
+cosmo@study:~/myProject/lpi$ ls -d pat[ao12]
+pat1  pata  pato
+
+cosmo@study:~/myProject/lpi$ ls -d pat[a-o]
+pata  pato
+
+cosmo@study:~/myProject/lpi$ ls -d pat[!i]
+pat1  pata  pato
+
+cosmo@study:~/myProject/lpi$ ls -d pat[!i]
+pat1  pata  pato
+
+cosmo@study:~/myProject/lpi$ ls -d pat{a..o}
+ls: cannot access patb: No such file or directory
+ls: cannot access patc: No such file or directory
+ls: cannot access patd: No such file or directory
+ls: cannot access pate: No such file or directory
+ls: cannot access patf: No such file or directory
+ls: cannot access patg: No such file or directory
+ls: cannot access path: No such file or directory
+ls: cannot access patj: No such file or directory
+ls: cannot access patk: No such file or directory
+ls: cannot access patl: No such file or directory
+ls: cannot access patm: No such file or directory
+ls: cannot access patn: No such file or directory
+pata  pati  pato
+
+cosmo@study:~/myProject/lpi$ ls -d pat{a..c}{1..3}
+ls: cannot access pata1: No such file or directory
+ls: cannot access pata3: No such file or directory
+ls: cannot access patb1: No such file or directory
+ls: cannot access patb2: No such file or directory
+ls: cannot access patb3: No such file or directory
+ls: cannot access patc1: No such file or directory
+ls: cannot access patc2: No such file or directory
+ls: cannot access patc3: No such file or directory
+pata2
+

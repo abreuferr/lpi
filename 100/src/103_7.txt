@@ -1,0 +1,129 @@
+###
+#
+# GREP
+#
+
+###
+# grep - aplicativo que faz buscas no conteudo de arquivos por
+# strings especificadas por uma expressao regular (regex).
+#
+# grep [opcoes] [regex] [arquivo]
+#
+# comando | grep [opcoes] [regex]
+#
+# opcoes:
+# -c 		exibe uma contagem das linhas encontradas;
+# -i 		ignora o caso (maiusculas e minusculas)
+# -n 		exibe as linhas encontradas com os respectivos numero de linha
+# -v		exibe as linhas que NAO correspondam a expressao regular
+# -r		busca recursiva
+# -E		interpretar a regex como uma regex extendida
+# --color	mostra a saida colorida
+
+cosmo@study:~/myProject/lpi$ cat grep.db
+	reading.txt
+	book
+	book
+	Paper
+	paper
+	article
+	article
+	magazine
+	reading.txt
+
+cosmo@study:~/myProject/lpi$ grep book grep.db
+	book
+	book
+	book
+	book
+
+cosmo@study:~/myProject/lpi$ grep -i Paper grep.db
+	Paper
+	paper
+
+# exibe a quantidade de linhas em que uma string aparece em um
+# determinado arquivo
+#
+$ grep -c book grep.db 
+	2
+
+cosmo@study:~/myProject/lpi$ ls /etc/ | grep hosts
+	hosts
+	hosts.allow
+	hosts.deny
+
+# listar as linhas que começam com letra minuscula
+#
+cosmo@debian:~/myProject/lpi$ grep ^[a-z] --color /etc/passwd
+
+# listar as linhas que contem numeros
+#
+cosmo@debian:~/myProject/lpi$ grep --color [[:digit:]] /etc/passwd
+
+# lista as linhas que contem letras maiusculas
+#
+cosmo@debian:~/myProject/lpi$ grep --color -n [A-Z] /etc/passwd
+
+# listar as linhas que contem a palavra bash no final da linha
+#
+cosmo@debian:~/myProject/lpi$ grep "bash$" /etc/passwd
+
+# listar as linhas que contem as palavras ae, ai e ao
+#
+cosmo@debian:~/myProject/lpi$ grep "a[eio]" /etc/passwd
+cosmo@debian:~/myProject/lpi$ grep "[cC]osmo" --color /etc/passwd
+
+# procurar por cosmo ou root
+#
+# opcao -E diz que esta sendo utilizado uma expressao regular extendida
+#
+cosmo@debian:~/myProject/lpi$ grep -E "(cosmo|root)" /etc/passwd
+cosmo@debian:~/myProject/lpi$ egrep "(cosmo|root)" /etc/group
+
+###
+#
+# SED
+#
+###
+
+# utilitario sed
+#
+# editor de streams. utilizado para automatizar tarefas 
+# de edicao repetitivas
+#
+# sed [opcao] [comando] [arquivo]
+# sed [opcao] -f [script] [arquivo]
+#
+# opção
+# -e 	comando do sed
+# -f [arquivo]	o arquivo eh um script do sed
+# -g	trata todas as substituicoes globais
+# -i	editar o proprio aquivo
+#
+# comandos
+# d	apaga linha
+# s	realiza substituicoes	s/anterior/posterior/flags
+		flags
+			g	global
+			n	substitui a enesima instacia
+			y	traduz caracteres
+
+# apaga as duas primeiras linhas do arquivo /etc/passwd
+#
+cosmo@debian:~/myProject/lpi$ sed "1,2d" /etc/passwd
+
+# substituir o caracter "x" pelo caractere "X" de forma global
+#
+cosmo@debian:~/myProject/lpi$ sed "s/x/X/g" /etc/passwd
+
+# apagar as linhas cujo primeiro caracter eh o "#"
+#
+cosmo@debian:~/myProject/lpi$ sed "/^#/d" /etc/passwd
+
+# apagar linhas em branco (^$)
+#
+cosmo@debian:~/myProject/lpi$ sed "/^$/d" /etc/passwd
+
+# substituir as linhas em branco pela palavra BRANCO
+#
+cosmo@debian:~/myProject/lpi$ sed 's/^$/BRANCO/' /etc/passwd

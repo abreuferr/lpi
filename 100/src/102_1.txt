@@ -1,0 +1,68 @@
+# esse parte do curso de LPI faz referencia a particionamento
+# do disco rígido.
+
+###
+#
+# /
+#
+###
+
+###
+#
+# /var
+#
+###
+
+# diretorio utilizado para armazenar arquivos de log
+# de aplicativos.
+#
+# recomenda-se que tenha um espaco grande para essa
+# particao pois tende a cresce.
+
+###
+#
+# /HOME
+#
+###
+
+# localizacao dos diretorios dos usuarios.
+
+###
+#
+# /BOOT
+#
+###
+
+# diretorio a onde ficam armazenadas as configuracoes
+# do gerenciador de boot.
+#
+# diretorio a onde fica armazenado o binario do kernel
+# do sistema operacional utilizado pelo sistema operacional.
+
+###
+#
+# SWAP
+#
+###
+
+# particao ou arquivo utilizado como memoria auxiliar do
+# computador.
+#
+# caso a quantidade de memoria seja atingida, parte da memoria
+# eh despejada para a area de swap.
+
+###
+#
+# MOUNT POINT
+#
+###
+
+# para permitir o acesso a um determinado disco rígido ou
+# pendrive, eh necessario montar esse dispositivo em um
+# diretorio.
+#
+cosmo@workstation:~$ sudo mount /dev/sda1 /mnt/usb/
+
+# a partir deste momento, o disco rigido sda1 pode ser
+# acessado.
+

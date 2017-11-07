@@ -1,0 +1,76 @@
+# download do codigo fonte do kernel
+#
+$ wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.13.3.tar.xz
+
+# instalacao dos pacotes necessarios para poder compilar o codigo
+# fonte do kernel no GNU/Linux Debian
+#
+$ sudo apt install build-essential libncurses5-dev kernel-package bc
+
+# descompactando o codigo fonte do kernel no diretorio /usr/src
+#
+$ sudo tar -xvf linux-4.13.3.tar.xz -C /usr/src/
+
+# acessando o diretorio
+#
+$ sudo cd /usr/src/
+
+# link simbolico
+#
+$ sudo ln -s linux-4.13.3 linux
+
+# acessando o diretorio
+#
+$ sudo cd linux
+
+# A - neste caso, o sysadmin optou por importar as configuracoes do
+# kernel em producao para o kernel que ele deseja instalar atraves
+# do codigo fonte.
+#
+$ sudo cp /boot/config-`uname -r` .config
+
+# B - neste caso, o sysadmin optou para fazer toda a configuracao do
+# kernel de forma manual.
+#
+$ sudo make menuconfig
+
+# Para customizar o nome do kernel, basta editar o arquivo Makefile
+#
+$ sudo vi /usr/src/linux/Makefile
+	EXTRAVERSION = LPI 201
+
+# gerando a imagem bzImage
+#
+$ sudo make bzImage
+
+# bzImage do kernel
+#
+$ sudo ls /usr/src/linux/arch/x86_64/boot/
+
+# compilacao dos modulos do kernel
+#
+$ sudo make modules
+
+# instalacao dos modulos
+#
+$ sudo make modules_install
+
+# instalacao do kernel
+#
+$ sudo make install
+
+# diretorio boot
+#
+$ sudo cd /boot
+
+# criacao do Initial Ramdisk
+#
+$ sudo mkinitramfs -o initrd.img-4.13.3lpi_201 4.13.3lpi_201
+
+# atualizacao do grub
+#
+$ sudo update-grub
+
+# reboot
+#
+$ sudo reboot
