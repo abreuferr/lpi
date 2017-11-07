@@ -1,0 +1,53 @@
+cosmo@study:~/myProject/lpi$ cat sort.db
+1
+2
+4
+3
+5
+7
+6
+8
+0
+9
+
+cosmo@study:~/myProject/lpi$ sort sort.db > sort.txt
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+cosmo@study:~/myProject/lpi$ sort -r sort.db > sort.txt
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+
+# -n	indica que sera utilizado numero para fazer o ordenamento
+# -t:	indica que o delimitador entre os campos eh o simbolo :
+# -kN	o aqruivo sera indexado por qual campo.
+#
+cosmo@debian:~/myProject/lpi$ sort -n -t: -k3 /etc/passwd >> sort.txt 
+
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin

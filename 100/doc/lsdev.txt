@@ -1,0 +1,16 @@
+# o comando LSDEV mostra informacoes sobre o hardware do computador.
+#
+# o aplicativo obtem informacoes dos arquivo interrupts, ioports e dma
+# que estao localizados no diretorio /proc.
+#
+# no exemplo abaixo, eh possivel visualizar informacoes de alguns 
+# dispositivos e as suas respectivas informacoes em relacao ao
+# DMA(/proc/dma), IRQ(/proc/interrups), I/O(/proc/ioports) e PORTS.
+#
+Device            DMA   IRQ  I/O Ports
+------------------------------------------------
+ahci                     42      f020-f03f     f060-f063     f070-f077     f080-f083     f090-f097
+cascade             4       
+eth0                     41 
+keyboard                       0060-0060   0064-0064
+parport0                  5    0378-037a

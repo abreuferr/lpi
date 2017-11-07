@@ -1,0 +1,16 @@
+cosmo@debian:~/myProject/lpi$ ls -l permissao.txt 
+-rw-r--r-- 1 cosmo cosmo 0 May 29 11:02 permissao.txt
+
+d = diretorio
+- = arquivo comum de usuario
+c = arquivo de caractere
+b = arquivo de bloco
+l = link
+
+proprietario	grupo	outros
+rw-		r--	r--
+  
+r = read (leitura)
+w = write (escrita)
+x = execition (execucao)
+- = sem premissao

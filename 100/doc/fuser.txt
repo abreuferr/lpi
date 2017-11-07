@@ -1,0 +1,40 @@
+# atraves do comando fusers, é possivel identificar
+# quais processos estao utilizando um determinado 
+# arquivo, diretorio ou socker.
+#
+# eh possivel encerrar um determinado processo
+# que esteja utilizando um determinado arquivo
+# e esteja travado.
+#
+# comando : fuser [opcao] [diretorio/arquivo]
+# opcao	:-k		- encerrar o processo (kill)
+#	 -l		- enviar outro tipo de sinal
+#	 -i		- modo interativo
+#	 -n SPACE	- file, tcp/udp [port]
+
+# processos que estao em vigencia no diretorio
+# atual (.)
+#
+cosmo@debian:~/myProject/lpi$ fuser -v .
+                     USER        PID ACCESS COMMAND
+                     cosmo      2142 ..c.. bash
+                     cosmo      7037 ..c.. vi
+                     cosmo      7159 ..c.. bash
+
+# utilizacao do fuser para identificar o processo que esteja utilizando
+# a porta 22 e protocolo tcp
+#
+cosmo@debian:~/myProject/lpi$ sudo fuser -v -n tcp 22
+                     USER        PID ACCESS COMMAND
+22/tcp:              root        579 F.... sshd
+                     root       8383 F.... sshd
+                     cosmo      8385 F.... sshd
+
+# opcao -l permite alterar o tipo de sinal enviado.
+# em vez de encerrar o processo de forma abrupta,
+# eh possivel encerrar o processo de forma elegante.
+#
+cosmo@debian:~/myProject/lpi$ fuser -l
+HUP INT QUIT ILL TRAP ABRT IOT BUS FPE KILL USR1 SEGV USR2 PIPE ALRM TERM
+STKFLT CHLD CONT STOP TSTP TTIN TTOU URG XCPU XFSZ VTALRM PROF WINCH IO PWR SYS
+UNUSED

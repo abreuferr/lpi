@@ -1,0 +1,44 @@
+# inverso do comando cat
+#
+# visualizar o conteudo de um arquivo, so que de forma inversa.
+
+
+cosmo@debian:~/myProject/lpi$ tac /etc/passwd > tac.txt
+
+
+ftp:x:116:124:ftp daemon,,,:/srv/ftp:/bin/false
+ntp:x:108:117::/home/ntp:/bin/false
+Debian-exim:x:111:123::/var/spool/exim4:/bin/false
+usbmux:x:115:46:usbmux daemon,,,:/var/lib/usbmux:/bin/false
+rtkit:x:114:122:RealtimeKit,,,:/proc:/bin/false
+pulse:x:113:120:PulseAudio daemon,,,:/var/run/pulse:/bin/false
+lightdm:x:112:119:Light Display Manager:/var/lib/lightdm:/bin/false
+dnsmasq:x:110:65534:dnsmasq,,,:/var/lib/misc:/bin/false
+hplip:x:109:7:HPLIP system user,,,:/var/run/hplip:/bin/false
+sshd:x:107:65534::/var/run/sshd:/usr/sbin/nologin
+saned:x:106:112::/var/lib/saned:/bin/false
+colord:x:105:111:colord colour management daemon,,,:/var/lib/colord:/bin/false
+messagebus:x:104:109::/var/run/dbus:/bin/false
+cosmo:x:1000:1000:cosmo,,,:/home/cosmo:/bin/bash
+systemd-bus-proxy:x:103:106:systemd Bus Proxy,,,:/run/systemd:/bin/false
+systemd-resolve:x:102:105:systemd Resolver,,,:/run/systemd/resolve:/bin/false
+systemd-network:x:101:104:systemd Network Management,,,:/run/systemd/netif:/bin/false
+systemd-timesync:x:100:103:systemd Time Synchronization,,,:/run/systemd:/bin/false
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+root:x:0:0:root:/root:/bin/bash

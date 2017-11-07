@@ -1,0 +1,28 @@
+# informacoes sobre o hardware do computador.
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 cmdline
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 cpuinfo
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 devices
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 dma
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 interrupts
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 ioports
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 meminfo
+# -r--r--r--  1 root        root                      0 Jun 13 09:32 modules
+# dr-xr-xr-x  1 root        root                      0 Jun 12 08:36 sys
+#
+# /proc/cmdline - arquivo que contem informacoes que sao repassadas para o kernel
+# durante o boot
+#	BOOT_IMAGE=/boot/vmlinuz-3.16.0-4-amd64 root=UUID=e1238fef-ebe3-42bf-8038-333dca18cbd3 ro quiet
+#
+# /proc/cpuinfo - informacoes sobre o processador do computador. Informacoes divididas de acordo com o
+# numero do nucleo do processador. No computadores de hoje, um processador pode ter mais de um nucleo.
+#
+# /proc/devices - informacoes sobre os devices que estao conectados no computador.
+#
+# /proc/interrupts - interrupcoes utilizadas pelo computador
+#
+# /proc/ioports - portas logicas que estao sendo utilizadas no computador.
+#
+# /proc/meminfo - informacoes sobre a utilizacao da memoria, como por exemplo, memoria sendo utilizada,
+# memoria livre, memoria swap e outras informacoes.
+#
+# /proc/modules - modulos carregados e sendo utilizados pelo kernel

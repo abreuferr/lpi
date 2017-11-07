@@ -1,0 +1,47 @@
+
+cosmo@debian:~/myProject/lpi$ echo $PATH
+/home/cosmo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+cosmo@debian:~/myProject/lpi$ env
+XDG_VTNR=1
+ORBIT_SOCKETDIR=/tmp/orbit-cosmo
+SSH_AGENT_PID=1468
+XDG_SESSION_ID=1
+TERMINATOR_UUID=urn:uuid:fb50be62-e1de-4d94-8694-a06a7fc2d444
+SHELL=/bin/bash
+(...)
+
+# variavel local
+#
+cosmo@debian:~/myProject/lpi$ FRUTA=laranja
+cosmo@debian:~/myProject/lpi$ echo $FRUTA
+laranja
+
+# variavel global
+#
+cosmo@debian:~/myProject/lpi$ export $FRUTA
+cosmo@debian:~/myProject/lpi$ env
+XDG_VTNR=1
+ORBIT_SOCKETDIR=/tmp/orbit-cosmo
+SSH_AGENT_PID=1468
+XDG_SESSION_ID=1
+TERMINATOR_UUID=urn:uuid:fb50be62-e1de-4d94-8694-a06a7fc2d444
+SHELL=/bin/bash
+TERM=xterm
+HUSHLOGIN=FALSE
+WINDOWID=25165827
+OLDPWD=/home/cosmo
+USER=cosmo
+SSH_AUTH_SOCK=/tmp/ssh-Yq5o9dxwFtUA/agent.1439
+PATH=/home/cosmo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+MAIL=/var/mail/cosmo
+FRUTA=laranja
+
+# adicionar uma nova variavel em outra variavel
+#
+cosmo@debian:~/myProject/lpi$ mkdir testevar
+cosmo@debian:~/myProject/lpi$ PATH=$PATH:/home/cosmo/myProject/lpi/testevar/
+cosmo@debian:~/myProject/lpi$ echo $PATH
+	/home/cosmo/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/home/cosmo/myProject/lpi/testevar/
+
+

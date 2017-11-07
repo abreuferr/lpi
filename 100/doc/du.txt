@@ -1,0 +1,16 @@
+# aplicativo que permite visualizar o tamanho total ocupado 
+# pelos arquivos em um determinado diretorio e respectivos
+# subdiretorio
+#
+# du [opcao] [diretorio]
+#
+# opcao
+#	-h	formato umano
+#	-a	exibe o tamanho dos arquivos e um total
+
+# no exemplo abaixo, o diretorio "/home/cosmo/Downloads/"
+# possuem arquivos que totalizam 123M de tamanho.
+# 
+cosmo@debian:~/myProject/lpi$ du -h /home/cosmo/Downloads/
+123M	/home/cosmo/Downloads/
+

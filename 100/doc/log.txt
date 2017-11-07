@@ -1,0 +1,5 @@
+# principais arquivos de log
+#
+#	/var/log/dmesg
+#	/var/log/messages
+#	/var/log/syslog

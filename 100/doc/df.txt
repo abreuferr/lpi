@@ -1,0 +1,24 @@
+# aplicativo utilizado para mostrar a utilização e espaço
+# livre.
+#
+Filesystem     Inodes IUsed IFree IUse% Mounted on
+/dev/sda1         14M  187K   14M    2% /
+udev             4.0M   411  4.0M    1% /dev
+tmpfs            4.0M   573  4.0M    1% /run
+tmpfs            4.0M    37  4.0M    1% /dev/shm
+tmpfs            4.0M     5  4.0M    1% /run/lock
+tmpfs            4.0M    13  4.0M    1% /sys/fs/cgroup
+/dev/sdb1        233M  2.7K  233M    1% /mnt/sdb
+tmpfs            4.0M    11  4.0M    1% /run/user/1000
+
+# com a opção -i, é possível visualizar os inodes.
+#
+Filesystem        Inodes  IUsed     IFree IUse% Mounted on
+/dev/sda1       14647296 190471  14456825    2% /
+udev             4117586    411   4117175    1% /dev
+tmpfs            4119837    573   4119264    1% /run
+tmpfs            4119837     37   4119800    1% /dev/shm
+tmpfs            4119837      5   4119832    1% /run/lock
+tmpfs            4119837     13   4119824    1% /sys/fs/cgroup
+/dev/sdb1      244195328   2759 244192569    1% /mnt/sdb
+tmpfs            4119837     11   4119826    1% /run/user/1000

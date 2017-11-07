@@ -1,0 +1,48 @@
+# utilitario sed
+#
+# editor de streams. utilizado para automatizar tarefas 
+# de edicao repetitivas
+#
+# sed [opcao] [comando] [arquivo]
+# sed [opcao] -f [script] [arquivo]
+#
+# opção
+# -e 	comando do sed
+# -f [arquivo]	o arquivo eh um script do sed
+# -g	trata todas as substituicoes globais
+# -i	editar o proprio aquivo
+#
+# comandos
+# d	apaga linha
+# s	realiza substituicoes	s/anterior/posterior/flags
+		flags
+			g	global
+			n	substitui a enesima instacia
+			y	traduz caracteres
+
+# apaga as duas primeiras linhas do arquivo /etc/passwd
+#
+cosmo@debian:~/myProject/lpi$ sed "1,2d" /etc/passwd
+
+# substituir o caracter "x" pelo caractere "X" de forma global
+#
+cosmo@debian:~/myProject/lpi$ sed "s/x/X/g" /etc/passwd
+
+# apagar as linhas cujo primeiro caracter eh o "#"
+#
+cosmo@debian:~/myProject/lpi$ sed "/^#/d" /etc/passwd
+
+# apagar linhas em branco (^$)
+#
+cosmo@debian:~/myProject/lpi$ sed "/^$/d" /etc/passwd
+
+# substituir as linhas em branco pela palavra BRANCO
+#
+cosmo@debian:~/myProject/lpi$ sed 's/^$/BRANCO/' /etc/passwd
+
+# a opcao -i permite alterar o arquivo que esta sendo lido
+# pelo SED, nao eh necessario utilizar o redirecionador > e 
+# reditar para um segundo arquivo.
+#
+cosmo@workstation:~/myProjects/lpi$ sed -i "s/echo/ECHO/g" echo.txt 
+

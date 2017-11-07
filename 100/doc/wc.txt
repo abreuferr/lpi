@@ -1,0 +1,34 @@
+cosmo@study:~/myProject/lpi$ cat fmt.db
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+diam enim, faucibus ut cursus vel, dictum et risus. Donec elementum,
+lacus in pulvinar pretium, ex risus porttitor tortor, ac faucibus
+leo ante sed mauris. Proin volutpat urna ut faucibus placerat. Ut
+dictum tristique nibh quis ornare.
+
+cosmo@study:~/myProject/lpi$ ls -l fmt.db
+-rw-r--r-- 1 cosmo cosmo 305 May 11 11:56 fmt.db
+
+# contagem de bytes
+#
+cosmo@study:~/myProject/lpi$ wc -c fmt.db
+305 fmt.db
+
+# contagem de linhas
+#
+cosmo@study:~/myProject/lpi$ wc -l fmt.db
+5 fmt.db
+
+# exibe a quantidade de caracteres da linha mais longa do arquivo
+#
+cosmo@study:~/myProject/lpi$ wc -L fmt.db
+68 fmt.db
+
+# contagem de caracteres
+#
+cosmo@study:~/myProject/lpi$ wc -m fmt.db
+305 fmt.db
+
+# contagem de palavras
+#
+cosmo@study:~/myProject/lpi$ wc -w fmt.db
+46 fmt.db

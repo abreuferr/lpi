@@ -1,0 +1,56 @@
+# chown - change owner - alterar as o proprietario de um arquivo ou diretoro
+# 
+# permite atribuir um novo USUARIO ou GRUPO para um determinado
+# arquivo ou pasta.
+#
+# chmow [opcao] [novo_usuario] [arquivo/diretorio]
+# chmow [opcao] .[novo_grupo] [arquivo/diretorio]
+# chmow [opcao] [novo_usuario].[novo_grupo] [arquivo/diretorio]
+# 
+# opcao - -R - recursividade
+
+# no exemplo abaixo o usuario dono do arquivo eh o usuario COSMO.
+# ja o grupo dono do arquivo eh o grupo USERS
+#
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo users 1956 Jun  1 12:29 passwd
+
+# o comando abaixo ira alterar usuario dono do arquivo
+# do usuario COSMO para o usuario ROOT
+#
+# chmow [opcao] [novo_usuario] [arquivo/diretorio]
+# 
+cosmo@debian:~/myProject/lpi$ sudo chown root passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 root users 1956 Jun  1 12:29 passwd
+
+# o comando abaixo ira alterar o atribuicao do GRUPO
+# dono do arquivo. Sera alterado o grupo de USERS para
+# COSMO.
+#
+# a grande diferenca em relacao ao comando executado
+# anteriormente eh a utilizacao do (.) antes do novo
+# nome do grupo.
+#
+# chmow [opcao] .[novo_grupo] [arquivo/diretorio]
+#
+cosmo@debian:~/myProject/lpi$ chown .cosmo passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 root cosmo 1956 Jun  1 12:29 passwd
+
+# existe tambem a possibilidade de utilizar o comando 
+# chmod para alterar o usuario dono do arquivo e alterar
+#  o grupo dono do arquivo de uma unica vez.
+#
+# no exemplo abaixo, tanto o usuario dono do arquivo quanto
+# o grupo dono do arquivo serao alterados para o usuario
+# COSMO e para o grupo COSMO de uma unica vez. Nos exemplos
+# anteriores foi necessario executar duas vezes o comando
+# chmod para alterar o usuario e o grupo. Desta vez, com um 
+# unico comando, foi possivel fazer essas duas alteracoes.
+# 
+# chmow [opcao] [novo_usuario].[novo_grupo] [arquivo/diretorio]
+# 
+cosmo@debian:~/myProject/lpi$ sudo chown cosmo.cosmo passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  1 12:29 passwd

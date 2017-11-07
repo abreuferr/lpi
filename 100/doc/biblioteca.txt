@@ -1,0 +1,92 @@
+# o aplicativo dd eh utilizar para exibir quais bibliotecas um determinado
+# aplicativo esta utilizando.
+#
+cosmo@debian:~/myProject/lpi$ ldd /bin/ls > biblioteca.txt 
+
+	linux-vdso.so.1 (0x00007ffd2efce000)
+	libselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0x00007fca7a671000)
+	libacl.so.1 => /lib/x86_64-linux-gnu/libacl.so.1 (0x00007fca7a468000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fca7a0bc000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007fca79e4e000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fca79c4a000)
+	/lib64/ld-linux-x86-64.so.2 (0x00005559ffab0000)
+	libattr.so.1 => /lib/x86_64-linux-gnu/libattr.so.1 (0x00007fca79a44000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fca79827000)
+	linux-vdso.so.1 (0x00007ffe4cb5f000)
+	libselinux.so.1 => /lib/x86_64-linux-gnu/libselinux.so.1 (0x00007fccfe002000)
+	libacl.so.1 => /lib/x86_64-linux-gnu/libacl.so.1 (0x00007fccfddf9000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fccfda4d000)
+	libpcre.so.3 => /lib/x86_64-linux-gnu/libpcre.so.3 (0x00007fccfd7df000)
+	libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fccfd5db000)
+	/lib64/ld-linux-x86-64.so.2 (0x000055bbc32b9000)
+	libattr.so.1 => /lib/x86_64-linux-gnu/libattr.so.1 (0x00007fccfd3d5000)
+	libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fccfd1b8000)
+
+# a opcao -v (verbose) exibe mais informacoes referentes as bibliotecas que estao
+# associadas a um determinado aplicativo.
+#
+cosmo@debian:~/myProject/lpi$ ldd -v /bin/ls
+
+	Version information:
+	/bin/ls:
+		libacl.so.1 (ACL_1.0) => /lib/x86_64-linux-gnu/libacl.so.1
+		libc.so.6 (GLIBC_2.14) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.17) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3) => /lib/x86_64-linux-gnu/libc.so.6
+	/lib/x86_64-linux-gnu/libselinux.so.1:
+		libdl.so.2 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libdl.so.2
+		ld-linux-x86-64.so.2 (GLIBC_2.3) => /lib64/ld-linux-x86-64.so.2
+		libc.so.6 (GLIBC_2.7) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.14) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.8) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3.2) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3.4) => /lib/x86_64-linux-gnu/libc.so.6
+	/lib/x86_64-linux-gnu/libacl.so.1:
+		libc.so.6 (GLIBC_2.14) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+		libattr.so.1 (ATTR_1.0) => /lib/x86_64-linux-gnu/libattr.so.1
+	/lib/x86_64-linux-gnu/libc.so.6:
+		ld-linux-x86-64.so.2 (GLIBC_2.3) => /lib64/ld-linux-x86-64.so.2
+		ld-linux-x86-64.so.2 (GLIBC_PRIVATE) => /lib64/ld-linux-x86-64.so.2
+	/lib/x86_64-linux-gnu/libpcre.so.3:
+		libpthread.so.0 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libpthread.so.0
+		libc.so.6 (GLIBC_2.14) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3) => /lib/x86_64-linux-gnu/libc.so.6
+	/lib/x86_64-linux-gnu/libdl.so.2:
+		ld-linux-x86-64.so.2 (GLIBC_PRIVATE) => /lib64/ld-linux-x86-64.so.2
+		libc.so.6 (GLIBC_PRIVATE) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+	/lib/x86_64-linux-gnu/libattr.so.1:
+		libc.so.6 (GLIBC_2.4) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+	/lib/x86_64-linux-gnu/libpthread.so.0:
+		ld-linux-x86-64.so.2 (GLIBC_2.2.5) => /lib64/ld-linux-x86-64.so.2
+		ld-linux-x86-64.so.2 (GLIBC_2.3) => /lib64/ld-linux-x86-64.so.2
+		ld-linux-x86-64.so.2 (GLIBC_PRIVATE) => /lib64/ld-linux-x86-64.so.2
+		libc.so.6 (GLIBC_2.14) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.3.2) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_PRIVATE) => /lib/x86_64-linux-gnu/libc.so.6
+		libc.so.6 (GLIBC_2.2.5) => /lib/x86_64-linux-gnu/libc.so.6
+
+# o arquivo ld.so.conf eh uma especie de indice de diretorios
+# a onde se encontram as bibliotecas.
+#
+cosmo@debian:~/myProject/lpi$ cat /etc/ld.so.conf
+include /etc/ld.so.conf.d/*.conf
+
+# depois de alterar o arquivo ld.so.conf, adicionar ou remover
+# uma biblioteca, eh necessario execugar o comando ldconfig para
+# atualizar o indice de bibliotecas presentes no sistema operacional.
+#
+cosmo@debian:~/myProject/lpi$ sudo ldconfig

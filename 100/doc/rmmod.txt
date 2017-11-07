@@ -1,0 +1,13 @@
+# o comando rmmod tem o objetivo de remover um determinado modulo
+# do linux kernel.
+#
+cosmo@debian:~/myProject/lpi$ sudo rmmod fan 
+cosmo@debian:~/myProject/lpi$ sudo rmmod /lib/modules/4.4.0-21-generic/kernel/drivers/cpufreq/speedstep-lib.ko 
+
+# se por acaso o modulo que esta sendo removido
+# possui alguma dependencia, entao o modulo NAO
+# sera removido e ira aparecer uma mensagem de
+# erro, mensagem abaixo.
+#
+cosmo@debian:~/myProject/lpi$ sudo rmmod thermal_sys
+rmmod: ERROR: Module thermal_sys is in use by: video intel_powerclamp thermal processor x86_pkg_temp_thermal

@@ -1,0 +1,186 @@
+# metacaracter - caracteres que possuem significado especial
+# 
+# sao os seguinte
+# \ . * + - {} [] ^ $ | ? () : ! =
+# 
+# os metacaracteres podem ter mias de um significado, dependendo
+# do contexto de uso.
+# cosmo@debian:~/myProject/lpi$ grep "casado" expressao_regular.db 
+O homem é casado e a mulher é casada.
+cosmo@debian:~/myProject/lpi$ grep "casada" expressao_regular.db 
+O homem é casado e a mulher é casada.
+cosmo@debian:~/myProject/lpi$ grep "casad(do|da)" expressao_regular.db 
+cosmo@debian:~/myProject/lpi$ grep "casa(do|da)" expressao_regular.db 
+
+# as aspas nao sao metacaracteres.
+# 
+# . = caractere unico que representa qualquer caractere unico.
+#
+# ^ = negacao
+
+cosmo@debian:~/myProject/lpi$ cat expressao_regular.db
+Nunca é demais lembrar o peso e o 
+significado destes problemas, uma 
+vez que a estrutura atual da 
+organização exige a precisão e a 
+definição das condições financeiras 
+e administrativas exigidas.
+
+2.000
+2,000
+2-000
+
+cosmo@debian:~/myProject/lpi$ grep "exigi.as" expressao_regular.db 
+e administrativas exigidas.
+
+# caracteres de escape - trata-se de um metacaracter \ que indica
+# a mudanca de outro caractere. Transforma um metacaractere em um
+# literal.
+#
+# no exemplo abaixo, eh destacado o ponto final da expressao
+#
+cosmo@debian:~/myProject/lpi$ grep "\." expressao_regular.db 
+e administrativas exigidas.
+
+cosmo@debian:~/myProject/lpi$ grep "\-" expressao_regular.db 
+2-000
+
+# Classes ou conjunto de caracteres:
+# - sao listas de caracteres escritos dentro de
+# conchetes [] e que sao utilizadas para corresponder apensa
+# um dos caracteres listador.
+# - permite selecionar um dos caracterss dentro dos []
+# - nao importa a ordem.
+#
+# [A-Z] - localizar todos os caracteres maiusculos
+
+# expressao posix 
+#
+# [[:alpha:]] - equivale de a a-zA-Z
+# [[:upper:]] - A-Z
+# [[:lower:]] - a-z
+# [[:digit:]] - 0-9
+# [[:alnum:]] - 0-9a-zA-Z
+# [[:space:]] - espaco em branco
+#
+# no exemplo abaixo, foram descartados todos os numeros
+#
+cosmo@debian:~/myProject/lpi$ grep [[:alpha:]] expressao_regular.db 
+Nunca é demais lembrar o peso e o 
+significado destes problemas, uma 
+vez que a estrutura atual da 
+organização exige a precisão e a 
+definição das condições financeiras 
+e administrativas exigidas.
+
+cosmo@debian:~/myProject/lpi$ grep [[:digit:]] expressao_regular.db 
+2.000
+2,000
+2-000
+
+cosmo@debian:~/myProject/lpi$ grep "exig[a-z]" expressao_regular.db 
+organização exige a precisão e a 
+e administrativas exigidas.
+
+cosmo@debian:~/myProject/lpi$ grep "exig[[:alpha:]]" expressao_regular.db 
+organização exige a precisão e a 
+e administrativas exigidas.
+
+cosmo@debian:~/myProject/lpi$ grep "d[[:alpha:]]s" expressao_regular.db 
+significado destes problemas, uma 
+definição das condições financeiras 
+e administrativas exigidas.
+
+# METACARACTERES - ANCORAS
+# usados para representar caracteres no inicio ou no final
+# de uma linha.
+#
+# inicio da linha : ^
+# final da linha : $
+#
+# ^abc
+# abc$
+#
+
+# encontrar a palavra "Nunca" no começo da linha.
+#
+cosmo@debian:~/myProject/lpi$ grep "^Nunca" expressao_regular.db 
+Nunca é demais lembrar o peso e o 
+
+# encontrar a palavra "problemas." no final da linha $
+#
+cosmo@debian:~/myProject/lpi$ grep "problemas.$" expressao_regular.db 
+Nunca é demais lembrar o peso e o significado destes problemas.
+
+# encontrar palavras que contenham o caracter N ou U no começo
+# da linha ^.
+#
+cosmo@debian:~/myProject/lpi$ grep "^[NU]" expressao_regular.db 
+Nunca é demais lembrar o peso e o significado destes problemas.
+Uma vez que a estrutura atual da organização exige a precisão e a 
+
+# encontrar linha vazias
+#
+cosmo@debian:~/myProject/lpi$ grep "^$" expressao_regular.db 
+
+
+# METACARACTERES - REPETICAO DE CARACTERES
+#
+# *	- item precedentes 0 ou mais vezes
+# \+	- item precedente uma ou mais vezes
+# \?	- item precedente 0 ou uma ocorrencia
+# \w	- um caracter qualquer alfanumerico
+
+# conteudo do arquivo
+##
+cosmo@debian:~/myProject/lpi$ cat expressao_regular.db 
+2.000
+2,000
+2-000
+
+laranja
+laranjas
+laranjass
+
+# encontrar todas as palavras "laranjas"
+#
+cosmo@debian:~/myProject/lpi$ grep "laranja*" expressao_regular.db 
+"laranja"
+"laranjas"
+"laranjass"
+
+# encontrar as palavras "laranjas"
+#
+cosmo@debian:~/myProject/lpi$ grep "laranjas\+" expressao_regular.db 
+"laranjas"
+"laranjass"
+
+# encontrar as palavras "laranjas"
+#
+cosmo@debian:~/myProject/lpi$ grep "laranjas\?" expressao_regular.db 
+"laranja"
+"laranjas"
+"laranjas"s	; foi selecionado a palavra "laranjas" e n"ao "laranjass"
+
+
+# METACARACTERES - AGRUPAMENTO DE CARACTERES
+#
+# metacaracteres - ()
+# - permite agrupar partes de uma expressao;
+# - aplicar operadores de repeticao a um grupo;
+# - nao usar dentro de conjuntos de caracteres, pois
+# tem significado literal.
+#
+
+# METACARACTERES - ALTERNACAO
+#
+# metacaracteres - |
+#
+# permite corresponder uma ou outra expressão
+#
+cosmo@debian:~/myProject/lpi$ grep "casado" expressao_regular.db 
+O homem é "casado" e a mulher é casada.
+cosmo@debian:~/myProject/lpi$ grep "casada" expressao_regular.db 
+O homem é casado e a mulher é "casada".
+cosmo@debian:~/myProject/lpi$ grep "casa(do|da)" expressao_regular.db 
+O homem é "casado" e a mulher é "casada".

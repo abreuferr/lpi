@@ -1,0 +1,51 @@
+# a opcao -c <n> ira exibir somente os primeiros N caracteres
+# do arquivo /etc/passwd
+#
+# tambem eh possivel utilizar as opcoes 1,5 ou 1-5
+#
+$ cut -c 1 /etc/passwd
+
+#  neste caso, serao selecionados os campos 1, 2 e 3
+#
+$ cut -f 1-3 -d : /etc/passwd > cutt.txt
+
+#  neste caso, serao selecionados os campos 1 e 3
+#
+$ cut -f 1,3 -d : /etc/passwd > cutt.txt
+root:0
+cosmo:1000
+sshd:104
+
+#  neste caso, serao selecionados os campos 1 e 3 e o
+# delimitador original (:) será trocado pelo sinal =
+#
+$ cut -f 1,3 -d : /etc/passwd --output-delimiter = >> cut.txt
+root=0
+cosmo=1000
+sshd=104
+
+# neste caso, sera selecionado somente o campo 1 e
+# logo em seguida o resultado sera ordenado.
+#
+$ cut -f 1 -d : /etc/passwd > cut.txt | sort
+
+# o comando head ira ler as 5 primeiras linhas do arquivo /etc/passwd
+# o resultado sera enviado para o comando cut que ira exibir o conteudo
+# do campo 1 e 3. Finalmente, o comando sort ira ordenar o resultado.
+#
+$ head -n 5 /etc/passwd | cut -d : -f 1,3 | sort
+
+# o comando grep eh utilizado para filtrar e selecionar somente os
+# registros que utilizam o /bin/bash.
+#
+# depois de fazer o filtro, o comando cut eh utilizado para obter
+# as informacoes desejadas.
+#
+$ grep /bin/bash /etc/passwd 
+root:x:0:0:root:/root:/bin/bash
+cosmo:x:1000:1000:cosmo,,,:/home/cosmo:/bin/bash
+
+$ grep /bin/bash /etc/passwd | cut -f 1,3 -d :
+root:0
+cosmo:1000
+

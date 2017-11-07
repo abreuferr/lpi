@@ -1,0 +1,93 @@
+# o comando find eh utilizado para encontrar arquivos.
+# dependendo do paramentro que eh passado para o find,
+# o mesmo pode procurar arquivos de acordo com o nome,
+# o tamanho, os atributos, os donos e muitas outras 
+# opcoes.
+#
+# comando : find [diretorio] [opcao] [nome_arquivo]
+#
+# opcao
+#	-name		procurar pelo nome do arquivo
+#	-maxdepth n	recursividade de no maximo N subdiretorios
+#	-group		procurar por um determinado grupo
+#	-user		procura por determinado usuario
+#	(...)
+
+# o comando find ira procurar no diretorio ETC arquivos que
+# tenham o nome (-name) passwd
+#
+cosmo@study:~/myProject/lpi$ sudo find /etc/ -name passwd
+/etc/cron.daily/passwd
+/etc/passwd
+/etc/pam.d/passwd
+
+# o comando find ira procurar no diretorio ETC arquivos cujo tamanho seja maior
+# que 15k e ira executar o comando ls
+#
+cosmo@study:~/myProject/lpi$ sudo find /etc/ -size +15k -ls
+ 21474  240 -rw-r--r--   1 root     root       242091 Jul 22  2016 /etc/ssh/moduli
+  9127   20 -rw-r--r--   1 root     root        19605 Oct 20  2014 /etc/services
+ 20040   20 drwxr-xr-x   2 root     root        20480 May 11 11:50 /etc/ssl/certs
+ 27113  272 -rw-r--r--   1 root     root       277524 May 11 11:50 /etc/ssl/certs/ca-certificates.crt
+
+
+# o comando find ira procurar no diretorio raiz (.) por arquivos
+# cujo nome (-iname=nao eh case sensitive) seja igual a arquivo.txt 
+# e ira procurar no maximo em dois subdiretorios (-maxdepth 2)
+#
+cosmo@study:~/myProject/lpi$ mkdir -p linux1 linux2/linux3
+cosmo@study:~/myProject/lpi$ touch arquivo.txt linux1/arquivo.txt linux2/linux3/arquivo.txt
+cosmo@study:~/myProject/lpi$ find . -maxdepth 2 -iname arquivo.txt
+./linux1/arquivo.txt
+./arquivo.txt
+
+# o comando find ira procurar no diretorio raiz (.) por diretorios 
+# (-type d) e ira procurar no maximo em um subdiretorios (-maxdepth 1)
+#
+cosmo@study:~/myProject/lpi$ find . -maxdepth 1 -type d
+.
+./pat1
+./linux1
+./pato
+./pata10
+./pati
+./pata2
+./pata
+./linux2
+./.git
+./pata100
+./pata0
+cosmo@study:~/myProject/lpi$ find . -mindepth 2 -iname arquivo.txt
+./linux1/arquivo.txt
+./linux2/linux3/arquivo.txt
+
+# busca atraves da permissao(-perm) de um arquivo.
+#
+cosmo@study:~/myProject/lpi$ mkdir -m 300 300; mkdir -m 014 014; mkdir -m 103 103; mkdir -m 777 777
+cosmo@study:~/myProject/lpi$ find . -perm 777
+./777
+find: `./300': Permission denied
+find: `./014': Permission denied
+find: `./103': Permission denied
+
+cosmo@study:~/myProject/lpi$ find . -perm -006
+./777
+find: `./300': Permission denied
+find: `./014': Permission denied
+find: `./103': Permission denied
+
+# busca de arquivos localizado em um determinado diretorio (-path)
+#
+cosmo@study:~/myProject/lpi$ sudo find / -path "/usr/bin/*"
+/usr/bin/catman
+/usr/bin/factor
+/usr/bin/config_data.diverted
+/usr/bin/systemd-cgls
+/usr/bin/buildhash
+/usr/bin/rsync
+/usr/bin/bashbug
+/usr/bin/perf
+/usr/bin/gpgv
+/usr/bin/report-hw
+/usr/bin/test
+(...)

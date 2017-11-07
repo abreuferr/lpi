@@ -1,0 +1,20 @@
+cosmo@study:~/myProject/lpi$ cat paste1.db
+1
+2
+3
+cosmo@study:~/myProject/lpi$ cat paste2.db
+4
+5
+6
+
+cosmo@study:~/myProject/lpi$ paste paste1.db paste2.db
+1	4
+2	5
+3	6
+cosmo@study:~/myProject/lpi$ paste -s paste1.db paste2.db
+1	2	3
+4	5	6
+cosmo@study:~/myProject/lpi$ paste -d -  paste1.db paste2.db
+1-4
+2-5
+3-6

@@ -1,0 +1,38 @@
+cosmo@debian:~/myProject/lpi$ cat uniq.db 
+reading.txt
+book
+book
+Paper
+paper
+article
+article
+magazine
+reading.txt
+
+cosmo@debian:~/myProject/lpi$ uniq -c grep.db 
+      1 reading.txt
+      2 book
+      1 Paper
+      1 paper
+      2 article
+      1 magazine
+      1 reading.txt
+
+cosmo@debian:~/myProject/lpi$ uniq -ci grep.db 
+      1 reading.txt
+      2 book
+      2 Paper
+      2 article
+      1 magazine
+      1 reading.txt
+
+cosmo@debian:~/myProject/lpi$ uniq -cd grep.db 
+      2 book
+      2 article
+
+cosmo@debian:~/myProject/lpi$ uniq -cu grep.db 
+      1 reading.txt
+      1 Paper
+      1 paper
+      1 magazine
+      1 reading.txt

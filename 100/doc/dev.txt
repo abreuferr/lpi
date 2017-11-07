@@ -1,0 +1,11 @@
+# /DEV
+#
+# utiliza o sistema de arquivos tmpfs
+#
+# armazena informações sobre os dispositivos que estao
+# conectados no computador.
+#
+# dispositivos de armazenamento (/dev/hdXY, /dev/sdXY)
+#
+# trabalha junto com o UDEV para manter atualizado
+# o conteudo do diretorio.

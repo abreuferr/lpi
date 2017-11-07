@@ -1,0 +1,33 @@
+cosmo@debian:~/myProject/lpi$ stat touch.txt 
+  File: ‘touch.txt’
+  Size: 1322      	Blocks: 8          IO Block: 4096   regular file
+Device: 801h/2049d	Inode: 12061812    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-30 14:50:28.689634200 -0300
+Modify: 2017-05-30 14:50:28.689634200 -0300
+Change: 2017-05-30 14:50:28.693634164 -0300
+ Birth: -
+
+cosmo@debian:~/myProject/lpi$ touch -m touch.txt 
+
+cosmo@debian:~/myProject/lpi$ stat touch.txt 
+  File: ‘touch.txt’
+  Size: 1322      	Blocks: 8          IO Block: 4096   regular file
+Device: 801h/2049d	Inode: 12061812    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-30 14:50:28.689634200 -0300
+Modify: 2017-05-30 14:50:50.409468612 -0300
+Change: 2017-05-30 14:50:50.409468612 -0300
+ Birth: -
+
+cosmo@debian:~/myProject/lpi$ touch -a touch.txt 
+
+cosmo@debian:~/myProject/lpi$ stat touch.txt 
+  File: ‘touch.txt’
+  Size: 1322      	Blocks: 8          IO Block: 4096   regular file
+Device: 801h/2049d	Inode: 12061812    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-30 14:51:16.965266151 -0300
+Modify: 2017-05-30 14:50:50.409468612 -0300
+Change: 2017-05-30 14:51:16.965266151 -0300
+ Birth: -

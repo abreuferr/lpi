@@ -1,0 +1,22 @@
+# o aplicativo xargs le dados da entrada padrão (stdin) e executa o 
+# comando (fornecido como argumento) uma ou mais vezes com base na 
+# leitura de entrada.
+#
+
+# no exemplo abaixo, sera executado primeiramente o comando
+# find que tera como resultado a exibicao de uma serie de 
+# arquivos. Logo em seguida, o xargs ira executar o comando
+# grep dentro de cada arquivo TXT e verificar se existe a
+# string "vi". Se sim, entao sera exibido o conteudo.
+#
+cosmo@debian:~/myProject/lpi$ find /home/cosmo/myProject/lpi/ -name "*.txt" | xargs grep "vi"
+
+# no exemplo abaixo. o comando CAT ira ler o conteudo do arquivo xargs.db
+# e ira enviar o resultado para o xargs que ira criar cada os arquivos -n 1.
+#
+cosmo@debian:~/myProject/lpi$ cat xargs.db
+xargs_1
+xargs_2
+xargs_3
+xargs_4
+cosmo@debian:~/myProject/lpi$ cat xargs.db | xargs -n 1 touch
