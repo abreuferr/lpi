@@ -1,0 +1,190 @@
+$ iostat
+#
+# software utilizado para obter informacoes de performance de CPU e disco rigido
+# para poder determinar o que esta causando gargalo no sistema.
+#
+# os dados obtem as informacoes dos diretorios /SYS e /PROC
+#
+Linux 4.9.0-4-amd64 (workstation) 	11/08/2017 	_x86_64_	(8 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1.94    0.01    1.71    0.63    0.00   95.70
+
+Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
+sdb              18.12       848.01       271.35    4723889    1511580
+sda              17.04       184.62       284.37    1028435    1584120
+
+%user - utilizacao de cpu por parte dos aplicativos ativados pelo usuario
+%nice - utilizacao de cpu por parte dos aplicativos ativados pelo usuario e cujo nice foi alterado
+%system - utilizacao de cpu por parte dos aplicativos ativados pelo sistema
+%iowait - percentagem de tempo em que a cpu esta ociosa esperando resposta de I/O do disco
+%steal - percentagem de tempo em que a cpu virtual esta ociosa
+%idle - percentagem de tempo em que a cpu esta ociosa e NAO estava esperando resposta de I/O do disco
+
+        pelos dados acima, é possivel constatar que o computador esta sendo subutilizado.
+
+Device - dispositivos de armazenamento que estao sendo avaliados
+tps - transferencia por segundo
+kB_read/s - kB lidos por segundo
+kB_wrtn/s - KB escritos por segundo
+kB_read - quantidade de dados utilizados para realizar o teste de leitura
+kB_wrtn - quantidade de dados utilizados para realizar o teste de escrita
+Linux 4.9.0-4-amd64 (workstation) 	11/08/2017 	_x86_64_	(8 CPU)
+
+        os dados acima indicam que o sda eh mais lento que o sdb.
+
+$ iostat -c
+#
+# teste de cpu
+#
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1.74    0.01    1.57    0.57    0.00   96.11
+
+$ iostat -d
+#
+# teste de disco
+#
+Linux 4.9.0-4-amd64 (workstation) 	11/08/2017 	_x86_64_	(8 CPU)
+
+Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
+sdb              16.25       758.83       241.16    4792101    1522956
+sda              16.22       162.97       262.25    1029175    1656156
+
+$ iostat -x
+#
+# um relatorio mais detalhado sobre os testes
+#
+Linux 4.9.0-4-amd64 (workstation) 	11/08/2017 	_x86_64_	(8 CPU)
+
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           1.67    0.01    1.52    0.54    0.00   96.26
+
+Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+sdb               0.01     0.24   11.98    3.60   725.87   231.13   122.86     1.00   64.42    6.43  257.65   2.62   4.08
+sda               0.52     7.54    5.58   10.37   155.87   254.80    51.50     0.02    1.36    0.99    1.55   0.14   0.23
+
+$ sar
+#
+# o aplicativo SAR coleta uma serie de informacoes sobre 
+#
+# disco (-d)
+# cpu (sem opcao)
+# memoria (-r)
+# swap (-S)
+# rede (-n [iface])
+# -A (todas as opcoes)
+#
+$ sar
+#
+# informacoes sobre CPU
+#
+Linux 4.9.0-4-amd64 (workstation) 	11/08/2017 	_x86_64_	(8 CPU)
+
+07:36:46     LINUX RESTART	(8 CPU)
+
+07:45:01 AM     CPU     %user     %nice   %system   %iowait    %steal     %idle
+07:55:01 AM     all      0.13      0.01      0.12      0.01      0.00     99.73
+08:05:01 AM     all      1.52      0.01      2.77      3.10      0.00     92.60
+08:15:01 AM     all      0.92      0.01      1.44      1.59      0.00     96.04
+08:25:01 AM     all      1.78      0.01      0.81      0.10      0.00     97.30
+08:35:01 AM     all      1.87      0.01      3.68      0.33      0.00     94.12
+08:45:01 AM     all      2.08      0.01      3.86      0.23      0.00     93.82
+08:55:01 AM     all      3.79      0.01      1.08      0.06      0.00     95.06
+09:05:01 AM     all      4.27      0.01      1.28      0.13      0.00     94.30
+09:15:01 AM     all      0.71      0.01      0.74      0.23      0.00     98.32
+09:25:01 AM     all      0.21      0.00      0.52      0.09      0.00     99.18
+Average:        all      1.73      0.01      1.63      0.59      0.00     96.05
+
+$ netstat
+#
+# -i - exibir as interfaces de rede
+#
+Kernel Interface table
+Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
+docker0   1500        0      0      0 0             0      0      0      0 BMU
+eno1      1500   378928      0      0 0        178363      0      0      0 BMRU
+lo       65536      125      0      0 0           125      0      0      0 LRU
+vmnet1    1500        0      0      0 0           336      0      0      0 BMRU
+vmnet8    1500     1722      0      0 0          2025      0      0      0 BMRU
+
+#
+# netstat
+#
+# o aplicativo netstat eh utilizado para obter uma serie de informacoes referentes
+# a utilizacao dos dispositivos de rede que estao sendo utilizados.
+#
+# informacoes sobre os processos que estao utilizando a rede
+# rotas que estao ativas
+# estatisticas sobre a ulizacao das interfaces de rede
+# 
+# uma ferramenta utilizada para obter informacoes sobre a utilizacao dos 
+# dispositivos de rede, quais aplicativos estao acessando a rede.
+
+$ netstat
+#
+# -r - exibe rotas ativas
+#
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
+172.17.0.0      0.0.0.0         255.255.0.0     U         0 0          0 docker0
+192.168.0.0     0.0.0.0         255.255.255.0   U         0 0          0 vmnet8
+192.168.2.0     0.0.0.0         255.255.255.0   U         0 0          0 eno1
+192.168.165.0   0.0.0.0         255.255.255.0   U         0 0          0 vmnet1
+
+#
+# vmstat
+#
+# mais um aplicativo utilizado para obter informacoes sobre memoria, swap, disco, 
+# sistema e cpu.
+#
+# mais um aplitcativo utilizado para identificar qual componente do computador esta
+# causando gargalo no sistema.
+
+$ vmstat
+#
+# -r - exibe informacoes sobre memoria, swap, disco, sistemas e cpu
+#
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 22590448 125720 8708808    0    0    88    51   90  308  1  1 97  0  0
+
+$ vmstat
+#
+# -d - exibe informacoes sobre disco
+#
+# testes de leitura e escrita nos dispositivos de armazenamento presentes no computador.
+#
+disk- ------------reads------------ ------------writes----------- -----IO------
+       total merged sectors      ms  total merged sectors      ms    cur    sec
+sdb    79178     45 9588002  508960  25495   1875 3106008 6130628      0    275
+sda    36821   3423 2059062   36628  86829  51852 3697824  136744      0     16
+sr0        0      0       0       0      0      0       0       0      0      0
+
+#
+# uptime
+#
+# comando utilizado para exibir a quanto tempo o sistema esta ativo.
+#
+# a quantidade de usuarios que estao logados no sistema.
+#
+# o aplicativo TOP tambem existe esse tipo de informacao
+#
+# o comando tambem exibe a carga media do sistema nos ultimos 1, 5 e 15
+# minutos
+#
+10:11:20 up  2:34,  6 users,  load average: 0.03, 0.01, 0.00
+
+#
+# w
+#
+# o comando W exibe quais sao os usuarios que estao logados no sistema
+# e o que estao fazendo.
+
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+cosmo    tty1     -                07:37    2:33m 45.35s  0.00s xinit /etc/X11/xinit/xinitrc -- /etc/X11/xinit/xserverrc :0 vt1 -auth /tmp/serverauth.ByJmsccnto
+cosmo    pts/1    tmux(32596).%4   09:37    8:20   0.04s  0.04s -bash
+cosmo    pts/2    tmux(32596).%2   08:11   38:12   0.07s  0.07s -bash
+cosmo    pts/3    tmux(32596).%5   09:37    8:36   0.12s  0.12s -bash
+cosmo    pts/4    tmux(32596).%10  10:09    1:23   0.03s  0.03s -bash
+cosmo    pts/5    tmux(32596).%11  10:09    4.00s  0.04s  0.00s w
