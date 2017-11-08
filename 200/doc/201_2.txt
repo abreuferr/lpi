@@ -32,7 +32,11 @@ $ sudo cp /boot/config-`uname -r` .config
 # B - neste caso, o sysadmin optou para fazer toda a configuracao do
 # kernel de forma manual.
 #
-$ sudo make menuconfig
+$ sudo make menuconfig  ; configuracao tradicional
+$ sudo make nconfig     ; configuracao utilizando o ncurses
+$ sudo make ondconfig   ; recupera todas as configuracoes do arquivo
+                          .config pre-existente e pergunta somente
+                          por novas configuracoes.
 
 # Para customizar o nome do kernel, basta editar o arquivo Makefile
 #
@@ -74,3 +78,21 @@ $ sudo update-grub
 # reboot
 #
 $ sudo reboot
+
+#
+# PATCH
+#
+
+#
+# aplicando patch no kernel linux
+#
+$ sudo cd /usr/src/linux
+$ sudo bzcat patch.versao.bz2 | patch -p1
+
+#
+# reverter o patch aplicado no kernel linux
+#
+# opcao -R
+#
+$ sudo cd /usr/src/linux
+$ sudo bzcat patch.versao.bz2 | patch -p1 -R

@@ -1,0 +1,43 @@
+#
+# kernel do gnu/linux
+#
+# o kernel controla e gerencia a comunicacao entre o hardware
+# e os processos em execucao.
+#
+# o linux eh um kernel do tipo monolitico
+#
+# linux-source-4.9.51-3-amd64
+#
+# A.B.C - versao principal.revisao principal.revisao secundaria (patch)-modificacao
+
+# diretorio de armazenamento do kernel - /usr/src/linux-versao
+#
+# link simbolico linux -> linux-source-4.9.51
+
+#
+# /boot
+# 
+# diretorio a onde fica armazenado o arquivo de configuracao
+# e a imagem do kernel
+#
+config-4.9.51-3-amd64
+initrd.img-4.9.51-3-amd64
+System.map-4.9.51-3-amd64
+vmlinuz-4.9.51-3-amd64
+
+#
+# Documentacao do kernel linux se encontra no diretorio 
+# /usr/src/linux/Documentation
+#
+# arquivo de configuracao do kernel linux
+#
+# /usr/src/linux/.config
+
+#
+# arquivo que contem parametros utilizados para compilar o
+# kernel linux.
+#
+# o arquivo pode ser alterado por exemplo para indicar que
+# houve uma customizacao ou versionamento 
+#
+# /usr/src/linux/Makefile

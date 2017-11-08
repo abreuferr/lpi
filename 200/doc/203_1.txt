@@ -1,0 +1,137 @@
+#
+# MOUNT
+#
+
+# os sistemas de arquivos suportados pelo comando mount
+# estao listados no arquivo abaixo.
+#
+$ cat /proc/filesystems
+
+nodev	sysfs
+nodev	rootfs
+nodev	ramfs
+nodev	bdev
+nodev	proc
+nodev	cpuset
+nodev	cgroup
+nodev	cgroup2
+nodev	tmpfs
+nodev	devtmpfs
+nodev	debugfs
+nodev	tracefs
+nodev	securityfs
+nodev	sockfs
+nodev	bpf
+nodev	pipefs
+nodev	hugetlbfs
+nodev	devpts
+nodev	pstore
+nodev	mqueue
+	ext3
+	ext2
+	ext4
+nodev	autofs
+nodev	rpc_pipefs
+	fuseblk
+nodev	fuse
+nodev	fusectl
+nodev	overlay
+
+#
+# /etc/mtab, /proc/mount, /proc/self/mount
+#
+# estes qrquivos contem informacoes sobre os dispositivos
+# que estao atualmente montados.
+#
+
+sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0
+proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+udev /dev devtmpfs rw,nosuid,relatime,size=16435056k,nr_inodes=4108764,mode=755 0 0
+devpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=000 0 0
+tmpfs /run tmpfs rw,nosuid,noexec,relatime,size=3289324k,mode=755 0 0
+/dev/sda1 / ext4 rw,relatime,errors=remount-ro,data=ordered 0 0
+securityfs /sys/kernel/security securityfs rw,nosuid,nodev,noexec,relatime 0 0
+tmpfs /dev/shm tmpfs rw,nosuid,nodev 0 0
+tmpfs /run/lock tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k 0 0
+tmpfs /sys/fs/cgroup tmpfs ro,nosuid,nodev,noexec,mode=755 0 0
+cgroup /sys/fs/cgroup/systemd cgroup rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/lib/systemd/systemd-cgroups-agent,name=systemd 0 0
+pstore /sys/fs/pstore pstore rw,nosuid,nodev,noexec,relatime 0 0
+cgroup /sys/fs/cgroup/devices cgroup rw,nosuid,nodev,noexec,relatime,devices 0 0
+cgroup /sys/fs/cgroup/freezer cgroup rw,nosuid,nodev,noexec,relatime,freezer 0 0
+cgroup /sys/fs/cgroup/perf_event cgroup rw,nosuid,nodev,noexec,relatime,perf_event 0 0
+cgroup /sys/fs/cgroup/cpu,cpuacct cgroup rw,nosuid,nodev,noexec,relatime,cpu,cpuacct 0 0
+cgroup /sys/fs/cgroup/net_cls,net_prio cgroup rw,nosuid,nodev,noexec,relatime,net_cls,net_prio 0 0
+cgroup /sys/fs/cgroup/pids cgroup rw,nosuid,nodev,noexec,relatime,pids 0 0
+cgroup /sys/fs/cgroup/blkio cgroup rw,nosuid,nodev,noexec,relatime,blkio 0 0
+cgroup /sys/fs/cgroup/memory cgroup rw,nosuid,nodev,noexec,relatime,memory 0 0
+cgroup /sys/fs/cgroup/cpuset cgroup rw,nosuid,nodev,noexec,relatime,cpuset 0 0
+systemd-1 /proc/sys/fs/binfmt_misc autofs rw,relatime,fd=26,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=440 0 0
+mqueue /dev/mqueue mqueue rw,relatime 0 0
+debugfs /sys/kernel/debug debugfs rw,relatime 0 0
+hugetlbfs /dev/hugepages hugetlbfs rw,relatime 0 0
+sunrpc /run/rpc_pipefs rpc_pipefs rw,relatime 0 0
+/dev/sdb1 /mnt/sdb ext4 rw,relatime,data=ordered 0 0
+fusectl /sys/fs/fuse/connections fusectl rw,relatime 0 0
+/etc/auto.removable /mnt/removable autofs rw,relatime,fd=6,pgrp=1675,timeout=40,minproto=5,maxproto=5,indirect,pipe_ino=12083 0 0
+vmware-vmblock /run/vmblock-fuse fuse.vmware-vmblock rw,nosuid,nodev,relatime,user_id=0,group_id=0,default_permissions,allow_other 0 0
+/dev/sda1 /var/lib/docker/plugins ext4 rw,relatime,errors=remount-ro,data=ordered 0 0
+/dev/sda1 /var/lib/docker/overlay2 ext4 rw,relatime,errors=remount-ro,data=ordered 0 0
+tmpfs /run/user/1000 tmpfs rw,nosuid,nodev,relatime,size=3289320k,mode=700,uid=1000,gid=1000 0 0
+
+#
+# arquivo /etc/fstab
+#
+# no arquivo /etc/fstab eh configurado os dispositivos que serao montados durante o boot
+#
+# <dipositivo> <ponto_montagem> <filesystem> <opcao> <dump> <checagem_erro>
+#
+$ cat /etc/fstab
+
+UUID=b0add11a-56dc-4924-aea7-17b28e25325d /               ext4    errors=remount-ro 0       1
+/dev/sdb1       /mnt/sdb        ext4    defaults,auto   0       2
+
+#
+# para se obter o UUID do dispositivo, eh necessario utilizar o aplicativo
+# blkid
+#
+# a vantagem de se trabalhar com o UUID em vez de trabalhar com o /dev/sdXY
+# eh que nao eh necessario saber qual /dev/sdXY sera criado, basta saber o UUID
+# do dispositivo
+#
+$ sudo blkid
+/dev/sdb1: UUID="06f74859-624f-4ba5-8104-9deda11cbe02" TYPE="ext4" PARTUUID="6dc1c979-603a-423c-95d6-8fb530e2bd67"
+/dev/sda1: UUID="b0add11a-56dc-4924-aea7-17b28e25325d" TYPE="ext4" PARTUUID="5b62f781-01"
+/dev/sda5: UUID="26d033fc-10ce-47c5-9aa9-8619ec6a5f01" TYPE="swap" PARTUUID="5b62f781-05"
+
+#
+# SWAP
+#
+# a area de swap pode ser tanto uma particao do discos rigido quanto
+# um arquivos
+#
+# uma forma de obter informacoes sobre a particao de swap eh atraves da visualizacao
+# do conteudo do arquivo /proc/swaps
+#
+$ cat /proc/swaps
+Filename				Type		Size	Used	Priority
+/dev/sda5                               partition	33494012	0	-1
+
+#
+# outra forma eh atraves do arquivo /etc/fstab
+#
+$ cat /etc/fstab
+
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# swap was on /dev/sda5 during installation
+UUID=26d033fc-10ce-47c5-9aa9-8619ec6a5f01 none            swap    sw              0       0
+
+#
+# para criar o arquivo de swap basta executar o comando abaixo.
+#
+$ dd if=/dev/zero of=/tmp/swap.bin bs=1024 count=256
+
+#
+# mkswap - formatar a paricao ou arquivo de swap
+# swapon - ativar o arquivo ou particao de swap
+# swapoff - desativar a particao ou arquivo de swap
+#

@@ -1,0 +1,102 @@
+#
+# MKFS
+#
+# aplicativo utilizado para formatar sistema de arquivo do disco 
+# rigido ou particao
+#
+# quando nao eh especificado o formato do sistema de arquivos, o
+# aplicativo mkfs formata como EXT2
+#
+# mkfs -t [tipo] /dev/sdXY
+#
+$ sudo mkfs /dev/sde1
+
+        mke2fs 1.42.5 (29-Jul-2012)
+        Filesystem label=
+        OS type: Linux
+        Block size=4096 (log=2)
+        Fragment size=4096 (log=2)
+        Stride=0 blocks, Stripe width=0 blocks
+        1310720 inodes, 5242624 blocks
+        262131 blocks (5.00%) reserved for the super user
+        First data block=0
+        Maximum filesystem blocks=4294967296
+        160 block groups
+        32768 blocks per group, 32768 fragments per group
+        8192 inodes per group
+        Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,4096000
+
+        Allocating group tables: done   
+        Writing inode tables: done   
+        Writing superblocks and filesystem accounting information: done   
+
+#
+# FSCK
+#
+# aplicativo utilizado para reparar um sistema de arquivo que esteja
+# apresentando problema.
+#
+# para poder executar o comando, a particao nao pode esta montada
+#
+# se por acaso o problema ocorrer em uma particao a onde esta instalado
+# o SO, o tecnico podera inicializar o computador com um LiveCD e
+# executar o comando fsck.
+#
+# fsck [opcao] [particao]
+#
+# -t [tipo] - especifica o tipo do sistema de arquivo
+# -M - nao checa as particoes que estao montadas
+# -N - simulacao
+# -a - corrige os erros de forma automatica
+# -n - nao executa a correcao, somente gera um relatorio
+# -r - modo interativo
+#
+$ sudo fsck -n -t ext2 /dev/sde1
+        fsck from util-linux 2.20.1
+        e2fsck 1.42.5 (29-Jul-2012)
+        /dev/sde1: clean, 11/1310720 files, 93521/5242624 blocks
+
+#
+# DUMPE2FS
+#
+# aplicativo utilizado para exibir informacoes referentes aos sistema
+# de arquivos de uma determinda particao
+#
+
+#
+# TUNE2FS
+#
+# comando utilizado para converter um sistema de arquivos em outro
+# sistema de arquivos
+#
+# -c - numero maxima de montagens ate que a particao seja checada pelo fsck
+# -j - ext2 para ext3
+# -O [opcap] - ext3 para ext4
+# -L - nomear o dispositivo
+#
+# ext2 para ext3
+#
+$ sudo tune2fs -j /dev/sde1
+        tune2fs 1.42.5 (29-Jul-2012)
+        Creating journal inode: done
+
+#
+# ext3 para ext4
+#
+$ sudo tune2fs -O extents,uninit_bg,dir_index /dev/sde1
+        tune2fs 1.42.5 (29-Jul-2012)
+
+#
+# ext2 para ext4
+#
+$ sudo tune2fs -O extents,uninit_bg,dir_index,has_journal /dev/sde1
+        tune2fs 1.42.5 (29-Jul-2012)
+        Creating journal inode: done
+
+#
+# nome para o dispositivo
+#
+$ sudo tune2fs -L lpi2 /dev/sde1
+        Filesystem volume name:   lpi2
+

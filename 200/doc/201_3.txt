@@ -1,0 +1,76 @@
+# uname
+#
+# -i - tipo de processador - unknown
+# -n - nome do host - workstation
+# -p - processador - unknown
+# -o - sistema operacional - GNU/Linux
+# -r - versao do codigo fonte do kernel - 4.9.0-4-amd64
+# -s - nome do kernel - Linux
+# -v - versao de compilacao - #1 SMP Debian 4.9.51-1 (2017-09-28)
+# -a - todas as opcoes
+#
+# /proc/sys/kernel/ - diretorio onde o software uname obtem informacoes.
+
+$ uname -a
+Linux workstation 4.9.0-4-amd64 #1 SMP Debian 4.9.51-1 (2017-09-28) x86_64 GNU/Linux
+
+#
+# MODULOS DO KERNEL
+#
+
+# diretorio a onde sao armazenados os modulos do kernel.
+#
+$ /lib/modules/[versao]/
+
+# MODULES.DEP
+#
+# arquivo que contem informacoes referentes aos mododulos que estao
+# disponiveis para ser utilizado e quais sao as dependencias de cada modulo.
+#
+# para atualizar, basta executar o comando "depmod -a"
+
+#
+# LSMOD
+# 
+# comando utilizado para listar os modulos que estao sendo utilizados
+#
+# o comando lista os modulos e suas dependencias. no exemplo abaixo,
+# o modulo nf_nat_ipv4 depende do modulo iptable_nat.
+#
+# o comando lsmod extrai as informacoes do arquivo /proc/modules
+#
+Module                  Size  Used by
+iptable_nat            16384  1
+nf_nat_ipv4            16384  1 iptable_nat
+
+#
+# MODINFO
+#
+# o comando modnfo eh utilizado para exibir informacoes sobre um determinado
+# modulo. 
+#
+# modinfo [opcao] [modulo]
+#
+# -a - autor do modulo
+# -d - descricao do modulo
+# -l - licenca do modulo
+# -n - nome do arquivo do modulo
+# -p - parametro esperados/;suportado pelo modulo
+
+$ sudo modinfo thermal
+
+filename:       /lib/modules/4.9.0-4-amd64/kernel/drivers/acpi/thermal.ko
+license:        GPL
+description:    ACPI Thermal Zone Driver
+author:         Paul Diefenbaugh
+alias:          acpi*:LNXTHERM:*
+depends:        
+intree:         Y
+vermagic:       4.9.0-4-amd64 SMP mod_unload modversions 
+parm:           act:Disable or override all lowest active trip points. (int)
+parm:           crt:Disable or lower all critical trip points. (int)
+parm:           tzp:Thermal zone polling frequency, in 1/10 seconds. (int)
+parm:           nocrt:Set to take no action upon ACPI thermal zone critical trips points. (int)
+parm:           off:Set to disable ACPI thermal support. (int)
+parm:           psv:Disable or override all passive trip points. (int)
+
