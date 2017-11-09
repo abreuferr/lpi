@@ -1,0 +1,152 @@
+#
+# RAID
+#
+# raid 0 - striping;
+         - velocidade;
+         - os dados sao dividos entre os discos rigidos
+         - parte dos dados sao gravados em um disco rigido
+         enquanto a outra parte eh gravada no outro disco
+         rigido;
+         - minimo de 02 discos rigidos;
+         - todos os discos sao visualizados como um unico
+         volume;
+#
+# raid 1 - mirroring;
+         - redundancia;
+         - o mesmo dado eh espelhado no segundo disco rigido;
+         - velocidade na leitura pois parte dos dados sao lidos
+         em um disco rigido e a outra parte no outro discos rigidos;
+#
+# raid 5 - velocidade + redundancia;
+         - minimo de 03 discos rigidos;
+
+#
+# RAID VIA SOFTWARE
+#
+
+#
+# MDADM
+#
+
+#
+# RAID 0/1
+#
+
+# discos que serao utilizados para contruir o raid 0/1
+#
+	/dev/sdb
+	/dev/sdc
+
+# criar as partcoes e formatar os discos rigidos sdb e sdc no formato fd
+#
+	sudo fdisk /dev/sdb
+	sudo fdisk /dev/sdc
+
+# criacao do raid 0 com dois discos rigidos
+#
+	sudo mdadm --create /dev/md0 --verbose --level=0 --raid-device=2 /dev/sd[bc]1
+
+# criacao do raid 1 com dois discos rigidos
+#
+	sudo mdadm --create /dev/md0 --verbose --level=1 --raid-device=2 /dev/sd[bc]1
+
+# informacoes sobre o raid 0/1
+#
+	sudo mdadm --detail /dev/md0
+
+# arquivo de configuracao do raid 0/1
+#
+	/etc/mdadm/mdadm.conf
+
+# adicionar o raid 0/1 no arquivo de configuracao
+#
+	sudo su
+	mdadm -Es | grep md >> /etc/mdadm/mdadm.conf
+	exit
+
+# formatar o raid 0/1 no formato ext4
+#
+	sudo mkfs -t ext4 /dev/md0
+
+# montar o raid 0/1
+#
+	sudo mkdir /mnt/raid
+	sudo mount -t ext4 /dev/md0 /mnt/raid/
+
+# verificar o ponto de montagem do raid 0/1
+#
+	sudo df -h
+
+# verificar o status do raid 0/1
+#
+	sudo mdadm --detail /dev/md0
+
+# fstab
+#
+	sudo blkid
+		/dev/md0: UUID="6fa1e03f-d958-46db-9b36-e19b344715b5" TYPE="ext4"
+
+	sudo vi /etc/fstab
+		UUID=6fa1e03f-d958-46db-9b36-e19b344715b5	/mnt/raid1	ext4	defaults	0    0
+
+# TESTE
+#
+
+# simular falha no raid 1 (sdc1)
+#
+	sudo mdadm --manage --set-faulty /dev/md0 /dev/sdc1
+
+# remover o disco com defeito
+#
+	sudo mdadm /dev/md0 -r /dev/sdc1
+
+# adicionar o disco no raid 1
+#
+	sudo mdadm /dev/md0 -a /dev/sdc1
+
+# EXCLUIR O RAID
+#
+# desmontar
+#
+	sudo umount /dev/md0
+
+# parar o raid
+#
+	sudo mdadm --stop /dev/md0
+
+# remover
+#
+	sudo mdadm --remove /dev/md0
+
+# excluir o superbloco
+#
+	sudo mdadm --zero-superblock /dev/sd[bc]1
+#
+#RAID 5
+#
+# discos
+#
+	/dev/sdb
+	/dev/sdc
+	/dev/sdd
+
+# criar o raid
+#
+	sudo mdadm --create --force --assume-clean /dev/md0 --verbose --level=5 --raid-device=3 /dev/sd[bcd]1
+
+# adicionar o raid ao arquivo de configuracao
+#
+	sudo mdadm -Es | grep md >> /etc/mdadm/mdadm.conf
+
+# formatar o raid 5 no formato ext4
+#
+	sudo mkfs -t ext4 /dev/md0
+
+# montar o raid 5
+#
+	sudo mount -t ext4 /dev/md0 /mnt/raid0/
+
+# fstab
+#
+	blkid
+		UUID=664b53e1-d87a-4dbb-a25e-08d9bada14eb       /mnt/raid       ext4    defaults        0       0
