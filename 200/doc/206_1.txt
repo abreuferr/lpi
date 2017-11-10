@@ -1,0 +1,37 @@
+######
+# INSTALCAO VIA CODIGO FONTE
+######
+#
+# procedimentos para a instalacao de um programa atraves
+# do codigo fonte. um dos motivos para fazer este tipo de
+# instalacoes eh que normalmente o software eh lancado
+# primerio via codigo fonte em vez de empacotar.
+#
+# geralmente, o codigo fonte eh extraido no diretorio
+# /usr/src/local.
+#
+# a extracao eh feita atraves do comando
+#
+#   tar xzvf arquivo.tar.gz
+#   tar xjvf arquivo.tar.bz2
+#
+
+#
+# ./configure [OPCAO] - o comando configure tem por objetivo o de
+#                       verificar as dependencia, como por exemplo,
+#                       biblioteca e compilador.
+#
+
+#
+# make - comando utilizado para compilar o programa
+#
+
+#
+# make install - comando utilizado para instalar os componentes
+#               do programa, como por exemplo, bibliotecas, manuais
+#               binario.
+
+#
+# make clean - comando utilizado para apagar os arquivos objetos e 
+#               binarios, basicamente o resultado do processo de
+#               compilacao do programa.

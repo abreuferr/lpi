@@ -1,0 +1,230 @@
+######
+# IFCONFIG
+######
+
+#
+# ifconfig
+#
+# sem nenhum parametro, o comando ifconfig exibe as
+# interfaces de redes que estao configuradas.
+#
+$ ifconfig
+eth0    Link encap:Ethernet  HWaddr 00:0c:29:f2:43:a5
+        inet addr:192.168.2.121  Bcast:192.168.2.255  Mask:255.255.255.0
+lo      Link encap:Local Loopback
+        inet addr:127.0.0.1  Mask:255.0.0.0
+
+#
+# ifconfig up
+#
+# a opcao UP ativa a placa de rede
+#
+# ifconfig [IFACE] up
+#
+$ sudo ifconfig eth1 up
+
+#
+# ifconfig down
+#
+# a opcao DOWN desativa a placa de rede
+#
+# ifconfig [IFACE] down
+#
+$ sudo ifconfig eth1 down
+
+#
+# ifconfig [IFACE] [IP]
+#
+# atraves do comando ipconfig existe a possibilidade de 
+# atribuir um determinado ip a uma determinada interface 
+# de rede
+#
+$ sudo ifconfig eth1 192.168.0.171
+
+#
+# ifconfig [IFACE] [IP] netmask [MASK]
+#
+# atraves do comando ipconfig existe a possibilidade de 
+# atribuir uma determinada mascara de uma determinada 
+# interface de rede
+#
+$ sudo ifconfig eth1 192.168.0.171 netmask 255.255.248.0
+$ sudo ifconfig eth1
+eth1      Link encap:Ethernet  HWaddr 00:0c:29:f2:43:af
+          inet addr:192.168.0.171  Bcast:192.168.7.255  Mask:255.255.248.0
+
+#
+# ifconfig [IFACE] [IP] netmask [MASK] broadcast [BCAST]
+#
+# atraves do comando ipconfig existe a possibilidade de 
+# atribuir o broadcast de uma determinada interface de 
+# rede
+#
+$ sudo ifconfig eth1 192.168.0.171 netmask 255.255.248.0 broadcast 192.168.0.200
+$ sudo ifconfig eth1
+eth1      Link encap:Ethernet  HWaddr 00:0c:29:f2:43:af
+          inet addr:192.168.0.171  Bcast:192.168.0.200  Mask:255.255.248.0
+
+######
+# ROUTE
+######
+
+#
+# a tabela de rotas determina o destino de cada pacote de dados
+# que eh encaminhado para fora por uma interface de rede.
+#
+# para realizar a comunicacao entre computadores de redes
+# diferentes, eh necessario que exista um computador que faca
+# essa intermediacao. O nome deste computador se chama GATEWAY.
+#
+# route
+#
+# o comando route, sem nenhum parametro, existe as rotas configuradas 
+# nas interfaces de rede presentes no computador.
+#
+$ sudo route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+192.168.0.0     *               255.255.255.0   U     0      0        0 eth1
+
+#
+# atraves do comando route, eh possivel atribuir uma rota em uma determinada
+# interface de rede.
+#
+# no exemplo abaixo, esta sendo atribuida uma determinada rota DEFAULT na
+# interface de rede eth1.
+#
+# route add default gw [IP_GATEWAY] [IFACE]
+#
+$ sudo route add default gw 192.168.0.2 eth1
+$ sudo route
+Kernel IP routing table
+Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+default         192.168.0.2     0.0.0.0         UG    0      0        0 eth1
+192.168.0.0     *               255.255.255.0   U     0      0        0 eth1
+
+#
+# no comando abaixo, foi utilizado o comando ping e redirecionado
+# atraves da interface de rede eth1
+#
+$ ping -I eth1 8.8.8.8
+PING 8.8.8.8 (8.8.8.8) from 192.168.0.171 eth1: 56(84) bytes of data.
+
+#
+# o comando route tambem pode ser utilizado para apagar uma rota.
+#
+# route del default gw [IP_GATEWAY] [IFACE]
+#
+# route del -net [REDE] netmask [MASK] [IFACE]
+#
+$ sudo route del default gw 192.168.0.2 eth1
+$
+$ sudo route del -net 192.168.0.0 netmask 255.255.255.0 eth1
+
+
+######
+# IP
+######
+
+#
+# devido a depreciacao do aplicativo IFCONFIG, o novo
+# software de configuracanterface de rede eh o comando
+# IP.
+#
+
+#
+# ip link show
+#
+# exibir as interfaces de rede que estao ativas
+#
+$ ip link show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue state UNKNOWN mode DEFAULT
+        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP mode DEFAULT qlen 1000
+link/ether 00:0c:29:f2:43:af brd ff:ff:ff:ff:ff:ff
+
+#
+# o comando IP tambem pode ser utilizado para obter
+# informacoes sobre a estatistica da utilizacao de
+# uma determinada interface de rede.
+#
+# ip -s link show dev [IFACE]
+#
+$ ip -s link show dev eth1
+
+#
+# exibir informacoes detalhadas sobre as interfaces de
+# rede.
+#
+# ip addr show
+#
+# ip addr show [IFACE]
+
+#
+# habilitar uma placa de rede
+#
+# ip link set [IFACE] up
+#
+
+#
+# desabilitar uma placa de rede
+#
+# ip link set [IFACE] down
+#
+
+#
+# adicionar ip em uma interface de rede.
+#
+# ip addr ad [IP/REDE] broadcast [IP_BROAD] dev [IFACE]
+#
+$ sudo ip addr add 192.168.0.51/24 broadcast 192.168.0.255 dev eth1
+
+#
+# remover ip em uma interface de rede.
+#
+# ip addr del [IP/REDE] dev [IFACE]
+#
+$ sudo ip addr del 192.168.0.51/24 dev eth1
+
+#
+# exibir informacoes sobre a rota
+#
+# ip route show
+#
+# ip route show [IFACE]
+#
+$ ip route show
+default via 192.168.0.2 dev eth1
+192.168.0.0/24 dev eth1  proto kernel  scope link  src 192.168.0.51
+
+#
+# adicionar rota em uma interface de rede.
+#
+# ip route add default via [IP_GATEWAY] dev [IFACE]
+#
+$ sudo ip route add default via 192.168.0.2 dev eth1
+
+#
+# remover rota em uma interface de rede.
+#
+# ip route delete [REDE/MASK] via [IFACE]
+#
+$ sudo ip route delete 192.168.0.0/24 via 192.168.0.2
+
+######
+# ARP
+######
+#
+# eh no protocolo ARP que os enderecos IPs sao mapeados
+# para enderecos MAC dos dispositivos de comunicacao,
+# tornando possivel o estabelecimento da comunicacao.
+#
+# o comando ARP  manipula o cache da relacao IP<>MAC
+# e tambem pode ser utilizado para verificar o cache
+# ARP
+#
+$ arp
+Address                  HWtype  HWaddress           Flags Mask            Iface
+workstation              ether   08:62:66:99:ba:65   C                     eth0
+
+

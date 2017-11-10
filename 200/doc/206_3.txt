@@ -1,0 +1,39 @@
+#
+# /ETC/ISSUE
+#
+# conexao local
+#
+# o programa que controle do login via terminal mostra o conteudo
+# do arquivo /ETC/ISSUE tao logo o prompt aparece.
+#
+$ cat /etc/issue
+
+Debian GNU/Linux 7 \n \l
+
+#
+# /ETC/ISSUE.NET
+#
+# conexao remota
+#
+# o programa que controle do login via telnet/ssh mostra o conteudo
+# do arquivo /ETC/ISSUE.NET tao logo o prompt aparece.
+#
+$ cat /etc/issue.net
+
+Debian GNU/Linux 7
+
+#
+# /ETC/MOTD
+#
+# conexao local
+#
+# o conteudo do arquivo /ETC/MOTD eh exibido apos um login bem sucedido.
+#
+$ cat /etc/motd
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
