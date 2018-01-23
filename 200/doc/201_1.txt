@@ -6,9 +6,13 @@
 #
 # o linux eh um kernel do tipo monolitico
 #
-# linux-source-4.9.51-3-amd64
+# linux >= 3.x.y
 #
-# A.B.C - versao principal.revisao principal.revisao secundaria (patch)-modificacao
+# A.B.C-XYZ 
+# A - versao principal/version
+# B - revisao principal/major revision
+# C - revisao secundaria/minor revidion (patch)
+# XYZ -modificacao
 
 # diretorio de armazenamento do kernel - /usr/src/linux-versao
 #
