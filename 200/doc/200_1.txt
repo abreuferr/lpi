@@ -109,7 +109,6 @@ Average:        all      1.73      0.01      1.63      0.59      0.00     96.05
 #
 # informacoes sobre os processos que estao utilizando a rede
 # rotas que estao ativas
-# estatisticas sobre a ulizacao das interfaces de rede
 # 
 # uma ferramenta utilizada para obter informacoes sobre a utilizacao dos 
 # dispositivos de rede, quais aplicativos estao acessando a rede.
@@ -136,6 +135,27 @@ default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
 192.168.165.0   0.0.0.0         255.255.255.0   U         0 0          0 vmnet1
 
 #
+# -s - estatistica dividida por protocolo.
+#
+
+#
+# -tuna - estatistica dividida por protocolo.
+#
+# protocolo tcp e udp
+# conexao aberta
+#
+# no exemplo abaixo, o ip 192.168.2.111 esta acessando o servidor ssh 192.168.2.123:22
+# ja o servidor ssh 0.0.0.0:22 esta escutando e esperando conexao de qualquer endereco
+#
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN     
+tcp        0      0 192.168.2.123:22        192.168.2.111:59948     ESTABLISHED
+tcp        0      0 192.168.2.123:22        192.168.2.111:59904     ESTABLISHED
+udp        0      0 0.0.0.0:27922           0.0.0.0:*                          
+udp        0      0 0.0.0.0:68              0.0.0.0:*                          
+
+#
 # VMSTAT
 #
 # mais um aplicativo utilizado para obter informacoes sobre memoria, swap, disco, 
@@ -143,6 +163,7 @@ default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
 #
 # mais um aplitcativo utilizado para identificar qual componente do computador esta
 # causando gargalo no sistema.
+#
 
 #
 # -r - exibe informacoes sobre memoria, swap, disco, sistemas e cpu
@@ -199,5 +220,3 @@ KiB Mem:    495048 total,    66708 used,   428340 free,     5456 buffers
 KiB Swap:   901116 total,        0 used,   901116 free,    21940 cached
 
    PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND                                       
-
-
