@@ -15,7 +15,6 @@
 # os dados obtem as informacoes dos diretorios /SYS e /PROC
 #
 
-$ iostat
 #
 # visao geral
 #
@@ -84,8 +83,6 @@ sda               0.52     7.54    5.58   10.37   155.87   254.80    51.50     0
 # -A (todas as opcoes)
 #
 
-$ sar
-#
 # informacoes sobre CPU
 #
 07:45:01 AM     CPU     %user     %nice   %system   %iowait    %steal     %idle
@@ -212,6 +209,10 @@ cosmo    pts/1    tmux(32596).%4   09:37    8:20   0.04s  0.04s -bash
 # aplicativo utilizado para monitorar a utilizacao de cpu, memoria,
 # memoria swap, a quanto tempo o sistema esta ativo, quantos usuarios
 # estao conectados no sistema.
+#
+# wa - quanto maior esse valor, isso indica que a CPU esta a maior parte
+# do tempo esperando a leitura/escrita no disco rigido. resumindo, disco
+# rigido lento. (stress --hdd 1)
 
 top - 13:45:31 up 5 min,  2 users,  load average: 0.04, 0.06, 0.02
 Tasks:  73 total,   1 running,  72 sleeping,   0 stopped,   0 zombie
@@ -238,3 +239,18 @@ $ free -m
 Mem:           231        226          4          0         35        146
 -/+ buffers/cache:         44        186
 Swap:          507          0        507
+
+
+# IOTOP
+#
+# programa semelhante ao aplicativo TOP soh que para disco rigido.
+#
+# se por acaso o aplicativo TOP indicar que o problema esta no disco
+# rigido, será necessário verificar o que eh que esta causando esse problema,
+# se por acaso eh um aplicativo que esta causando essa sobrecarga ou eh o disco
+# rigido que eh lento mesmo. Dependendo da situacao, eh interessante trocar o 
+# disco rigido do tipo mecanico por um ssd ou hibrido.
+#
+
+Total DISK READ:       0.00 B/s | Total DISK WRITE:       0.00 B/s
+  TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO>    COMMAND
