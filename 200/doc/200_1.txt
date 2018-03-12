@@ -110,9 +110,10 @@ Average:        all      1.73      0.01      1.63      0.59      0.00     96.05
 # uma ferramenta utilizada para obter informacoes sobre a utilizacao dos 
 # dispositivos de rede, quais aplicativos estao acessando a rede.
 
-#
+# -ie - igual ao comando ifconfig
+
 # -i - exibir as interfaces de rede
-#
+
 Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
 docker0   1500        0      0      0 0             0      0      0      0 BMU
 eno1      1500   378928      0      0 0        178363      0      0      0 BMRU
@@ -120,9 +121,8 @@ lo       65536      125      0      0 0           125      0      0      0 LRU
 vmnet1    1500        0      0      0 0           336      0      0      0 BMRU
 vmnet8    1500     1722      0      0 0          2025      0      0      0 BMRU
 
-#
 # -r - exibe rotas ativas
-#
+
 Kernel IP routing table
 Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
 default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
@@ -131,18 +131,17 @@ default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
 192.168.2.0     0.0.0.0         255.255.255.0   U         0 0          0 eno1
 192.168.165.0   0.0.0.0         255.255.255.0   U         0 0          0 vmnet1
 
-#
 # -s - estatistica dividida por protocolo.
-#
 
-#
 # -tuna - estatistica dividida por protocolo.
 #
 # protocolo tcp e udp
 # conexao aberta
 #
-# no exemplo abaixo, o ip 192.168.2.111 esta acessando o servidor ssh 192.168.2.123:22
-# ja o servidor ssh 0.0.0.0:22 esta escutando e esperando conexao de qualquer endereco
+# no exemplo abaixo, o comando netstat esta sendo executado no computador 192.168.2.123.
+# o host 192.168.2.111 esta acessando o servidor ssh 192.168.2.123:22
+# ja o servidor ssh 192.168.2.123 (0.0.0.0:22) esta escutando e esperando conexao de 
+# qualquer endereco
 #
 Active Internet connections (servers and established)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State      
@@ -239,7 +238,6 @@ $ free -m
 Mem:           231        226          4          0         35        146
 -/+ buffers/cache:         44        186
 Swap:          507          0        507
-
 
 # IOTOP
 #
