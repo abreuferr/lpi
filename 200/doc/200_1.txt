@@ -220,3 +220,21 @@ KiB Mem:    495048 total,    66708 used,   428340 free,     5456 buffers
 KiB Swap:   901116 total,        0 used,   901116 free,    21940 cached
 
    PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND                                       
+
+#
+# FREE
+#
+# o aplicativo free eh utilizado para exibir informacoes sobre a utilizacao
+# ou nao da memoria e da area de swap.
+#
+# quanto maior a quantidade da memoria swap esta sendo utilizada, pior eh a
+# situacao pois a area de memoria swap que fica armazenada no disco rigido e
+# disco rigido eh mais lenta que a memoria.
+#
+# no exdmplo abaixo, a area de swap nao esta sendo utilizada.
+#
+$ free -m
+             total       used       free     shared    buffers     cached
+Mem:           231        226          4          0         35        146
+-/+ buffers/cache:         44        186
+Swap:          507          0        507
