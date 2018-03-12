@@ -20,12 +20,14 @@ Linux workstation 4.9.0-4-amd64 #1 SMP Debian 4.9.51-1 (2017-09-28) x86_64 GNU/L
 
 # diretorio a onde sao armazenados os modulos do kernel.
 #
-$ /lib/modules/`uname -r`/
+$ /lib/modules/`uname -r`/kernel/
 
 # MODULES.DEP
 #
 # arquivo que contem informacoes referentes aos mododulos que estao
 # disponiveis para ser utilizado e quais sao as dependencias de cada modulo.
+#
+# /lib/modules/`uname -r`/modules.dep
 #
 # para atualizar, basta executar o comando "depmod -a"
 
@@ -88,5 +90,3 @@ parm:           psv:Disable or override all passive trip points. (int)
 # modprobe [modulo] - comando utilizado para adicionar um modulo e os modulos
 # dependentes no kernel.
 #
-# 
-
