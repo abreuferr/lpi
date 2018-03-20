@@ -1,6 +1,31 @@
-######
+# NETSTAT
+#
+# aplicativo utilizado para exibir informacoes de conexao, tabela
+# de rotas, estatistica das interfaces de rede, conexao do tipo
+# masquerading e membros da conexao multicast
+#
+# netcast [opcao] [protocolo]
+#
+# -ie - semelhante a opcao "ifconfig" ou "ip addr"
+# -t - protocolo tcp
+# -u - protocolo udp
+# -n - nao resolve o nome
+# -a - todas as conexoes
+#
+# -tuna - as principais opcoes a serem utilizadas
+#
+# porta do servidor ssh - 22
+# ip servidor ssh - 192.168.0.42
+# porta do cliente ssh - 53392
+# ip cliente ssh - 192.168.0.1
+#
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp        0      0 192.168.0.42:22         192.168.0.1:53392       ESTABLISHED
+tcp6       0      0 :::22                   :::*                    LISTEN 
+
 # /ETC/HOSTS
-######
 #
 # o arquivo /ETC/HOSTS pode ser configurado para resolucao
 # de nomes no host local. Desta forma, nao eh necessario
@@ -9,9 +34,7 @@
 # [IP]          [HOST]  [DOMINIO]       [HOST]
 # 192.168.0.1   gateway.dominio.local   gateway
 
-######
 # /ETC/RESOLV.CONF
-######
 #
 # o arquivo indica quais servidores de DNS a estacao
 # deve utilizar para resolver o nome/DNS
@@ -25,9 +48,7 @@
 # search        dominio.local
 # domain        dominio.local
 
-######
 # TCP WRAPPER
-######
 #
 # /etc/hosts.allow - lista os hosts que podem ter o acesso ao
 # sistema
