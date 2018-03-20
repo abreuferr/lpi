@@ -1,0 +1,30 @@
+# /ETC/HOSTS
+#
+# o arquivo /ETC/HOSTS pode ser configurado para resolucao
+# de nomes no host local. Desta forma, nao eh necessario
+# a implementacao de um servidor de DNS.
+#
+# [IP]          [HOST]  [DOMINIO]       [HOST]
+# 192.168.0.1   gateway.dominio.local   gateway
+
+# /ETC/RESOLV.CONF
+#
+# o arquivo indica quais servidores de DNS a estacao
+# deve utilizar para resolver o nome/DNS
+#
+# [NAMESERVER]  [IP]
+# [SEARCH]      [DOMINIO]
+# [DOMAIN]      [DOMINIO]
+#
+# nameserver    192.168.0.5
+# nameserver    192.168.0.6
+# search        dominio.local
+# domain        dominio.local
+
+# TCP WRAPPER
+#
+# /etc/hosts.allow - lista os hosts que podem ter o acesso ao
+# sistema
+#
+# /etc/hosts.deny - lista os hosts que NAO pode ter o acesso ao
+# sistema
