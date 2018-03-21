@@ -336,16 +336,3 @@ $ ls /mnt/subvolweb/snapshot/web.txt
 #
 $ sudo btrfs subvolume snapshot -r /mnt/subvolweb/ /mnt/subvolweb/snapshot_r/
 	Create a readonly snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb/snapshot_r'
-
-# MOUNT
-#
-# montar de forma permanente
-#
-$ sudo blkid
-	/dev/sdb: UUID="4c595ce3-5a5a-465d-a7f4-d131a5614c7b" UUID_SUB="7cdeb097-3fba-4add-ac56-1570b570661f" TYPE="btrfs"
-	/dev/sdc: UUID="4c595ce3-5a5a-465d-a7f4-d131a5614c7b" UUID_SUB="1c9eba1d-41e2-4a64-8b9b-b409cc9db2f3" TYPE="btrfs"
-
-$ sudo cat /etc/fstab
-	UUID=4c595ce3-5a5a-465d-a7f4-d131a5614c7b	/mnt/subvolweb	btrfs	defaults,subvol@subvolweb	0	2
-	UUID=4c595ce3-5a5a-465d-a7f4-d131a5614c7b	/mnt/subvolsamba	btrfs	defaults,subvol@subvolsamba	0	2
-
