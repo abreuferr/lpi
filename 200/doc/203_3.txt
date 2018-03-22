@@ -7,6 +7,25 @@
 #
 
 #
+# NFS_SERVER
+#
+$ sudo apt install nfs-kernel-server nfs-common
+$ sudo mkdir -p /home/nfs/cosmo
+$ sudo chown nobody:nogroup -R /home/nfs/
+$ sudo chmod 755 -R /home/nfs/
+$ sudo vi /etc/exports
+	/home/nfs       192.168.0.41(rw,sync,no_subtree_check)
+$ sudo systemctl restart nfs-kernel-server.service
+
+#
+# NFS_CLIENT
+#
+$ sudo apt-get install nfs-common
+$ sudo mkdir /mnt/nfs
+$ sudo mount 192.168.0.40:/home/nfs /mnt/nfs/	; somente para teste
+$ sudo umount /mnt/nfs/				; somente para teste
+
+#
 # /etc/auto.master
 #
 # principal arquivo de configuraca
@@ -16,7 +35,8 @@
 # apos 10 minutos o dispositivo sera desmontado
 # o dipositivo tera as permissoes do usuario cujo id eh igual a 1000
 #
-        /mnt/removable   /etc/auto.removable --timeout=10,defaults,user,exec,uid=1000
+        /mnt/removable	/etc/auto.removable --timeout=10,defaults,user,exec,uid=1000
+	/mnt/nfs	/etc/auto.nfs --timeout=10
 
 #
 # /etc/auto.removable
@@ -29,7 +49,10 @@
 # o dispositivo que sera montado possui o UUID igual a E449-66E2
         cosmo   -fstype=auto,rw,gid=1000,umask=002     :UUID=E449-66E2
 
-
+#
+# /etc/auto.nfs
+#
+	cosmo  -fstype=nfs     192.168.0.40:/home/nfs/cosmo
 
 #
 # MKISOFS/genisoimage
