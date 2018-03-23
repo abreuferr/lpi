@@ -1,0 +1,13 @@
+#
+# UPTIME
+#
+# comando utilizado para exibir a quanto tempo o sistema esta ativo.
+#
+# a quantidade de usuarios que estao logados no sistema.
+#
+# o aplicativo TOP tambem existe esse tipo de informacao
+#
+# o comando tambem exibe a carga media do sistema nos ultimos 1, 5 e 15
+# minutos
+#
+10:11:20 up  2:34,  6 users,  load average: 0.03, 0.01, 0.00

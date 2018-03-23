@@ -1,0 +1,8 @@
+#
+# W
+#
+# o comando W exibe quais sao os usuarios que estao logados no sistema
+# e o que estao fazendo.
+
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+cosmo    pts/1    tmux(32596).%4   09:37    8:20   0.04s  0.04s -bash

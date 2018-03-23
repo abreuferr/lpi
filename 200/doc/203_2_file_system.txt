@@ -1,0 +1,156 @@
+# MKFS
+#
+# aplicativo utilizado para formatar sistema de arquivo do disco 
+# rigido ou particao
+#
+# quando nao eh especificado o formato do sistema de arquivos, o
+# aplicativo mkfs formata como EXT2
+#
+# mkfs -t [tipo] /dev/sdXY
+#
+$ sudo mkfs /dev/sde1
+
+        mke2fs 1.42.5 (29-Jul-2012)
+        Filesystem label=
+        OS type: Linux
+        Block size=4096 (log=2)
+        Fragment size=4096 (log=2)
+        Stride=0 blocks, Stripe width=0 blocks
+        1310720 inodes, 5242624 blocks
+        262131 blocks (5.00%) reserved for the super user
+        First data block=0
+        Maximum filesystem blocks=4294967296
+        160 block groups
+        32768 blocks per group, 32768 fragments per group
+        8192 inodes per group
+        Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208,4096000
+
+        Allocating group tables: done   
+        Writing inode tables: done   
+        Writing superblocks and filesystem accounting information: done   
+
+# FSCK
+#
+# aplicativo utilizado para reparar um sistema de arquivo que esteja
+# apresentando problema.
+#
+# para poder executar o comando, a particao nao pode esta montada
+#
+# se por acaso o problema ocorrer em uma particao a onde esta instalado
+# o SO, o tecnico podera inicializar o computador com um LiveCD e
+# executar o comando fsck.
+#
+# fsck [opcao] [particao]
+#
+# -t [tipo] - especifica o tipo do sistema de arquivo
+# -M - nao checa as particoes que estao montadas
+# -N - simulacao
+# -a - corrige os erros de forma automatica
+# -n - nao executa a correcao, somente gera um relatorio
+# -r - modo interativo
+#
+$ sudo fsck -n -t ext2 /dev/sde1
+        fsck from util-linux 2.20.1
+        e2fsck 1.42.5 (29-Jul-2012)
+        /dev/sde1: clean, 11/1310720 files, 93521/5242624 blocks
+
+# causar problema no ext*
+#
+$ sudo dd if=/dev/zero of=/dev/sdb count=1 bs=1024 seek=1
+
+# executando o aplicativo fsck para reparar o sistema de arquivo
+#
+$ sudo fsck /dev/sdb1
+	fsck from util-linux 2.29.2
+	e2fsck 1.43.4 (31-Jan-2017)
+	ext2fs_open2: Bad magic number in super-block
+	fsck.ext2: Superblock invalid, trying backup blocks...
+	fsck.ext2: Bad magic number in super-block while trying to open /dev/sdb
+
+	The superblock could not be read or does not describe a valid ext2/ext3/ext4
+	filesystem.  If the device is valid and it really contains an ext2/ext3/ext4
+	filesystem (and not swap or ufs or something else), then the superblock
+	is corrupt, and you might try running e2fsck with an alternate superblock:
+	    e2fsck -b 8193 <device>
+	 or
+	    e2fsck -b 32768 <device>
+
+# obter informacoes
+#
+# -n = opcao utilizada para obter os enderecos dos superblocos.
+#
+$ sudo mkfs -t ext4 -n /dev/sdb
+	ke2fs 1.43.4 (31-Jan-2017)
+	Creating filesystem with 5242880 4k blocks and 1310720 inodes
+	Filesystem UUID: 9a3a5183-5f4a-4342-9271-9b9f31603ccc
+	Superblock backups stored on blocks:
+		32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 
+		2654208, 4096000
+
+# reparar
+#
+$ sudo fsck -b 98304 /dev/sdb1
+	fsck from util-linux 2.29.2
+	e2fsck 1.43.4 (31-Jan-2017)
+	/dev/sdb1 was not cleanly unmounted, check forced.
+	Pass 1: Checking inodes, blocks, and sizes
+	Pass 2: Checking directory structure
+	Pass 3: Checking directory connectivity
+	Pass 4: Checking reference counts
+	Pass 5: Checking group summary information
+	/dev/sdb1: ***** FILE SYSTEM WAS MODIFIED *****
+	/dev/sdb1: 12/1310720 files (0.0% non-contiguous), 126323/5242624 blocks
+
+# DUMPE2FS
+#
+# aplicativo utilizado para exibir informacoes, como por exemplo, superblocos
+# referentes aos sistema de arquivos de uma determinda particao.
+#
+$ sudo dumpe2fs /dev/sdb1 | grep superblock
+  Primary superblock at 0, Group descriptors at 1-3
+  Backup superblock at 32768, Group descriptors at 32769-32771
+  Backup superblock at 98304, Group descriptors at 98305-98307
+  Backup superblock at 163840, Group descriptors at 163841-163843
+  Backup superblock at 229376, Group descriptors at 229377-229379
+  Backup superblock at 294912, Group descriptors at 294913-294915
+  Backup superblock at 819200, Group descriptors at 819201-819203
+  Backup superblock at 884736, Group descriptors at 884737-884739
+  Backup superblock at 1605632, Group descriptors at 1605633-1605635
+  Backup superblock at 2654208, Group descriptors at 2654209-2654211
+  Backup superblock at 4096000, Group descriptors at 4096001-4096003
+
+# TUNE2FS
+#
+# comando utilizado para converter um sistema de arquivos em outro
+# sistema de arquivos
+#
+# -c - numero maxima de montagens ate que a particao seja checada pelo fsck
+# -j - ext2 para ext3
+# -O [opcap] - ext3 para ext4
+# -L - nomear o dispositivo
+#
+# ext2 para ext3
+#
+$ sudo tune2fs -j /dev/sde1
+        tune2fs 1.42.5 (29-Jul-2012)
+        Creating journal inode: done
+
+#
+# ext3 para ext4
+#
+$ sudo tune2fs -O extents,uninit_bg,dir_index /dev/sde1
+        tune2fs 1.42.5 (29-Jul-2012)
+
+#
+# ext2 para ext4
+#
+$ sudo tune2fs -O extents,uninit_bg,dir_index,has_journal /dev/sde1
+        tune2fs 1.42.5 (29-Jul-2012)
+        Creating journal inode: done
+
+#
+# nome para o dispositivo
+#
+$ sudo tune2fs -L lpi2 /dev/sde1
+        Filesystem volume name:   lpi2

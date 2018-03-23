@@ -1,0 +1,7 @@
+# TCP WRAPPER
+#
+# /etc/hosts.allow - lista os hosts que podem ter o acesso ao
+# sistema
+#
+# /etc/hosts.deny - lista os hosts que NAO pode ter o acesso ao
+# sistema

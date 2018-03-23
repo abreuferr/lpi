@@ -1,0 +1,31 @@
+#
+# SWAP
+#
+# a area de swap pode ser tanto uma particao do discos rigido quanto
+# um arquivos
+#
+# uma forma de obter informacoes sobre a particao de swap eh atraves da visualizacao
+# do conteudo do arquivo /proc/swaps
+#
+$ cat /proc/swaps
+Filename				Type		Size	Used	Priority
+/dev/sda5                               partition	33494012	0	-1
+
+#
+# outra forma eh atraves do arquivo /etc/fstab
+#
+$ cat /etc/fstab
+
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# swap was on /dev/sda5 during installation
+UUID=26d033fc-10ce-47c5-9aa9-8619ec6a5f01 none            swap    sw              0       0
+
+#
+# para criar o arquivo de swap basta executar o comando abaixo.
+#
+$ dd if=/dev/zero of=/tmp/swap.bin bs=1024 count=256
+
+#
+# mkswap - formatar a paricao ou arquivo de swap
+# swapon - ativar o arquivo ou particao de swap
+# swapoff - desativar a particao ou arquivo de swap

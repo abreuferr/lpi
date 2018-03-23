@@ -1,0 +1,35 @@
+#
+# foi utilizado o programa stress para fazer os testes dos softwares abaixo.
+#
+# sudo apt-get install stress
+#
+# stress -c N - teste de cpu
+#
+# stress -m N - teste de memoria
+
+# SAR
+#
+# o aplicativo SAR coleta uma serie de informacoes sobre 
+#
+# disco (-d)
+# cpu (sem opcao)
+# memoria (-r)
+# swap (-S)
+# rede (-n [iface])
+# -A (todas as opcoes)
+#
+
+# informacoes sobre CPU
+#
+07:45:01 AM     CPU     %user     %nice   %system   %iowait    %steal     %idle
+07:55:01 AM     all      0.13      0.01      0.12      0.01      0.00     99.73
+08:05:01 AM     all      1.52      0.01      2.77      3.10      0.00     92.60
+08:15:01 AM     all      0.92      0.01      1.44      1.59      0.00     96.04
+08:25:01 AM     all      1.78      0.01      0.81      0.10      0.00     97.30
+08:35:01 AM     all      1.87      0.01      3.68      0.33      0.00     94.12
+08:45:01 AM     all      2.08      0.01      3.86      0.23      0.00     93.82
+08:55:01 AM     all      3.79      0.01      1.08      0.06      0.00     95.06
+09:05:01 AM     all      4.27      0.01      1.28      0.13      0.00     94.30
+09:15:01 AM     all      0.71      0.01      0.74      0.23      0.00     98.32
+09:25:01 AM     all      0.21      0.00      0.52      0.09      0.00     99.18
+Average:        all      1.73      0.01      1.63      0.59      0.00     96.05

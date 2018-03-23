@@ -1,0 +1,13 @@
+# IOTOP
+#
+# programa semelhante ao aplicativo TOP soh que para disco rigido.
+#
+# se por acaso o aplicativo TOP indicar que o problema esta no disco
+# rigido, será necessário verificar o que eh que esta causando esse problema,
+# se por acaso eh um aplicativo que esta causando essa sobrecarga ou eh o disco
+# rigido que eh lento mesmo. Dependendo da situacao, eh interessante trocar o 
+# disco rigido do tipo mecanico por um ssd ou hibrido.
+#
+
+Total DISK READ:       0.00 B/s | Total DISK WRITE:       0.00 B/s
+  TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO>    COMMAND

@@ -1,0 +1,18 @@
+# TCPDUMP
+#
+# aplicativo utilizado para ficar escutando as interface de rede
+# e capturar pacote para analise.
+#
+# o aplicativo tcpdump trabalha em modo real-time.
+#
+# tcpdump [OPCAO]
+#
+# -i [IFACE] - definir a interface de rede cujos dados serao capturados
+# -q - captura os dados de forma sucinta
+# -w [FILE] - salva os dados em um arquivo
+# -r [FILE] - leitura do arquivo gerado pela opcao -w
+#
+# no exemplo abaixo a estacao 192.168.0.1, porta 53392, acessa o servidor 192.168.0.42, porta 22. 
+#
+11:59:10.747648 IP 192.168.0.1.53392 > 192.168.0.42.22: Flags [.], ack 5512792, win 4080, options [nop,nop,TS val 930674701 ecr 1198365], length 0
+11:59:10.747733 IP 192.168.0.42.22 > 192.168.0.1.53392: Flags [P.], seq 5512992:5513496, ack 4561, win 2852, options [nop,nop,TS val 1198365 ecr 930674701], length 504

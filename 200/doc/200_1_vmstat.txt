@@ -1,0 +1,36 @@
+#
+# foi utilizado o programa stress para fazer os testes dos softwares abaixo.
+#
+# sudo apt-get install stress
+#
+# stress -c N - teste de cpu
+#
+# stress -m N - teste de memoria
+
+#
+# VMSTAT
+#
+# mais um aplicativo utilizado para obter informacoes sobre memoria, swap, disco, 
+# sistema e cpu.
+#
+# mais um aplitcativo utilizado para identificar qual componente do computador esta
+# causando gargalo no sistema.
+#
+
+#
+# -r - exibe informacoes sobre memoria, swap, disco, sistemas e cpu
+#
+procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 0  0      0 22590448 125720 8708808    0    0    88    51   90  308  1  1 97  0  0
+
+#
+# -d - exibe informacoes sobre disco
+#
+# testes de leitura e escrita nos dispositivos de armazenamento presentes no computador.
+#
+disk- ------------reads------------ ------------writes----------- -----IO------
+       total merged sectors      ms  total merged sectors      ms    cur    sec
+sdb    79178     45 9588002  508960  25495   1875 3106008 6130628      0    275
+sda    36821   3423 2059062   36628  86829  51852 3697824  136744      0     16
+sr0        0      0       0       0      0      0       0       0      0      0
