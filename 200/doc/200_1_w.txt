@@ -3,6 +3,23 @@
 #
 # o comando W exibe quais sao os usuarios que estao logados no sistema
 # e o que estao fazendo.
+#
+# w [opcao] [usuario]
+#
+# o cabecalho exibe as seguintes informacoes
+
+- hora atual
+- a quanto tempo o sistema esta ativo
+- quantos usuarios estao logados no sistema
+- carga media do sistema nos ultimos 1, 5 e 15 minutos
+
+ 15:01:44 up  4:21,  1 user,  load average: 0.00, 0.00, 0.00
 
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
-cosmo    pts/1    tmux(32596).%4   09:37    8:20   0.04s  0.04s -bash
+cosmo    pts/0    192.168.0.1      10:42    0.00s  0.19s  0.01s w
+
+# -s - versao curta
+#
+ 15:12:44 up  4:32,  1 user,  load average: 0.00, 0.00, 0.00
+USER     TTY      FROM              IDLE WHAT
+cosmo    pts/0    192.168.0.1       3.00s w -s
