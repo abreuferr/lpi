@@ -11,3 +11,13 @@
 # minutos
 #
 10:11:20 up  2:34,  6 users,  load average: 0.03, 0.01, 0.00
+
+- hora atual
+- a quanto tempo o sistema esta ativo
+- quantas pessoas estao logadas no sistema
+- carga de trabalho
+	1 minuto
+	5 minutos
+	15 minutos
+
+# essas informacoes foram obtidas do arquivo /proc/uptime
