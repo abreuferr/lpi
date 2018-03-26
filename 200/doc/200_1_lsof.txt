@@ -1,0 +1,5 @@
+# LSOF
+#
+# aplicativo utilizado para exibir qual ou quais processos
+# estao utilizando um determinado arquivos (arquivo regular,
+# diretorios, arquivos especiais e biblioteca).
