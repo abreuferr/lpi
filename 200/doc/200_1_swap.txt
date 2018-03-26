@@ -1,0 +1,37 @@
+# SWAP
+#
+# a memoria swap eh uma memoria auxiliar para quando a memoria
+# RAM esta muito sobrecarregada.
+#
+# processos poucos utilizados pela RAM sao transferidos para
+# a area swap, evitando o sobrecarregamento da RAM
+#
+# pode-se utilizar como memoria swap uma particao de um disco
+# ou utilizar um arquivo
+#
+# a utilizacao do swap ira degradar a performance do sistema pois
+# o swap eh feito em um disco rigido e disco rigido eh muito mais
+# lento  em relacao a memoria RAM.
+
+# criar arquivo para ser area de swap
+#
+$ dd if=/dev/zero of=/tmp/area.swap
+
+# formatar a area de swap
+#
+$ sudo mkswap /dev/sdXY
+$ sudo mkswap /tmp/area.swap
+
+# informacao sobre a area de swap
+#
+$ sudo cat /proc/swaps
+
+# ativar a area de swap
+#
+$ sudo swapon /dev/sdXY
+$ sudo swapon /tmp/area.swap
+
+# desativar a area de swap
+#
+$ sudo swapoff /dev/sdXY
+$ sudo swapoff /tmp/area.swap
