@@ -1,49 +1,69 @@
-#
-# foi utilizado o programa stress para fazer os testes dos softwares abaixo.
-#
-# sudo apt-get install stress
-#
-# stress -c N - teste de cpu
-#
-# stress -m N - teste de memoria
-
 # IOSTAT
 #
-# software utilizado para obter informacoes de performance de CPU e disco rigido
-# para poder determinar o que esta causando gargalo no sistema.
+# o comando iostat pode ser utilizado para monitorar o sistema de i/o de um dispositivo
+# monitorando o tempo em que o dispositivo esta ativo em relacao a taxa media de transferencia
+# de dados.
 #
-# os dados obtem as informacoes dos diretorios /SYS e /PROC
+# o comando iostat gera relatorios que podem ser utilizado pelo administrador do sistema
+# para melhor balancear o i/o entre dos disco rigidos.
 #
+# os dados obtem as informacoes do diretorio /PROC
+#
+# o primeiro relatorio gerado pelo comando iostat prove estatisticas referentes desde que o sistema
+# foi inicializado. Cada subsequente relatorio cobre o tempo desde a ultima relatorio gerado. 
+# Todos as estatisticas sao reportadas cada vez que o comando iostat eh utilizado.
+#
+# iostat [opcao] [intervalo] [quantidade]
+# 
+# em relacao ao parametro "intervalo", ele especifica a quantidade de tempo em segundos entre cada
+# relatorio. Ja o parametro "quantidade" especifica a quantidade de relatorio que serao gerados. O
+# o parametro "quantidade" deve ser especificado em conjunto com o parametro "intervalo". 
 
 #
-# visao geral
+# VISAO GERAL
 #
 avg-cpu:  %user   %nice %system %iowait  %steal   %idle
            1.94    0.01    1.71    0.63    0.00   95.70
+
 Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
 sdb              18.12       848.01       271.35    4723889    1511580
 sda              17.04       184.62       284.37    1028435    1584120
 
-%user - utilizacao de cpu por parte dos aplicativos ativados pelo usuario
-%nice - utilizacao de cpu por parte dos aplicativos ativados pelo usuario 
-	e cujo nice foi alterado
-%system - utilizacao de cpu por parte dos aplicativos ativados pelo sistema
-%iowait - percentagem de tempo em que a cpu esta ociosa esperando resposta 
-	de I/O do disco
-%steal - percentagem de tempo em que a cpu virtual esta ociosa
-%idle - percentagem de tempo em que a cpu esta ociosa e NAO estava esperando 
-	resposta de I/O do disco pelos dados acima, é possivel constatar que 
-	o computador esta sendo subutilizado.
+# a primeira parte do relatorio eh referente a CPU e a segunda parte
+# eh referente a dispositivo.
+#
+# CPU
+#
+# %user - utilizacao de cpu por parte dos aplicativos ativados pelo usuario
+# %nice - utilizacao de cpu por parte dos aplicativos ativados pelo usuario 
+# 	e cujo nice foi alterado
+# %system - utilizacao de cpu por parte dos aplicativos ativados pelo sistema
+# %iowait - percentagem de tempo em que a cpu esta ociosa esperando resposta 
+# 	de I/O do disco
+# %steal - percentagem de tempo em que a cpu virtual esta ociosa
+# %idle - percentagem de tempo em que a cpu esta ociosa e NAO estava esperando 
+# 	resposta de I/O do disco pelos dados acima, é possivel constatar que 
+# 	o computador esta sendo subutilizado.
+#
+# DEVICE
+# 
+# Device - dispositivos de armazenamento que estao sendo avaliados
+# tps - transferencia por segundo (transfers per second)
+# kB_read/s - kB lidos por segundo
+# kB_wrtn/s - KB escritos por segundo
+# kB_read - quantidade de dados utilizados para realizar o teste de leitura
+# kB_wrtn - quantidade de dados utilizados para realizar o teste de escrita
 
-Device - dispositivos de armazenamento que estao sendo avaliados
-tps - transferencia por segundo
-kB_read/s - kB lidos por segundo
-kB_wrtn/s - KB escritos por segundo
-kB_read - quantidade de dados utilizados para realizar o teste de leitura
-kB_wrtn - quantidade de dados utilizados para realizar o teste de escrita
-Linux 4.9.0-4-amd64 (workstation) 	11/08/2017 	_x86_64_	(8 CPU)
-
-        os dados acima indicam que o sda eh mais lento que o sdb.
+# OPCAO
+#
+# -c - estatisticas geradas por cpu
+# -d - estatisticas geradas por dispositivo/device
+# -p - exibe a estatitisca das particoes do dispositivo.
+# -h - em formato humano
+# -k - em kylobyte por segundos
+# -m - em megabytes por segundos
+# -x - estatistica extendida, mas informacoes.
+# -j - estatistica baseada no UUID do dispositivo
 
 $ iostat -c
 #
@@ -70,3 +90,18 @@ avg-cpu:  %user   %nice %system %iowait  %steal   %idle
 Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
 sdb               0.01     0.24   11.98    3.60   725.87   231.13   122.86     1.00   64.42    6.43  257.65   2.62   4.08
 sda               0.52     7.54    5.58   10.37   155.87   254.80    51.50     0.02    1.36    0.99    1.55   0.14   0.23
+
+Device - esse campo indica o nome do dispositivo.  
+rrqm/s - este campo indica a quantidade de solicitacoes de leitura por segundos.
+wrqm/s - este campo indica a quantidade de solicitacoes de escrita por segundos.
+r/s - leitura por segundos
+w/s - escrita por segundo
+rsec/s - quantidade de setores lidos por segundo
+wsec/s - quantidade de setores escritos por segundo
+rkB/s - quantidade de dados lidos por segundos no dispositivo, em kilobytes por segundo.
+wkB/s - quantidade de dados gravados por segundo no dispositivo, em kilobytes por segundos.
+avgrq-sz - quantidade de setores lidos para gerar o relatorio
+avgqu-sz - quantiade de setores escritos para gerar o relatorio
+await - tempo medio do dispositivo para solicitacao de I/O
+svctm - esse campo pode ser ignorado, sera removido nas foturas versoes
+%util - quantidade da largura de banda utilizada pelo dispositivo
