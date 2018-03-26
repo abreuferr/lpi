@@ -1,4 +1,3 @@
-#
 # NETSTAT
 #
 # o aplicativo netstat eh utilizado para obter uma serie de informacoes referentes
@@ -9,27 +8,54 @@
 # 
 # uma ferramenta utilizada para obter informacoes sobre a utilizacao dos 
 # dispositivos de rede, quais aplicativos estao acessando a rede.
+#
+# network connection
+# routing table
+# interface static
+# masquerade connection
+# multicasting membership
+#
+# NETSTAT [OPCAO] [PROTOCOLO]
 
 # -ie - igual ao comando ifconfig
+#
+	Kernel Interface table
+	ens33: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        	inet 192.168.0.41  netmask 255.255.255.0  broadcast 192.168.0.255
+        	inet6 fe80::20c:29ff:feff:b9b  prefixlen 64  scopeid 0x20<link>
+        	ether 00:0c:29:ff:0b:9b  txqueuelen 1000  (Ethernet)
+        	RX packets 8269  bytes 9252518 (8.8 MiB)
+        	RX errors 0  dropped 0  overruns 0  frame 0
+        	TX packets 3645  bytes 399230 (389.8 KiB)
+        	TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+	lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        	inet 127.0.0.1  netmask 255.0.0.0
+        	inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        	loop  txqueuelen 1  (Local Loopback)
+        	RX packets 0  bytes 0 (0.0 B)
+        	RX errors 0  dropped 0  overruns 0  frame 0
+        	TX packets 0  bytes 0 (0.0 B)
+        	TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 
 # -i - exibir as interfaces de rede
-
-Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
-docker0   1500        0      0      0 0             0      0      0      0 BMU
-eno1      1500   378928      0      0 0        178363      0      0      0 BMRU
-lo       65536      125      0      0 0           125      0      0      0 LRU
-vmnet1    1500        0      0      0 0           336      0      0      0 BMRU
-vmnet8    1500     1722      0      0 0          2025      0      0      0 BMRU
+#
+	Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
+	docker0   1500        0      0      0 0             0      0      0      0 BMU
+	eno1      1500   378928      0      0 0        178363      0      0      0 BMRU
+	lo       65536      125      0      0 0           125      0      0      0 LRU
+	vmnet1    1500        0      0      0 0           336      0      0      0 BMRU
+	vmnet8    1500     1722      0      0 0          2025      0      0      0 BMRU
 
 # -r - exibe rotas ativas
-
-Kernel IP routing table
-Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
-default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
-172.17.0.0      0.0.0.0         255.255.0.0     U         0 0          0 docker0
-192.168.0.0     0.0.0.0         255.255.255.0   U         0 0          0 vmnet8
-192.168.2.0     0.0.0.0         255.255.255.0   U         0 0          0 eno1
-192.168.165.0   0.0.0.0         255.255.255.0   U         0 0          0 vmnet1
+#
+	Kernel IP routing table
+	Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
+	default         192.168.2.1     0.0.0.0         UG        0 0          0 eno1
+	172.17.0.0      0.0.0.0         255.255.0.0     U         0 0          0 docker0
+	192.168.0.0     0.0.0.0         255.255.255.0   U         0 0          0 vmnet8
+	192.168.2.0     0.0.0.0         255.255.255.0   U         0 0          0 eno1
+	192.168.165.0   0.0.0.0         255.255.255.0   U         0 0          0 vmnet1
 
 # -s - estatistica dividida por protocolo.
 
