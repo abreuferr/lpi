@@ -1,25 +1,64 @@
-#
-# foi utilizado o programa stress para fazer os testes dos softwares abaixo.
-#
-# sudo apt-get install stress
-#
-# stress -c N - teste de cpu
-#
-# stress -m N - teste de memoria
-
-#
 # VMSTAT
 #
-# mais um aplicativo utilizado para obter informacoes sobre memoria, swap, disco, 
-# sistema e cpu.
+# mais um aplicativo utilizado para obter informacoes sobre:
+# - processador
+# - memoria (memory usage)
+# - paginacao (swap paging)
+# - I/O de blocos (block I/O)
+# - falhas
+# - disco
 #
 # mais um aplitcativo utilizado para identificar qual componente do computador esta
 # causando gargalo no sistema.
 #
+# o primeiro relatorio informa as medias des o ultimo inicio do sistema
+# 
+# relatorios adicionais fornecem informacoes da amostras em um intervalo
+# de tempo.
+#
+# relatorios de processos e memorias sao gerados instantaneamentes
+#
+# vmstat [opcao] [intervalo] [quantidade] 
+#
+#	intervalo - intervalo entre um relatorio e outro
+#	quantidade - quantidade de vezes emq ue o relatorio deve ser gerado
+
+# OPCAO
+#
+# -d - informacoes sobre os discos
+# -p - informacoes sobre as particoes do disco rigido
+#
 
 #
-# -r - exibe informacoes sobre memoria, swap, disco, sistemas e cpu
+# vmstat [SEM OPCAO]
 #
+# r - numero de processos executaveis
+# b - numero de processos dormindo (sleep)
+#
+# swpd - quantidade de memoria virtual utilizada
+# free - quantiade de memoria ociosa 
+# buff - quantidade de memoria utilizada como buffer.
+# cache - quantidade de memoria como cache.
+#
+# si - quantidade de memoria carregada do disco rigido por segundo
+# so - quantidade de memoria movida para o disco rigido por segundo
+#
+# bi - blocos recebidos de um dispositivo de blocl
+# bo - blocos enviados para um dispositivo de bloco
+#
+# in - numero de interrupcoes por segundo
+# cs - o numero de mudancas de contexto por segundo
+# 
+# us - tempo gasto executando codigo nao kernel (user code)
+# sy - tempo gasto executando codigo do kernel (system code)
+# id - tempo ocioso (time speed idle)
+# wa - tempo gasto aguardando por i/o (time speed waiting for i/o)
+# st - tempo roubado por uma maquina virtual (steal time)
+#
+# (wa) valor alto indica que o disco rigido esta sendo utilizado em demazia
+# e o processador esta ocioso - disco rigido lento - substituir o disco rigido
+# mecanico por um ssd. 
+
 procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
  0  0      0 22590448 125720 8708808    0    0    88    51   90  308  1  1 97  0  0
@@ -34,3 +73,23 @@ disk- ------------reads------------ ------------writes----------- -----IO------
 sdb    79178     45 9588002  508960  25495   1875 3106008 6130628      0    275
 sda    36821   3423 2059062   36628  86829  51852 3697824  136744      0     16
 sr0        0      0       0       0      0      0       0       0      0      0
+
+# disk - nome do disco rigido
+# total - total de dados lidos/escritos com sucesso
+# merged - leituras/escritas agrupadas (resultado em um i/o)
+# sectors - leituras/escritas lidas com sucesso
+# ms - milissegundos gastos lendo/escrevendo
+#
+# cur: I/O in progress
+# sec: seconds spent for I/O
+
+# -p - exibe informacoes sobre particao
+#
+sda5          reads   read sectors  writes    requested writes
+                  80       6576          0          0
+
+# sdXY - nome da particao
+# reads - numero total de leituras realizadas nessa particao
+# read sectors - total de setores lidos nessa particao
+# writes - numero total de escritas realizadas nessa particao
+# requested writes - numero total de requisicoes de escrita
