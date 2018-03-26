@@ -1,0 +1,25 @@
+# ANALISE e RESOLVER PROBLEMAS NO USO DE RECURSOS
+#
+
+# oferta flexivel de recursos torna possivel alocar
+# a quantidade certa de capacidade computaciona
+# a cada necessidade (utilizacao de recursos de forma 
+# recinal).
+
+# identificar a subutilizacao do processador e a grande
+# utilizacao do disco rigido ou memoria.
+
+# um sistema pode utilizar muito disco rigido e pouco
+# processador.
+
+# o mesmo sistema pode estar utilizando muito a area de
+# swap - o problema esta na falta de memoria e nao na 
+# lentidao do disco rigido.
+
+# pacote sysstar - pacote com uma serie de softwares
+# utilizado para analisar a utilizacao do hardware do 
+# computador.
+
+# previsao de quando os recursos precisarao ser aumentados.
+
+# diagnostico problemas de capacidades.
