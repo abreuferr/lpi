@@ -15,4 +15,44 @@ Tasks:  73 total,   1 running,  72 sleeping,   0 stopped,   0 zombie
 KiB Mem:    495048 total,    66708 used,   428340 free,     5456 buffers
 KiB Swap:   901116 total,        0 used,   901116 free,    21940 cached
 
-   PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND                                       
+PID USER      PR  NI  VIRT  RES  SHR S  %CPU %MEM    TIME+  COMMAND                                       
+
+# %CPU
+#
+# us - tempo de cpu na execucao dos processos de usuario (user)
+# sy - tempo em que um processo do kernel esta sendo executado (system)
+# ni - tempo em que um processo de um usuario (nice)
+# id - tempo ocioso do kernel (idle)
+# wa - tempo de espera por conclusao de i/o (i/o wait)
+# hi - tempo gasto utilizado pelas interrupcoes de hardware (hi)
+# si - tempo gasto utilizado pelas interrupcoes de software (si)
+# st - tempo utilizado por uma vm em um hipervisor
+#
+# wa - processes waiting for io operations to complete (i/o blocked)
+#
+# porcentagem de tempo em que a cpu fica esperando devido ao grande 
+# acesso ao disco rigido.
+#
+# a cpu nao consegue executar nenhum aplicativo pois o disco rigido
+# esta sobrecarregado
+#
+# nao adianta colocar mais cpu ou memoria no computador, pois o
+# problema esta localizado no disco rigido. substituir o modelo 
+# disco rigido por um modelo mais moderno - ssd
+
+# pid - pid do processo
+# user - usuario proprietario do processo
+# pr - prioridade da tarefa (priority)
+# ni - valor nice da tarefa
+# virt - memoria virtual usada pelo processo (virtual memory)
+# res - memoria fisica utilizada pelo processo
+# shr - memoria compartilhada pelo processo (share memory)
+# s - estado da tarefa (state)
+# 	s - sleeping
+# 	r - running
+# 	t - stopped
+# 	z - zombie
+# %cpu - porcentagem de tempo de cpu usada pela tarefa
+# %mem - porcentagem de memoria fisica usada pelo processo
+# time+ - tempo total de atividade da tarefa desde que ela foi iniciada
+# command - nome do comando 
