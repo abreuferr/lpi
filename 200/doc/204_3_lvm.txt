@@ -20,26 +20,16 @@
 # para esse teste serao utilizado tres discos rigidos, /dev/sd[bcde]1
 #
 
-##
-#
-# INSTALCAO
-#
-##
-
 #
 # instalacao dos software necessários
 #
-	$ sudo apt-get install lvm2 dmsetup mdadm xfsprogs
-##
-#
-# FORMATACAO
-#
-##
+$ sudo apt-get install lvm2 dmsetup mdadm xfsprogs
 
+#
 # os discos deve ser particionados e formatados (8e) utilizando o
 # aplicativo fdisk
 #
-    $ sudo fdisk /dev/sd[bcde]1
+$ sudo fdisk /dev/sd[bc]1
 
 ##
 #
@@ -50,19 +40,46 @@
 # 
 # nessa etapa, serao criados os volumes fisicos.
 #
-	$ sudo pvcreate /dev/sd[bcd]1
+$ sudo pvcreate /dev/sd[bc]1
+	Physical volume "/dev/sdb1" successfully created.
+	Physical volume "/dev/sdc1" successfully created.
 
 #
 # para desmontar um lvm, como ultima etapa, devesse
 # apagar os volumes fisicos.
 #
-	$ sudo pvremove /dev/sd[bcd]1
+$ sudo pvremove /dev/sd[bc]1
+	Labels on physical volume "/dev/sdb1" successfully wiped.
+	Labels on physical volume "/dev/sdc1" successfully wiped.
 
 #
 # exibir informacoes sobre os volumes fisicos.
 #
-	$ sudo pvdisplay
-	$ sudo pvdisplay /dev/sdXY
+$ sudo pvdisplay
+$ sudo pvdisplay /dev/sdXY
+	"/dev/sdc1" is a new physical volume of "20.00 GiB"
+	--- NEW Physical volume ---
+	PV Name               /dev/sdc1
+	VG Name
+	PV Size               20.00 GiB
+	Allocatable           NO
+	PE Size               0
+	Total PE              0
+	Free PE               0
+	Allocated PE          0
+	PV UUID               lkCaxx-styn-fDt7-K0fc-apE1-Qfgx-25gQ6O
+
+	"/dev/sdb1" is a new physical volume of "20.00 GiB"
+	--- NEW Physical volume ---
+	PV Name               /dev/sdb1
+	VG Name
+	PV Size               20.00 GiB
+	Allocatable           NO
+	PE Size               0
+	Total PE              0
+	Free PE               0
+	Allocated PE          0
+	PV UUID               RHUF4t-Lac3-1tnX-b04w-dpme-VBZj-1IQB0P
 
 ##
 #
@@ -75,24 +92,47 @@
 # consiste em reunir esses volumes fisicos em um volume
 # logico cujo nome no exemplo abaixo eh lvm_volume
 #
-	$ sudo vgcreate lvm_volume /dev/sd[bcd]1
+$ sudo vgcreate vgdata /dev/sd[bc]1
+	Volume group "vgdata" successfully created
 
 #
 # exibir informacoes sobre o(s) volume(s) logico(s)
 #
-	$ sudo vgdisplay
-	$ sudo vgdisplay lvm_volume
+$ sudo vgdisplay
+$ sudo vgdisplay vgdata
+	--- Volume group ---
+	VG Name               vgdata
+	System ID
+	Format                lvm2
+	Metadata Areas        2
+	Metadata Sequence No  1
+	VG Access             read/write
+	VG Status             resizable
+	MAX LV                0
+	Cur LV                0
+	Open LV               0
+	Max PV                0
+	Cur PV                2
+	Act PV                2
+	VG Size               39.99 GiB
+	PE Size               4.00 MiB
+	Total PE              10238
+	Alloc PE / Size       0 / 0
+	Free  PE / Size       10238 / 39.99 GiB
+	VG UUID               KNKcaE-FVfd-DMzz-i6DH-i76f-LY3y-KXIapC
 
 #
 # comando utilizado para renomear o volume logico criado
 # na etapa anterior.
 #
-	$ sudo vgrename lvm_volume vg_data
+$ sudo vgrename lvm_volume vg_data
+	Volume group "vgdata" successfully renamed to "vg_data"
 
 #
 # comando utilizado para apagar o volume logico criado anteriormente.
 #
-	$ sudo vgremove vg_data
+$ sudo vgremove vg_data
+	Volume group "vg_data" successfully removed
 
 ##
 #
@@ -105,24 +145,61 @@
 # um volume logico de nome vg_data, agora esse volume logico sera
 # dividido em varios volumes logicos de acordo com as necessidade.
 #
-    $ sudo lvcreate --name samba --size 5G vg_data
-    $ sudo lvcreate --name web --size 10G vg_data
+$ sudo lvcreate --name samba --size 5G vg_data
+	Logical volume "samba" created.
+$ sudo lvcreate --name web --size 10G vg_data
+	Logical volume "web" created.
 
 #
 # exibir informacoes sobre o volume logico
 #
-	$ sudo lvdisplay
-	$ sudo lvscan
+$ sudo lvdisplay
+	--- Logical volume ---
+	LV Path                /dev/vgdata/samba
+	LV Name                samba
+	VG Name                vgdata
+	LV UUID                4wBgA6-6anQ-NVry-PKat-lSht-aKd0-Cv9MxK
+	LV Write Access        read/write
+	LV Creation host, time lpi_client, 2018-03-28 15:07:38 -0300
+	LV Status              available
+	# open                 0
+	LV Size                5.00 GiB
+	Current LE             1280
+	Segments               1
+	Allocation             inherit
+	Read ahead sectors     auto
+	- currently set to     256
+	Block device           253:0
+
+	--- Logical volume ---
+	LV Path                /dev/vgdata/web
+	LV Name                web
+	VG Name                vgdata
+	LV UUID                PP1OjO-fPSX-Khq8-wufe-2qdB-Zcml-h0pQgs
+	LV Write Access        read/write
+	LV Creation host, time lpi_client, 2018-03-28 15:08:31 -0300
+	LV Status              available
+	# open                 0
+	LV Size                10.00 GiB
+	Current LE             2560
+	Segments               1
+	Allocation             inherit
+	Read ahead sectors     auto
+	- currently set to     256
+	Block device           253:1
 
 #
 # renomvear o volume logico WEB para WWW
 # 
-	$ sudo lvrename vg_data web www 
+$ sudo lvrename vg_data web www 
+	Renamed "web" to "www" in volume group "vgdata"
 
 #
 # apagar o volume logico WWW
 #
-	$ sudo lvremove /dev/vg_data/www
+$ sudo lvremove /dev/vg_data/www
+	Do you really want to remove active logical volume vgdata/www? [y/n]: y
+	Logical volume "www" successfully removed
 
 #
 # depois de criar os volumes logicos SAMBA e WWW
@@ -133,16 +210,16 @@
 #
 # formatar
 #
-	$ sudo mkfs -t ext4 /dev/vg_data/samba
-	$ sudo mkfs -t ext4 /dev/vg_data/www
+$ sudo mkfs -t ext4 /dev/vg_data/samba
+$ sudo mkfs -t ext4 /dev/vg_data/www
 
 #
 # montar
 #
-	$ sudo mkdir /mnt/samba
-	$ sudo mkdir /mnt/www
-	$ sudo mount /dev/vg_data/samba /mnt/samba
-	$ sudo mount /dev/vg_data/www /mnt/www
+$ sudo mkdir /mnt/samba
+$ sudo mkdir /mnt/www
+$ sudo mount /dev/vg_data/samba /mnt/samba
+$ sudo mount /dev/vg_data/www /mnt/www
 
 #
 # adicionar os volumes logicos montados no arquivo
@@ -150,8 +227,8 @@
 # reinicializado, o mesmo seja montado de forma
 # automatica.
 #
-	$ sudo blkid
-	$ sudo vi /etc/fstab
+$ sudo blkid
+$ sudo vi /etc/fstab
 	UUID=XYZ	/mnt/samba      ext4    defaults      0 2
 	UUID=ABC	/mnt/www        ext4    defaults      0 2
 
@@ -163,10 +240,34 @@
 # procedimentos para adicionar um novo disco rigido
 # ao VG_DATA
 #
-	$ sudo fdisk /dev/sdf   ; particionar o disco rigido
-	$ sudo pvcreate /dev/sdf1   ; criar o volume fisico do novo disco rigido
-	$ sudo vgextend vg_data /dev/sdf1   ; extender o VG com o novo disco rigido
-	$ sudo vgdisplay
+$ sudo fdisk /dev/sdd   ; particionar o disco rigido
+
+$ sudo pvcreate /dev/sdd1   ; criar o volume fisico do novo disco rigido
+	Physical volume "/dev/sdd1" successfully created.
+$ sudo vgextend vg_data /dev/sdd1   ; extender o VG com o novo disco rigido
+	Volume group "vgdata" successfully extended
+
+$ sudo vgdisplay
+	--- Volume group ---
+	VG Name               vgdata
+	System ID
+	Format                lvm2
+	Metadata Areas        3
+	Metadata Sequence No  6
+	VG Access             read/write
+	VG Status             resizable
+	MAX LV                0
+	Cur LV                1
+	Open LV               0
+	Max PV                0
+	Cur PV                3
+	Act PV                3
+	VG Size               59.99 GiB
+	PE Size               4.00 MiB
+	Total PE              15357
+	Alloc PE / Size       1280 / 5.00 GiB
+	Free  PE / Size       14077 / 54.99 GiB
+	VG UUID               dgh2w5-WEfK-c5et-FVNc-SdsP-S8L9-YUr4FB
 
 ##
 # AMPLIACAO
@@ -175,10 +276,8 @@
 # foi montado
 #
 # samba - de 5GB para 15GB
-# web - de 10GB para 25GB
 #
 $ sudo lvextend -L15G /dev/vg_data/samba
-$ sudo lvextend -L25G /dev/vg_data/web
 $ sudo lvscan
 
 ##
@@ -188,10 +287,8 @@ $ sudo lvscan
 # foi montado
 # 
 # samba - de 15GB para 9GB
-# web - de 25GB para 17GB
 #
 $ sudo lvreduce -L9G /dev/vg_data/samba
-$ sudo lvreduce -L17G /dev/vg_data/web
 $ sudo lvscan
 
 ##
@@ -204,19 +301,10 @@ $ sudo lvscan
 # web - de 15GB para 25GB
 #
 $ sudo umount /mnt/samba/
-$ sudo umount /mnt/web/
-
 $ sudo lvextend -L15G /dev/vg_data/samba
-$ sudo lvextend -L25G /dev/vg_data/web
-
 $ sudo e2fsck -f /dev/vg_data/samba
-$ sudo e2fsck -f /dev/vg_data/web
-
 $ sudo resize2fs /dev/vg_data/samba
-$ sudo resize2fs /dev/vg_data/web
-
 $ sudo mount /mnt/samba/
-$ sudo mount /mnt/web/
 
 ##
 # REDUCAO
@@ -225,22 +313,12 @@ $ sudo mount /mnt/web/
 # foi montado
 #
 # samba - de 15GB para 9GB
-# web - de 25GB para 16GB
 #
 $ sudo umount /mnt/samba/
-$ sudo umount /mnt/web/
-
 $ sudo e2fsck -f /dev/vg_data/samba
-$ sudo e2fsck -f /dev/vg_data/web
-
 $ sudo resize2fs /dev/vg_data/samba 9216M
-$ sudo resize2fs /dev/vg_data/web 16384M
-
 $ sudo lvreduce -L9G /dev/vg_data/samba
-$ sudo lvreduce -L16G /dev/vg_data/web
-
 $ sudo mount /mnt/samba/
-$ sudo mount /mnt/web/
 
 ##
 #
@@ -271,4 +349,4 @@ $ sudo umount /mnt/web/
 $ sudo lvremove /dev/vg_data/samba 
 $ sudo lvremove /dev/vg_data/web
 $ sudo vgremove vg_data
-$ sudo pvremove /dev/sd[cde]1
+$ sudo pvremove /dev/sd[bc]1
