@@ -17,7 +17,8 @@
          - velocidade na leitura pois parte dos dados sao lidos
          em um disco rigido e a outra parte no outro discos rigidos;
 #
-# raid 5 - velocidade + redundancia;
+# raid 5 - (p)arity and (s)triping
+	 - velocidade + redundancia;
          - minimo de 03 discos rigidos;
 
 #
@@ -39,90 +40,213 @@
 
 # criar as partcoes e formatar os discos rigidos sdb e sdc no formato fd
 #
-	sudo fdisk /dev/sdb
-	sudo fdisk /dev/sdc
+$ sudo fdisk /dev/sdb
+$ sudo fdisk /dev/sdc
 
 # criacao do raid 0 com dois discos rigidos
 #
-	sudo mdadm --create /dev/md0 --verbose --level=0 --raid-device=2 /dev/sd[bc]1
+$ sudo mdadm --create /dev/md0 --verbose --level=0 --raid-device=2 /dev/sd[bc]1
+	mdadm: chunk size defaults to 512K
+	mdadm: Defaulting to version 1.2 metadata
+	mdadm: array /dev/md0 started.
 
 # criacao do raid 1 com dois discos rigidos
 #
-	sudo mdadm --create /dev/md0 --verbose --level=1 --raid-device=2 /dev/sd[bc]1
+$ sudo mdadm --create /dev/md0 --verbose --level=1 --raid-device=2 /dev/sd[bc]1
+	mdadm: Note: this array has metadata at the start and
+	    may not be suitable as a boot device.  If you plan to
+	    store '/boot' on this device please ensure that
+	    your boot-loader understands md/v1.x metadata, or use
+	    --metadata=0.90
+	mdadm: size set to 20954112K
+	Continue creating array? y
+	mdadm: Defaulting to version 1.2 metadata
+	mdadm: array /dev/md0 started.
 
 # informacoes sobre o raid 0/1
 #
-	sudo mdadm --detail /dev/md0
+$ sudo mdadm --detail /dev/md0
+	/dev/md0:
+	Version : 1.2
+	Creation Time : Wed Mar 28 09:18:44 2018
+	Raid Level : raid0
+	Array Size : 41908224 (39.97 GiB 42.91 GB)
+	Raid Devices : 2
+	Total Devices : 2
+	Persistence : Superblock is persistent
+	Update Time : Wed Mar 28 09:18:44 2018
+	State : clean
+	Active Devices : 2
+	Devices : 2
+	Failed Devices : 0
+	Spare Devices : 0
+	Chunk Size : 512K
+	Name : lpi_client:0  (local to host lpi_client)
+	UUID : e4b8b207:5a9f8c7c:c3ba2907:cefa14e5
+	Events : 0
+	Number   Major   Minor   RaidDevice State
+	0       8       17        0      active sync   /dev/sdb1
+	1       8       33        1      active sync   /dev/sdc1
+
+	/dev/md0:
+	Version : 1.2
+	Creation Time : Wed Mar 28 10:07:51 2018
+	Raid Level : raid1
+	Array Size : 20954112 (19.98 GiB 21.46 GB)
+	Used Dev Size : 20954112 (19.98 GiB 21.46 GB)
+	Raid Devices : 2
+	Total Devices : 2
+	Persistence : Superblock is persistent
+	Update Time : Wed Mar 28 10:08:24 2018
+	State : clean, resyncing
+	Active Devices : 2
+	Working Devices : 2
+	Failed Devices : 0
+	Spare Devices : 0
+	Resync Status : 35% complete
+	Name : lpi_client:0  (local to host lpi_client)
+	UUID : fa1f406f:d3440adf:41b79c66:9cc5e6ed
+	Events : 5
+	Number   Major   Minor   RaidDevice State
+	0       8       17        0      active sync   /dev/sdb1
+	1       8       33        1      active sync   /dev/sdc1
 
 # arquivo de configuracao do raid 0/1
 #
-	/etc/mdadm/mdadm.conf
+/etc/mdadm/mdadm.conf
 
 # adicionar o raid 0/1 no arquivo de configuracao
 #
-	sudo su
-	mdadm -Es | grep md >> /etc/mdadm/mdadm.conf
-	exit
+$ sudo su
+$ mdadm -Es | grep md >> /etc/mdadm/mdadm.conf
+$ exit
 
 # formatar o raid 0/1 no formato ext4
 #
-	sudo mkfs -t ext4 /dev/md0
+$ sudo mkfs -t ext4 /dev/md0
 
 # montar o raid 0/1
 #
-	sudo mkdir /mnt/raid
-	sudo mount -t ext4 /dev/md0 /mnt/raid/
+$ sudo mkdir /mnt/raid
+$ sudo mount -t ext4 /dev/md0 /mnt/raid/
 
 # verificar o ponto de montagem do raid 0/1
 #
-	sudo df -h
+$ sudo df -h
+	Filesystem      Size  Used Avail Use% Mounted on
+	/dev/md0         40G   49M   38G   1% /mnt/raid
 
 # verificar o status do raid 0/1
 #
-	sudo mdadm --detail /dev/md0
+$ sudo mdadm --detail /dev/md0
 
 # fstab
 #
-	sudo blkid
-		/dev/md0: UUID="6fa1e03f-d958-46db-9b36-e19b344715b5" TYPE="ext4"
+$ sudo blkid
+	/dev/md0: UUID="6fa1e03f-d958-46db-9b36-e19b344715b5" TYPE="ext4"
 
-	sudo vi /etc/fstab
-		UUID=6fa1e03f-d958-46db-9b36-e19b344715b5	/mnt/raid1	ext4	defaults	0    0
+$ sudo vi /etc/fstab
+	UUID=6fa1e03f-d958-46db-9b36-e19b344715b5	/mnt/raid	ext4	defaults	0    2
 
 # TESTE
 #
+# a simulacao de falha pode SO pode ser feita em um raid do tipo 1, 
+# espelhamento. Nao existe a possibilidade de realizar uma simulacao 
+# em um RAID 0 pois isso acarretaria na distruicao do RAID.
 
 # simular falha no raid 1 (sdc1)
 #
-	sudo mdadm --manage --set-faulty /dev/md0 /dev/sdc1
+$ sudo mdadm --manage /dev/md0 --faulty /dev/sdc1
+	mdadm: set /dev/sdc1 faulty in /dev/md0
+
+# exibindo os detalhes da falha
+#
+$ sudo mdadm --detail /dev/md0
+	/dev/md0:
+	Version : 1.2
+	Creation Time : Wed Mar 28 10:07:51 2018
+	Raid Level : raid1
+	Array Size : 20954112 (19.98 GiB 21.46 GB)
+	Used Dev Size : 20954112 (19.98 GiB 21.46 GB)
+	Raid Devices : 2
+	Total Devices : 2
+	Persistence : Superblock is persistent
+
+	Update Time : Wed Mar 28 10:17:03 2018
+	State : clean, degraded
+	Active Devices : 1
+	Working Devices : 1
+	Failed Devices : 1
+	Spare Devices : 0
+
+	Name : lpi_client:0  (local to host lpi_client)
+	UUID : fa1f406f:d3440adf:41b79c66:9cc5e6ed
+	Events : 19
+
+	Number   Major   Minor   RaidDevice State
+	0       8       17        0      active sync   /dev/sdb1
+	-       0        0        1      removed
+
+	1       8       33        -      faulty   /dev/sdc1
 
 # remover o disco com defeito
 #
-	sudo mdadm /dev/md0 -r /dev/sdc1
+$ sudo mdadm /dev/md0 -r /dev/sdc1
+	mdadm: hot removed /dev/sdc1 from /dev/md0
 
 # adicionar o disco no raid 1
 #
-	sudo mdadm /dev/md0 -a /dev/sdc1
+$ sudo mdadm /dev/md0 -a /dev/sdc1
+	mdadm: added /dev/sdc1
+$ sudo mdadm --detail /dev/md0
+	/dev/md0:
+	        Version : 1.2
+	  Creation Time : Wed Mar 28 10:07:51 2018
+	     Raid Level : raid1
+	     Array Size : 20954112 (19.98 GiB 21.46 GB)
+	  Used Dev Size : 20954112 (19.98 GiB 21.46 GB)
+	   Raid Devices : 2
+	  Total Devices : 2
+	    Persistence : Superblock is persistent
+
+	    Update Time : Wed Mar 28 10:40:29 2018
+        	  State : clean, degraded, recovering
+	 Active Devices : 1
+	Working Devices : 2
+	 Failed Devices : 0
+	  Spare Devices : 1
+
+	 Rebuild Status : 31% complete
+
+	           Name : lpi_client:0  (local to host lpi_client)
+	           UUID : fa1f406f:d3440adf:41b79c66:9cc5e6ed
+	         Events : 31
+
+	    Number   Major   Minor   RaidDevice State
+	       0       8       17        0      active sync   /dev/sdb1
+	       2       8       33        1      spare rebuilding   /dev/sdc1
 
 # EXCLUIR O RAID
 #
 # desmontar
 #
-	sudo umount /dev/md0
+$ sudo umount /dev/md0
 
 # parar o raid
 #
-	sudo mdadm --stop /dev/md0
+$ sudo mdadm --stop /dev/md0
+	mdadm: stopped /dev/md0
 
 # remover
 #
-	sudo mdadm --remove /dev/md0
+$ sudo mdadm --remove /dev/md0
 
 # excluir o superbloco
 #
-	sudo mdadm --zero-superblock /dev/sd[bc]1
+$ sudo mdadm --zero-superblock /dev/sd[bc]1
+
 #
-#RAID 5
+# RAID 5
 #
 # discos
 #
@@ -132,21 +256,113 @@
 
 # criar o raid
 #
-	sudo mdadm --create --force --assume-clean /dev/md0 --verbose --level=5 --raid-device=3 /dev/sd[bcd]1
+$ sudo mdadm --create /dev/md0 --verbose --level=1 --raid-device=2 /dev/sd[bc]1
+$ sudo mdadm --create --force --assume-clean /dev/md0 --verbose --level=5 --raid-device=3 /dev/sd[bcd]1
+	mdadm: layout defaults to left-symmetric
+	mdadm: layout defaults to left-symmetric
+	mdadm: chunk size defaults to 512K
+	mdadm: size set to 20954112K
+	mdadm: Defaulting to version 1.2 metadata
+	mdadm: array /dev/md0 started.
+
+# informacao
+#
+$ sudo mdadm --detail /dev/md0
+	/dev/md0:
+	        Version : 1.2
+	  Creation Time : Wed Mar 28 10:45:29 2018
+	     Raid Level : raid5
+	     Array Size : 41908224 (39.97 GiB 42.91 GB)
+	  Used Dev Size : 20954112 (19.98 GiB 21.46 GB)
+	   Raid Devices : 3
+	  Total Devices : 3
+	    Persistence : Superblock is persistent
+
+	    Update Time : Wed Mar 28 10:47:15 2018
+	          State : clean
+	 Active Devices : 3
+	Working Devices : 3
+	 Failed Devices : 0
+	  Spare Devices : 0
+
+	         Layout : left-symmetric
+	     Chunk Size : 512K
+
+	           Name : lpi_client:0  (local to host lpi_client)
+	           UUID : c9f7a7ff:30fcf464:605b3037:73751a84
+	         Events : 18
+
+	    Number   Major   Minor   RaidDevice State
+	       0       8       17        0      active sync   /dev/sdb1
+	       1       8       33        1      active sync   /dev/sdc1
+	       3       8       49        2      active sync   /dev/sdd1
 
 # adicionar o raid ao arquivo de configuracao
 #
-	sudo mdadm -Es | grep md >> /etc/mdadm/mdadm.conf
+$ sudo mdadm -Es | grep md >> /etc/mdadm/mdadm.conf
 
 # formatar o raid 5 no formato ext4
 #
-	sudo mkfs -t ext4 /dev/md0
+$ sudo mkfs -t ext4 /dev/md0
 
 # montar o raid 5
 #
-	sudo mount -t ext4 /dev/md0 /mnt/raid0/
+$ sudo mount -t ext4 /dev/md0 /mnt/raid0/
 
 # fstab
 #
-	blkid
-		UUID=664b53e1-d87a-4dbb-a25e-08d9bada14eb       /mnt/raid       ext4    defaults        0       0
+$udo blkid
+	UUID=664b53e1-d87a-4dbb-a25e-08d9bada14eb       /mnt/raid       ext4    defaults        0       0
+
+# TESTE
+#
+
+# simular falha no raid 5 (sdc1)
+#
+$ sudo mdadm --manage /dev/md0 --fail /dev/sdc1
+$ sudo mdadm --detaul /dev/md0
+	/dev/md0:
+	        Version : 1.2
+	  Creation Time : Wed Mar 28 10:45:29 2018
+	     Raid Level : raid5
+	     Array Size : 41908224 (39.97 GiB 42.91 GB)
+	  Used Dev Size : 20954112 (19.98 GiB 21.46 GB)
+	   Raid Devices : 3
+	  Total Devices : 3
+	    Persistence : Superblock is persistent
+
+	    Update Time : Wed Mar 28 10:55:09 2018
+	          State : clean, degraded
+	 Active Devices : 2
+	Working Devices : 2
+	 Failed Devices : 1
+	  Spare Devices : 0
+
+        	 Layout : left-symmetric
+	     Chunk Size : 512K
+
+	           Name : lpi_client:0  (local to host lpi_client)
+	           UUID : c9f7a7ff:30fcf464:605b3037:73751a84
+	         Events : 20
+
+	    Number   Major   Minor   RaidDevice State
+	       0       8       17        0      active sync   /dev/sdb1
+	       -       0        0        1      removed
+	       3       8       49        2      active sync   /dev/sdd1
+
+	       1       8       33        -      faulty   /dev/sdc1
+
+$ sudo cat /proc/mdstat
+	Personalities : [raid0] [raid1] [raid6] [raid5] [raid4]
+	md0 : active raid5 sdd1[3] sdc1[1](F) sdb1[0]
+	      41908224 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [U_U]
+
+# remover o disco com problema, /dev/sdc1
+#
+$ sudo mdadm /dev/md0 -r /dev/sdc1
+	mdadm: hot removed /dev/sdc1 from /dev/md0
+
+# adicionar um novo disco rigido, /dev/sdc1
+#
+$ sudo mdadm /dev/md0 -a /dev/sdc1
+	mdadm: added /dev/sdc1
