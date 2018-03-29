@@ -180,10 +180,6 @@ $ sudo df -h
 # SUBVOLUME
 #
 
-# listar subvolume
-#
-$ sudo btrfs subvolume list /mnt/btrfs/
-
 # criar subvolume
 #
 $ sudo btrfs subvolume create /mnt/btrfs/subvolweb
