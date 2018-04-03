@@ -45,6 +45,12 @@ $ sudo fdisk /dev/sdc
 
 # criacao do raid 0 com dois discos rigidos
 #
+# comando padrao para se criar um raid, seja ele 0, 1 ou 5
+#
+# mdadm [modo] [nome_raid] [opcao] [componentes_raid]
+#
+# mdadm --create md-device --chunk=X --level=Y --raid-devices=Z devices
+#
 $ sudo mdadm --create /dev/md0 --verbose --level=0 --raid-device=2 /dev/sd[bc]1
 	mdadm: chunk size defaults to 512K
 	mdadm: Defaulting to version 1.2 metadata
