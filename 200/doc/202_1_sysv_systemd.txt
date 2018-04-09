@@ -1,0 +1,91 @@
+#
+# SYSV
+#
+
+#
+# TEORIA
+#
+
+# arquivo a onde se define qual o runlevel
+#
+$ cat /etc/inittab
+	# The default runlevel.
+	id:2:initdefault:
+
+# o diretorio /etc/init.d/ contem os scripts cujos programas
+# serao inicializados pelo SysV.
+#
+$ ls /etc/init.d/
+	README    .sh             console-setup  hwclock.sh      kmod                   mountdevsubfs.sh       mpt-statusd  rc        rmnologin  skeleton  udev-mtab     urandom
+	acpid     checkfs.sh              cron           kbd             motd                   mountkernfs.sh         mtab.sh      rc.local  rsyslog    ssh       umountfs
+	apache2   checkroot-bootclean.sh  halt           keyboard-setup  mountall-bootclean.sh  mountnfs-bootclean.sh  networking   rcS       sendsigs   sudo      umountnfs.sh
+	bootlogs  checkroot.sh            hostname.sh    killprocs       mountall.sh            mountnfs.sh            procps       reboot    single     udev      umountroot
+
+# o diretorio /etc/rcX.d/ contem os links simbolicos para os scripts
+# /etc/init.d/
+#
+$ ls /etc/rc*.d
+	/etc/rc0.d:
+	K01apache2  K01mpt-statusd  K01urandom  K02sendsigs  K03rsyslog  K04hwclock.sh  K04umountnfs.sh  K05networking  K06umountfs  K07umountroot  K08halt  README
+	/etc/rc1.d:
+	K01apache2  K01mpt-statusd  K03rsyslog  README  S01killprocs  S01motd  S05bootlogs  S06single
+	/etc/rc2.d:
+	README  S01motd  S01rsyslog  S01sudo  S02apache2  S03acpid  S03cron  S03mpt-statusd  S03ssh  S05bootlogs  S06rc.local  S06rmnologin
+	/etc/rc3.d:
+	README  S01motd  S01rsyslog  S01sudo  S02apache2  S03acpid  S03cron  S03mpt-statusd  S03ssh  S05bootlogs  S06rc.local  S06rmnologin
+	/etc/rc4.d:
+	README  S01motd  S01rsyslog  S01sudo  S02apache2  S03acpid  S03cron  S03mpt-statusd  S03ssh  S05bootlogs  S06rc.local  S06rmnologin
+	/etc/rc5.d:
+	README  S01motd  S01rsyslog  S01sudo  S02apache2  S03acpid  S03cron  S03mpt-statusd  S03ssh  S05bootlogs  S06rc.local  S06rmnologin
+	/etc/rc6.d:
+	K01apache2  K01mpt-statusd  K01urandom  K02sendsigs  K03rsyslog  K04hwclock.sh  K04umountnfs.sh  K05networking  K06umountfs  K07umountroot  K08reboot  README
+	/etc/rcS.d:
+	README             S02udev              S05hwclock.sh              S07kmod        S09mountall.sh            S11udev-mtab   S13mountnfs.sh            S16console-setup
+	S01hostname.sh     S03keyboard-setup    S06checkroot.sh            S07mtab.sh     S10mountall-bootclean.sh  S11urandom     S14mountnfs-bootclean.sh  S17bootmisc.sh
+	S01mountkernfs.sh  S04mountdevsubfs.sh  S07checkroot-bootclean.sh  S08checkfs.sh  S11procps                 S12networking  S15kbd
+
+
+# CHKCONFIG
+#
+# aplicativo utilizado pela RedHat para grenciar os scripts de inicializacao
+#
+# alem de gerenciar os sripts, eh possivel visualizar a situacao dos scripts
+# de inicializacao.
+#
+# chkconfig [sem parametro]
+$ chkconfig
+	(...)
+	postfix        	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+	(...)
+
+# desativar o postfix
+#
+$ chkconfig postfix off
+$ chkconfig postfix off
+$ ls /etc/rc.d/rc2.d/
+	K10saslauthd  K50kdump     K75netfs        K89netconsole  S02lvm2-monitor  S08ip6tables  S10network  S12rsyslog    S25blk-availability  S55sshd   S99local
+	K30postfix    K61nfs-rdma  K87restorecond  K89rdisc       S05rdma          S08iptables   S11auditd   S15mdmonitor  S26udev-post         S90crond
+
+$ chkconfig --list postfix
+	postfix        	0:off	1:off	2:off	3:off	4:off	5:off	6:off
+
+# ativar o postfix
+#
+$ chkconfig postfix on
+$ ls /etc/rc.d/rc2.d/
+	K10saslauthd  K61nfs-rdma  K87restorecond  K89rdisc         S05rdma       S08iptables  S11auditd   S15mdmonitor         S26udev-post  S80postfix  S99local
+	K50kdump      K75netfs     K89netconsole   S02lvm2-monitor  S08ip6tables  S10network   S12rsyslog  S25blk-availability  S55sshd       S90crond
+
+$ chkconfig --list postfix
+	postfix        	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+
+# desativar(off) e ativar(on) a execucao do script em alguns niveis
+#
+$ chkconfig postfix
+	postfix         0:off   1:off   2:on    3:on    4:on    5:on    6:off
+
+$ chkconfig --level 45 postfix off
+	postfix        	0:off	1:off	2:on	3:on	4:off	5:off	6:off
+
+$ chkconfig --level 45 postfix on
+	postfix        	0:off	1:off	2:on	3:on	4:on	5:on	6:off
