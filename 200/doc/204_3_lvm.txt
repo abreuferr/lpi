@@ -325,7 +325,6 @@ $ sudo mount /mnt/samba/
 # ADICIONANDO UM DISCO RIGIDO NO LVM
 #
 ##
-
 $ sudo pvcreate /dev/sde1
 $ sudo vgextend vg_data /dev/sde1
 
@@ -334,10 +333,30 @@ $ sudo vgextend vg_data /dev/sde1
 # REMOVER UM DISCO RIGIDO NO LVM
 #
 ##
-
 $ sudo pvmove /dev/sdb1 /dev/sde1
 $ sudo vgreduce vg_data /dev/sdb1
 $ sudo pvremove /dev/sdb1
+
+##
+#
+# SNAPSHOT
+#
+# - lv snapshot sao LVs em si mesmo
+# - lv snapshot pode ser montado em um diretorio
+#
+##
+$ sudo mount /dev/vg_data/web /mnt/web
+$ sudo cp /etc/*.conf /mnt/web
+$ sudo lvcreate -L 100M -n web_snap -s /dev/vg_data/web
+$ sudo mount /dev/vg_data/web_snap /mnt/web_snap
+$ sudo df /mnt/web /mnt/web_snap
+$ sudo umount /mnt/{web,web_snap}
+$ sudo lvconvert --merge /dev/vg_data/web_snap
+# a partir deste ponto, os dados do diretorio /mnt/web_snap
+# sao clonados para o diretorio /mnt/web
+$ sudo mount /dev/vg_data/web /mnt/web
+$ sudo mount /dev/vg_data/web_snap /mnt/web_snap
+$ sudo df /mnt/web /mnt/web_snap
 
 ##
 #
