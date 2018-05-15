@@ -1,0 +1,52 @@
+# xfs
+#
+
+# instalacao do software
+#
+$ sudo apt-get install xfsprogs
+
+#
+# criacao particao
+#
+$ sudo fdisk /dev/sdb
+
+#
+# FORMATACAO
+#
+$ sudo mkfs -t xfs /dev/sdb1
+	meta-data=/dev/sdb1              isize=512    agcount=4, agsize=1310720 blks
+	         =                       sectsz=512   attr=2, projid32bit=1
+	         =                       crc=1        finobt=1, sparse=0, rmapbt=0, reflink=0
+	data     =                       bsize=4096   blocks=5242880, imaxpct=25
+	         =                       sunit=0      swidth=0 blks
+	naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+	log      =internal log           bsize=4096   blocks=2560, version=2
+	         =                       sectsz=512   sunit=0 blks, lazy-count=1
+	realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+#
+# INFORMACAO
+#
+$ sudo xfs_info /dev/sdb1
+	meta-data=/dev/sdb1              isize=512    agcount=4, agsize=1310656 blks
+	         =                       sectsz=512   attr=2, projid32bit=1
+	         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
+	         =                       reflink=0
+	data     =                       bsize=4096   blocks=5242624, imaxpct=25
+	         =                       sunit=0      swidth=0 blks
+	naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+	log      =internal               bsize=4096   blocks=2560, version=2
+	         =                       sectsz=512   sunit=0 blks, lazy-count=1
+	realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+#
+# LABEL
+#
+$ sudo xfs_admin -L lpi_xfs /dev/sdb1
+	writing all SBs
+	new label = "lpi_xfs"
+
+#
+# MONTAR
+#
+$ sudo mount -t xfs /dev/sdb1 /mnt/xfs
