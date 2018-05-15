@@ -11,13 +11,42 @@
 #
 $ sudo apt-get install btrfs-tools
 
+#
+# FORMATACAO
+#
+
+# formatacao do sistema de arquivos do tipo BTRFS
+#
+# SEM OPCAO
+#
+# nesse tipo de formatacao, os dados sao armazenados
+# como um RAID0 e os metadados como um RAID1.
+#
+$ sudo mkfs -t btrfs /dev/sd[bc]
+	Label:              (null)
+	UUID:
+	Node size:          16384
+	Sector size:        4096
+	Filesystem size:    40.00GiB
+	Block group profiles:
+	  Data:             RAID0             2.00GiB
+	  Metadata:         RAID1             1.00GiB
+	  System:           RAID1             8.00MiB
+	SSD detected:       no
+	Incompat features:  extref, skinny-metadata
+	Number of devices:  2
+	Devices:
+	   ID        SIZE  PATH
+	    1    20.00GiB  /dev/sdb
+	    2    20.00GiB  /dev/sdc
+
 # formatacao do sistema de arquivos do tipo BTRFS
 #
 # SINGLE
 #
 # -m - metadados
 #
-$ sudo mkfs -t btrfs -m single /dev/sdb
+$ sudo mkfs -t btrfs -m single /dev/sd[bc]
 
 # formatacao do sistema de arquivos do tipo BTRFS
 #
@@ -32,7 +61,7 @@ $ sudo mkfs -t btrfs -m raid0 /dev/sd[bc]
 #
 # RAID 1
 #
-# -m - metadados
+# -m - metadados (RAID 1 - default)
 # -d - dados
 #
 $ sudo mkfs -t btrfs -d raid1 /dev/sd[bc]
@@ -44,16 +73,15 @@ $ sudo mkfs -t btrfs -d raid1 /dev/sd[bc]
 # -m - metadados
 # -d - dados
 #
-$ sudo mkfs -t btrfs -d raid10 -m raid10 /dev/sd[bc]
+$ sudo mkfs -t btrfs -d raid1 -m raid0 /dev/sd[bc]
 
-# formatacao do sistema de arquivos do tipo BTRFS
+# exibit informacoes sobre o btrfs
 #
-# RAID 0/1
-#
-# -m - metadados
-# -d - dados
-#
-$ sudo mkfs -t btrfs -m raid0 -d raid1 /dev/sd[bc]
+$ sudo btrfs filesystem show
+	Label: none  uuid: 4a16fe5f-f067-4217-904c-b93f0c1a5700
+		Total devices 2 FS bytes used 112.00KiB
+		devid    1 size 20.00GiB used 2.01GiB path /dev/sdb
+		devid    2 size 20.00GiB used 2.01GiB path /dev/sdc
 
 # montar o sistema
 #
@@ -64,11 +92,16 @@ $ sudo mount /dev/sdb /mnt/btrfs/
 #
 $ sudo df -h
 	Filesystem      Size  Used Avail Use% Mounted on
-	/dev/sdb         20G   17M   18G   1% /mnt/btrfs
+	/dev/sdb         40G   17M   38G   1% /mnt/btrfs
 
 # adicionar um dispositivo, /dev/sdd
 #
 $ sudo btrfs device add /dev/sdd /mnt/btrfs/
+	Label: none  uuid: 0e48de10-9874-4cdb-becd-1cc93a9259b1
+		Total devices 3 FS bytes used 896.00KiB
+		devid    1 size 20.00GiB used 2.01GiB path /dev/sdb
+		devid    2 size 20.00GiB used 2.01GiB path /dev/sdc
+		devid    3 size 20.00GiB used 0.00B path /dev/sdd
 
 # balanceamento dos dados
 #
@@ -97,6 +130,10 @@ $ sudo btrfs device stats /mnt/btrfs/
 # remover um dispositivo, /dev/sdc
 #
 $ sudo btrfs device delete /dev/sdc /mnt/btrfs/
+	Label: none  uuid: 0e48de10-9874-4cdb-becd-1cc93a9259b1
+		Total devices 2 FS bytes used 704.00KiB
+		devid    1 size 20.00GiB used 1.28GiB path /dev/sdb
+		devid    3 size 20.00GiB used 1.28GiB path /dev/sdd
 
 # informacao sobre a particao montada
 #
@@ -115,18 +152,20 @@ $ sudo btrfs filesystem df /mnt/btrfs/
 # mais informacoes sobre o btrfs que esta montado
 #
 $ sudo btrfs filesystem show --mounted
-	Label: none  uuid: 4c595ce3-5a5a-465d-a7f4-d131a5614c7b
-		Total devices 2 FS bytes used 384.00KiB
-		devid    1 size 20.00GiB used 2.02GiB path /dev/sdb
-		devid    2 size 20.00GiB used 0.00B path /dev/sdc
+	Label: none  uuid: 0e48de10-9874-4cdb-becd-1cc93a9259b1
+		Total devices 3 FS bytes used 704.00KiB
+		devid    1 size 20.00GiB used 1.28GiB path /dev/sdb
+		devid    3 size 20.00GiB used 1.28GiB path /dev/sdd
+		devid    4 size 20.00GiB used 0.00B path /dev/sdc
 
 # mais informacoes sobre os dispositivos que compoem o btrfs
 #
 $ sudo btrfs filesystem show  --all-devices
-	Label: none  uuid: 4c595ce3-5a5a-465d-a7f4-d131a5614c7b
-		Total devices 2 FS bytes used 384.00KiB
-		devid    1 size 20.00GiB used 2.02GiB path /dev/sdb
-		devid    2 size 20.00GiB used 0.00B path /dev/sdc
+	Label: none  uuid: 0e48de10-9874-4cdb-becd-1cc93a9259b1
+		Total devices 3 FS bytes used 704.00KiB
+		devid    1 size 20.00GiB used 1.29GiB path /dev/sdb
+		devid    3 size 20.00GiB used 1.28GiB path /dev/sdd
+		devid    4 size 20.00GiB used 0.00B path /dev/sdc
 
 # desfragmentacao do ponto montado
 #
@@ -177,37 +216,58 @@ $ sudo df -h
 	/dev/sdb         40G   17M   38G   1% /mnt/btrfs
 
 #
+# RESIZE
+#
+
+#
+# diminuicao do tamanho do volume do btrfs
+#
+$ sudo btrfs filesystem resize -2g /mnt/btrfs/
+	Resize '/mnt/btrfs/' of '-2g'
+$ sudo df -h
+	Filesystem      Size  Used Avail Use% Mounted on
+	/dev/sdb         58G   17M   57G   1% /mnt/btrfs
+#
+# aumento do tamanho do volume btrfs
+#
+$ sudo btrfs filesystem resize +2g /mnt/btrfs/
+	Resize '/mnt/btrfs/' of '+2g'
+$ sudo df -h
+	Filesystem      Size  Used Avail Use% Mounted on
+	/dev/sdb         60G   17M   59G   1% /mnt/btrfs
+
+#
+# aumento do tamanho para o tamanho maximo do volume btrfs
+#
+$ sudo btrfs filesystem resize max /mnt/btrfs/
+	Resize '/mnt/btrfs/' of 'max'
+$ sudo df -h
+	Filesystem      Size  Used Avail Use% Mounted on
+	/dev/sdb         60G   17M   59G   1% /mnt/btrfs
+
+#
 # SUBVOLUME
 #
 
 # criar subvolume
 #
-$ sudo btrfs subvolume create /mnt/btrfs/subvolweb
-	Create subvolume '/mnt/btrfs/subvolweb'
-$ sudo btrfs subvolume create /mnt/btrfs/subvolsamba
-	Create subvolume '/mnt/btrfs/subvolsamba'
-
-# apagar subvolume
-#
-$ sudo btrfs subvolume delete /mnt/btrfs/subvolweb
-$ sudo btrfs subvolume delete /mnt/btrfs/subvolsamba
+$ sudo btrfs subvolume create /mnt/btrfs/subvol
 
 # listar subvolume
 #
 $ sudo btrfs subvolume list /mnt/btrfs/
-	ID 257 gen 13 top level 5 path subvolweb
-	ID 258 gen 14 top level 5 path subvolsamba
+
+# apagar subvolume
+#
+$ sudo btrfs subvolume delete /mnt/btrfs/subvol
 
 # montar subvolume
 #
 $ sudo btrfs subvolume list /mnt/btrfs/
-	ID 257 gen 13 top level 5 path subvolweb
-	ID 258 gen 14 top level 5 path subvolsamba
+	ID 257 gen 13 top level 5 path subvol
 $ sudo umount /mnt/btrfs/
-$ sudo mkdir /mnt/subvolweb
-$ sudo mkdir /mnt/subvolsamba
-$ sudo mount -o subvolid=257 /dev/sdb /mnt/subvolweb/
-$ sudo mount -o subvolid=258 /dev/sdb /mnt/subvolsamba/
+$ sudo mkdir /mnt/subvol
+$ sudo mount -o subvolid=257 /dev/sdb /mnt/subvol/
 
 #
 # SNAPSHOT
@@ -215,22 +275,8 @@ $ sudo mount -o subvolid=258 /dev/sdb /mnt/subvolsamba/
 
 # criar snapshot
 #
-$ sudo btrfs subvolume snapshot /mnt/subvolweb/ /mnt/subvolweb/
-	Create a snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb//subvolweb'
-$ sudo btrfs subvolume snapshot /mnt/subvolsamba/ /mnt/subvolsamba/
-	Create a snapshot of '/mnt/subvolsamba/' in '/mnt/subvolsamba//subvolsamba'
-
-# criar um snapshot dentro de outro diretorio
-#
-$ sudo btrfs subvolume snapshot /mnt/subvolweb/ /mnt/subvolweb/snapshot/
-	Create a snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb/snapshot'
-
-$ ls /mnt/subvolweb/web.txt
-	/mnt/subvolweb/web.txt
-$ ls /mnt/subvolweb/snapshot/web.txt
-	/mnt/subvolweb/snapshot/web.txt
+$ sudo btrfs subvolume snapshot /mnt/btrfs/subvol/ /mnt/btrfs/subvol_snap/
 
 # snapshot em modo read-only
 #
-$ sudo btrfs subvolume snapshot -r /mnt/subvolweb/ /mnt/subvolweb/snapshot_r/
-	Create a readonly snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb/snapshot_r'
+$ sudo btrfs subvolume snapshot -r /mnt/subvol/ /mnt/subvol_snap_r/
