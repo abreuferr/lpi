@@ -1,0 +1,339 @@
+#: Title : DNS Howto
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Configuracao do Bind9 no GNU/Linux Debian Stable
+#: Options : None
+
+1. INSTALACAO
+#
+# instalacao do bind
+#
+$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc
+
+# alterando a permissao do diretorio do Bind
+#
+$ sudo chown -R bind:bind /etc/bind (master)
+
+2. CONFIGIRACAO DNS PRIMARIO (NS1) e DNS SECUNDARIO (NS2)
+#
+# Reincializacao do Bind
+#
+$ sudo systemctl restart bind9
+
+2.1. CONFIGURACAO DO DNS PRIMARIO (NS1)
+#
+# Local File
+#
+$ sudo vi /etc/bind/named.conf.local (master)
+	// Master zones
+	zone "particula.local" {
+	        type master;
+	        file "/etc/bind/db.particula.local";	# zone file path
+	        allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
+    		notify yes;
+	};
+
+	// Reverse
+	zone "0.168.192.in-addr.arpa" {
+	        type master;
+	        file "/etc/bind/db.0.168.192.in-addr.arpa";	# zone file path
+	    	allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
+	};
+
+# Forward Zone File
+#
+$ sudo vi /etc/bind/db.particula.local (master)
+	; Start of Authority (SOA) record
+	$TTL 604800
+	@ IN SOA ns1.particula.local. root.particula.local. (
+				2010101301;	Serial
+				3600;		Refresh [1h]
+				600;		Retry   [10m]
+				86400;		Expire  [1d]
+				600 );		Negative Cache TTL [1h]
+
+	; Name Server (NS) records.
+				IN NS ns1.particula.local.
+				IN NS ns2.particula.local.
+
+	; Mail Exchange (MX) records.
+				IN MX 10 srv6.particula.local.
+
+	; Address (A) records. (real-names of machines)
+				            IN A 192.168.0.5
+	ns1                    	IN A 192.168.0.5
+	ns2                    	IN A 192.168.0.6
+	srv1                  	IN A 192.168.0.7
+	srv2                  	IN A 192.168.0.8
+	srv3                  	IN A 192.168.0.9
+	srv4                  	IN A 192.168.0.10
+	srv5                  	IN A 192.168.0.11
+	srv6                  	IN A 192.168.0.12
+
+	; Aliases in Canonical Name (CNAME) records...
+	www			            IN CNAME srv5
+
+# Reverse Zone File
+#
+$ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
+	; Start of Authority (SOA) record
+	$TTL   900
+	@ IN SOA ns1.particula.local. root.particula.local. (
+				2010101301;	Serial
+				3600;		Refresh [1h]
+				600;		Retry   [10m]
+				86400;		Expire  [1d]
+				600 );		Negative Cache TTL [1h]
+
+	; Name Server (NS) records.
+				IN NS ns1.particula.local.
+				IN NS ns2.particula.local.
+
+	; Addresses point to canonical names (PTR) for reverse lookups
+	5                       IN PTR    ns1.particula.local.
+	6                       IN PTR    ns2.particula.local.
+	7                       IN PTR    srv1.particula.local.
+	8                       IN PTR    srv2.particula.local.
+	9                       IN PTR    srv3.particula.local.
+	10                      IN PTR    srv4.particula.local.
+	11                      IN PTR    srv5.particula.local.
+	12                      IN PTR    srv6.particula.local.
+
+# Comando utilizado para verificar se as configuracoes estao corretas
+#
+$ sudo named-checkconf
+
+2.2. CONFIGURACAO DO DNS SECUNDARIO (NS2)
+#
+$ sudo vi /etc/bind/named.conf.local (slave)
+	// Slave zones
+	//
+	zone "particula.local" {
+        	type slave;
+        	file "/etc/bind/db.particula.local";
+	        masters { 192.168.0.5; };	# ns1 private IP
+		    allow-notify { 192.168.0.5; };
+	};
+
+	// Reverse zone
+	zone "0.168.192.in-addr.arpa" {
+            type slave;
+    		file "/etc/bind/db.0.168.192.in-addr.arpa";
+    		masters { 192.168.0.5; };	# ns1 private IP
+	};
+
+# reinicializar o servico do Bind
+#
+$ sudo systemctl restart bind9
+
+# reler os arquivos de configuracao do Bind
+#
+$ sudo systemctl reload bind9
+
+6. Troubleshoot DNS
+
+6.1. "A" record do dominio
+#
+$ nslookup particula.local
+	Server:         192.168.0.5
+	Address:        192.168.0.5#53
+
+	Name:   particula.local
+	Address: 192.168.0.5
+
+6.2. Dominio reverso
+#
+$ nslookup 192.168.0.5
+	Server:         192.168.0.5
+	Address:        192.168.0.5#53
+
+	5.0.168.192.in-addr.arpa        name = ns1.particula.local.
+
+6.3. Informacao sobre um determinado host
+#
+$ nslookup web1.particula.local
+	Server:         192.168.0.5
+	Address:        192.168.0.5#53
+
+	Name:   web1.particula.local
+	Address: 192.168.0.16
+
+6.4. NS record
+#
+$ nslookup -query=ns www.particula.local
+	Server:         192.168.0.5
+	Address:        192.168.0.5#53
+
+	www.particula.local     canonical name = srv1.particula.local.
+
+6.5. Debug
+#
+$ nslookup -debugparticula.local                                                                                                                                                                
+	> set debug
+	> particula.local
+	Server:         192.168.0.5
+	Address:        192.168.0.5#53
+
+	------------
+	    QUESTIONS:
+	        particula.local, type = A, class = IN
+	    ANSWERS:
+	    ->  particula.local
+	        internet address = 192.168.0.5
+	        ttl = 604800
+	    AUTHORITY RECORDS:
+	    ->  particula.local
+	        nameserver = ns1.particula.local.
+	        ttl = 604800
+	    ->  particula.local
+	        nameserver = ns2.particula.local.
+	        ttl = 604800
+	    ADDITIONAL RECORDS:
+	    ->  ns1.particula.local
+        	internet address = 192.168.0.5
+	        ttl = 604800
+	    ->  ns2.particula.local
+	        internet address = 192.168.0.6
+	        ttl = 604800
+	------------
+	Name:   particula.local
+	Address: 192.168.0.5
+
+6.6. Dig - A record
+#
+$ dig particula.local
+
+	; <<>> DiG 9.9.5-9+deb8u13-Debian <<>> particula.local
+	;; global options: +cmd
+	;; Got answer:
+	;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 27058
+	;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 2, ADDITIONAL: 3
+
+	;; OPT PSEUDOSECTION:
+	; EDNS: version: 0, flags:; udp: 4096
+	;; QUESTION SECTION:
+	;particula.local.               IN      A
+
+	;; ANSWER SECTION:
+	particula.local.        604800  IN      A       192.168.0.5
+
+	;; AUTHORITY SECTION:
+	particula.local.        604800  IN      NS      ns1.particula.local.
+	particula.local.        604800  IN      NS      ns2.particula.local.
+
+	;; ADDITIONAL SECTION:
+	ns1.particula.local.    604800  IN      A       192.168.0.5
+	ns2.particula.local.    604800  IN      A       192.168.0.6
+
+	;; Query time: 3 msec
+	;; SERVER: 192.168.0.5#53(192.168.0.5)
+	;; WHEN: Fri Aug 04 07:55:31 -03 2017
+	;; MSG SIZE  rcvd: 128
+
+6.7. Dig - MX record
+#
+$ dig particula.local MX
+
+	; <<>> DiG 9.9.5-9+deb8u13-Debian <<>> particula.local MX
+	;; global options: +cmd
+	;; Got answer:
+	;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 29532
+	;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 2, ADDITIONAL: 4
+
+	;; OPT PSEUDOSECTION:
+	; EDNS: version: 0, flags:; udp: 4096
+	;; QUESTION SECTION:
+	;particula.local.               IN      MX
+
+	;; ANSWER SECTION:
+	particula.local.        604800  IN      MX      10 srv1.particula.local.
+
+6.7. Dig - SOA record
+#
+cosmo@ns1:~$ dig particula.local SOA
+
+	; <<>> DiG 9.9.5-9+deb8u13-Debian <<>> particula.local SOA
+	;; global options: +cmd
+	;; Got answer:
+	;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 64528
+	;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 2, ADDITIONAL: 3
+
+	;; OPT PSEUDOSECTION:
+	; EDNS: version: 0, flags:; udp: 4096
+	;; QUESTION SECTION:
+	;particula.local.               IN      SOA
+
+	;; ANSWER SECTION:
+	particula.local.        604800  IN      SOA     ns1.particula.local. root.particula.local. 2017080205 3600 600 86400 600
+
+	;; AUTHORITY SECTION:
+	particula.local.        604800  IN      NS      ns2.particula.local.
+	particula.local.        604800  IN      NS      ns1.particula.local.
+
+	;; ADDITIONAL SECTION:
+	ns1.particula.local.    604800  IN      A       192.168.0.5
+	ns2.particula.local.    604800  IN      A       192.168.0.6
+
+	;; Query time: 3 msec
+	;; SERVER: 192.168.0.5#53(192.168.0.5)
+	;; WHEN: Fri Aug 04 07:58:30 -03 2017
+	;; MSG SIZE  rcvd: 153
+
+6.8. Dig - TTL record
+#
+$ dig particula.local TTL
+
+	; <<>> DiG 9.9.5-9+deb8u13-Debian <<>> particula.local TTL
+	;; global options: +cmd
+	;; Got answer:
+	;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 43980
+	;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 2, ADDITIONAL: 3
+
+	;; OPT PSEUDOSECTION:
+	; EDNS: version: 0, flags:; udp: 4096
+	;; QUESTION SECTION:
+	;particula.local.               IN      A
+
+	;; ANSWER SECTION:
+	particula.local.        604800  IN      A       192.168.0.5
+
+	;; AUTHORITY SECTION:
+	particula.local.        604800  IN      NS      ns2.particula.local.
+	particula.local.        604800  IN      NS      ns1.particula.local.
+
+	;; ADDITIONAL SECTION:
+	ns1.particula.local.    604800  IN      A       192.168.0.5
+	ns2.particula.local.    604800  IN      A       192.168.0.6
+
+	;; Query time: 0 msec
+	;; SERVER: 192.168.0.5#53(192.168.0.5)
+	;; WHEN: Fri Aug 04 08:00:23 -03 2017
+	;; MSG SIZE  rcvd: 128
+
+	;; Got answer:
+	;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 39341
+	;; flags: qr rd ra ad; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+	;; OPT PSEUDOSECTION:
+	; EDNS: version: 0, flags:; udp: 4096
+	;; QUESTION SECTION:
+	;TTL.                           IN      A
+
+	;; AUTHORITY SECTION:
+	.                       10707   IN      SOA     a.root-servers.net. nstld.verisign-grs.com. 2017080400 1800 900 604800 86400
+
+	;; Query time: 0 msec
+	;; SERVER: 192.168.0.5#53(192.168.0.5)
+	;; WHEN: Fri Aug 04 08:01:33 -03 2017
+	;; MSG SIZE  rcvd: 107
+
+6.9. Dig - ANY record
+#
+$ dig particula.local ANY +noall +answer
+
+	; <<>> DiG 9.9.5-9+deb8u13-Debian <<>> particula.local ANY +noall +answer
+	;; global options: +cmd
+	particula.local.        604800  IN      SOA     ns1.particula.local. root.particula.local. 2017080205 3600 600 86400 600
+	particula.local.        604800  IN      NS      ns2.particula.local.
+	particula.local.        604800  IN      NS      ns1.particula.local.
+	particula.local.        604800  IN      MX      10 srv1.particula.local.
+	particula.local.        604800  IN      A       192.168.0.5

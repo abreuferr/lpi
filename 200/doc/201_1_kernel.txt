@@ -13,6 +13,12 @@
 # B - revisao principal/major revision
 # C - revisao secundaria/minor revidion (patch)
 # XYZ -modificacao
+#
+# exemplo
+#
+# VERSION = 4
+# PATCHLEVEL = 16
+# SUBLEVEL = 9
 
 # diretorio de armazenamento do kernel - /usr/src/linux-versao
 #
@@ -24,13 +30,14 @@
 # diretorio a onde fica armazenado o arquivo de configuracao
 # e a imagem do kernel
 #
-config-4.9.51-3-amd64
+config-4.9.51-3-amd64 - backup do arquivo de configurcao do linux (/usr/src/linux/.config)
 initrd.img-4.9.51-3-amd64
 System.map-4.9.51-3-amd64
-vmlinuz-4.9.51-3-amd64
+vmlinuz-4.9.51-3-amd64 - arquivo binario nao compactado do kernel
 
 #
 # Documentacao do kernel linux se encontra no diretorio 
+#
 # /usr/src/linux/Documentation
 #
 # arquivo de configuracao do kernel linux
