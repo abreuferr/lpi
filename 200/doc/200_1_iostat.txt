@@ -22,12 +22,18 @@
 #
 # VISAO GERAL
 #
+
+$ iostat [opcao] [intervalo] [quantidade]
+
 avg-cpu:  %user   %nice %system %iowait  %steal   %idle
            1.94    0.01    1.71    0.63    0.00   95.70
 
 Device:            tps    kB_read/s    kB_wrtn/s    kB_read    kB_wrtn
 sdb              18.12       848.01       271.35    4723889    1511580
 sda              17.04       184.62       284.37    1028435    1584120
+
+# intervalo - intervalo entre um relatorio e outro.
+# quantidade - quantidade de vezes em que o relatorio deve ser gerado.
 
 # a primeira parte do relatorio eh referente a CPU e a segunda parte
 # eh referente a dispositivo.
