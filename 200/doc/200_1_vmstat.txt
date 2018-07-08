@@ -27,35 +27,48 @@
 #
 # -d - informacoes sobre os discos
 # -p - informacoes sobre as particoes do disco rigido
-#
+# -s - sumario. relatorio. summary. formato de tabela
+# -sM - relatorio em MB
+# -a - mostra memoria ativa e inativa
+# -n - mostra o cabecalho somente uma vez, em vez de periodicamente
 
 #
 # vmstat [SEM OPCAO]
 #
-# r - numero de processos executaveis
-# b - numero de processos dormindo (sleep)
+# PROCS (PROCESSO)
+# r - numero de processos executaveis (executando ou aguardado execucao)
+# b - numero de processos dormindo (sleep). executar o comando "ps aux"
+# e observar a opcao D na coluna STAT.
 #
-# swpd - quantidade de memoria virtual utilizada
-# free - quantiade de memoria ociosa 
-# buff - quantidade de memoria utilizada como buffer.
-# cache - quantidade de memoria como cache.
+# MEMORY (MEMORIA)
+# swpd - quantidade de memoria virtual utilizada. virtual memory. swap
+# free - quantiade de memoria ocios. available free ram. sem utilizacao
+# buff - quantidade de memoria utilizada como buffer. ram used buffer.
+# cache - quantidade de memoria como cache. ram used for cache
+# inact - total de memoria inativa. inactive memory
+# active - total de memoria ativa. active memory
 #
+# SWAP (MEMORIA SWAP, MEMORIA <> DISCO)
 # si - quantidade de memoria carregada do disco rigido por segundo
 # so - quantidade de memoria movida para o disco rigido por segundo
 #
+# IO (BLOCO)
 # bi - blocos recebidos de um dispositivo de blocl
 # bo - blocos enviados para um dispositivo de bloco
 #
+# SYSTEM(INTERRUPTS AND CONTEXT SWITCHES P/S)
 # in - numero de interrupcoes por segundo
 # cs - o numero de mudancas de contexto por segundo
 # 
+#
+# CPU (PERCENTUAL DO TOTAL DE TEMPO DA CPU)
 # us - tempo gasto executando codigo nao kernel (user code)
 # sy - tempo gasto executando codigo do kernel (system code)
 # id - tempo ocioso (time speed idle)
 # wa - tempo gasto aguardando por i/o (time speed waiting for i/o)
 # st - tempo roubado por uma maquina virtual (steal time)
 #
-# (wa) valor alto indica que o disco rigido esta sendo utilizado em demazia
+# OBS- (wa) valor alto indica que o disco rigido esta sendo utilizado em demazia
 # e o processador esta ocioso - disco rigido lento - substituir o disco rigido
 # mecanico por um ssd. 
 
@@ -74,14 +87,16 @@ sdb    79178     45 9588002  508960  25495   1875 3106008 6130628      0    275
 sda    36821   3423 2059062   36628  86829  51852 3697824  136744      0     16
 sr0        0      0       0       0      0      0       0       0      0      0
 
+# READS (LEITURA) / WRITE (ESCRITA)
 # disk - nome do disco rigido
 # total - total de dados lidos/escritos com sucesso
 # merged - leituras/escritas agrupadas (resultado em um i/o)
 # sectors - leituras/escritas lidas com sucesso
 # ms - milissegundos gastos lendo/escrevendo
 #
-# cur: I/O in progress
-# sec: seconds spent for I/O
+# I/O (
+# cur: I/O em progresso
+# sec: segundos gastos com I/O
 
 # -p - exibe informacoes sobre particao
 #
