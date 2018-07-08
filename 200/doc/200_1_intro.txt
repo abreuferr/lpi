@@ -1,0 +1,203 @@
+analisar e resolver problemas na utilizacao dos recursos
+
+oferta flexivel de recursos torna possivel alocar a quantidade
+certa da capacidade computacional a cada necessidade (utilizacao
+dos recursos de forma racional). 
+
+imaginar que hoje em dia, a utilizacao de servicos de provedores 
+de cloud a onde sao cobrados por segundos, eh extremamente importa 
+dimensionar de forma correta a utilizacao do hardware para que
+nao se pague por recursos nao utilizados ou economize dinheiro
+no componente errado, economizar dinheito na memoria e gastar
+dinheiro em armazenamento, sendo que a aplicacao utiliza muito
+recursos de memoria.
+
+identificar a onde existe a subutilizacao de recursos e onde os 
+recursos nao sao suficientes para determinadas tarefas. a melhor
+forma de identificar as caracteristicas da utilizacao do hardware
+eh atraves de software que fica monitorando a utilizacao do mesmo.
+depois dessa analise historica, eh possivel tomar qualquer tipo de
+decissao.
+
+pacote sysstat - pacote com uma serie de softwares utilizados
+para analisar a sua utilizacao dos recursos do harware.
+
+softwares utilizados para diagnosticar problemas de capacidade
+(sub ou sobre utilizacao do hardware)
+
+solucao de problemas de software - identificar qual eh o software
+que esta causando o problema e em qual parte do hardware esse software
+esta afetando. o aplicativo pode estar utilizando muita memoria, o
+que estaria causando a sobreutilizacao da area de swap.
+
+quando o computador fica lento, eh necessario identificar o que
+esta causando essa lentidao:
+	- memoria - pouca memoria, causando a superutilizacao da 
+	area de swap, o que causa lentidao pois a area de swap 
+	fica localizada no disco rigido. a melhor solucao seria 
+	acrescentar mais memoria no computador, mas se nao for 
+	possivel, entao mover a area de swap para um disco rigido 
+	mais rapido, um ssd ou hibrido.
+	se por acaso o aplicativo necessita de mais memoria, o
+	sistema operacional contorna essa necessidade utilizando
+	a memoria de swap que fica localizada no disco rigido. o
+	disco rigido eh mais lento que a memoria ram.
+	softwares - free, sar, vmstat, top
+
+	processo - identificar qual processo esta utilizando os
+	recursos do hardware do computador, principalmente se o
+	processo esta causando problema.
+	software - ps, psmap, pstree, vmstat, top, htop, lsof, w
+
+	- cpu - um aplicativo que utiliza mais cpu do que memoria
+	ou disco rigido pode ter o seu desempenho comprometido se
+	o computador nao possui a quantidade correta de processadores.
+	software - uptime, top, sar, mpstat, htop
+
+	-  disco rigido - substituicao de um disco rigido mecanico
+	por um ssd ou um disco rigido hibirido.
+	entender a utilizacao do disco rigido pelos processos. localizar
+	quais aplicativos estao escrevendo/lendo mais causando a
+	subutilizacao da cpu (wa)
+	software - iotop, iostat, lsof, sar
+
+	- rede - algum componente da rede esta causando gargalo. o 
+	problema nao eh a aplicacao ou computador a onde essa aplicacao
+	esta armazenada, mas eh a rede eh que esta causando o problema.
+	a lentidao no aplicativo)
+	- configuracao do software (o hardware do computador eh mais
+	suficiente, mas o software foi mal configurado e nao utiliza
+	todos os recurosos do hardware.
+	software - iftop, ip, iptraf, lsof, tcpdump, ping, traceroute, ss
+
+# resumo dos softwares
+
+free 
+	- exibe a quantidade livre e utilizada de memoria fisica e memoria
+	swap.
+	- relatorio - estatico
+	- monitora - memoria
+
+htop
+	- melhoramento do aplicativo top (obter uma serie de informacoes
+	sobre consumo de processos e hardware)
+	- relatorio - dinamico
+	- monitora - cpu, memoria, processo, uptime
+
+iftop (if = interface de rede)
+	- informacao sobre trafego de dados na interface de rede
+	- relatorio - dinamica
+	- monitora - rede
+
+iostat (i/o = disco rigido , stat = estatistica)
+	- i/o dos dispositivos. dados estatisticos da utilizacao de
+	i/o do disco rigido.
+	- relatorio - dinamico/estatico
+	- monitora - cpu e i/o de dispositivos
+
+iotop (i/o = disco rigido)
+	- i/o por processo. dados exibidos em modo real-time da utilizacao
+	de i/o do disco rigido (processo X i/o)
+	- relatorio - dinamico
+	- monitora - i/o de dispositivo
+
+lsof
+	- exibir quais arquivos estao abertos e quais softwares estao
+	utilizados para abrir esse arquivos. tambem pode ser utilizado
+	para exibir pode ser utilizado para obter informacoes sobre arquivos
+	abertos na rede. exibe informacoes sobre arquivos que estao abertos,
+	que pode ser de forma local ou remoto.
+	- relatorio - estatico
+	- monitora - arquivo, rede e processo.
+
+netstat
+	- estatistica da rede e rota. dados estatisticos sobre a utilizacao
+	da rede. identifica a sobrecarga ou nao da utilizacao da rede.
+	- relatorio - estatico
+	- monitora - processo
+
+pmap (mapeamento de processos)
+	- mapa de processos(PID). informacao referente aos processos que
+	estao em execucao no computador. informacao baseadano PID do processo
+	- relatorio - estatico
+	- monitora - processo
+
+sar
+	- utilitario com varias funcionalidades. ferramentas utilizadas para 
+	obter uma serie de informacoes referentes a utilizaca do hardware do
+	computador.
+	- relatorio - estatico/dinamico
+	- monitora - cpu, memoria, processo e uptime
+
+top
+	- utilitario com varias funcionalidade. possibilidade de identificar 
+	a relacao de processo e consumo do hardware.
+	- relatorio - dinamico
+	- monitora - cpu, memoria, processo e uptime
+
+vmstat (virtual memory statistic)
+	- swap performance (mamria fisica e virtual)
+	- relatorio - dinamico
+	- monitora - processo
+
+tcpdump
+	- analizador/sniffer de pacote de rede. pacote utilizado pela
+	capturar e analisar os pacotes que trafegam pela interface
+	de rede (analise de forma manual)
+	- relatorio - dinamico
+	- monitora - rede
+
+w
+	- exibe informacao dos usuarios que estao conectados no
+	sistema. usuario - processo relacionado ao usuario
+	1 minuto, 5 minutos e 15 minutos.
+	- relatorio - estatico
+	- monitora - processo e uptime
+
+mpstat
+	- estatistica de processos. estatistica relacionada a
+	processos.
+	- relatorio - estastico e dinamico
+	- monitora - cpu
+
+mtr
+	- exitbe as informacoes sobre rotas. interface grafica
+	e traceroute.
+	- relatorio - dinamico
+	- monitora - rede (roteamento)
+
+ntop
+	- estatistica sobre a rede. interface web. analizador 
+	do trafego da rede.
+	- relatorio - dinamico
+	- monitora - rede (n=network)
+
+ss
+	- estatistica do socket do kernel space. prove mais
+	informacoes que o utilitatio netstat
+	- relatorio - estatico
+	- monitora - rede
+
+uptime
+	- exibe informacoes indicando a quanto tempo o sistema
+	esta ativo. hora atual, a quanto tempo o sistema esta 
+	ativo, quantidade de usuarios logados no sistema, carga
+	media (1 minuto, 5 minutos e 15 minutos)
+	- relatorio - estatico
+	- monitora - uptime, carga media
+
+ps
+	- exibe os processos ativos de maneira detalhada.
+	- reltorio - dinamico
+	- monitora - processo, cpu, memoria(fisico e swap), 
+	carga media 
+
+valor wa - os aplicativos iostat, vmstat e top podem indicar 
+que a maior parte do tempo a cpu fica aguardando requisicao 
+de i/o do dispositivo. isso indica que o diso rigido eh mais
+lento que a cpu e eh necessario substituir o disco rigido por
+um disco rigido mais apido.
+
+no unix, praticamente todos os recursos podem ser acessados
+a partir de arquivos ou pseudo-arquivos, o aplicativo lsof
+eh uma ferramenta de investigacao bastante poderosa.
