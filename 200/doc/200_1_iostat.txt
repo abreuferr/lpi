@@ -32,25 +32,34 @@ sda              17.04       184.62       284.37    1028435    1584120
 # a primeira parte do relatorio eh referente a CPU e a segunda parte
 # eh referente a dispositivo.
 #
-# CPU
+# CPU (iostat -c)
 #
 # %user - utilizacao de cpu por parte dos aplicativos ativados pelo usuario
+#	(processo de usuaio) (aplicao).
 # %nice - utilizacao de cpu por parte dos aplicativos ativados pelo usuario 
-# 	e cujo nice foi alterado
+# 	e cujo valor nice foi alterado
 # %system - utilizacao de cpu por parte dos aplicativos ativados pelo sistema
+#	sistema/kernel
 # %iowait - percentagem de tempo em que a cpu esta ociosa esperando resposta 
-# 	de I/O do disco
-# %steal - percentagem de tempo em que a cpu virtual esta ociosa
+# 	de I/O do disco (disco rigido lento)
+# 	ociosidade, wait=esperar, cpu esperando o disco rigido.
+# %steal - percentagem de tempo em que a cpu virtual esta ociosa devido ao 
+#	hipervisor estar servidno a outra cpu virtual (virtual server
+#	environment. cpu virtual concorrente. ociosidade.
 # %idle - percentagem de tempo em que a cpu esta ociosa e NAO estava esperando 
 # 	resposta de I/O do disco pelos dados acima, é possivel constatar que 
-# 	o computador esta sendo subutilizado.
+# 	o computador esta sendo subutilizado. equipamento mal dimensionado.
+#	valor alto - cpu pouco utilizado.
 #
-# DEVICE
+# PARTICAO (iostat -p PARTICAO)
+#
+# verificar se a taxa de transferencia de dados eh alta ou baixa por parte
+# do disco rigido.
 # 
 # Device - dispositivos de armazenamento que estao sendo avaliados
-# tps - transferencia por segundo (transfers per second)
-# kB_read/s - kB lidos por segundo
-# kB_wrtn/s - KB escritos por segundo
+# tps - numero de transferencia por segundo (transfers per second)
+# kB_read/s - quantidade de kB lidos por segundo
+# kB_wrtn/s - quantidade de KB escritos por segundo
 # kB_read - quantidade de dados utilizados para realizar o teste de leitura
 # kB_wrtn - quantidade de dados utilizados para realizar o teste de escrita
 
@@ -91,17 +100,26 @@ Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu
 sdb               0.01     0.24   11.98    3.60   725.87   231.13   122.86     1.00   64.42    6.43  257.65   2.62   4.08
 sda               0.52     7.54    5.58   10.37   155.87   254.80    51.50     0.02    1.36    0.99    1.55   0.14   0.23
 
-Device - esse campo indica o nome do dispositivo.  
-rrqm/s - este campo indica a quantidade de solicitacoes de leitura por segundos.
-wrqm/s - este campo indica a quantidade de solicitacoes de escrita por segundos.
-r/s - leitura por segundos
-w/s - escrita por segundo
-rsec/s - quantidade de setores lidos por segundo
-wsec/s - quantidade de setores escritos por segundo
-rkB/s - quantidade de dados lidos por segundos no dispositivo, em kilobytes por segundo.
-wkB/s - quantidade de dados gravados por segundo no dispositivo, em kilobytes por segundos.
-avgrq-sz - quantidade de setores lidos para gerar o relatorio
-avgqu-sz - quantiade de setores escritos para gerar o relatorio
-await - tempo medio do dispositivo para solicitacao de I/O
-svctm - esse campo pode ser ignorado, sera removido nas foturas versoes
-%util - quantidade da largura de banda utilizada pelo dispositivo
+# Device - esse campo indica o nome do dispositivo.  
+# rrqm/s - este campo indica a quantidade de solicitacoes de leitura por segundos.
+# wrqm/s - este campo indica a quantidade de solicitacoes de escrita por segundos.
+# r/s - leitura por segundos
+# w/s - escrita por segundo
+# rsec/s - quantidade de setores lidos por segundo
+# wsec/s - quantidade de setores escritos por segundo
+# rkB/s - quantidade de dados lidos por segundos no dispositivo, em kilobytes por segundo.
+# wkB/s - quantidade de dados gravados por segundo no dispositivo, em kilobytes por segundos.
+# avgrq-sz - quantidade de setores lidos para gerar o relatorio
+# avgqu-sz - quantiade de setores escritos para gerar o relatorio
+# await - tempo medio do dispositivo para solicitacao de I/O
+# svctm - esse campo pode ser ignorado, sera removido nas foturas versoes
+# %util - quantidade da largura de banda utilizada pelo dispositivo
+
+# fonte de informacao
+#
+# /proc/diskstats - estatistica do disco rigido
+# /proc/stat - estatistica do sistema
+# /sys - block device
+# /proc/devices - persistent device names
+# proc/self/mountstat - network filesystem
+# /proc/uptime - informacao sobre o sistema (uptime)
