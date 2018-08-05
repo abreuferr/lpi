@@ -1,0 +1,31 @@
+###
+# OPERACAO DE BACKUP
+###
+
+# DIRETORIO
+#
+/etc - arquivos de configuracao
+/home - diretorio com as informacoes dos usuario
+/var - diretorio que contem arquivos de log
+/usr - programas instalados pelo usuario
+/opt - programas instalados pelo usuario
+
+# SOFTWARE AGLUTINADOR
+# 
+sudo apt-get install cpio ; instalacao
+
+sudo find /etc/ | cpio -ov > etc.cpio ; aglutinar o sarquivos do diretorio /etc em um arquvo cpio
+sudo find /home/ | cpio -ov > home.cpio
+sudo find /var/ | cpio -ov > var.cpio
+sudo find /usr/ | cpio -ov > usr.cpio
+sudo find /opt | cpio -ov > opt.cpio
+
+cpio -ivd < etc.cpio '*.conf' ; desaglutinar os arquivos .conf nos seus respectivos diretorios
+
+# COPIA VIA REDE
+#
+rsync -av *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos arquivos cpio para o servidor de backup e de forma incremental
+rsync -av -e ssh *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dados de forma segura e de forma incremental
+rsync -ave ssh *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dadso de forma segura e de forma incremental
+
+scp *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dados de forma segura mas NAO eh realizado de forma incremental

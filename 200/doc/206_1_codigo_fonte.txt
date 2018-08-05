@@ -14,6 +14,10 @@
 #
 #   tar xzvf arquivo.tar.gz
 #   tar xjvf arquivo.tar.bz2
+#   tar xJvf arquivo.tar.xz
+73  tar -czvf backup_cpio.tar.gz *.cpio
+   81  tar -cjvf backup_cpio.tar.bz2 *.cpio
+   83  tar -cJvf backup_cpio.tar.xz *.cpio
 #
 
 #
