@@ -7,35 +7,47 @@
 # instalacoes eh que normalmente o software eh lancado
 # primerio via codigo fonte em vez de empacotar.
 #
-# geralmente, o codigo fonte eh extraido no diretorio
-# /usr/src/local.
-#
-# a extracao eh feita atraves do comando
-#
-#   tar xzvf arquivo.tar.gz
-#   tar xjvf arquivo.tar.bz2
-#   tar xJvf arquivo.tar.xz
-73  tar -czvf backup_cpio.tar.gz *.cpio
-   81  tar -cjvf backup_cpio.tar.bz2 *.cpio
-   83  tar -cJvf backup_cpio.tar.xz *.cpio
-#
 
+# DIRETORIO
 #
-# ./configure [OPCAO] - o comando configure tem por objetivo o de
-#                       verificar as dependencia, como por exemplo,
-#                       biblioteca e compilador.
-#
+/usr/src/
 
+# DOCUMENTACAO
 #
-# make - comando utilizado para compilar o programa
-#
+README
+INSTALL
+COPYING
 
+# DESCOMPACTACAO
 #
-# make install - comando utilizado para instalar os componentes
-#               do programa, como por exemplo, bibliotecas, manuais
-#               binario.
+$ tar xzvf arquivo.tar.gz
+$ tar xjvf arquivo.tar.bz2
+$ tar xJvf arquivo.tar.xz
 
+# CONFIGURACAO
 #
-# make clean - comando utilizado para apagar os arquivos objetos e 
-#               binarios, basicamente o resultado do processo de
-#               compilacao do programa.
+# o comando "configure" tem por objetivo o de verificar as dependencia, 
+# como por exemplo, biblioteca e compilador.
+# 
+# criacao do aqruivo Mikefile ou Makefile.ini
+#
+# --prefix=[DIR] ; informa qual diretorio do sistema de arquivos o 
+# o binario, os manuais e afins deverao ser instalados.
+#
+$ ./configure --prefix=/usr/src
+
+# COMPILACAO
+#
+$ make ; comando utilizado para compilar o programa
+
+# INSTALACAO
+#
+$ make install ; comando utilizado para instalar os componentes do programa
+
+# LIMPEZA
+#
+$ make clean ; comando utilizado para apagar os arquivos objetos
+
+# DESINSTALACAO
+#
+$ make uninstall ; comando utilizado para desinstalar o programa
