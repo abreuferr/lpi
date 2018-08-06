@@ -2,73 +2,47 @@
 # IFCONFIG
 ######
 
+# VISUALIZACAO DA CONFIGURACAO
 #
-# ifconfig
-#
-# sem nenhum parametro, o comando ifconfig exibe as
-# interfaces de redes que estao configuradas.
-#
-$ ifconfig
-eth0    Link encap:Ethernet  HWaddr 00:0c:29:f2:43:a5
-        inet addr:192.168.2.121  Bcast:192.168.2.255  Mask:255.255.255.0
-lo      Link encap:Local Loopback
-        inet addr:127.0.0.1  Mask:255.0.0.0
+$ ifconfig ; exibe as configuracoes das placas de rede ativas
+$ ifconfig -a ; exibe as configuracoes de todas das placas de rede ativas e inativas
 
+# UP/DOWN
 #
-# ifconfig up
-#
-# a opcao UP ativa a placa de rede
-#
-# ifconfig [IFACE] up
-#
-$ sudo ifconfig eth1 up
+$ ifconfig [IFACE] up ; ativar uma determinada placa de rede
+$ ifconfig [IFACE] down ; desativa uma determinada placa de rede
 
+# MUTICAST
 #
-# ifconfig down
-#
-# a opcao DOWN desativa a placa de rede
-#
-# ifconfig [IFACE] down
-#
-$ sudo ifconfig eth1 down
+$ ifconfig [IFACE] multicast ; habilita multicast em uma placa de rede
+$ ifconfig [IFACE] -multicast ; desabilita multicast em uma placa de rede
 
+# ADICIONAR
 #
-# ifconfig [IFACE] [IP]
-#
-# atraves do comando ipconfig existe a possibilidade de 
-# atribuir um determinado ip a uma determinada interface 
-# de rede
-#
-$ sudo ifconfig eth1 192.168.0.171
+$ ifconfig [IFACE] [IP] ; atribuir um endereco IP em uma determinada interface de rede
+$ ifconfig [IFACE] [IP] netmask [MASK] ; atribuir um IP e Mascara de rede a uma determinada interface de rede
+$ ifconfig [IFACE] [IP] netmask [MASK] broadcast [BCAST] ; atribuir um IP, Mascara de Rede e Broadcast para uma determinada interface de rede
+$ ifconfig [IFACE] [IP/MASK] ; atribuir um IPi e Mascara de Rede em uma determinada interface de rede
 
+# MAIS DE UM IP
 #
-# ifconfig [IFACE] [IP] netmask [MASK]
-#
-# atraves do comando ipconfig existe a possibilidade de 
-# atribuir uma determinada mascara de uma determinada 
-# interface de rede
-#
-$ sudo ifconfig eth1 192.168.0.171 netmask 255.255.248.0
-$ sudo ifconfig eth1
-eth1      Link encap:Ethernet  HWaddr 00:0c:29:f2:43:af
-          inet addr:192.168.0.171  Bcast:192.168.7.255  Mask:255.255.248.0
+$ ifconfig [IFACE:X] [IP] netmask [MASK] ; atribuir mais de um IP em uma placa de rede
+$ ifconfig [IFACE] add [IP] ; atribuir mais de um IP em uma placa de rede
 
+# MODO PROMISCUO
 #
-# ifconfig [IFACE] [IP] netmask [MASK] broadcast [BCAST]
+$ ifconfig [IFACE] promisc ; habilitar o modo promiscuo em uma placa de rede
+$ ifconfig [IFACE] -promisc ; desabilitar o modo promiscuo em uma placa de rede
+
+# MTU
 #
-# atraves do comando ipconfig existe a possibilidade de 
-# atribuir o broadcast de uma determinada interface de 
-# rede
-#
-$ sudo ifconfig eth1 192.168.0.171 netmask 255.255.248.0 broadcast 192.168.0.200
-$ sudo ifconfig eth1
-eth1      Link encap:Ethernet  HWaddr 00:0c:29:f2:43:af
-          inet addr:192.168.0.171  Bcast:192.168.0.200  Mask:255.255.248.0
+$ ifconfig [IFACE] mtu [MTU-VALOR] ; alterar o valor do MTU de uma interface de rede
 
 ######
 # ROUTE
 ######
 
+# TEORIA
 #
 # a tabela de rotas determina o destino de cada pacote de dados
 # que eh encaminhado para fora por uma interface de rede.
@@ -76,144 +50,102 @@ eth1      Link encap:Ethernet  HWaddr 00:0c:29:f2:43:af
 # para realizar a comunicacao entre computadores de redes
 # diferentes, eh necessario que exista um computador que faca
 # essa intermediacao. O nome deste computador se chama GATEWAY.
-#
-# route
-#
-# o comando route, sem nenhum parametro, existe as rotas configuradas 
-# nas interfaces de rede presentes no computador.
-#
-$ sudo route
-Kernel IP routing table
-Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
-192.168.0.0     *               255.255.255.0   U     0      0        0 eth1
 
+# INFORMACAO
 #
-# atraves do comando route, eh possivel atribuir uma rota em uma determinada
-# interface de rede.
-#
-# no exemplo abaixo, esta sendo atribuida uma determinada rota DEFAULT na
-# interface de rede eth1.
-#
-# route add default gw [IP_GATEWAY] [IFACE]
-#
-$ sudo route add default gw 192.168.0.2 eth1
-$ sudo route
-Kernel IP routing table
-Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
-default         192.168.0.2     0.0.0.0         UG    0      0        0 eth1
-192.168.0.0     *               255.255.255.0   U     0      0        0 eth1
+$ route ; exibir as rotas das interfaces de rede
+$ route -n ; exibir as rotas das interfaces de rede sem resolver o nome
 
+# ADICIONAR
 #
-# no comando abaixo, foi utilizado o comando ping e redirecionado
-# atraves da interface de rede eth1
-#
-$ ping -I eth1 8.8.8.8
-PING 8.8.8.8 (8.8.8.8) from 192.168.0.171 eth1: 56(84) bytes of data.
+$ route add default gw [IP_GATEWAY] [IFACE] ; atribuir o IP do Gateway para a rota default iem uma determinada placa de rede
+$ route add -net [REDE] netmask [MASK] dev [IFACE] ; adicionar uma rota para uma rede
+$ route add -net [REDE] netmask [MASK] gw [IP-GATEWAY] ; adicionar uma rota para uma rede
+$ route add -net [REDE/MASK] netmask [MASK] dev [IP-GATEWAY] [IFACE] ; adicionar uma rota para uma rede
 
+# REMOVER
 #
-# o comando route tambem pode ser utilizado para apagar uma rota.
-#
-# route del default gw [IP_GATEWAY] [IFACE]
-#
-# route del -net [REDE] netmask [MASK] [IFACE]
-#
-$ sudo route del default gw 192.168.0.2 eth1
-$
-$ sudo route del -net 192.168.0.0 netmask 255.255.255.0 eth1
-
+$ route del default gw [IP_GATEWAY] [IFACE] ; apagar a rota default de uma determinada placa de rede
+$ route del -net [REDE] netmask [MASK] [IFACE] ; apagar a rota de uma determinada placa de rede
+$ route del -net [REDE]/[MASK] ; apagar a rota de uma determinada rede
+$ route del -net [REDE]/[MASK] gw [IP-GATEWAY] ; apagar a rota de uma determinada rede
+$ route del default ; apagar a rota default
 
 ######
 # IP
 ######
 
+# TEORIA
 #
 # devido a depreciacao do aplicativo IFCONFIG, o novo
 # software de configuracanterface de rede eh o comando
 # IP.
 #
+# diferente do comando IFCONFIG que consegue atribui somente endereco ip 
+# para uma determinada placa de rede, o comando IP consegue atribuir tanto 
+# o endereco IP quanto a ROTA em uma determinada placa de rede.
+#
+# ip [OPCAO] [OBJETO] [COMANDO]
+#
+# OPCAO - link, addr, route (add/del)
+# OPBJETO - placa de rede
+# COMANDO - definir a acao a ser tomado
 
+# PLACA DE REDE - EXIBIR INFORMACAO
 #
-# ip link show
-#
-# exibir as interfaces de rede que estao ativas
-#
-$ ip link show
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue state UNKNOWN mode DEFAULT
-        link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-2: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP mode DEFAULT qlen 1000
-link/ether 00:0c:29:f2:43:af brd ff:ff:ff:ff:ff:ff
+$ ip link show ; exibir as inforacoes das placas de redes ativas
+$ ip link show [IFACE]; exibir as inforacoes de uma determinada placa de rede
+$ ip -s link show dev [IFACE] ; exibir estatisticas de uma determinada placa de rede
+$ ip addr show ; exibir informacoes detalhadas em todas as placas de rede
+$ ip addr show [IFACE] ; exibir informacoes detalhadas em uma determinada placa de rede
 
+# PLACA DE REDE - UP/DOWN
 #
-# o comando IP tambem pode ser utilizado para obter
-# informacoes sobre a estatistica da utilizacao de
-# uma determinada interface de rede.
-#
-# ip -s link show dev [IFACE]
-#
-$ ip -s link show dev eth1
+$ ip link set [IFACE] up ; habilitar a placa de rede
+$ ip link set [IFACE] down ; desabilitar a placa de rede
+$ ip link set dev [IFACE] up ; habilitar a placa de rede
+$ ip link set dev [IFACE] down ; desabilitar a placa de rede
 
+# IP - ADICIONAR
 #
-# exibir informacoes detalhadas sobre as interfaces de
-# rede.
-#
-# ip addr show
-#
-# ip addr show [IFACE]
+$ ip addr add [IP] dev [IFACE] ; atribuir ip e mascara de rede para uma placa de rede
+$ ip addr add [IP/REDE] dev [IFACE] ; atribuir ip e mascara de rede em uma placa de rede
+$ ip addr add [IP/REDE] broadcast [IP_BROAD] dev [IFACE] ; atribuir ip, mascara de rede e broadcast em uma placa de rede
+$ ip addr add broadcast [IP_BROAD] dev [IFACE] ; atribuir broadcast em uma placa de rede
 
+# IP - REMOVER
 #
-# habilitar uma placa de rede
-#
-# ip link set [IFACE] up
-#
+$ ip addr del [IP/REDE] dev [IFACE] ; remover o endereco ip, mascara de rede e broadcast de uma determinada interface de rede
+$ ip addr del [IP] dev [IFACE] ; remover o endereco ip, mascara de rede e broadcast de uma determinada interface de rede
+$ ip addr flush dev [IFACE] ; limpar todas as configuracoes de uma determinada placa de rede
 
+# ROTA - EXIBIR INFORMACAO
 #
-# desabilitar uma placa de rede
-#
-# ip link set [IFACE] down
-#
+$ ip route show ; exibir rotas das interfaces de rede
+$ ip route show [IFACE] ; exibir as rotas de uma determinada placa de rede
 
+# ROTA - ADICIONAR ROTA
 #
-# adicionar ip em uma interface de rede.
-#
-# ip addr ad [IP/REDE] broadcast [IP_BROAD] dev [IFACE]
-#
-$ sudo ip addr add 192.168.0.51/24 broadcast 192.168.0.255 dev eth1
+$ ip route add [REDE/MASK] via [IP-GATEWAY] ; adicionar uma rota em uma determinada rede para um determinado gateway
+$ ip route add [REDE/MASK] dev [IP-GATEWAY] ; adicionar uma rota em uma determinada rede para um determinado gateway
+$ ip route add default via [IP_GATEWAY] dev [IFACE] ; adicionar a rota padrao em uma determinada placa de rede
 
+# ROTA - REMOVER
 #
-# remover ip em uma interface de rede.
-#
-# ip addr del [IP/REDE] dev [IFACE]
-#
-$ sudo ip addr del 192.168.0.51/24 dev eth1
+$ ip route delete [REDE/MASK] via [IP-GATEWAY] ; apagar uma rota em uma determinada rede para um determinado gateway
+$ ip route delete [REDE/MASK] dev [IP-GATEWAY] ; apagar uma rota em uma determinada rede para um determinado gateway
+$ ip route delete [REDE/MASK] via [IFACE] ; remover a rota de uma determinada placa de rede
+$ ip route flush de [IFACE] ; apagar todas as rotas de uma determinada interface
 
+# VIZINHO - NEIGH
 #
-# exibir informacoes sobre a rota
-#
-# ip route show
-#
-# ip route show [IFACE]
-#
-$ ip route show
-default via 192.168.0.2 dev eth1
-192.168.0.0/24 dev eth1  proto kernel  scope link  src 192.168.0.51
-
-#
-# adicionar rota em uma interface de rede.
-#
-# ip route add default via [IP_GATEWAY] dev [IFACE]
-#
-$ sudo ip route add default via 192.168.0.2 dev eth1
-
-#
-# remover rota em uma interface de rede.
-#
-# ip route delete [REDE/MASK] via [IFACE]
-#
-$ sudo ip route delete 192.168.0.0/24 via 192.168.0.2
+$ ip neigh show ; exibir o ip de todos os vizinhos do computador
 
 ######
 # ARP
 ######
+
+# TEORIA
 #
 # eh no protocolo ARP que os enderecos IPs sao mapeados
 # para enderecos MAC dos dispositivos de comunicacao,
@@ -222,9 +154,7 @@ $ sudo ip route delete 192.168.0.0/24 via 192.168.0.2
 # o comando ARP  manipula o cache da relacao IP<>MAC
 # e tambem pode ser utilizado para verificar o cache
 # ARP
+
+# ARP - EXIBIR INFORMACAO
 #
 $ arp
-Address                  HWtype  HWaddress           Flags Mask            Iface
-workstation              ether   08:62:66:99:ba:65   C                     eth0
-
-
