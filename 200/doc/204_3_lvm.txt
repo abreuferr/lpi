@@ -1,9 +1,7 @@
 ##
-#
 # TEORIA
-#
 ##
-
+#
 # PV = phisical volume = volume fisico = sao os discos rigidos 
 # propriamente ditos
 #
@@ -17,355 +15,118 @@
 # exemplo, um volume para o samba, outro para paginas web (www) e assim
 # por diante.
 #
-# para esse teste serao utilizado tres discos rigidos, /dev/sd[bcde]1
-#
-
-#
-# instalacao dos software necessários
-#
-$ sudo apt-get install lvm2 dmsetup mdadm xfsprogs
-
-#
-# os discos deve ser particionados e formatados (8e) utilizando o
-# aplicativo fdisk
-#
-$ sudo fdisk /dev/sd[bc]1
-
-##
-#
-# PV
-#
-##
-
-# 
-# nessa etapa, serao criados os volumes fisicos.
-#
-$ sudo pvcreate /dev/sd[bc]1
-	Physical volume "/dev/sdb1" successfully created.
-	Physical volume "/dev/sdc1" successfully created.
-
-#
-# para desmontar um lvm, como ultima etapa, devesse
-# apagar os volumes fisicos.
-#
-$ sudo pvremove /dev/sd[bc]1
-	Labels on physical volume "/dev/sdb1" successfully wiped.
-	Labels on physical volume "/dev/sdc1" successfully wiped.
-
-#
-# exibir informacoes sobre os volumes fisicos.
-#
-$ sudo pvdisplay
-$ sudo pvdisplay /dev/sdXY
-	"/dev/sdc1" is a new physical volume of "20.00 GiB"
-	--- NEW Physical volume ---
-	PV Name               /dev/sdc1
-	VG Name
-	PV Size               20.00 GiB
-	Allocatable           NO
-	PE Size               0
-	Total PE              0
-	Free PE               0
-	Allocated PE          0
-	PV UUID               lkCaxx-styn-fDt7-K0fc-apE1-Qfgx-25gQ6O
-
-	"/dev/sdb1" is a new physical volume of "20.00 GiB"
-	--- NEW Physical volume ---
-	PV Name               /dev/sdb1
-	VG Name
-	PV Size               20.00 GiB
-	Allocatable           NO
-	PE Size               0
-	Total PE              0
-	Free PE               0
-	Allocated PE          0
-	PV UUID               RHUF4t-Lac3-1tnX-b04w-dpme-VBZj-1IQB0P
-
-##
-#
-# VG
-#
-##
-
-#
-# depois de ser criado os volumes fisicos, a proxima etapa
-# consiste em reunir esses volumes fisicos em um volume
-# logico cujo nome no exemplo abaixo eh lvm_volume
-#
-$ sudo vgcreate vgdata /dev/sd[bc]1
-	Volume group "vgdata" successfully created
-
-#
-# exibir informacoes sobre o(s) volume(s) logico(s)
-#
-$ sudo vgdisplay
-$ sudo vgdisplay vgdata
-	--- Volume group ---
-	VG Name               vgdata
-	System ID
-	Format                lvm2
-	Metadata Areas        2
-	Metadata Sequence No  1
-	VG Access             read/write
-	VG Status             resizable
-	MAX LV                0
-	Cur LV                0
-	Open LV               0
-	Max PV                0
-	Cur PV                2
-	Act PV                2
-	VG Size               39.99 GiB
-	PE Size               4.00 MiB
-	Total PE              10238
-	Alloc PE / Size       0 / 0
-	Free  PE / Size       10238 / 39.99 GiB
-	VG UUID               KNKcaE-FVfd-DMzz-i6DH-i76f-LY3y-KXIapC
-
-#
-# comando utilizado para renomear o volume logico criado
-# na etapa anterior.
-#
-$ sudo vgrename lvm_volume vg_data
-	Volume group "vgdata" successfully renamed to "vg_data"
-
-#
-# comando utilizado para apagar o volume logico criado anteriormente.
-#
-$ sudo vgremove vg_data
-	Volume group "vg_data" successfully removed
-
-##
-#
-# LV
-#
-##
-
-#
-# depois de criar os volumes fisicos e agrupar esses volumes fisicos
-# um volume logico de nome vg_data, agora esse volume logico sera
-# dividido em varios volumes logicos de acordo com as necessidade.
-#
-$ sudo lvcreate --name samba --size 5G vg_data
-	Logical volume "samba" created.
-$ sudo lvcreate --name web --size 10G vg_data
-	Logical volume "web" created.
-
-#
-# exibir informacoes sobre o volume logico
-#
-$ sudo lvdisplay
-	--- Logical volume ---
-	LV Path                /dev/vgdata/samba
-	LV Name                samba
-	VG Name                vgdata
-	LV UUID                4wBgA6-6anQ-NVry-PKat-lSht-aKd0-Cv9MxK
-	LV Write Access        read/write
-	LV Creation host, time lpi_client, 2018-03-28 15:07:38 -0300
-	LV Status              available
-	# open                 0
-	LV Size                5.00 GiB
-	Current LE             1280
-	Segments               1
-	Allocation             inherit
-	Read ahead sectors     auto
-	- currently set to     256
-	Block device           253:0
-
-	--- Logical volume ---
-	LV Path                /dev/vgdata/web
-	LV Name                web
-	VG Name                vgdata
-	LV UUID                PP1OjO-fPSX-Khq8-wufe-2qdB-Zcml-h0pQgs
-	LV Write Access        read/write
-	LV Creation host, time lpi_client, 2018-03-28 15:08:31 -0300
-	LV Status              available
-	# open                 0
-	LV Size                10.00 GiB
-	Current LE             2560
-	Segments               1
-	Allocation             inherit
-	Read ahead sectors     auto
-	- currently set to     256
-	Block device           253:1
-
-#
-# renomvear o volume logico WEB para WWW
-# 
-$ sudo lvrename vg_data web www 
-	Renamed "web" to "www" in volume group "vgdata"
-
-#
-# apagar o volume logico WWW
-#
-$ sudo lvremove /dev/vg_data/www
-	Do you really want to remove active logical volume vgdata/www? [y/n]: y
-	Logical volume "www" successfully removed
-
-#
-# depois de criar os volumes logicos SAMBA e WWW
-# eh necessario criar o sistema de arquivos e
-# montar.
-#
-
-#
-# formatar
-#
-$ sudo mkfs -t ext4 /dev/vg_data/samba
-$ sudo mkfs -t ext4 /dev/vg_data/www
-
-#
-# montar
-#
-$ sudo mkdir /mnt/samba
-$ sudo mkdir /mnt/www
-$ sudo mount /dev/vg_data/samba /mnt/samba
-$ sudo mount /dev/vg_data/www /mnt/www
-
-#
-# adicionar os volumes logicos montados no arquivo
-# /etc/fstab para que toda vez que o computador for
-# reinicializado, o mesmo seja montado de forma
-# automatica.
-#
-$ sudo blkid
-$ sudo vi /etc/fstab
-	UUID=XYZ	/mnt/samba      ext4    defaults      0 2
-	UUID=ABC	/mnt/www        ext4    defaults      0 2
-
-##
-# ADICIONAR UM NOVO DISCO RIGIDO AO VG_DATA
-##
-
-#
-# procedimentos para adicionar um novo disco rigido
-# ao VG_DATA
-#
-$ sudo fdisk /dev/sdd   ; particionar o disco rigido
-
-$ sudo pvcreate /dev/sdd1   ; criar o volume fisico do novo disco rigido
-	Physical volume "/dev/sdd1" successfully created.
-$ sudo vgextend vg_data /dev/sdd1   ; extender o VG com o novo disco rigido
-	Volume group "vgdata" successfully extended
-
-$ sudo vgdisplay
-	--- Volume group ---
-	VG Name               vgdata
-	System ID
-	Format                lvm2
-	Metadata Areas        3
-	Metadata Sequence No  6
-	VG Access             read/write
-	VG Status             resizable
-	MAX LV                0
-	Cur LV                1
-	Open LV               0
-	Max PV                0
-	Cur PV                3
-	Act PV                3
-	VG Size               59.99 GiB
-	PE Size               4.00 MiB
-	Total PE              15357
-	Alloc PE / Size       1280 / 5.00 GiB
-	Free  PE / Size       14077 / 54.99 GiB
-	VG UUID               dgh2w5-WEfK-c5et-FVNc-SdsP-S8L9-YUr4FB
-
-##
-# AMPLIACAO
-#
-# neste caso, o sistema de arquivo NAO foi formatado e nem
-# foi montado
-#
-# samba - de 5GB para 15GB
-#
-$ sudo lvextend -L15G /dev/vg_data/samba
-$ sudo lvscan
-
-##
-# REDUCAO
-#
-# neste caso, o sistema de arquivo NAO foi formatado e nem
-# foi montado
-# 
-# samba - de 15GB para 9GB
-#
-$ sudo lvreduce -L9G /dev/vg_data/samba
-$ sudo lvscan
-
-##
-# AMPLIACAO
-#
-# neste caso, o sistema de arquivo FOI formatado e
-# foi montado
-#
-# samba - de 9GB para 15GB
-# web - de 15GB para 25GB
-#
-$ sudo umount /mnt/samba/
-$ sudo lvextend -L15G /dev/vg_data/samba
-$ sudo e2fsck -f /dev/vg_data/samba
-$ sudo resize2fs /dev/vg_data/samba
-$ sudo mount /mnt/samba/
-
-##
-# REDUCAO
-#
-# neste caso, o sistema de arquivo FOI formatado e
-# foi montado
-#
-# samba - de 15GB para 9GB
-#
-$ sudo umount /mnt/samba/
-$ sudo e2fsck -f /dev/vg_data/samba
-$ sudo resize2fs /dev/vg_data/samba 9216M
-$ sudo lvreduce -L9G /dev/vg_data/samba
-$ sudo mount /mnt/samba/
-
-##
-#
-# ADICIONANDO UM DISCO RIGIDO NO LVM
-#
-##
-$ sudo pvcreate /dev/sde1
-$ sudo vgextend vg_data /dev/sde1
-
-##
-#
-# REMOVER UM DISCO RIGIDO NO LVM
-#
-##
-$ sudo pvmove /dev/sdb1 /dev/sde1
-$ sudo vgreduce vg_data /dev/sdb1
-$ sudo pvremove /dev/sdb1
-
-##
-#
 # SNAPSHOT
 #
 # - lv snapshot sao LVs em si mesmo
 # - lv snapshot pode ser montado em um diretorio
-#
-##
-$ sudo mount /dev/vg_data/web /mnt/web
-$ sudo cp /etc/*.conf /mnt/web
-$ sudo lvcreate -L 100M -n web_snap -s /dev/vg_data/web
-$ sudo mount /dev/vg_data/web_snap /mnt/web_snap
-$ sudo df /mnt/web /mnt/web_snap
-$ sudo umount /mnt/{web,web_snap}
-$ sudo lvconvert --merge /dev/vg_data/web_snap
-# a partir deste ponto, os dados do diretorio /mnt/web_snap
-# sao clonados para o diretorio /mnt/web
-$ sudo mount /dev/vg_data/web /mnt/web
-$ sudo mount /dev/vg_data/web_snap /mnt/web_snap
-$ sudo df /mnt/web /mnt/web_snap
 
-##
+# INICIO
 #
+$ sudo apt-get install lvm2 dmsetup mdadm xfsprogs ; instalacao do software
+$ sudo fdisk /dev/sd[bc]1 ; formatacao da particao
+
+# PV
+#
+$ sudo pvcreate /dev/sd[bc]1 ; criacao de um PV com os discos rigidos sd[bc]
+$ sudo pvremove /dev/sd[bc]1 ; remover o PV
+$ sudo pvdisplay ; exibir informacao sobre o raid
+$ sudo pvdisplay /dev/sdXY ; exibir informacao sobre o raid
+$ sudo pvs ; versao resumida do pvdisplay
+
+# VG
+#
+$ sudo vgcreate [VG-NOME] /dev/sd[bc]1 ; criacao de um VG
+$ sudo vgdisplay ; exibir informacao sobre o VG
+$ sudo vgdisplay [VG-NOME] ; exibir informacao sobre o VG
+$ sudo vgs ; versao resumida do vgdisplay
+$ sudo vgrename [VG-NOME-ANTIGO] [VG-NOME-NOVO] ; renomear o VG
+$ sudo vgremove [VG-NOME] ; remover o VG
+
+# LV
+#
+$ sudo lvcreate --name [LV-NOME] --size [TAMANHO]G [VG-NOME] ; cracao de um LV em um VG
+$ sudo lvdisplay ; exibir informacao sobre o LV
+$ sudo lvs ; versao resumida do lvdisplay
+$ sudo lvrename [VG-NOME] [LV-NOME-ANTIGO] [LV-NOME-NOVO] ; renomear o LV
+$ sudo lvremove /dev/[VG-NOME]/[LV-NOME] ; apagar um LV
+
+# FORMATACAO
+#
+$ sudo mkfs -t ext4 /dev/[VG-NOME]/[LV-NOME]
+
+# MONTAR
+#
+$ sudo mkdir /mnt/[LV-NOME]
+$ sudo mount /dev/[VG-NOME]/[LV-NOME] /mnt/[LV-NOME]
+
+# FSTAB
+#
+$ sudo blkid ; obter o uuid do LV
+$ sudo vi /etc/fstab
+
+# ADICIONAR UM NOVO DISCO RIGIDO
+#
+$ sudo fdisk /dev/sdd   ; particionar o disco rigido
+$ sudo pvcreate /dev/sdd1   ; criar o volume fisico do novo disco rigido
+$ sudo vgextend [VG-NOME] /dev/sdd1   ; extender o VG com o novo disco rigido
+$ sudo vgdisplay ; exibir informacao sobre o VG
+
+# AMPLIACAO
+#
+$ sudo lvextend -L[TAMANGO]G /dev/[VG-NOME]/[LV-NOME] ; ampliando o tamanho do LV
+$ sudo lvscan
+
+# REDUCAO
+#
+$ sudo lvreduce -L[TAMANHO]G /dev/[VG-NOME]/[LV-NOME] ; reduzindo o tamanho do LV
+$ sudo lvscan ; obtendo informacao
+
+# AMPLIACAO
+#
+$ sudo umount /mnt/[LV-NOME]/ ; desmontar
+$ sudo lvextend -L[TAMANHO]G /dev/[VG-NOME]/[LV-NOME] ; ampliar o LV
+$ sudo e2fsck -f /dev/[VG-NOME]/[LV-NOME] ; checar a integridade da particao
+$ sudo resize2fs /dev/[VG-NOME]/[LV-NOME] ; checar a integridade do sistema de arquivos
+$ sudo mount /mnt/[LV-NOME]/ ; montar o LV
+
+# REDUCAO
+#
+$ sudo umount /mnt/[LV-NOME]/ ; desmontar o lvm
+$ sudo e2fsck -f /dev/[VG-NOME]/[LV-NOME] ; checar a integridade da particao
+$ sudo resize2fs /dev/[VG-NOME]/[LV-NOME] [TAMANHO-NOVO]M ; checar a integridade do sisttema de arquivos
+$ sudo lvreduce -L[TAMANHO-NOVO]G /dev/[VG-NOME]/[LV-NOME] ; reduzir o tamanho do LV
+$ sudo mount /mnt/[LV-NOME]/ ; montar
+
+# ADICIONANDO UM DISCO RIGIDO NO LVM
+#
+$ sudo pvcreate /dev/sde1 ; adicionar um disco r[igido ao PV
+$ sudo vgextend [VG-NOME] /dev/sde1 ; adicionar o disco rigido ao VG
+
+# REMOVER UM DISCO RIGIDO NO LVM
+#
+$ sudo pvmove /dev/sdb1 /dev/sde1 ; mover os dados do sdb1 om defeito para o novodisco rigido
+$ sudo vgreduce [VG-NOME] /dev/sdb1 remover o disco rigido do VG
+$ sudo pvremove /dev/sdb1 ; remover o disco rigidodo PV
+
+# SNAPSHOT
+#
+$ sudo mount /dev/[VG-NOME]/[LV-NOME] /mnt/[LV-NOME] ; montar o LV
+$ sudo cp /etc/*.conf /mnt/[LV-NOME] ; teste
+$ sudo lvcreate -L [SNAPSHOT-TAMANHO]M -n [SNAPSHOT-NOME] -s /dev/[VG-NOME]/[LV-NOME] ; criando snapshot
+$ sudo mount /dev/[VG-NOME]/[SNAPSHOT-NOME] /mnt/[SNAPSHOT-NOME] ; montar o snapshot
+$ sudo df /mnt/[LV-NOME] /mnt/[SNAPSHOT-NOME] ; comparar o snapshot com o LV original
+$ sudo umount /mnt/[LV-NOME] ; desmontar o LV original
+$ sudo lvconvert --merge /dev/[VG-NOME]/[SNAPSHOT-NOME] ; transferir os "novos" dados do snapshot para o LV
+
+# a partir deste ponto, os dados do diretorio /mnt/[SNAPSHOT-NOME] sao clonados para o diretorio /mnt/[LV-NOME]
+
+$ sudo mount /dev/[VG-NOME]/[LV-NOME] /mnt/[LV-NOME]
+$ sudo mount /dev/[VG-NOME]/[SNAPSHOT-NOME] /mnt/[SNAPSHOT-NOME]
+$ sudo df /mnt/[LV-NOME] /mnt/[SNAPSHOT-NOME] ; agora ambos os diretorios estao iguais, o LV e o snapshot
+
 # REMOVER LVM DO COMPUTADOR
 #
-##
-$ sudo umount /mnt/samba/
-$ sudo umount /mnt/web/
-$ sudo lvremove /dev/vg_data/samba 
-$ sudo lvremove /dev/vg_data/web
-$ sudo vgremove vg_data
-$ sudo pvremove /dev/sd[bc]1
+$ sudo umount /mnt/[LV-NOME]/ ; desmontar o LV
+$ sudo lvremove /dev/[VG-NOME]/[LV-NOME] ; remover o LV
+$ sudo vgremove [VG-NOME] ; remover o VG
+$ sudo pvremove /dev/sd[bc]1 ; remover o PV
