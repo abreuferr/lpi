@@ -1,5 +1,4 @@
-#
-# kernel do gnu/linux
+# VERSAO
 #
 # o kernel controla e gerencia a comunicacao entre o hardware
 # e os processos em execucao.
@@ -20,35 +19,30 @@
 # PATCHLEVEL = 16
 # SUBLEVEL = 9
 
+# DIRETORIO
+#
 # diretorio de armazenamento do kernel - /usr/src/linux-versao
 #
 # link simbolico linux -> linux-source-4.9.51
 
-#
-# /boot
+# BOOT
 # 
 # diretorio a onde fica armazenado o arquivo de configuracao
 # e a imagem do kernel
 #
-config-4.9.51-3-amd64 - backup do arquivo de configurcao do linux (/usr/src/linux/.config)
+config-4.9.51-3-amd64 ; bckup do arquivo de configuracao
 initrd.img-4.9.51-3-amd64
 System.map-4.9.51-3-amd64
-vmlinuz-4.9.51-3-amd64 - arquivo binario nao compactado do kernel
+vmlinuz-4.9.51-3-amd64 ; arquivo binario nao compactado do kernel
 
-#
-# Documentacao do kernel linux se encontra no diretorio 
+# DOCUMENTACAO
 #
 # /usr/src/linux/Documentation
-#
-# arquivo de configuracao do kernel linux
+
+# CONFIGURACAO
 #
 # /usr/src/linux/.config
 
-#
-# arquivo que contem parametros utilizados para compilar o
-# kernel linux.
-#
-# o arquivo pode ser alterado por exemplo para indicar que
-# houve uma customizacao ou versionamento 
+# MAKEFILE
 #
 # /usr/src/linux/Makefile
