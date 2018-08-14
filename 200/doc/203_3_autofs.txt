@@ -14,19 +14,20 @@
 # NFS_SERVER
 #
 $ sudo apt install nfs-kernel-server nfs-common ; instalacao dos componetnes necessarios para o NFS Server
-$ sudo mkdir -p /mnt/nfs ; diretorio que sera exportado
-$ sudo chown nobody:nogroup -R /mnt/nfs ; propriedades do diretorio
-$ sudo chmod 755 -R /mnt/nfs ; propriedades do diretorio
+$ sudo mkdir -p /mnt/nfs ; diretorio do usuario que sera exportado
+$ sudo chown root:users -R /mnt/nfs ; propriedades do diretorio
+$ sudo chmod 775 -R /mnt/nfs ; propriedades do diretorio
 $ sudo vi /etc/exports ; configuracao do nfs server
-	/home/nfs       *(rw,sync,no_subtree_check)
+	/mnt/nfs       192.168.10.0/24(rw,sync,no_subtree_check)
 $ sudo systemctl restart nfs-kernel-server.service ; reinicializado o servico
 
 # NFS_CLIENT
 #
 $ sudo apt-get install nfs-common ; instalacao dos componentes necessarios para o NFS Client
-$ sudo mkdir /home/USER/nfs
-$ sudo mount 192.168.0.40:/mnt/nfs /home/USER/nfs/ ; somente para teste
-$ sudo umount /mnt/nfs/	; somente para teste
+$ mkdir /mnt/server/nfs ; somente para teste
+$ sudo mount 192.168.0.40:/mnt/nfs /mnt/server/nfs ; somente para teste
+$ sudo umount /mnt/server/nfs ; somente para teste
+$ rm -rf /mnt/server/nfs ; somente para teste
 
 ###
 # AUTOFS
@@ -36,9 +37,9 @@ $ sudo umount /mnt/nfs/	; somente para teste
 #
 $ sudo apt-get install autofs udev ; instalacao do autofs no cliente
 $ cat /et/auto.master ; configuracao do mapa mestre
-	/mnt/nfs	/etc/auto.nfs --timeout=10
+	/mnt/server	/etc/auto.nfs --timeout=10
 
 # AUTO.NFS
 #
 $ sudo cat /etc/auto.nfs
-	cosmo  -fstype=nfs     192.168.0.40:/home/nfs/cosmo
+	nfs  -fstype=nfs     192.168.0.40:/mnt/nfs
