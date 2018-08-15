@@ -3,119 +3,44 @@
 #: Description : Instalacao e configuracao do iSCSI no GNU/Linux Debian Stable
 #: Options : None
 
-#
 # TOPOLOGIA
 #
-# Debian iSCSI Target: 192.168.0.40
-# Debian iSCSI Initiator: 192.168.0.41
-#
-# no iscsi target, foi adicionado um disco rigido (/dev/sdb1) que sera
-# exportado.
+# Debian iSCSI Target: 192.168.10.60
+# Debian iSCSI Initiator: 192.168.10.65
 
-#
 # TARGET / SERVER
 #
-
-#
-# instalacao
-#
-$ sudo apt-get install tgt
-
-#
-# configuracao
-#
-$ sudo vi /etc/tgt/conf.d/iscsi.conf
-	<target iqn.2018-03.particula.local:lun1>
-	# Provided device as an iSCSI target
-	backing-store /dev/sdb1
-	initiator-address 192.168.0.41
-	incominguser particula-iscsi-user admin
+$ sudo apt-get install tgt ; instalacao
+$ sudo vi /etc/tgt/conf.d/iscsi.conf ; arquivo de configuracao
+	<target 192.168.10.60:target01>
+	backing-store /dev/sdf
+	incominguser admin admin
 	</target>
 
-#
-# reinicializando o servico
-#
-$ sudo systemctl restart tgt
+$ sudo systemctl restart tgt ; reinicializar o servico
 
-#
-# checando a configuracao
-#
-$ sudo tgtadm --mode target --op show
-	Target 1: iqn.2018-03.particula.local:lun1
-	    System information:
-	        Driver: iscsi
-        	State: ready
-    	I_T nexus information:
-    	LUN information:
-        	LUN: 0
-			(...)
-        	LUN: 1
-            		Type: disk
-            		SCSI ID: IET     00010001
-            		SCSI SN: beaf11
-            		Size: 21474 MB, Block size: 512
-            		Online: Yes
-            		Removable media: No
-            		Prevent removal: No
-            		Readonly: No
-            		SWP: No
-            		Thin-provisioning: No
-            		Backing store type: rdwr
-            		Backing store path: /dev/sdb1
-            		Backing store flags:
-    	Account information:
-        	particula-iscsi-user
-        	debian-iscsi-target (outgoing)
-    	ACL information:
-        	192.168.147.11
+$ sudo tgtadm --mode target --op show ; checando a configuracao
 
-#
 # INITIATOR / CLIENT
 #
+$ sudo apt-get install open-iscsi ; instalacao
 
-#
-# instalacao
-#
-$ sudo apt-get install open-iscsi
-
-#
-# inicalizar a comunicacao entre o initiator e target
-#
-$ sudo iscsiadm -m discovery -t st -p 192.168.0.40
-	192.168.0.40:3260,1 iqn.2018-03.particula.local:lun1
-
-$ sudo ls /etc/iscsi/nodes/iqn.2018-03.particula.local:lun1
-	192.168.0.40,3260,1
-
-#
-# configuracao do node
-#
-$ sudo vi /etc/iscsi/nodes/iqn.2018-03.particula.local:lun1/192.168.0.40,3260,1/default
-	node.startup = automatic
-
-	node.session.auth.authmethod = CHAP
-	node.session.auth.username = particula-iscsi-user
+$ sudo vi /etc/iscsi/iscsid.conf
+	node.session.auth.username = admin
 	node.session.auth.password = admin
 
-#
-# teste
-#
+$ sudo /etc/init.d/open-iscsi restart ; reinicializar o iscsi
 
-# estacao
-#
-$ sudo lsblk
-	NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-	sdb      8:16   0   20G  0 disk
+$ sudo iscsiadm -m discovery -t st -p 192.168.0.40 ; inicalizar a comunicacao entre o initiator e target
+$ sudo iscsiadm --mode discovery -t sendtargets --portal 192.168.10.60 ; inicalizar a comunicacao entre o initiator e target
 
-# estacao
-#
-$ sudo iscsiadm -m session
-tcp: [4] 192.168.0.40:3260,1 iqn.2018-03.particula.local:lun1 (non-flash)
+$ sudo iscsiadm --mode node --targetname 192.168.10.60:target01 --portal 192.168.10.60 --login
 
-# servidor
-#
-$ sudo tgtadm --mode conn --op show --tid 1
-Session: 1
-    Connection: 0
-        Initiator: iqn.1993-08.org.debian:01:553acfea77c
-        IP Address: 192.168.0.41
+$ ls $ ls /dev/disk/by-id/wwn-XYZ
+$ ls $ ls /dev/disk/by-id/scsi-ABC
+
+$ sudo vi /etc/iscsi/nodes/192.168.10.60:target01/192.168.10.60,3260,1/default ; configuracao do node
+	node.startup = automatic
+	node.session.auth.authmethod = CHAP
+	node.session.auth.username = admin
+	node.session.auth.password = admin
