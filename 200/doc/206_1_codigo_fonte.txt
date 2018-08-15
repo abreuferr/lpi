@@ -29,12 +29,12 @@ $ tar xJvf arquivo.tar.xz
 # o comando "configure" tem por objetivo o de verificar as dependencia, 
 # como por exemplo, biblioteca e compilador.
 # 
-# criacao do aqruivo Mikefile ou Makefile.ini
+# criacao do arquivo Mikefile ou Makefile.ini
 #
 # --prefix=[DIR] ; informa qual diretorio do sistema de arquivos o 
 # o binario, os manuais e afins deverao ser instalados.
 #
-$ ./configure --prefix=/usr/src
+$ ./configure --prefix=/usr/local
 
 # COMPILACAO
 #

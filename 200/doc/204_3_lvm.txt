@@ -22,7 +22,7 @@
 
 # INICIO
 #
-$ sudo apt-get install lvm2 dmsetup mdadm xfsprogs ; instalacao do software
+$ sudo apt-get install lvm2 ; instalacao do software
 $ sudo fdisk /dev/sd[bc]1 ; formatacao da particao
 
 # PV
