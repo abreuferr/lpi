@@ -1,10 +1,16 @@
 # ANALISE e RESOLVER PROBLEMAS NO USO DE RECURSOS
 #
+# PESO 6 
+#
 
 # oferta flexivel de recursos torna possivel alocar
-# a quantidade certa de capacidade computaciona
+# a quantidade certa de capacidade computacional
 # a cada necessidade (utilizacao de recursos de forma 
-# recinal).
+# racinal).
+
+# eh muito importante conseguir identificar onde ha 
+# subutilizacao de recursos e onde os recursos nao sao
+# suficientes para determinadas tarefas.
 
 # identificar a subutilizacao do processador e a grande
 # utilizacao do disco rigido ou memoria.

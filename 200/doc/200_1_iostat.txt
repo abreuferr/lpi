@@ -4,6 +4,9 @@
 # monitorando o tempo em que o dispositivo esta ativo em relacao a taxa media de transferencia
 # de dados.
 #
+# alem de I/O, o aplicativo iostat tambem pode ser utilizado para gerar relatorios sobre a
+# utilizacao de CPU.
+#
 # o comando iostat gera relatorios que podem ser utilizado pelo administrador do sistema
 # para melhor balancear o i/o entre dos disco rigidos.
 #
