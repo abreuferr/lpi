@@ -1,0 +1,23 @@
+##
+# NMAP
+###
+
+# GERAL
+#
+# software de varredura de porta e coleta de outros tipos de informacao 
+#
+# ele pode ser utilizado para verificar o problema de conexao entre dois 
+# computadores, verificar se a firewall esta ativa ou nao.
+#
+
+# EXEMPLOS
+#
+# alguns exemplos da utilizacao do nmap. existem infinidades de opcoes.
+#
+$ sudo nmap -R 192.168.10.0/24 ; resolucao de nome
+$ sudo nmap -sS 192.168.10.0/24 ; verifica quais portas estao abertas
+$ sudo nmap -sn 192.168.10.65 ; nao realiza a varredura de portas mas coleta outros tipos de informacao
+$ sudo nmap -sV 192.168.10.65 ; obtem informacoes sobre algumas aplicacoes que estao em execucao no computador
+$ sudo nmap -p 22 192.168.10.65 ; faz a varredura em uma determinada porta
+$ sudo nmap -F 192.168.10.65 ; varredura de modo rapido
+$ sudo nmap -O 192.168.10.65 ; identifica o sistema operacional

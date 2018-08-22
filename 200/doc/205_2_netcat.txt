@@ -1,0 +1,19 @@
+# aplicativo utilizado para simular um servidor e cliente
+# enviando e recebendo dados na rede.
+#
+# ferramenta utilizada para diagnosticar a conexao.
+
+# MODO BASICO
+#
+$ netcat -l -p [PORTA-SERVIDOR] ; lado do servidor
+$ netcat [IP-SERVIDOR] [PORTA-SERVIDOR] ; lado do cliente
+
+# SCANNER DE PORTA
+#
+$ netcat -l -p [PORTA-SERVIDOR] ; lado do servidor
+$ netcat -z -v [IP-SERVIDOR] [RANGE-PORTA] ; lado do cliente
+
+# TRANSFERIR ARQUIVO
+#
+$ netcat -l [PORTA-SERVIDOR] > [ARQUIVO-DESTINO] ; lado do servidor
+$ netcat [IP-SERVIDOR] [PORTA-SERVIDOR] < [ARQUIVO-ORIGEM] ; lado do cliente

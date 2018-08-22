@@ -1,66 +1,45 @@
-#
-# AUTOFS
+# TEORIA
 #
 # software utilizado para montar um dispositivo de armazenamento,
 # como por exemplo, um pendrive de forma automatica. Basta inserir
 # o dispositivo para que o mesmo seja montado de forma automatica.
 #
+# para estudar o autofs, sera utilizado o a tecnologia NFS para poder
+# simular a utilizacao de um servidor remoto NFS.
 
-#
+###
+# NFS
+###
+
 # NFS_SERVER
 #
-$ sudo apt install nfs-kernel-server nfs-common
-$ sudo mkdir -p /home/nfs/cosmo
-$ sudo chown nobody:nogroup -R /home/nfs/
-$ sudo chmod 755 -R /home/nfs/
-$ sudo vi /etc/exports
-	/home/nfs       192.168.0.41(rw,sync,no_subtree_check)
-$ sudo systemctl restart nfs-kernel-server.service
+$ sudo apt install nfs-kernel-server nfs-common ; instalacao dos componetnes necessarios para o NFS Server
+$ sudo mkdir -p /mnt/nfs ; diretorio do usuario que sera exportado
+$ sudo chown root:users -R /mnt/nfs ; propriedades do diretorio
+$ sudo chmod 775 -R /mnt/nfs ; propriedades do diretorio
+$ sudo vi /etc/exports ; configuracao do nfs server
+	/mnt/nfs       192.168.10.0/24(rw,sync,no_subtree_check)
+$ sudo systemctl restart nfs-kernel-server.service ; reinicializado o servico
 
-#
 # NFS_CLIENT
 #
-$ sudo apt-get install nfs-common
-$ sudo mkdir /mnt/nfs
-$ sudo mount 192.168.0.40:/home/nfs /mnt/nfs/	; somente para teste
-$ sudo umount /mnt/nfs/				; somente para teste
+$ sudo apt-get install nfs-common ; instalacao dos componentes necessarios para o NFS Client
+$ mkdir /mnt/server/nfs ; somente para teste
+$ sudo mount 192.168.0.40:/mnt/nfs /mnt/server/nfs ; somente para teste
+$ sudo umount /mnt/server/nfs ; somente para teste
+$ rm -rf /mnt/server/nfs ; somente para teste
 
-#
-# /etc/auto.master
-#
-# principal arquivo de configuraca
-#
-# o dipositivo sera montado no diretorio /mnt/removable
-# o autofs ira ler o arquivo de configuracao /etc/auto.removable para obter mais informacoes
-# apos 10 minutos o dispositivo sera desmontado
-# o dipositivo tera as permissoes do usuario cujo id eh igual a 1000
-#
-        /mnt/removable	/etc/auto.removable --timeout=10,defaults,user,exec,uid=1000
-	/mnt/nfs	/etc/auto.nfs --timeout=10
+###
+# AUTOFS
+###
 
+# MASTER MAP/ MAPA MESTRE
 #
-# /etc/auto.removable
-#
-# o dispositvo recebera o nome de cosmo
-# o sistema de arquivos sera identificado de forma automatica
-# o dispositivo sera montado com a permissao de leitura e escrita
-# o diretorio sera associado ao grupo cujo gid eh igual a 1000
-# o umask atribuido ao diretorio sera de 002
-# o dispositivo que sera montado possui o UUID igual a E449-66E2
-        cosmo   -fstype=auto,rw,gid=1000,umask=002     :UUID=E449-66E2
+$ sudo apt-get install autofs udev ; instalacao do autofs no cliente
+$ cat /et/auto.master ; configuracao do mapa mestre
+	/mnt/server	/etc/auto.nfs --timeout=10
 
+# AUTO.NFS
 #
-# /etc/auto.nfs
-#
-	cosmo  -fstype=nfs     192.168.0.40:/home/nfs/cosmo
-
-#
-# MKISOFS/genisoimage
-#
-# o aplicativo mkisofs eh responsvel pela criacao de um aquivo ISO
-# com o conteudo de um determinado diretorio.
-#
-# devido a problemas de licenca, foi criado um fork do projeto mkisofs
-# com o nome de genisoimage.
-#
-$ genisoimage -o git.iso myProject/
+$ sudo cat /etc/auto.nfs
+	nfs  -fstype=nfs     192.168.0.40:/mnt/nfs

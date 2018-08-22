@@ -6,7 +6,8 @@
 #
 # netcast [opcao] [protocolo]
 #
-# -ie - semelhante a opcao "ifconfig" ou "ip addr"
+# -i[e] - interfaces de rede ativas
+# -ia[e] - interfaces de rede atiavas e inativas
 # -t - protocolo tcp
 # -u - protocolo udp
 # -n - nao resolve o nome
