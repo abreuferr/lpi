@@ -1,6 +1,6 @@
 # DEBIAN
 #
-$ sudo apt-get install -y build-essential libncurses5-dev gcc libssl-dev bc
+$ sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev bc -y -d
 
 # DOWNLOAD DO KERNEL
 #
@@ -15,11 +15,16 @@ $ sudo tar -xJvf linux-4.13.3.tar.xz -C /usr/src/
 $ cd /usr/src/
 $ sudo ln -s linux-4.13.3 linux
 
+# CONFIGURACAO
+#
 # A - neste caso, o sysadmin optou por importar as configuracoes do
 # kernel em producao para o kernel que ele deseja instalar atraves
 # do codigo fonte.
 #
-$ sudo cp /boot/config-`uname -r` .config
+$ sudo cp /boot/config-$(uname -r) .config ; copiar o arquivo de
+     				             configugracao do kernel
+					     em uso.
+
 $ sudo make ondconfig   ; recupera todas as configuracoes do arquivo
                           .config pre-existente e pergunta somente
                           por novas configuracoes.
@@ -34,31 +39,17 @@ $ sudo make menuconfig  ; configuracao tradicional
 $ sudo vi /usr/src/linux/Makefile
 	EXTRAVERSION = lpi201
 
-# gerando a imagem bzImage
+# COMPILACAO
 #
-$ sudo make bzImage
+$ sudo make ; compinado o kernel
+$ sudo make modules ; compilando os modulos
 
-# bzImage do kernel
+# INSTALACAO
 #
-$ sudo ls /usr/src/linux/arch/x86_64/boot/
+$ sudo make install ; instalacao do novo kernel
+$ sudo make modules_install ; instalacao dos modulos (/lib/modules/$(uname -r)/)
 
-# compilacao dos modulos do kernel
-#
-$ sudo make modules
-
-# instalacao dos modulos
-#
-$ sudo make modules_install
-
-# instalacao do kernel
-#
-$ sudo make install
-
-# diretorio boot
-#
-$ sudo cd /boot
-
-# criacao do Initial Ramdisk
+# Initial Ramdisk
 #
 $ sudo mkinitramfs -o initrd.img-4.13.3lpi_201 4.13.3lpi_201
 
