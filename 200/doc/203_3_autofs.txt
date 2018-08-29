@@ -24,10 +24,10 @@ $ sudo systemctl restart nfs-kernel-server.service ; reinicializado o servico
 # NFS_CLIENT
 #
 $ sudo apt-get install nfs-common ; instalacao dos componentes necessarios para o NFS Client
-$ mkdir /mnt/server/nfs ; somente para teste
+$ sudo mkdir -p /mnt/server/nfs ; somente para teste
 $ sudo mount 192.168.0.40:/mnt/nfs /mnt/server/nfs ; somente para teste
 $ sudo umount /mnt/server/nfs ; somente para teste
-$ rm -rf /mnt/server/nfs ; somente para teste
+$ sudo rm -rf /mnt/server/nfs ; somente para teste
 
 ###
 # AUTOFS
@@ -36,10 +36,11 @@ $ rm -rf /mnt/server/nfs ; somente para teste
 # MASTER MAP/ MAPA MESTRE
 #
 $ sudo apt-get install autofs udev ; instalacao do autofs no cliente
-$ cat /et/auto.master ; configuracao do mapa mestre
+$ udo cat /etc/auto.master ; configuracao do mapa mestre
 	/mnt/server	/etc/auto.nfs --timeout=10
 
 # AUTO.NFS
 #
 $ sudo cat /etc/auto.nfs
 	nfs  -fstype=nfs     192.168.0.40:/mnt/nfs
+$ sudo systemctl restart autofs.service
