@@ -1,3 +1,9 @@
+#: Title : Setup RAID Server
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Setup RAID Server
+#: Options : None
+
+
 # TEORIA
 #
 # raid 0 - striping;
