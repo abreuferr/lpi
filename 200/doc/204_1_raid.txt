@@ -61,25 +61,20 @@ $ sudo mount -t ext4 /dev/md0 /mnt/raid/ ; processo de montagem propriamente dit
 $ sudo blkid ; comando utilizado para obter o UUID do raid
 $ sudo vi /etc/fstab
 
-###
 # SIMULACAO DE PROBLEMA
-###
-
-# FALHA
 #
 $ sudo mdadm --manage /dev/md0 --fail /dev/sdc1 ; simulacao da falha em um dos discos rigidos
 
-# REMOCAO
-#
 $ sudo mdadm /dev/md0 -r /dev/sdc1 ; remocao do disco rigido com falha
 
-# SUBSTITUICAO
-#
 $ sudo mdadm /dev/md0 -a /dev/sdc1 ; adicao de um novo disco rigido no raid
 
-# LIMPEZA/DESMONTE
+# EXCLUSAO DO RAID
 #
 $ sudo umount /dev/md0 ; desmontando o raid
+
 $ sudo mdadm --stop /dev/md0 ; parar o raid
+
 $ sudo mdadm --remove /dev/md0 ; remover o raid
+
 $ sudo mdadm --zero-superblock /dev/sd[bc]1 ; limpara os superblocos dos discos rigidos
