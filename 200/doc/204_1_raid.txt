@@ -45,7 +45,7 @@ $ sudo cat /proc/mdstat
 
 # CONFIGURACAO
 #
-$ mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
+$ sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
 
 # FORMATACAO
 #
