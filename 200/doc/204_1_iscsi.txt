@@ -29,15 +29,15 @@ $ sudo vi /etc/iscsi/iscsid.conf
 	node.session.auth.username = admin
 	node.session.auth.password = admin
 
-$ sudo /etc/init.d/open-iscsi restart ; reinicializar o iscsi
+$ sudo systemctl restart open-iscsi.service ; reinicializar o iscsi
 
-$ sudo iscsiadm -m discovery -t st -p 192.168.0.40 ; inicalizar a comunicacao entre o initiator e target
+$ sudo iscsiadm -m discovery -t st -p 192.168.10.60 ; inicalizar a comunicacao entre o initiator e target
 $ sudo iscsiadm --mode discovery -t sendtargets --portal 192.168.10.60 ; inicalizar a comunicacao entre o initiator e target
 
 $ sudo iscsiadm --mode node --targetname 192.168.10.60:target01 --portal 192.168.10.60 --login
 
-$ ls $ ls /dev/disk/by-id/wwn-XYZ
-$ ls $ ls /dev/disk/by-id/scsi-ABC
+$ ls /dev/disk/by-id/wwn-XYZ
+$ ls /dev/disk/by-id/scsi-ABC
 
 $ sudo vi /etc/iscsi/nodes/192.168.10.60:target01/192.168.10.60,3260,1/default ; configuracao do node
 	node.startup = automatic
