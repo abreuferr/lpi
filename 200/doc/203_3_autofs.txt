@@ -1,3 +1,8 @@
+#: Title : nfs + autofs
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Instalacao e configuracao do NFS e autofs no GNU/Linux Debian Stable
+#: Options : None
+
 # TEORIA
 #
 # software utilizado para montar um dispositivo de armazenamento,
@@ -6,6 +11,12 @@
 #
 # para estudar o autofs, sera utilizado o a tecnologia NFS para poder
 # simular a utilizacao de um servidor remoto NFS.
+
+# TOPOLOGIA
+#
+# Debian server : 192.168.10.40
+# Debian client : 192.168.10.xyz
+#
 
 ###
 # NFS
@@ -25,7 +36,7 @@ $ sudo systemctl restart nfs-kernel-server.service ; reinicializado o servico
 #
 $ sudo apt-get install nfs-common ; instalacao dos componentes necessarios para o NFS Client
 $ sudo mkdir -p /mnt/server/nfs ; somente para teste
-$ sudo mount 192.168.0.40:/mnt/nfs /mnt/server/nfs ; somente para teste
+$ sudo mount 192.168.10.40:/mnt/nfs /mnt/server/nfs ; somente para teste
 $ sudo umount /mnt/server/nfs ; somente para teste
 $ sudo rm -rf /mnt/server/nfs ; somente para teste
 
@@ -36,11 +47,11 @@ $ sudo rm -rf /mnt/server/nfs ; somente para teste
 # MASTER MAP/ MAPA MESTRE
 #
 $ sudo apt-get install autofs udev ; instalacao do autofs no cliente
-$ udo cat /etc/auto.master ; configuracao do mapa mestre
+$ sudo cat /etc/auto.master ; configuracao do mapa mestre
 	/mnt/server	/etc/auto.nfs --timeout=10
 
 # AUTO.NFS
 #
 $ sudo cat /etc/auto.nfs
-	nfs  -fstype=nfs     192.168.0.40:/mnt/nfs
+	nfs  -fstype=nfs     192.168.10.40:/mnt/nfs
 $ sudo systemctl restart autofs.service
