@@ -12,10 +12,13 @@
 #
 $ sudo apt-get install tgt ; instalacao
 $ sudo vi /etc/tgt/conf.d/iscsi.conf ; arquivo de configuracao
-	<target 192.168.10.60:target01>
-	backing-store /dev/sdf
-	incominguser admin admin
-	</target>
+<target 192.168.10.60:target01>
+        # provided device as an iSCSI Target
+        backing-store /dev/sdg
+        initiator-address 192.168.10.65
+        incominguser admin admin
+        outgoinguser admin admin
+</target>
 
 $ sudo systemctl restart tgt ; reinicializar o servico
 
