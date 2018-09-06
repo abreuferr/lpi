@@ -1,0 +1,10 @@
+cosmo@study:~/myProject/lpi$ cat /etc/shadow
+cat: /etc/shadow: Permission denied
+
+cosmo@study:~/myProject/lpi$ ls -la /etc/shadow
+-rw-r----- 1 root shadow 905 May 12 12:03 /etc/shadow
+
+cosmo@study:~/myProject/lpi$ sudo cat /etc/shadow
+[sudo] password for cosmo:
+root:$6$23EYdDIm$XF/kHIhnyaOFUEyRaXA/IHzVhMzSUrPgprSgKqBCOkdsw4Ya1g4NsEjQ1ytpHWDSB2HymXCslju3/tuagTj8E0:17290:0:99999:7:::
+cosmo:$6$uddLemWk$7ELlUhSwajds5craT7z1WdQE8w82MhuKEbtyAkqJQCtduMJbqpBgAjbS0yRGS/ch4pwUqj0NoyQtWXzwgmYDj0:17290:0:99999:7:::

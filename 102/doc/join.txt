@@ -1,0 +1,65 @@
+# com o aplicativo cat, é possivel concatenar dois arquivos
+# e geral um terceiro arquivo com o resultado da concatenacao.
+#
+# para executar a concatenacao, eh necessario que ambos os
+# arquivos tenham um campo em comum e tenha o mesmo numero
+# de linhas de dados,
+#
+cosmo@study:~/myProject/lpi$ cat join1.db
+1 a arq1
+2 b arq1
+3 c arq1
+
+cosmo@study:~/myProject/lpi$ cat join2.db
+1 arq2 a
+2 arq2 b
+3 arq2 c
+
+cosmo@study:~/myProject/lpi$ join -j 1 join1.db join2.db
+1 a arq1 arq2 a
+2 b arq1 arq2 b
+3 c arq1 arq2 c
+
+# o exemplo abaixo ira concatenar o conteudo de dois arquivos
+# utilizando o primeiro campo como orientacao na hora de
+# fazer a concatenacao.
+#
+# como nao foi expecificado qual o campo que sera utilizado
+# como orientacao na hora de fazer a concatenacao, entao o
+# software toma como padrao o primeiro campo.
+#
+cosmo@study:~/myProject/lpi$ cat join1.db
+1 john
+2 jane
+3 mary
+
+cosmo@study:~/myProject/lpi$ cat join2.db
+1 doe
+2 doe
+3 sue
+
+cosmo@study:~/myProject/lpi$ join join1.db join2.db
+1 john doe
+2 jane doe
+3 mary sue
+
+# o exemplo abaixo ira concatenar o conteudo de dois arquivos
+# 
+# do primeiro arquivo (-1), sera utilizado o segundo campo (2) e
+# do segundo arquivo (-2), sera utilizado o primeiro campo para
+# realizar a concatenacao.
+#
+cosmo@study:~/myProject/lpi$ cat join1.db
+john 1
+jane 2
+mary 3
+
+cosmo@study:~/myProject/lpi$ cat join2.db
+doe 1
+doe 2
+sue 3
+
+cosmo@study:~/myProject/lpi$ joint -1 2 -2 1 join1.db join2.db
+1 John Doe
+2 Jane Doe
+3 Mary Sue

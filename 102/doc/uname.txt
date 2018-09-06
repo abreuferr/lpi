@@ -1,0 +1,16 @@
+cosmo@debian:~/myProject/lpi$ uname -a
+Linux debian 3.16.0-4-amd64 #1 SMP Debian 3.16.43-2 (2017-04-30) x86_64 GNU/Linux
+cosmo@debian:~/myProject/lpi$ uname -s
+Linux
+cosmo@debian:~/myProject/lpi$ uname -n
+debian
+cosmo@debian:~/myProject/lpi$ uname -r
+3.16.0-4-amd64
+cosmo@debian:~/myProject/lpi$ uname -v
+#1 SMP Debian 3.16.43-2 (2017-04-30)
+cosmo@debian:~/myProject/lpi$ uname -m
+x86_64
+cosmo@debian:~/myProject/lpi$ uname -p
+unknown
+cosmo@debian:~/myProject/lpi$ uname -i
+unknown

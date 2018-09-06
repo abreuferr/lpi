@@ -1,0 +1,22 @@
+# pode ser utilizado para remover um arquivo que esteja corrompido
+# e não esta sendo possivel apagar o arquivo através do comando RM
+
+# visualizar o número inode de um arquivo
+#
+$ ls -i
+
+12059185 arquivo.txt
+
+# o comando stat também pode ser utilizado para obter o 
+# inode do arquivo, além é claro de outras informações.
+#
+$ stat arquivo.txt >> inode.txt
+
+  File: ‘arquivo.txt’
+  Size: 0         	Blocks: 0          IO Block: 4096   regular empty file
+Device: 801h/2049d	Inode: 12059185    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-29 11:02:19.106278023 -0300
+Modify: 2017-05-29 11:02:19.106278023 -0300
+Change: 2017-05-29 11:02:19.106278023 -0300
+ Birth: -

@@ -1,0 +1,33 @@
+# o comando FMT tem por finalidade o de formatar
+# o texto.
+#
+# -w N	: definir o numero de caracteres de cada linha.
+# -u	: um espaco entre cada palavra.
+
+cosmo@debian:~/myProject/lpi$ cat fmt.db 
+O incentivo ao avanço tecnológico, assim como o início 
+da atividade geral de formação de atitudes estimula a 
+padronização da gestão inovadora da qual fazemos parte.
+
+# como eh possivel perceber, o software fmt NAO possui a
+# capacidade de QUEBRAR uma palavra. Desta forma, normalmente
+# as frases possuem normalmente MENOS de n caracteres, que
+# no exemplo abaixo sao de 15 caracteres.
+#
+cosmo@debian:~/myProject/lpi$ fmt -w 15 fmt.db 
+O incentivo
+ao avanço
+tecnológico,
+assim como o
+início da
+atividade
+geral de
+formação
+de atitudes
+estimula a
+padronização
+da gestão
+inovadora da
+qual fazemos
+parte.
+

@@ -1,0 +1,251 @@
+###
+#
+# CHMOD
+#
+###
+
+# o comando chmod permite alterar as permissoes de um 
+# determinado arquivo ou arquivo.
+#
+# um sistema unix possuem tres tipos de permissao,
+# leitura(R), escrita(W) e execucao(X)
+#
+# alem disso, todo arquivo no unix possui como 
+# propriedade que indica qual eh o dono do arquivo
+# qual eh o grupo em que esse arquivo pertence
+# e outros.
+
+# sintaxe do comando
+#
+# chmod [opcao] [permissao] [arquivo/diretorio]
+
+# valores atribuido as permissoes
+#
+# r - 4
+# w - 2
+# x - 1
+#
+# 1 - ligado = com permissao
+# 0 - desligado - sem permissao
+# 
+# rwx
+# 111 - 7
+# r--
+# 100 - 4
+# -w-
+# 010 - 2
+# --x
+# 001 - 1
+#
+# rw-
+# 110 - 4 + 2 = 6
+# r-x
+# 101 - 4 + 1 = 5
+# rwx
+# 111 - 4 + 2 + 1 = 7
+
+# no exemplo abaixo, o arquivo chmod.txt pertende ao
+# usuario COSMO e ao grupo COSMO.
+#
+# o usuario COSMO possui a permissao de leitura e escrita
+# o grupo COSMO possui a permissao somente de leitura
+# os outros usuarios ou grupos possuem somente a permissao de leitura
+#
+-rw-r--r-- 1 cosmo cosmo 238 Jun  1 13:54 chmod.txt
+rw- = 6
+r-- = 4
+r-- = 4
+
+# comando chmod 775 ira alterar as permissoes do arquivo
+# para o usuario, grupo e outros.
+#
+# rwx = 4+2+1=7
+# rwx = 4+2+1=7
+# r-x = 4+0+1=5
+#
+cosmo@debian:~/myProject/lpi$ chmod 775 chmod.txt
+
+# agora o usuario COSMO possui as pemissoes de leitura,
+# escrita e execucao. Ja o GRUPO COSMO possui as
+# permissoes de leitura, escrita e execucao. Ja os
+# OUTROS possuem a permissao de leitura e execucao
+#
+cosmo@debian:~/myProject/lpi$ ls -l chmod.txt 
+-rwxrwxr-x 1 cosmo cosmo 238 Jun  1 13:54 chmod.txt
+
+# outra forma de atribuir as permissoes de leitura(R),
+# escrita (W) e execucao(X) ao arquivo eh utilizando
+# o formato literal.
+#
+
+# permissoes iniciais do arquivo passwd
+#
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# atraves da opcao +X, sera atribuido a opcao
+# de execucao tanto para USUARIO, quanto para
+# GRUPO quanto para OUTROS.
+#
+cosmo@debian:~/myProject/lpi$ chmod +x passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rwxr-xr-x 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# atraves da opcao -X, sera removido a opcao de
+# execucao tanto do USUARIO, quanto do GRUPO e
+# do OUTROS
+#
+cosmo@debian:~/myProject/lpi$ chmod -x passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# a opcao U+X ira atribuir a opcao de execucao somente
+# para o USUARIO.
+#
+# se por acaso tanto o GRUPO ou OUTROS tiverem a
+# opcao de sexecucao, as mesmas NAO serao removidas.
+@
+cosmo@debian:~/myProject/lpi$ chmod u+x passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rwxr--r-- 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# a opcao de execucao(X) sera removida (-) do
+# USUARIO, do GRUPO e OUTROS.
+#
+cosmo@debian:~/myProject/lpi$ chmod ugo-x passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# a opcao de execucao(X) sera adicionada (+) do
+# USUARIO, do GRUPO e OUTROS.
+#
+cosmo@debian:~/myProject/lpi$ chmod ugo+x passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rwxr-xr-x 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# a atribuicao de execucao (X) sera atribuida
+# para todos (A) (USUARIO, GRUPO e OUTROS).
+#
+cosmo@debian:~/myProject/lpi$ chmod a-x passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+# as permissoes do grupo(G) serao as mesmas
+# do usuario(U).
+#
+cosmo@debian:~/myProject/lpi$ chmod g=u passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-rw-r-- 1 cosmo cosmo 1956 Jun  7 11:38 passwd
+
+###
+#
+# UMASK
+#
+###
+
+# toda vez que um arquivo eh criado dentro de um
+# determinado diretorio, esse arquivo recebe uma
+# mascara de permissoes.
+
+# comando UMASK
+#
+cosmo@workstation:~$ umask
+0022
+
+# 0 - indica que eh o valor de um umask
+# 0 - acesso total a um arquivo criado pelo usuario
+# 2 - acesso de leitura e execucao
+# 2 - acesso de leitura e execucao para outros usuarios
+
+###
+#
+# CHOWN
+#
+###
+
+# chown - change owner - alterar as o proprietario de um arquivo ou diretoro
+# 
+# permite atribuir um novo USUARIO ou GRUPO para um determinado
+# arquivo ou pasta.
+#
+# chmow [opcao] [novo_usuario] [arquivo/diretorio]
+# chmow [opcao] .[novo_grupo] [arquivo/diretorio]
+# chmow [opcao] [novo_usuario].[novo_grupo] [arquivo/diretorio]
+# 
+# opcao - -R - recursividade
+
+# no exemplo abaixo o usuario dono do arquivo eh o usuario COSMO.
+# ja o grupo dono do arquivo eh o grupo USERS
+#
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo users 1956 Jun  1 12:29 passwd
+
+# o comando abaixo ira alterar usuario dono do arquivo
+# do usuario COSMO para o usuario ROOT
+#
+# chmow [opcao] [novo_usuario] [arquivo/diretorio]
+# 
+cosmo@debian:~/myProject/lpi$ sudo chown root passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 root users 1956 Jun  1 12:29 passwd
+
+# o comando abaixo ira alterar o atribuicao do GRUPO
+# dono do arquivo. Sera alterado o grupo de USERS para
+# COSMO.
+#
+# a grande diferenca em relacao ao comando executado
+# anteriormente eh a utilizacao do (.) antes do novo
+# nome do grupo.
+#
+# chmow [opcao] .[novo_grupo] [arquivo/diretorio]
+#
+cosmo@debian:~/myProject/lpi$ chown .cosmo passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 root cosmo 1956 Jun  1 12:29 passwd
+
+# existe tambem a possibilidade de utilizar o comando 
+# chmod para alterar o usuario dono do arquivo e alterar
+#  o grupo dono do arquivo de uma unica vez.
+#
+# no exemplo abaixo, tanto o usuario dono do arquivo quanto
+# o grupo dono do arquivo serao alterados para o usuario
+# COSMO e para o grupo COSMO de uma unica vez. Nos exemplos
+# anteriores foi necessario executar duas vezes o comando
+# chmod para alterar o usuario e o grupo. Desta vez, com um 
+# unico comando, foi possivel fazer essas duas alteracoes.
+# 
+# chmow [opcao] [novo_usuario].[novo_grupo] [arquivo/diretorio]
+# 
+cosmo@debian:~/myProject/lpi$ sudo chown cosmo.cosmo passwd 
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  1 12:29 passwd
+
+###
+#
+# CHGROUP
+#
+###
+
+# chgroup - change group - alterar o grupo de um arquivo ou diretorio.
+#
+# o comando chgroup permite alterar o grupo de um determinado arquivo ou
+# pasta.
+#
+# chgrp [novo_grupo] [arquivo/diretorio]
+#
+
+# no exemplo abaixo, o arquivo passwd esta
+# associado ao grupo cosmo
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  1 12:29 passwd
+
+# atraves do comando chgrp foi possivel
+# alterar o grupo dono do arquivo, do grupo
+# csmo para o grupo users
+cosmo@debian:~/myProject/lpi$ chgrp users passwd 
+
+# eh possivel observar que o novo grupo dono do
+# arquivo eh o USERS e nao mai o COSMO
+#
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo users 1956 Jun  1 12:29 passwd

@@ -1,0 +1,340 @@
+###
+#
+# CP
+#
+###
+
+# o comando CP eh utilizado para copiar arquivos ou
+# diretorios de um local para outro
+#
+# cp [opcao] [origem] [destino]
+#
+# -f	- force
+# -i	- interativo
+# -r	- recursivo
+
+###
+#
+# MKDIR
+#
+###
+
+# o comando MKDIR eh utilizado para criar um ou mais diretorios
+#
+# mkdir [opcao] [diretorio]
+#
+# -p	- essa opcao permite a criacao de um diretorio filho mesmo
+#	que o diretorio pai tenha sido criado. nessa situacao tanto
+#	o diretorio pai quanto o diretorio filho serao criados.
+
+###
+#
+# MV
+#
+###
+
+# o comando MV eh utilizado tanto para mover um arquivo quanto para
+# renomear o mesmo.
+#
+# mv [opcao] [origem] [destino] 
+#
+# -f	- opcao utilizada para forcar o ato de mover o arquivo
+# -i	- interessao
+
+###
+#
+# LS
+#
+###
+
+# o comando LS eh utilizado para listar o conteudo de um diretorio
+# ou entao exibir informacoes de um ou mais arquivos.
+#
+# ls [opcao] [diretorio/arquivo] 
+#
+# -a 	- mosta o conteudo de um diretorio, inclusive arquivos
+#	ocultos;
+# -i	- exibe o inode do arquivo;
+# -l	- exibe todas as informacoes do arquivo em um formato longo;
+# -x	- exibe em formato de coluna
+# -h	- exibe as informacoes em formato humano.
+#
+# comumente, as opcoes mais utilizadas sao "lha".
+
+###
+#
+# RM
+#
+###
+
+# o comando RM eh utilizado para remover/apagar um arquivo ou 
+# diretorio.
+#
+# rm [opcao] [arquivo/diretorio]
+#
+# -f	- forcar a remocao;
+# -d	- remover um diretorio vazio;
+# -r	- remove um diretorio de forma recursiva
+# -i	- forma interativa;
+
+###
+#
+# RMDIR
+#
+###
+
+# comando utilizado para remover diretorio(s)
+#
+# rmdir [opcao] [diretorio] 
+#
+# --ignore-fail-on-non-empty	- ignora falha se por acaso
+#				o diretorio nao esta vazio.
+
+###
+#
+# TOUCH
+#
+###
+
+# o comando touch pode ser utilizado para criar um arquivo em branco
+# ou entao mudar o timestamp de um arquivo
+#
+# touch [option] [file]
+#
+# -a	- muda somente o tempo de acesso;
+# -m	- muda somente o tempo de modificacao;
+# -t	- utiliza o formato [[CC]YY]MMDDhhmm[.ss] para alterar o timestamp
+
+# obtem informacoes sobre o arquivo.
+#
+cosmo@debian:~/myProject/lpi$ stat touch.txt 
+  File: ‘touch.txt’
+  Size: 1322      	Blocks: 8          IO Block: 4096   regular file
+Device: 801h/2049d	Inode: 12061812    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-30 14:50:28.689634200 -0300
+Modify: 2017-05-30 14:50:28.689634200 -0300
+Change: 2017-05-30 14:50:28.693634164 -0300
+ Birth: -
+
+# altera o horario de modificacao e se utiliza o horario do sistema
+#
+cosmo@debian:~/myProject/lpi$ touch -m touch.txt 
+
+cosmo@debian:~/myProject/lpi$ stat touch.txt 
+  File: ‘touch.txt’
+  Size: 1322      	Blocks: 8          IO Block: 4096   regular file
+Device: 801h/2049d	Inode: 12061812    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-30 14:50:28.689634200 -0300
+Modify: 2017-05-30 14:50:50.409468612 -0300
+Change: 2017-05-30 14:50:50.409468612 -0300
+ Birth: -
+
+# altera o horario de acesso e se utiliza o horario do sistema
+#
+cosmo@debian:~/myProject/lpi$ touch -a touch.txt 
+
+cosmo@debian:~/myProject/lpi$ stat touch.txt 
+  File: ‘touch.txt’
+  Size: 1322      	Blocks: 8          IO Block: 4096   regular file
+Device: 801h/2049d	Inode: 12061812    Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
+Access: 2017-05-30 14:51:16.965266151 -0300
+Modify: 2017-05-30 14:50:50.409468612 -0300
+Change: 2017-05-30 14:51:16.965266151 -0300
+ Birth: -
+
+###
+#
+# TAR
+#
+###
+
+# comando utilizado para empacotar arquivos
+#
+# o comando tar nao compacta arquivo, mas pode se utilizar
+# de outro aplicativo para compactar o arquivo.
+#
+# tar [opcao] [arquio.tar] [arquivos/diretorios]
+#
+# opcao
+#	-c	criar um novo arquivo tar;
+#	-t	exibir o conteudo;
+#	-r	adicionar um novo arquivo;
+#	-f	permite especificar o arquivo tar a ser utilizado;
+#	-x	extrair arquivos
+#	-z	compactar o resultado com o gzip
+#	-v	verbose
+#	--delete	apagar um arquivo que esta dentro do arquivo TAR
+#	-z	tar.gz
+#	-j	tar.bz2
+
+# Criar o arquivo history.tar baseado no arquivo history.txt
+#
+cosmo@debian:~/myProject/lpi$ tar -cf history.tar history.txt 
+
+# adicionar o arquivo passwd ao arquivo tar history.tar
+#
+cosmo@debian:~/myProject/lpi$ tar -rf history.tar passwd 
+
+# remover o arquivo passwd do arquivo tar history.tar
+#
+cosmo@debian:~/myProject/lpi$ tar -rf history.tar --delete passwd 
+
+# criar o arquivo history.tar baseado no diretorio ~/myProject/lpi/
+#
+cosmo@debian:~/myProject/lpi$ tar -cvf history.tar ~/myProject/lpi/
+
+# eXtrair o conteudo do arquivo history.tar
+#
+cosmo@debian:~/myProject/lpi$ tar -xvf history.tar
+
+# comando utilizado para desempacotar o arquivo tr.txt do arquivo
+# history.txt
+#
+cosmo@debian:~/myProject/lpi$ tar -xvf history.tar tr.txt
+
+# CRIAR e compactar o tar com o gzip (-z)
+#
+cosmo@debian:~/myProject/lpi$ tar -czvf history.tar.gz history.txt
+
+# EXTRAIR o arqivo tar compactado com o gzip
+#
+cosmo@debian:~/myProject/lpi$ tar -xzvf history.tar.gz
+
+# CRIAR e compactar o tar com o bzip2 (-j)
+#
+cosmo@debian:~/myProject/lpi$ tar -cjvf history.tar.bz2 history.txt
+
+# EXTRAIR o arqivo tar compactado com o bzip2
+#
+cosmo@debian:~/myProject/lpi$ tar -xjvf history.tar.bz2
+
+###
+#
+# CPIO
+#
+###
+
+###
+#
+# DD
+#
+###
+
+# o aplicativo DD realiza a copia de um arquivo bit-a-bit.
+#
+# pode ser utilizado para fazer o backup ou apagar um disco 
+# rigido ou entao de uma particao.
+#
+# fazer o backup ou apagar a MBR
+#
+# dd if=[origem] of=[destino] [opcao]
+#
+# para apagar a MBR sem apagar a tabela de particionamento do
+# disco rigido, basta executar o comando abaixo.
+#
+cosmo@workstation:~/myProjects/lpi$ dd if=/dev/zero bs=446 count=1 /dev/sdX 
+
+# para apagar a MBR e apagar a tabela de particionamento do
+# disco rigido, basta executar o comando abaixo.
+#
+cosmo@workstation:~/myProjects/lpi$ dd if=/dev/zero bs=512 count=1 /dev/sdX 
+
+###
+#
+# FILE
+#
+###
+
+# o comando FILE eh utilizado para identificar o tipo de arquivo
+#
+# file [opcao] [arquivo]
+#
+# -f	- utilizado uma lista de arquivos a serem verificas. Essa
+#	lista de arquivos ficam armazenados dentro de um arquivo
+#	texto;
+# -d	- realiza o teste e exibe o resultado de acordo o sistema
+# 	operacional;
+
+###
+#
+# GZIP/GUNZIP
+#
+###
+
+# aplicativo utilizado para compactar/descompactar um diretorio
+# ou um grupo de arquivos.
+#
+# gzip [opcao] [arquivo.gz]
+# gunzip [opcao] [arquivo.gz]
+#
+# -r	- compactar
+# -c	- compactar e manter o arquivo original
+# -d	- descompactar
+# -t	- testar o arquivo
+#
+
+# compactar
+#
+cosmo@workstation:~/myProjects/lpi$ gzip -r wc.txt 
+
+# compactar
+# com a opcao "-c", o arquivo original sera mantido.
+#
+cosmo@workstation:~/myProjects/lpi$ gzip -c wc.txt >  wc.txt.gz
+
+# descompactar
+#
+cosmo@workstation:~/myProjects/lpi$ gzip -d wc.txt.gz 
+cosmo@workstation:~/myProjects/lpi$ gunzip wc.txt.gz 
+
+###
+#
+# BZIP2/BUNZIP2
+#
+###
+
+# comando utilizado para compactar/descompactar arquivo(s) e/ou
+# diretorio(s).
+#
+# bzip2 [opcao] [arquivo/diretorio]
+#
+# -z	- compactar
+# -d	- descompactar
+
+# compactar
+#
+cosmo@workstation:~/myProjects/lpi$ bzip2 -z wc.txt 
+cosmo@workstation:~/myProjects/lpi$ bzip2 wc.txt 
+
+# descompactar
+#
+cosmo@workstation:~/myProjects/lpi$ bzip2 -d wc.txt.bz2 
+
+###
+#
+# XZ
+#
+###
+
+# aplicativo utilizado para compactar ou descompactar
+# um arquivo e/ou diretorio.
+#
+# xz [opcao] [arquivo/diretorio]
+#
+# -z	- compactar
+# -k	- compactar e manter o arquivo original
+# -l	- informacoes sobre o arquivo compactado
+# -d	- descompactar
+
+# compactar
+#
+cosmo@workstation:~/myProjects/lpi$ xz wc.txt 
+cosmo@workstation:~/myProjects/lpi$ xz -z wc.txt 
+
+# descompactar
+#
+cosmo@workstation:~/myProjects/lpi$ xz -d wc.txt.xz 
+

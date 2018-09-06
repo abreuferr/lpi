@@ -1,0 +1,243 @@
+###
+#
+# & BG FG JOBS
+#
+###
+
+# uma das formas de colocar o aplicativo em backgroud
+#
+# & - desvincular o aplicativo do terminal
+# [1] - numero da tarefa
+# [8612] - PID do processo
+#
+
+# o aplitcativo foi desvinculado do terminar e executado
+# em modo backgroup pois foi utilizado o caractere "&"
+# 
+cosmo@debian:~/myProject/lpi$ qbittorrent &
+[1] 8612
+
+# outra forma de desvincular o aplicativo do terminal e 
+# colocar o aplicativo em backgroud.
+#
+# nesse caso, o aplicativo eh colocado em backgroud atraves
+# da sequencia de teclas Ctrl+z. Quando o aplicativo eh 
+# desvinculado do terminal e colocado em backgroud desta 
+# forma o aplicativo eh colocado em backgroud de forma pausada.
+#
+# ^Z - colocar o aplicativo em backgroud
+# [1] - numero da tarefa atual
+# Stopped = pausado
+#
+cosmo@debian:~/myProject/lpi$ qbittorrent 
+^Z
+[1]+  Stopped                 qbittorrent
+
+# depois de colocar o aplicativo em backgroud, mas
+# PAUSADO, eh necessario executar o aplicativo BG 
+# para realmente colocar o aplicativo em backgroud
+#
+# o simbolo & indica que o aplicativo foi colocado
+# em modo backgroud.
+#
+cosmo@debian:~/myProject/lpi$ bg
+[1]+ qbittorrent &
+
+# colocar o aplicativo em foregroud
+#
+cosmo@debian:~/myProject/lpi$ fg 
+qbittorrent
+
+# forma de verificar quais sao os aplicativos
+# que estao sendo executados em backgroud.
+#
+# essa tarefa eh executada atraves do aplicativo
+# JOBS [opcao]
+# -l = PID do processo.
+#
+cosmo@debian:~/myProject/lpi$ qbittorrent 
+^Z
+[1]+  Stopped                 qbittorrent
+cosmo@debian:~/myProject/lpi$ bg
+[1]+ qbittorrent &
+cosmo@debian:~/myProject/lpi$ jobs
+[1]+  Running                 qbittorrent &
+cosmo@debian:~/myProject/lpi$ jobs -l
+[1]+  8834 Running                 qbittorrent &
+
+###
+#
+# KILL / KILLALL
+#
+###
+
+# enviar um signal para um processo.
+# 
+# Alguns inais comuns:
+# HUP	1	Deconectar
+# INT	2	Interromper o processo, Ctrl+C
+# TERM	15	Terminar o processo de forma elegante
+# KILL	9	Terrminar o processo de forma abrupta
+# TSTP	20	Para ou pausar a execucao de um processo, Ctrl+Z
+# CONT	18	Retornar o processo que foi pusado anteriormente
+# 
+# 
+# comando kill - Enciar um sinal a um processo
+# 
+# Sintaxe
+
+# encerra o processo
+#
+# kill -sinal PID
+
+# retorna o nome do processo
+#
+# kill -l numero_sinal
+# 
+# kill -15 2000
+# kill -SIGINT 2000
+
+cosmo@debian:~/myProject/lpi$ ps aux | grep qbittorrent
+cosmo     5263  2.1  0.1 655096 40032 tty1     Sl   11:14   0:00 qbittorrent
+
+cosmo@debian:~/myProject/lpi$ kill -15 5263
+
+cosmo@debian:~/myProject/lpi$ killall qbittorrent
+
+
+###
+#
+# PS
+#
+###
+
+# aplicativo utilizado para visualizar os processos que estao ativos.
+#
+# ps [opcao]
+#
+# a	- exibe processos de propriedade de outros usuarios e vinculado a um terminal.
+# u	- exibe o nome dos usuarios donos do processo.
+# x	- exibe processos sem terminal
+
+cosmo@workstation:~$ ps a
+  PID TTY      STAT   TIME COMMAND
+  575 tty1     Ss+    0:00 /sbin/agetty --noclear tty1 linux
+  661 tty7     Ss+    2:02 /usr/bin/X :0 -seat seat0 -auth /var/run/lightdm/root/:0 -nolisten tcp vt7 -novtswitch
+ 5879 pts/0    Ss     0:00 /bin/bash
+ 5886 pts/2    Ss     0:00 /bin/bash
+ 9938 pts/2    SN     0:01 xscreensaver -nosplash
+14466 pts/0    S+     0:00 vi 103_5.txt
+14959 pts/2    R+     0:00 ps a
+
+cosmo@workstation:~$ ps u
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+cosmo     5879  0.0  0.0  21912  3912 pts/0    Ss   Jun19   0:00 /bin/bash
+cosmo     5886  0.0  0.0  21920  3832 pts/2    Ss   Jun19   0:00 /bin/bash
+cosmo     9938  0.0  0.0  65104  5432 pts/2    SN   Jun19   0:01 xscreensaver -nosplash
+cosmo    14466  0.0  0.0  37180  5440 pts/0    S+   10:50   0:00 vi 103_5.txt
+cosmo    14962  0.0  0.0  19100  2492 pts/2    R+   11:03   0:00 ps u
+
+cosmo@workstation:~$ ps x
+  PID TTY      STAT   TIME COMMAND
+  985 ?        Ss     0:00 /lib/systemd/systemd --user
+  986 ?        S      0:00 (sd-pam)  
+  988 ?        Ss     0:04 /usr/bin/openbox --startup /usr/lib/x86_64-linux-gnu/openbox-autostart OPENBOX
+(...)
+
+# usualmente o aplicativo PS eh utilizado junto com o aplicativo GREP para poder
+# filtrar os dados exibidos
+#
+# outra opcao que normalmente utilizada eh a combinacao das opcoes "aux"
+#
+cosmo@workstation:~$ ps aux | grep vim
+cosmo    15050  0.0  0.0  12728  2208 pts/2    S+   11:07   0:00 grep vim
+
+###
+#
+# TOP
+#
+###
+
+# exibir os processo em execcucao no Linux.
+#
+# a situacao do processo sao atualizadas em modo real-time.
+#
+# top [opcao]
+#
+# -d N	- especifica o atrasona atualizacao das telas;
+# -i	- ignora processos ociosos;
+# -n N	- exibe N interacoes e depois termina;
+# -b	- permite enviar a saida  do top para outro programa ou um
+#	arquivo;
+#
+# eh possivel interagir com o aplicativo TOP durante a sua execucao. Para
+# isso, basta precionar algumas teclas.
+#
+# h	- help
+# k	- matar um processo.
+# r	- renice
+
+###
+#
+# FREE
+#
+###
+
+# o aplicativo FREE exibe a quantidade de memoria livre e que esta
+# sendo usada pelo sistem
+#
+# free [opcao]
+#
+# -b	- bytes
+# -k	- kbytes
+# -m	- mbytes
+# -t	- total
+# -s N	- operacao continua.
+#
+cosmo@workstation:~$ free -b
+             total       used       free     shared    buffers     cached
+Mem:    33749704704 10725171200 23024533504  124014592  129331200 7699054592
+-/+ buffers/cache: 2896785408 30852919296
+Swap:   10158600192          0 10158600192
+
+cosmo@workstation:~$ free -k
+             total       used       free     shared    buffers     cached
+Mem:      32958696   10475148   22483548     121276     126304    7518892
+-/+ buffers/cache:    2829952   30128744
+Swap:      9920508          0    9920508
+
+cosmo@workstation:~$ free -m
+             total       used       free     shared    buffers     cached
+Mem:         32186      10230      21956        118        123       7342
+-/+ buffers/cache:       2764      29422
+Swap:         9687          0       9687
+
+cosmo@workstation:~$ free -t
+             total       used       free     shared    buffers     cached
+Mem:      32958696   10475076   22483620     120844     126304    7518672
+-/+ buffers/cache:    2830100   30128596
+Swap:      9920508          0    9920508
+Total:    42879204   10475076   32404128
+
+###
+#
+# UPTIME
+#
+###
+
+# o aplicativo exibe a quanto tempo o sistema operacional esta em 
+# execucao.
+#
+# uptime [opcao]
+#
+# -p	- a quanto tempo esta em execucao de forma resumida
+# -s	- exibe as mesmas informacoes no formato yyyy-mm-dd MM:HH:SS
+
+###
+#
+# PSTREE
+#
+###
+
+# aplicativo utilizado para exibir os processos em execucao no computador em
+# formato de arvore.

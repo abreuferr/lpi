@@ -1,0 +1,23 @@
+# chgroup - change group - alterar o grupo de um arquivo ou diretorio.
+#
+# o comando chgroup permite alterar o grupo de um determinado arquivo ou
+# pasta.
+#
+# chgrp [novo_grupo] [arquivo/diretorio]
+#
+
+# no exemplo abaixo, o arquivo passwd esta
+# associado ao grupo cosmo
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo cosmo 1956 Jun  1 12:29 passwd
+
+# atraves do comando chgrp foi possivel
+# alterar o grupo dono do arquivo, do grupo
+# csmo para o grupo users
+cosmo@debian:~/myProject/lpi$ chgrp users passwd 
+
+# eh possivel observar que o novo grupo dono do
+# arquivo eh o USERS e nao mai o COSMO
+#
+cosmo@debian:~/myProject/lpi$ ls -l passwd 
+-rw-r--r-- 1 cosmo users 1956 Jun  1 12:29 passwd

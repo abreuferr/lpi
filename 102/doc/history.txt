@@ -1,0 +1,801 @@
+    1  sudo cp /usr/share/doc/ifupdown/examples/network-interfaces.gz /tmp/
+    2  gunzip /tmp/network-interfaces.gz 
+    3  sudo vi /etc/network/interfaces
+    4  ip a
+    5  clear
+    6  sudo poweroff
+    7  sudo vi /etc/hostname 
+    8  sudo vi /etc/hosts
+    9  sudo vi /etc/apt/sources.list
+   10  sudo apt-get update
+   11  sudo apt-get upgrade
+   12  sudo apt-get clean
+   13  clear
+   14  sudo poweroff
+   15  ls
+   16  ip a
+   17  exit
+   18  mkdir myProject
+   19  git config --global user.name "caio ferreria"
+   20  sudo apt-get install git
+   21  sudo apt-get update
+   22  sudo apt-get upgrade
+   23  sudo apt-get install git -y -d
+   24  sudo apt-get install git -y
+   25  git config --global user.name "caio ferreria"
+   26  git config --global user.email "abreuferr@gmail.com"
+   27  git config --global color.ui true
+   28  git config --global core.excludesfile ~/.gitignore
+   29  vi ~/.gitignore
+   30  ls
+   31  pwd
+   32  cd myProject/
+   33  ls
+   34  git clone https://github.com/abreuferr/lpi
+   35  git clone https://github.com/abreuferr/git
+   36  git clone https://github.com/abreuferr/howto
+   37  ls
+   38  vi password
+   39  ls
+   40  ls -a
+   41  ls -la
+   42  ls
+   43  cd lpi/
+   44  ls
+   45  cat fmt.db 
+   46  fmt -w 6 fmt.db 
+   47  fmt -w 6 fmt.db | cat -A
+   48  vi fmt.db 
+   49  fmt -w 6 fmt.db 
+   50  vi fmt.db 
+   51  fmt -w 6 fmt.db 
+   52  fmt -w 50 fmt.db 
+   53  fmt -w 3 fmt.db 
+   54  fmt -w 4 fmt.db 
+   55  fmt -w 5 fmt.db 
+   56  fmt -w 10 fmt.db 
+   57  clear
+   58  fmt -w 6 fmt.db | cat -A
+   59  clear
+   60  fmt -w 20 fmt.db | cat -A
+   61  fmt -w 20 fmt.db | cat -A > fmt.txt
+   62  vi fmt.txt 
+   63  head /etc/passwd
+   64  head -n 3 /etc/passwd
+   65  head -n 3 /etc/passwd > head.txt
+   66  clear
+   67  cat /etc/passwd
+   68  head -n 3 /etc/passwd > head.txt
+   69  head -n 3 /etc/passwd > head.txt | tee
+   70  clear
+   71  cat /etc/passwd
+   72  head -n 3 /etc/passwd
+   73  vi head.txt 
+   74  ls
+   75  git status
+   76  git log
+   77  sudo apt-get install vtop
+   78  ls
+   79  vi join1.db
+   80  vi join2.db
+   81  clear
+   82  cat join1.db 
+   83  cat join2.db 
+   84  join -j 1 join1.db join2.db 
+   85  join -j 1 join1.db join2.db > joinresult.txt
+   86  vi joinresult.txt 
+   87  cat join2.db 
+   88  vi join2.db 
+   89  join -j 1 join1.db join2.db 
+   90  clear
+   91  cat join1.db 
+   92  cat join2.db 
+   93  join -j 1 join1.db join2.db 
+   94  vi join2.db 
+   95  clear
+   96  cat join1.db 
+   97  cat join2.db 
+   98  join -j 1 join1.db join2.db 
+   99  vi join2.db 
+  100  join -1 2 join1.db -2 3 join2.db 
+  101  clear
+  102  cat join1.db 
+  103  cat join2.db 
+  104  join -1 2 join1.db -2 3 join2.db 
+  105  ls
+  106  cat expand.
+  107  cat expand.txt 
+  108  cat fmt.db 
+  109  nl -b a fmt.db 
+  110  cp fmt.db nl.db
+  111  nl -b a nl.db
+  112  vi nl.db 
+  113  nl -b a nl.db
+  114  nl -b t nl.db
+  115  vi nl.txt
+  116  vi paste1.db
+  117  vi paste2.db
+  118  paste paste1.db paste2.db 
+  119  paste -s paste1.db paste2.db 
+  120  paste -d -  paste1.db paste2.db 
+  121  cat paste1.db 
+  122  cat paste2.db 
+  123  vi paste.txt
+  124  split -10 /etc/passwd
+  125  ls
+  126  ls -l
+  127  cat xaa 
+  128  cat xab
+  129  cat xac
+  130  wc -l
+  131  wc -l x*
+  132  wc -l /etc/passwd
+  133  wc -l x*
+  134  vi split.txt
+  135  split /etc/passwd -b 1k -d
+  136  ls
+  137  ls -l
+  138  ls -l /etc/passwd
+  139  ls -lh /etc/passwd
+  140  ls -l
+  141  ls -lh x0*
+  142  clear
+  143  ls -lh /etc/passwd
+  144  ls -lh x0*
+  145  split /etc/passwd -b 1k -dvi split.txt 
+  146  vi split.txt 
+  147  split /etc/passwd -n 3 PREFIXO_
+  148  ls -l PREFIXO_a*
+  149  vi split.txt 
+  150  tac /etc/passwd
+  151  tail -n 2 /etc/passwd
+  152  clear
+  153  cat /etc/passwd
+  154  tail -n 2 /etc/passwd
+  155  vi cat.txt
+  156  tail -n +5 /etc/passwd
+  157  vi cat.txt
+  158  tr '[a-z]' '[A-Z' /etc/passwd
+  159  cat /etc/passwd | tr '[a-z]' '[A-Z]'
+  160  clear
+  161  cat /etc/passwd | tr '[a-z]' '[A-Z]'
+  162  tail /etc/passwd | tr '[a-z]' '[A-Z]'
+  163  tail -n 5 /etc/passwd | tr '[a-z]' '[A-Z]'
+  164  clear
+  165  tail -n 5 /etc/passwd | tr '[a-z]' '[A-Z]'
+  166  vi tr.txt
+  167  tail -n 5 /etc/passwd | tr a-z A-Z
+  168  tail -n 5 /etc/passwd | tr systemd SYSTEMD
+  169  clear
+  170  tail -n 5 /etc/passwd | tr systemd SYSTEMD
+  171  :~/myProject/lpi$ clear
+  172  cosmo@study:~/myProclear
+  173  clear
+  174  tail -n 5 /etc/passwd | tr systemd SYSTEMD
+  175  vi tr.txt 
+  176  git status
+  177  git add .
+  178  git status
+  179  clear
+  180  vi sort.db
+  181  clear
+  182  cat sort.db 
+  183  sort sort.db | uniq -d
+  184  sort sort.db | uniq -D
+  185  sort sort.db | uniq -c
+  186  sort sort.db | uniq -i
+  187  sort sort.db | uniq -u
+  188  vi sort.txt
+  189  clear
+  190  cat fmt.db 
+  191  wc -c fmt.db 
+  192  wc -l fmt.db 
+  193  wc -L fmt.db 
+  194  wc -m fmt.db 
+  195  wc -w fmt.db 
+  196  vi wc.txt
+  197  ls -l fmt.db 
+  198  vi wc.txt
+  199  vi fmt.db 
+  200  wc -m fmt.db 
+  201  wc -c fmt.db 
+  202  wc -m /etc/passwd
+  203  wc -c /etc/passwd
+  204  vi fmt.db 
+  205  wc -m /etc/passwd
+  206  wc -m fmt.db 
+  207  wc -c fmt.db 
+  208  file fmt.db 
+  209  files fmt.db 
+  210  clear
+  211  ls -l --color
+  212  ls --color
+  213  ls -d /etc/
+  214  git log
+  215  git status
+  216  ls
+  217  file tr.txt 
+  218  cp fmt.db touch.db
+  219  ls
+  220  clear
+  221  ls -l
+  222  clear
+  223  ls -l touch.db 
+  224  touch -m touch.db 
+  225  ls -l touch.db 
+  226  vi touch.txt
+  227  touch -m -t 201703310630 touch.db 
+  228  ls -l touch.db 
+  229  vi touch.txt
+  230  clear
+  231  ls
+  232  git status
+  233  ls
+  234  stat fmt.db 
+  235  clear
+  236  stat fmt.db 
+  237  vi stat.txt
+  238  mkdir pato pata pat1 pata2 pata0 pata10 pata100
+  239  ls -d par[ao12]
+  240  ls -d pat[ao12]
+  241  ls -d pat[a-o]
+  242  ls -d pat[!i]
+  243  mkdir pati
+  244  ls -d pat[!i]
+  245  ls -d pat{a..o}
+  246  ls -d pat{a..c}{1..3}
+  247  vi ls.txt
+  248  find /etc/ -user root
+  249  sudo find /etc/ -user root
+  250  sudo find /etc/ -group root
+  251  clear
+  252  find /etc/ -name passwd
+  253  clear
+  254  sudo find /etc/ -name passwd
+  255  sudo find /etc/ -name *passwd*
+  256  sudo find /etc/ -name passwd ls
+  257  sudo find /etc/ -name passwd -ls
+  258  vi find.txt
+  259  sudo find /etc/ -size +15K
+  260  sudo find /etc/ -size +15k
+  261  sudo find /etc/ -size +15k ls -l
+  262  sudo find /etc/ -size +15k -ls
+  263  sudo find /etc/ -size +15k -ls -h
+  264  sudo find /etc/ -size +15k -ls
+  265  sudo find /etc/ -size +1M -ls
+  266  sudo find /etc/ -size +1M -exec echo "arquivo emcontrado" \;
+  267  sudo find /etc/ -size +15k -exec echo "arquivo emcontrado" \;
+  268  clear
+  269  sudo find /etc/ -size +15k -exec echo "arquivo emcontrado" \;
+  270  sudo find /etc/ -size +15k -ls
+  271  vi find.txt 
+  272  sudo find /etc/ -size +15k -exec echo "arquivos {} encontrado" \;
+  273  sudo find /etc/ -size +15k -exec echo "arquivo { } encontrado" \;
+  274  sudo find /etc/ -size +15k -exec echo "arquivos {} encontrado" \;
+  275  vi find.txt 
+  276  sudo find /etc/ uid 0
+  277  sudo find /etc/ -uid 0
+  278  find /etc/ -atime 2
+  279  sudo find /etc/ -atime 2
+  280  clear
+  281  sudo find /etc/ -atime 1
+  282  sudo find /etc/ -atime -1
+  283  sudo find /etc/ -atime +2
+  284  clear
+  285  mkdir -p linux1 linux2/linux3
+  286  touch arquivo.txt linux1/arquivo.txt linux2/linux3/arquivo.txt
+  287  find . -maxdepth 2 -iname arquivo.txt
+  288  find . -maxdepth 1 -type d
+  289  find . -mindepth 2 -iname arquivo.txt
+  290  vi find.txt 
+  291  mkdir -m 300 300; mkdir -m 014 014; mkdir -m 103 103; mkdir -m 777 777
+  292  find . -perm 777
+  293  find . -perm -006
+  294  find . -perm +006
+  295  vi find.txt 
+  296  sudo find / -path "/usr/bin/*"
+  297  vi find.txt 
+  298  clear
+  299  cat
+  300  ls
+  301  cat > stdout.txt
+  302  cat stdout.txt 
+  303  clear
+  304  cat > stdout.txt
+  305  cat stdout.txt 
+  306  vi stdout.txt 
+  307  git status
+  308  git add .
+  309  git commit -am "continuacao do estudo pratico da lpi"
+  310  vi ../howto/git.txt 
+  311  git push origin master
+  312  cat ../password 
+  313  git push origin master
+  314  sudo poweroff
+  315  cd myProject/lpi/
+  316  ls
+  317  ls /etc/ /ETC > msg_stdout.txt 2_msg_stderr.txt
+  318  ls /etc/ /ETC > msg_stdout.txt 2> msg_stderr.txt
+  319  cat msg_stdout.txt 
+  320  cat msg_stderr.txt 
+  321  ls
+  322  mv msg_stdout.txt 
+  323  vimsg_stdout.txt 
+  324  vi msg_stdout.txt 
+  325  vi msg_stderr.txt 
+  326  ls -l /etc/passwd /ETC/PASSWD &> msg.txt
+  327  vi msg.txt 
+  328  ls /root/ /ROOT/ > msg2.txt 2>&1
+  329  vi msg2.txt 
+  330  ls /tmp/ /TMP/ > msg2.txt 2>&1
+  331  vi msg2.txt 
+  332  tr a-z A-Z < /etc/passwd
+  333  tr a-z A-Z < /etc/passwd > tr2.txt 
+  334  vi tr2.txt 
+  335  ping 1.1.1.1 &> /dev/null &
+  336  ping 2.2.2.2 &> /dev/null &
+  337  ping 3.3.3.3 &> /dev/null &
+  338  jobs
+  339  jobs > jobs.txt
+  340  jobs -l > jobs.txt
+  341  cat jobs.txt 
+  342  fg %2
+  343  ping 2.2.2.2 &> /dev/null &
+  344  jobs -l
+  345  bg %2
+  346  jobs -l
+  347  jobs -p
+  348  ps
+  349  ps -aux
+  350  pkill ping
+  351  ps -aux
+  352  ps u -C sshd
+  353  ps lax
+  354  pstree
+  355  sudo apt-get install pstree htop
+  356  sudo apt-get install htop
+  357  sudo apt-cache search pstree
+  358  sudo apt-get install psmisc
+  359  pstree
+  360  pstree -la
+  361  pstree -np
+  362  top
+  363  ping 2.2.2.2 &> /dev/null &
+  364  top
+  365  htop
+  366  ps aux | grep ping
+  367  pkill ping
+  368  free
+  369  free -h
+  370  free -m
+  371  uptime
+  372  w
+  373  ps axo `user,uid,ruser,ruid,comm'
+  374  ps axo `user,uid,ruser,ruid,comm`
+  375  ps axo 'user,uid,ruser,ruid,comm'
+  376  ps aox
+  377  ps axo
+  378  ping 2.2.2.2 &> /dev/null &
+  379  pgrep ping
+  380  ping 1.1.1.1 &> /dev/null &
+  381  ping 3.3.3.3 &> /dev/null &
+  382  pgrep ping -d ';'
+  383  pgrep ping -d ';' > pgrep.txt
+  384  vi pgrep.txt 
+  385  cut -f 3 -d ; pgrep 
+  386  cat cut
+  387  cat cut1.txt 
+  388  cat cut2.txt 
+  389  rm cut?.txt
+  390  cut -f 1,3 -d : /etc/passwd
+  391  cut -f 1,3 -d : /etc/passwd > cutt.txt
+  392  rm cut?.txt
+  393  cut -f 1,3 -d : /etc/passwd > cut.txt
+  394  vi cut.txt 
+  395  cut -f 1,3 -d : /etc/passwd --output-delimiter = >> cut.txt
+  396  vi cut.txt 
+  397  pkill ping
+  398  ping 1.1.1.1 &> /dev/null
+  399  clear
+  400  ping 1.1.1.1 &> /dev/null &
+  401  ps o ni,command -C ping
+  402  nice ping 2.2.2.2 &> /dev/null &
+  403  ps o ni,command -C ping
+  404  vi nice.txt
+  405  ps o pid,ni,command -C ping
+  406  renice +15 904
+  407  sudo renice +15 904
+  408  vi renice.txt
+  409  clear
+  410  ls /dev/ | grep "sda"
+  411  ls /dev/ | grep "sda1\|sda2"
+  412  echo Daniel Moreno | tee daniel | cat
+  413  brew install docker-machine-driver-xhyve
+  414  sudo lsblk -l
+  415  sudo lsblk -f
+  416  blkid
+  417  sudo blkid
+  418  df -h
+  419  df -h -i
+  420  clear
+  421  df -h
+  422  df -h -i
+  423  df -h -T
+  424  df -h
+  425  vi df.txt
+  426  mount -a
+  427  sudo mount -a
+  428  sudo mount -l
+  429  sudo apt-get install quota quotatool
+  430  clear
+  431  sudo poweroff
+  432  sudo apt-get update
+  433  sudo apt-get upgrade
+  434  exit
+  435  ip a
+  436  clear
+  437  exit
+  438  sudo apt-get update
+  439  sudo apt-get upgrade
+  440  sudo apt-get clean
+  441  cler
+  442  clear
+  443  ls
+  444  cd myProject/
+  445  ls
+  446  cd lpi/
+  447  ls
+  448  ls /home/cosmo/
+  449  ls -a /home/cosmo/
+  450  ls -la /home/cosmo/
+  451  cat ~/.bash_history 
+  452  ls /mnt/
+  453  sudo mkdir /mnt/quota
+  454  sudo chmod 775 -R /mnt/quota/
+  455  sudo chown root:users -R /mnt/quota/
+  456  sudo adduser cosmo
+  457  sudo adduser cosmo users
+  458  sudo mount -o remount,usrquota,grpquota,errors=remount-ro /mnt/quota/
+  459  sudo poweroff
+  460  sudo fdisk -l
+  461  sudo fdisk /dev/sdb 
+  462  sudo mkfs
+  463  sudo mkfs.ext4 /dev/sdb1 
+  464  sudo mkfs -t ext4 /dev/sdb1 
+  465  sudo mount /dev/sdb1 /mnt/quota/
+  466  sudo vi /etc/fstab 
+  467  sudo fdisk -l /dev/sdb
+  468  sudo fdisk /dev/sdb
+  469  sudo umount /mnt/quota/
+  470  sudo fdisk /dev/sdb
+  471  sudo mkfs.btrfs -f /dev/sdb1 
+  472  sudo su
+  473  apt-cache search btrfs
+  474  sudo apt-get install btrfs-tools
+  475  sudo su
+  476  sudo mkfs.btrfs -f /dev/sdb1 
+  477  sudo btrfs filesystem label /dev/sdb1 sdb
+  478  sudo btfrfs-convert /dev/sdb1 
+  479  sudo btrfs-convert /dev/sdb1 
+  480  sudo fdisk /dev/sdb1 
+  481  sudo poweroff
+  482  sudo fdisk /dev/sdb 
+  483  sudo mkfs.ext4 /dev/sdb1 
+  484  sudo mount /dev/sdb1 /mnt/quota/
+  485  sudo vi /etc/fstab 
+  486  sudo umount /mnt/quota/
+  487  sudo mount -a
+  488  ls /mnt/
+  489  ls /mnt/quota/
+  490  sudo mount -o remount,usrquota,gprquota,errors=remount-ro /mnt/quota/
+  491  sudo umount /mnt/quota/
+  492  sudo mount /dev/sdb1 /mnt/quota/
+  493  sudo mount -o remount,usrquota,gprquota,errors=remount-ro /mnt/quota/
+  494  sudo mount -o remount,usrquota,grpquota,errors=remount-ro /mnt/quota/
+  495  sudo quotacheck -mcugv /mnt/quota/
+  496  ls -la /mnt/quota/
+  497  sudo quotaon /mnt/quota/
+  498  sudo quotaon -p /mnt/quota/
+  499  sudo vi /etc/fstab 
+  500  sudo quotaon -u /mnt/quota/
+  501  sudo quotaon /mnt/quota/
+  502  > /mnt/quota/cosmo_quota.txt
+  503  sudo > /mnt/quota/cosmo_quota.txt
+  504  ls /mnt/
+  505  ls -l /mnt/
+  506  sudo chmor -R 775 /mnt/quota/
+  507  sudo chmod -R 775 /mnt/quota/
+  508  sudo chmod  775 /mnt/quota/
+  509  sudo chown root:users /mnt/quota/
+  510  ls -l /mnt/
+  511  > /mnt/quota/cosmo_quota.txt
+  512  sudo update-alternatives --config editor
+  513  sudo edquota -u cosmo
+  514  > /mnt/quota/arq01.txt
+  515  > /mnt/quota/arq02.txt
+  516  ls /mnt/quota/
+  517  rm /mnt/quota/cosmo_quota.txt 
+  518  > /mnt/quota/arq03.txt
+  519  > /mnt/quota/arq04.txt
+  520  > /mnt/quota/arq05.txt
+  521  ls /mnt/quota/
+  522  ls -l /mnt/quota/
+  523  sudo edquota -u cosmo
+  524  rm /mnt/quota/arq0*
+  525  sudo edquota -u cosmo
+  526  > /mnt/quota/arq01.txt
+  527  > /mnt/quota/arq02.txt
+  528  > /mnt/quota/arq03.txt
+  529  > /mnt/quota/arq04.txt
+  530  > /mnt/quota/arq05.txt
+  531  sudo edquota -u cosmo
+  532  ls -l /mnt/quota/
+  533  > /mnt/quota/arq06.txt
+  534  > /mnt/quota/arq07.txt
+  535  > /mnt/quota/arq08.txt
+  536  ls -l /mnt/quota/
+  537  sudo edquota -t
+  538  rm /mnt/quota/arq0*.txt
+  539  touch /mnt/quota/arq1.txt; touch /mnt/quota/arq2.txt; sleep 2; touch /mnt/quota/arq3.txt
+  540  touch /mnt/quota/arq4.txt; touch /mnt/quota/arq5.txt; sleep 2; touch /mnt/quota/arq3.txt
+  541  quota -u cosmo
+  542  repquota -u
+  543  sudo repquota -u
+  544  sudo repquota -u cosmo
+  545  sudo repquota -u cosmo /mnt/quota/
+  546  sudo repquota /mnt/quota/
+  547  clear
+  548  sudo repquota /mnt/quota/
+  549  ls
+  550  cd myProject/lpi/
+  551  ls
+  552  clea
+  553  clear
+  554  ls
+  555  > permissao.txt
+  556  ls -l
+  557  ls -l permissao.txt 
+  558  clear
+  559  ls -l permissao.txt 
+  560  chmod u+x permissao.txt 
+  561  ls -l permissao.txt 
+  562  chmod +x permissao.txt 
+  563  ls -l permissao.txt 
+  564  chmod g-x permissao.txt 
+  565  ls -l permissao.txt 
+  566  chmod o=wx permissao.txt 
+  567  ls -l permissao.txt 
+  568  chmod o=rwx permissao.txt 
+  569  ls -l permissao.txt 
+  570  chmod o=r permissao.txt 
+  571  ls -l permissao.txt 
+  572  chmod a=rwx permissao.txt 
+  573  ls -l permissao.txt 
+  574  chmod u=rw,g-rw permissao.txt 
+  575  ls -l permissao.txt 
+  576  chmod u=r,o=r permissao.txt 
+  577  ls -l permissao.txt 
+  578  chmod u=r,g=r,o=r permissao.txt 
+  579  ls -l permissao.txt 
+  580  chmod uo=rw permissao.txt 
+  581  ls -l permissao.txt 
+  582  ls
+  583  ls permissao.txt 
+  584  ls -l permissao.txt 
+  585  chown cosmo:users permissao.txt 
+  586  ls -l permissao.txt 
+  587  chown cosmo:cosmo permissao.txt 
+  588  chown :users permissao.txt 
+  589  ls -l permissao.txt 
+  590  ls -ld /tmp/
+  591  > link.txt
+  592  ln -s link.txt link_simbolico.txt
+  593  ls -l link*
+  594  date
+  595  ln link.txt link_hardlink.txt
+  596  ls -l link*
+  597  ls -F link*
+  598  ls -lF link*
+  599  ls -F link*
+  600  sudo poweroff
+  601  ls -la /etc/
+  602  ls -la /etc/ | less
+  603  ls
+  604  cd myProject/lpi/
+  605  ls
+  606  ls -l /etc/ | tee tee.txt
+  607  vi tee.txt 
+  608  echo $HOME
+  609  echo $USER
+  610  env
+  611  echo 'The quick brown; fox jumps over the lazy  dog' > sample.txt
+  612  vi sample.txt 
+  613  rm sample.txt 
+  614  vi cut.txt 
+  615  man cut
+  616  cut -c 5 /etc/passwd
+  617  vi cut.txt 
+  618  cut -f 1 -d : /etc/passwd
+  619  clear
+  620  cat /etc/passwd
+  621  cut -f 1 -d : /etc/passwd
+  622  vi paste.txt
+  623  cat paste.txt
+  624  clear
+  625  cat paste.txt
+  626  cat /var/log/syslog 
+  627  sudo head -n 15 /var/log/syslog 
+  628  man cat
+  629  sudo cat -n 15 /var/log/syslog 
+  630  sudo cat -n 5 /var/log/syslog 
+  631  man cat
+  632  cat cat.txt 
+  633  clar
+  634  clear
+  635  ls
+  636  cat cat.txt 
+  637  sudo cat -n5 /var/log/syslog 
+  638  sudo cat -n 5 cat.txt 
+  639  clear
+  640  sudo cat -n 5 cat.txt 
+  641  man cat
+  642  expand expand.db 
+  643  cat expand.db 
+  644  expand -t 10 expand.db 
+  645  expand -t 5 expand.db 
+  646  expand -t 15 expand.db 
+  647  unexpand -a expand.db 
+  648  cat expand.txt 
+  649  ls
+  650  cat join1.db 
+  651  vi join1.db 
+  652  vi join2.db 
+  653  join join1.db join2.db >> joinresult.txt 
+  654  cat joinresult.txt 
+  655  clear
+  656  cat join1.db 
+  657  cat join2.db 
+  658  cat joinresult.txt 
+  659  vi joinresult.txt 
+  660  vi join1.db 
+  661  vi join2.db 
+  662  join -1 2 -2 1 join1.db join2.db >> joinresult.txt 
+  663  clear
+  664  cat join1.db 
+  665  cat join2.db 
+  666  vi joinresult.txt 
+  667  join -1 2 -2 1 join1.db join2.db
+  668  vi join1.db 
+  669  vi joinresult.txt 
+  670  cat sort.db 
+  671  vi sort.db 
+  672  sort sort.db 
+  673  cat sort.txt 
+  674  sort sort.db > sort.txt 
+  675  vi sort.txt 
+  676  cat sort.db 
+  677  vi sort.txt 
+  678  sort -r sort.db >> sort.txt 
+  679  vi sort.txt 
+  680  ls /etc/ | sort -rn
+  681  ls
+  682  cat tr.txt 
+  683  tail -n 5 /etc/passwd | tr systemd SYSTEMD
+  684  clear
+  685  tail -n 5 /etc/passwd | tr systemd SYSTEMD
+  686  vi tr.txt 
+  687  ls
+  688  vi uniq.db
+  689  uniq uniq.db 
+  690  uniq uniq.db > uniq.txt
+  691  uniq -c uniq.db 
+  692  vi uniq.txt 
+  693  uniq -u uniq.db >> uniq.txt 
+  694  vi uniq.txt 
+  695  vi uniq.db 
+  696  uniq uniq.db 
+  697  vi uniq.txt 
+  698  uniq -c uniq.db 
+  699  vi uniq.txt 
+  700  sort uniq.db | uniq -c uniq.db 
+  701  sort uniq.db 
+  702  sort uniq.db | uniq -c
+  703  vi uniq.txt 
+  704  sort uniq.db | uniq -cc
+  705  sort uniq.db | uniq -cu
+  706  vi uniq.txt 
+  707  grep book uniq.db 
+  708  cp uniq.db grep.db
+  709  grep book grep.db > grep.txt
+  710  vi grep.txt 
+  711  vi grep.db 
+  712  grep book grep.db >> grep.txt
+  713  vi grep.db 
+  714  grep Paper grep.db
+  715  grep -i Paper grep.db
+  716  vi grep.db 
+  717  grep Paper grep.db
+  718  grep -i Paper grep.db
+  719  cat grep.db 
+  720  vi grep.txt
+  721  grep -i Paper grep.db >> grep.txt 
+  722  vi grep.txt
+  723  grep -i Paper grep.db
+  724  grep -i Paper grep.db >> grep.txt 
+  725  vi grep.txt
+  726  ls /etc/
+  727  ls /etc/ | grep hosts
+  728  ls /etc/ | grep hosts >> grep.txt 
+  729  vi grep.txt
+  730  git status
+  731  gitt add .
+  732  git add .
+  733  cat /etc/shadow
+  734  ls -la /etc/shadow
+  735  sudo cat /etc/shadow
+  736  vi sudo.txt
+  737  su 
+  738  cat /etc/passwd
+  739  cat /etc/passwdvipw
+  740  man vipw
+  741  sudo vipw -p 
+  742  sudo aptitude
+  743  clear
+  744  cat /etc/shadow
+  745  sudo cat /etc/shadow
+  746  sudo cat /etc/group
+  747  whereis useradd
+  748  cat /usr/sbin/useradd 
+  749  clear
+  750  cat /usr/sbin/useradd | head -n 1
+  751  file /usr/sbin/useradd 
+  752  man userdel
+  753  ls
+  754  ls -l permissao.txt 
+  755  chown cosmo:cosmo permissao.txt 
+  756  chown cosmo permissao.txt 
+  757  chown .users permissao.txt 
+  758  ls -l permissao.txt 
+  759  ls
+  760  > umask.txt
+  761  ls -l umask.txt 
+  762  umask umask.txt 
+  763  umask 021 umask.txt 
+  764  ls -l umask.txt 
+  765  umask 022 umask.txt 
+  766  ls -l umask.txt 
+  767  ls -l /usr/bin/passwd 
+  768  > suid.txt
+  769  ls -l suid.txt 
+  770  sudo chmod u+s suid.txt 
+  771  ls -l suid.txt 
+  772  vi suid.txt 
+  773  sudo chmod 4755 suid.txt 
+  774  ls -l suid.txt 
+  775  vi suid.txt 
+  776  > sgid.txt
+  777  ls -l sgid.txt 
+  778  sudo chmod g+s sgid.txt 
+  779  ls -l sgid.txt 
+  780  sudo chmod 2555 sgid.txt 
+  781  ls -l sgid.txt 
+  782  vi sgid.txt 
+  783  sudo chmod 2755 sgid.txt 
+  784  vi sgid.txt 
+  785  vi suid.txt 
+  786  history 
+  787  ping 1.1.1.1 &> /dev/null
+  788  ping 1.1.1.1 &> /dev/null &
+  789  jobs
+  790  ps aux | grep ping
+  791  htop
+  792  history 
+  793  ps o ni,command -C ping
+  794  man ps
+  795  ps
+  796  ps o ni
+  797  ps o ni,command -C ping
+  798  pkill ping
+  799  nice --15 ping 1.1.1.1 &> /dev/null &
+  800  ps o ni,command -C ping
+  801  history > history.txt

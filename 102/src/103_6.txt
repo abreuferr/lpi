@@ -1,0 +1,61 @@
+# o valor NICE de um processo indica a prioridade que eh dado a um
+# processo. Neste caso, o que se entende por prioridade eh a quantidade
+# de CPU que eh disponbilizada a um determinado processo.
+#
+# os valores NICE vao de -20 ate +19.
+#
+# quanto menor o valor NICE, maior eh a prioridade do processo.
+
+
+# todo processo quando eh inicializado eh atribuido por padrao o
+# valor zero (0) para o NICE desse processo.
+#
+cosmo@study:~/myProject/lpi$ ping 1.1.1.1 &> /dev/null &
+[1] 902
+
+# como eh possivel visualizar abaixo, todo processo que eh inicializado
+# pelo usuario, o valor nice atribuido eh o valor zero (0).
+#
+cosmo@study:~/myProject/lpi$ ps o ni,command -C ping
+ NI COMMAND
+  0 ping 1.1.1.1
+
+# se por acaso um processo eh inicializado atraves do aplicativo NICE,
+# o valor dez (10) eh atribuido ao NICE deste processo.
+#
+cosmo@study:~/myProject/lpi$ nice ping 2.2.2.2 &> /dev/null &
+[2] 904
+
+# como eh possivel visualizar abaixo, que o  valor NICE atribuido 
+# foi o valor dez (10).
+#
+cosmo@study:~/myProject/lpi$ ps o ni,command -C ping
+ NI COMMAND
+ 10 ping 2.2.2.2
+
+# se utilizado do aplicativo RENICE, existe a possibilidade de alterar
+# o valor NICE de um processo.
+#
+# eh possivel utilizar tanto o valor +N quanto somente N para definir
+# o valor NICE de um processo.
+cosmo@study:~/myProject/lpi$ sudo renice +15 904
+cosmo@study:~/myProject/lpi$ sudo renice 15 904
+904 (process ID) old priority 10, new priority 15
+
+cosmo@study:~/myProject/lpi$ ps o ni,command -C ping
+ NI COMMAND
+ 15 ping 2.2.2.2
+
+# se utilizado do aplicativo RENICE, existe a possibilidade de alterar
+# o valor NICE de um processo.
+#
+# eh possivel utilizar o valor -N para "abaixar" o valor NICE de um 
+# processo.
+cosmo@study:~/myProject/lpi$ sudo renice -15 904
+
+904 (process ID) old priority 10, new priority -15
+
+cosmo@study:~/myProject/lpi$ ps o ni,command -C ping
+ NI COMMAND
+ -15 ping 2.2.2.2
+

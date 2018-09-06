@@ -1,0 +1,58 @@
+# comando utilizado para empacotar arquivos
+#
+# o comando tar nao compacta arquivo.
+#
+# tar [opcao] [arquio.tar] [arquivos/diretorios]
+#
+# opcao
+#	-c	criar um novo arquivo tar;
+	-t	exibir o conteudo;
+	-r	adicionar um nov arquivo;
+	-f	permite especificar o arquivo tar a ser utilizado;
+	-x	extrari arquivos
+	-z	compactar o resultado com o gzip
+	-v	verbose
+	--delete	apagar um arquivo que esta dentro do arquivo TAR
+	-z	tar.gz
+	-j	tar.bz2
+
+# criar o arquivo history.tar baseado no arquivo history.txt
+#
+cosmo@debian:~/myProject/lpi$ tar -cf history.tar history.txt 
+
+# adicionar o arquivo passwd ao arquivo tar history.tar
+#
+cosmo@debian:~/myProject/lpi$ tar -rf history.tar passwd 
+
+# remover o arquivo passwd do arquivo tar history.tar
+#
+cosmo@debian:~/myProject/lpi$ tar -rf history.tar --delete passwd 
+
+# criar o arquivo history.tar baseado no diretorio ~/myProject/lpi/
+#
+cosmo@debian:~/myProject/lpi$ tar -cvf history.tar ~/myProject/lpi/
+
+# extrair o conteudo do arquivo history.tar
+#
+cosmo@debian:~/myProject/lpi$ tar -xvf history.tar
+
+# comando utilizado para desempacotar o arquivo tr.txt do arquivo
+# history.txt
+#
+cosmo@debian:~/myProject/lpi$ tar -xvf history.tar tr.txt
+
+# criar e compactar o tar com o gzip
+#
+cosmo@debian:~/myProject/lpi$ tar -czvf history.tar.gz history.txt
+
+# extrair o arqivo tar compactado com o gzip
+#
+cosmo@debian:~/myProject/lpi$ tar -xzvf history.tar.gz
+
+# criar e compactar o tar com o bzip2
+#
+cosmo@debian:~/myProject/lpi$ tar -cjvf history.tar.bz2 history.txt
+
+# extrair o arqivo tar compactado com o bzip2
+#
+cosmo@debian:~/myProject/lpi$ tar -xjvf history.tar.bz2

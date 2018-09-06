@@ -1,0 +1,92 @@
+# gerenciador de boot
+#
+# na tela inicial do grub_legacy/grub 2 sao exibidos os
+# sistemas operacionais e suas respectivas versoes instalados
+# no disco rigido.
+#
+# No menu de opcoes do grub, Grub Legacy e Grub , que aparece durante a 
+# inicializacao do computador, eh possivel alterar os parametros de 
+# inicializacao do grub. Para isso, basta precionar a tecla "e".
+#
+# parametros:
+#	init=/bin/bash	inicializa o sistema por meio do binario especificado;
+#	mem		especifica a quantidade de memoria maxima disponivel;
+#	quiet		modo silencioso (nao eh exibido nenhuma mensagem durante a inicializacao;
+#	root=/dev/sda2	permite definir em qual particao o sistema devera comecar;
+#	set root="hd0,msdos"
+#	ro		inicializa em modo read-only;
+#	rw		inicializa em modo read and write;
+#	S,1,2,3,4,5	runlevel inicial;
+#	splash		inicializa o linux em modo splash;
+#	vga=modo	resolucao do video para o grub;
+#	initialfs	sistema de arquivo virtual;
+#			permite que o sistema basico seja carregado para permitir que o restante
+#			do sistema seja reconhecido e carregado;
+#			responsavel pela inicializacao dos arquivos de configuracao e modulos do
+#			kernel;
+
+# GRUB VERSAO LEGACY
+#
+# arquivos de configuracao
+#	/etc/grub.d		- diretorio com uma serie de scripts que ajudam na criacao do arquivo grub.cfg;
+#	/boot/grub/menu.lst	- arquivo principal de configuracao do grub legacy
+#
+# opcoes do menu.lst
+#
+#	default	n	definir o SO padrao
+#	timeout n	tempo de espera
+#	password	senha de acesso
+#	fallback	define outro SO em caso de problema
+#	title		titulo
+#	root (hd0,0)	primeiro disco da primeira particao
+#	kernel		kernel a ser utilizado
+#	initd		disco RAM a ser utilizado
+#
+# exemplo /boot/grub/menu.lst
+#
+#	default         0
+#	timeout         5
+#	password topsecret
+#	title           Debian GNU/Linux, kernel 3.16.0-4-amd64
+#	root            (hd0,0)
+#	kernel          /boot/vmlinuz-3.16.0-4-amd64 root=UUID=8c5f207f-5b95-40ed-a934-9c4b7773a3dc ro 
+#	initrd          /boot/initrd.img-3.16.0-4-amd64
+
+###############################################################################
+
+# GRUB VERSAO 2
+#
+# arquivos de configuracao
+#	/boot/grub/grub.cfg	- principal arquivo de configuracao do (somente leitura);
+#	/etc/grub.d		- diretorio com uma serie de scripts que ajudam na criacao do arquivo grub.cfg;
+#	/etc/defaults/grub	- arquivo de configuracao do menu do grub2 (parametros descritos abaixo);
+#				- a partir deste arquivo, o arquivo /boot/grub/grub.cfg e sao utilizados os
+#				scripts presentes no diretorio /etc/grub.d
+#
+# opcoes do menu.lst
+#
+#	GRUB_DEFAULT=n			- SO a ser inicializado
+#	GRUB_TIMEOUT=n			- tempo de espera
+#	GRUB_HIDDEN_TIMEOUT=t		- simula a opcao anterior
+#	GRUB-DITRIBUTOR=...		- info sobre a distribuicao
+#	GRUB_CMDLINE_LINUX_DEFAULT=...	- parametros adicionais passados para o kernel
+#	GRUB_DISABLE_RECOVERY=...	- desabilitar a opcao de recovery
+#
+# exemplo /etc/default/grub
+#
+	GRUB_DEFAULT=0
+	GRUB_TIMEOUT=5
+	GRUB_DISTRIBUTOR=`lsb_release -i -s 2> /dev/null || echo Debian`
+	GRUB_CMDLINE_LINUX_DEFAULT="quiet"
+	GRUB_CMDLINE_LINUX=""
+	GRUB_GFXMODE=640x480
+	GRUB_DISABLE_RECOVERY="true"
+
+# o aplicativo grub-mkconfig eh utilizado para gerar o arquivo de configuracao
+# do grub2 (/boot/grub/grub.cfg)
+
+# o aplicativo grub-install eh utilizado para instalar o grub no computador.
+#
+# deve ser indicado o disco rigido em que o grub sera instalado e NAO a particao.
+#
+# grub-install /dev/sdX

@@ -1,0 +1,847 @@
+##
+#
+# CAT
+#
+##
+
+# o comando cat tem por objetivo o de visualizar o conteudo de um
+# ou mais arquivos
+#
+# cat [opcao] [arquivos]
+# opcao
+#	-E	adicionar o caractere $ no final das linhas
+#	-s	remove as linhas em branco e repetidas do arrquivo
+#	-T	adicionar os caracteres ^| no comeco das linhas 
+#	-A	equivale a todas as opcoes listadas acima
+
+cosmo@study:~/myProject/lpi$ cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+(...)
+
+# a opcao -n permite acrescentar o numero da linha no resultado do
+# comando cat.
+#
+cosmo@debian:~/myProject/lpi$ cat -n /etc/passwd >> cat.txt 
+     1	root:x:0:0:root:/root:/bin/bash
+     2	daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+     3	bin:x:2:2:bin:/bin:/usr/sbin/nologin
+     4	sys:x:3:3:sys:/dev:/usr/sbin/nologin
+     5	sync:x:4:65534:sync:/bin:/bin/sync
+     6	games:x:5:60:games:/usr/games:/usr/sbin/nologin
+     7	man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+     8	lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+     9	mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+    10	news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+	(...)
+
+# o comando cat tambem pode ser utilizado para redirecionar
+# o conteudo de um arquivo para outro arquivo. Para isso, basta
+# utilizar o redrecionardor ">"
+#
+cosmo@debian:~/myProject/lpi$ cat origem.txt > destino.txt
+
+##
+#
+# CUT
+#
+##
+
+# o aplicativo cut tem por objetivo o de extrair informacoes
+# de um determinado arquivo se utilizando de paramentros para
+# realizar a filtragem.
+
+# cut [opcao] [arquivo]
+
+# opcao
+	-b	- seleciona somente N bytes;
+	-c	- seleciona somente N caracteres;
+	-d	- utiliza delimitadores para selecionar os dados;
+	-f	- seleciona somente determinados campos;
+
+# conteudo do arquivo /et/passwd
+#
+cosmo@debian:~/myProject/lpi$ cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+
+# a opcao -c <n> ira exibir somente os primeiros N caracteres
+# do arquivo /etc/passwd
+#
+cosmo@debian:~/myProject/lpi$ cut -c 1 /etc/passwd
+r
+d
+
+# neste caso, serao selecionados os campos 1, 2 e 3
+# e esta sendo utilizado como delimitador o caractere
+# ":"
+#
+cosmo@debian:~/myProject/lpi$ cut -f 1-3 -d : /etc/passwd 
+root:x:0
+daemon:x:1
+
+# neste caso, serao selecionados os campos 1 e 3
+# e esta se utilizando como delimitador o caractere
+# ":"
+#
+cosmo@debian:~/myProject/lpi$ cut -f 1,3 -d : /etc/passwd
+root:0
+daemon:1
+
+#  neste caso, serao selecionados os campos 1 e 3 e o
+# delimitador original (:) será trocado pelo sinal =
+#
+cosmo@debian:~/myProject/lpi$ cut -f 1,3 -d : /etc/passwd --output-delimiter = 
+root=0
+daemon=1
+
+# neste caso, sera selecionado somente o campo 1 e
+# logo em seguida o resultado sera ordenado.
+#
+cosmo@debian:~/myProject/lpi$ cut -f 1 -d : /etc/passwd | sort
+avahi
+backup
+
+# o comando head ira ler as 5 primeiras linhas do arquivo /etc/passwd
+# o resultado sera enviado para o comando cut que ira exibir o conteudo
+# do campo 1 e 3. Finalmente, o comando sort ira ordenar o resultado.
+#
+cosmo@debian:~/myProject/lpi$ head -n 5 /etc/passwd | cut -d : -f 1,3 | sort
+bin:2
+daemon:1
+root:0
+sync:4
+sys:3
+
+# o comando grep eh utilizado para filtrar e selecionar somente os
+# registros que utilizam o /bin/bash.
+#
+# depois de fazer o filtro, o comando cut eh utilizado para obter
+# as informacoes desejadas.
+#
+$ grep /bin/bash /etc/passwd 
+root:x:0:0:root:/root:/bin/bash
+cosmo:x:1000:1000:cosmo,,,:/home/cosmo:/bin/bash
+
+$ grep /bin/bash /etc/passwd | cut -f 1,3 -d :
+root:0
+cosmo:1000
+
+##
+#
+# EXPAND
+#
+##
+
+# o objetivo deste aplicativo eh o de converter o caractere
+# TAB em ESPACOS.
+#
+# a opcao -t N permite definir a quantidade de espacos que 
+# sera utilizado.
+#
+caios-MBP:lpi cosmo$ expand expand.db
+1       2       3       4       5
+
+caios-MBP:lpi cosmo$ expand -t 1 expand.db
+1 2 3 4 5
+
+##
+#
+# FMT
+#
+##
+
+# o comando FMT tem por finalidade o de formatar
+# o texto.
+#
+# -w N	: definir o numero de caracteres de cada linha.
+# -u	: um espaco entre cada palavra.
+
+cosmo@debian:~/myProject/lpi$ cat fmt.db 
+O incentivo ao avanço tecnológico, assim como o início 
+da atividade geral de formação de atitudes estimula a 
+padronização da gestão inovadora da qual fazemos parte.
+
+# como eh possivel perceber, o software fmt NAO possui a
+# capacidade de QUEBRAR uma palavra. Desta forma, normalmente
+# as frases possuem normalmente MENOS de n caracteres, que
+# no exemplo abaixo sao de 15 caracteres.
+#
+cosmo@debian:~/myProject/lpi$ fmt -w 15 fmt.db 
+O incentivo
+ao avanço
+tecnológico,
+assim como o
+início da
+atividade
+geral de
+formação
+de atitudes
+estimula a
+padronização
+da gestão
+inovadora da
+qual fazemos
+parte.
+
+##
+#
+# HEAD
+#
+##
+
+# o comando head tem por objetivo o de exibir as N
+# primeiras partes de um arquivo.
+#
+# por padrao, o comando head exibe as 10 primeiras
+# linhas de um arquivo, mas existe a possibilidade
+# de definir a quantidade de linhas ou de bytes de
+# um determinado arquivos
+#
+# head [opcao] [arquivo]
+#
+# -c N	- bytes
+# -n N	- linha
+
+# conteudo do arquivo /etc/passwd
+#
+cosmo@study:~/myProject/lpi$ cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+systemd-timesync:x:100:103:systemd Time Synchronization,,,:/run/systemd:/bin/false
+systemd-network:x:101:104:systemd Network Management,,,:/run/systemd/netif:/bin/false
+systemd-resolve:x:102:105:systemd Resolver,,,:/run/systemd/resolve:/bin/false
+systemd-bus-proxy:x:103:106:systemd Bus Proxy,,,:/run/systemd:/bin/false
+cosmo:x:1000:1000:cosmo,,,:/home/cosmo:/bin/bash
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+
+# serao exibidos as tres primeiras linha do arquivo
+# /etc/passwd
+#
+cosmo@study:~/myProject/lpi$ head -n 3 /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+
+# a opcao -c ou --byte permite exibir somente os N primeros
+# bytes de um arquivo. Existe a possibilidade de definir K (kilo 
+# bytes).
+#
+cosmo@debian:~/myProject/lpi$ head --byte=15 /etc/passwd
+root:x:0:0:root
+
+##
+#
+# JOIN
+#
+##
+
+# com o aplicativo JOIN, é possivel concatenar dois arquivos
+# e geral um terceiro arquivo com o resultado da concatenacao.
+#
+# para executar a concatenacao, eh necessario que ambos os
+# arquivos tenham um campo em comum e tenha o mesmo numero
+# de linhas de dados.
+#
+# join [opcao] [arquivo1] [arquivo2]
+#
+# -j CAMPO	- definir qual eh o campo que sera utilizado como referencia,
+#		- equivalente a "-1 [CAMPO] -2 [CAMPO]", sendo -1 o primeiro
+#		arquivo e -2 o segundo arquivo.
+# -i		- ignorar case sensitive.
+
+cosmo@study:~/myProject/lpi$ cat join1.db
+1. Asia:
+2. Africa:
+3. Europe:
+4. North America:
+
+cosmo@study:~/myProject/lpi$ cat join2.db
+1. India
+2. Nigeria
+3. The Netherlands
+4. The US
+
+cosmo@study:~/myProject/lpi$ join join1.db join2.db
+1. Asia:India
+2. Africa:Nigeria
+3. Europe:The Netherlands
+4. North America:The US
+
+# o exemplo abaixo ira concatenar o conteudo de dois arquivos
+# utilizando o primeiro campo como orientacao na hora de
+# fazer a concatenacao.
+#
+# como nao foi expecificado qual o campo que sera utilizado
+# como orientacao na hora de fazer a concatenacao, entao o
+# software toma como padrao o primeiro campo.
+#
+cosmo@study:~/myProject/lpi$ cat join1.db
+1 john
+2 jane
+3 mary
+
+cosmo@study:~/myProject/lpi$ cat join2.db
+1 doe
+2 doe
+3 sue
+
+cosmo@study:~/myProject/lpi$ join join1.db join2.db
+1 john doe
+2 jane doe
+3 mary sue
+
+# o exemplo abaixo ira concatenar o conteudo de dois arquivos
+# 
+# do primeiro arquivo (-1), sera utilizado o segundo campo (2) e
+# do segundo arquivo (-2), sera utilizado o primeiro campo para
+# realizar a concatenacao.
+#
+cosmo@study:~/myProject/lpi$ cat join1.db
+john 1
+jane 2
+mary 3
+
+cosmo@study:~/myProject/lpi$ cat join2.db
+doe 1
+doe 2
+sue 3
+
+cosmo@study:~/myProject/lpi$ joint -1 2 -2 1 join1.db join2.db
+1 John Doe
+2 Jane Doe
+3 Mary Sue
+
+##
+#
+# NL
+#
+##
+
+# o aplicativo NL enumera as linhas de um arquivo.
+#
+# nl [opcao] [arquivo]
+#
+# -a	- enumera todas as linhas
+# -t	- enumera somente as linhas que nao estao em branco
+#
+
+# com a opcao a, sera enumerado todas as linhas do arquivo, esteja ela em
+# branco ou nao.
+#
+cosmo@study:~/myProject/lpi$ nl -b a nl.db
+     1	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+     2	diam enim, faucibus ut cursus vel, dictum et risus. Donec elementum,
+     3	lacus in pulvinar pretium, ex risus porttitor tortor, ac faucibus
+     4
+     5
+     6	leo ante sed mauris. Proin volutpat urna ut faucibus placerat. Ut
+     7	dictum tristique nibh quis ornare.
+
+# com a opcao t, sera enumerado somente as linhas que NAO estiverem em branco.
+#
+cosmo@study:~/myProject/lpi$ nl -b t nl.db
+     1	Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+     2	diam enim, faucibus ut cursus vel, dictum et risus. Donec elementum,
+     3	lacus in pulvinar pretium, ex risus porttitor tortor, ac faucibus
+
+
+     4	leo ante sed mauris. Proin volutpat urna ut faucibus placerat. Ut
+     5	dictum tristique nibh quis ornare.
+
+###
+#
+# OD
+#
+###
+
+# o aplicativo OD eh utilizado para "visualizar" um arquivo em formato
+# binario ou arquivos nao texto.
+#
+# od [opcao] [file]
+#
+# opcao
+#	-d	- formato decimal
+#	-b	- formato octal
+#	-h	- formato hexadecimal
+#	-c	- ASCII
+
+###
+#
+# PASTE
+#
+###
+
+# o comando paste permite unir as linhas de dois arquivos em 
+# um terceiro arquivo.
+#
+# paste [opcao] [arquivo1] [arquivo2]
+#
+# -d	- o caractere TAB eh convertido em um caractere
+# -s	- a uniao ocorre em modo paisagem
+
+cosmo@study:~/myProject/lpi$ cat paste1.db
+1
+2
+3
+cosmo@study:~/myProject/lpi$ cat paste2.db
+4
+5
+6
+
+# uniao das linhas dos arquivos.
+#
+cosmo@study:~/myProject/lpi$ paste paste1.db paste2.db
+1	4
+2	5
+3	6
+
+# semelhante ao comando acima, só que o que antes era coluna
+# agora virou paisagem.
+#
+cosmo@study:~/myProject/lpi$ paste -s paste1.db paste2.db
+1	2	3
+4	5	6
+
+# com a opcao -d, o que antes era o caractere TAB agora eh
+# o caractere -
+#
+cosmo@study:~/myProject/lpi$ paste -d -  paste1.db paste2.db
+1-4
+2-5
+3-6
+
+###
+#
+# PR
+#
+###
+
+# o comando PR eh utilizado para formatar um arquivo para
+# ser impresso.
+#
+# pr [opcao] [file]
+#
+# -l	- numero de colunas;
+# -o	- tamanho do paragrafo;
+
+###
+#
+# SED
+#
+###
+
+# o aplicativo SED eh um editor de streams, utilizado 
+# para automatizar tarefas de edicao repetitivas
+#
+# sed [opcao] [comando] [arquivo]
+# sed [opcao] -f [script] [arquivo]
+#
+# opção
+# -e 	comando do sed
+# -f [arquivo]	o arquivo eh um script do sed
+# -g	trata todas as substituicoes globais
+# -i	editar o proprio aquivo
+#
+# comandos
+# d	apaga linha
+# s	realiza substituicoes	s/anterior/posterior/flags
+		flags
+			g	global
+			n	substitui a enesima instancia
+			y	traduz caracteres
+
+# apaga as duas primeiras linhas do arquivo /etc/passwd
+#
+cosmo@debian:~/myProject/lpi$ sed "1,2d" /etc/passwd
+
+# substituir o caracter "x" pelo caractere "X" de forma global
+#
+cosmo@debian:~/myProject/lpi$ sed "s/x/X/g" /etc/passwd
+
+# apagar as linhas cujo primeiro caracter eh o "#"
+#
+# o caracter que indica o comeco da frase eh o 
+# caractere ^. Ja o caractere $ indica o fim da
+# linha.
+#
+cosmo@debian:~/myProject/lpi$ sed "/^#/d" /etc/passwd
+
+# apagar linhas em branco (^$)
+#
+# o caracter que indica o comeco da frase eh o 
+# caractere ^. Ja o caractere $ indica o fim da
+# linha.
+#
+cosmo@debian:~/myProject/lpi$ sed "/^$/d" /etc/passwd
+
+# substituir as linhas em branco pela palavra BRANCO
+#
+# o caracter que indica o comeco da frase eh o 
+# caractere ^. Ja o caractere $ indica o fim da
+# linha.
+#
+cosmo@debian:~/myProject/lpi$ sed 's/^$/BRANCO/' /etc/passwd
+
+###
+#
+# SORT
+#
+###
+
+# o coamdno sort eh utilizado para ordenar/indexar as linhas
+# de um arquivo.
+#
+# sort [opcao] [arquivo]
+#
+# -r	- ordem reversa
+# -R	- ordenacao randomica
+# -d	- branco ou alfanumerico
+# -i	- ignorar caracteres nao printavel
+# -t	- seleciona um delimitador
+# -k	- ordena segundo uma chave
+
+cosmo@study:~/myProject/lpi$ cat sort.db
+1
+2
+4
+3
+5
+7
+6
+8
+0
+9
+
+# ordena o conteudo do arquivo
+#
+cosmo@study:~/myProject/lpi$ sort sort.db > sort.txt
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+# ordena o arquivo de forma reversa.
+#
+cosmo@study:~/myProject/lpi$ sort -r sort.db > sort.txt
+9
+8
+7
+6
+5
+4
+3
+2
+1
+0
+
+# se utiliza do parametro -t para definir um delimitador : e em seguida
+# se utiliza do parametro -k para definir qual campo sera escolhido para
+# indexar o arquivo.
+#
+cosmo@debian:~/myProject/lpi$ sort -n -t : -k 3 /etc/passwd >> sort.txt 
+
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+
+###
+#
+# SPLIT
+#
+###
+
+# o comando split eh utilizado para dividir um arquivo
+# em N partes dependendo da quantidade de linhas ou bytes
+# que for definida.
+#
+# comando : split [opcao] [arq_entrada] [arq_saida]
+#
+# opcao	:
+#	-l n	numero de linhas
+#	-b nb/k	tamanho
+
+# no exemplo abaixo, o split ira dividir o arquivo
+# passwd em N partes e cada parte tera 10 linha (-10)
+#
+cosmo@study:~/myProject/lpi$ split -l 10 /etc/passwd
+
+# no exemplo abaixo, o split ira dividir o arquivo
+# passwd em N partes e cada parte tera 1k (-b 1k)
+#
+cosmo@study:~/myProject/lpi$ split -b 1k -d /etc/passwd
+
+###
+#
+# TAIL
+#
+###
+
+# comando utilizado para visulizar as ultimas linhas 
+# de um arquivo.
+#
+# tail [arquivo] - 10 ultimas linhas
+#
+# -n [N] 	- N numeras linhas
+# -f [arquivo]	- leitura dinamica.
+
+# como nao foi especificado a quantidade de linhas que deveria
+# ser exibidas, entao o tail utiliza como valor default o valor
+# 10, desta forma, serao exibidas as 10 ultimas linhas do arquivo.
+#
+cosmo@debian:~$ tail /etc/passwd > tail.txt
+sshd:x:107:65534::/var/run/sshd:/usr/sbin/nologin
+hplip:x:109:7:HPLIP system user,,,:/var/run/hplip:/bin/false
+dnsmasq:x:110:65534:dnsmasq,,,:/var/lib/misc:/bin/false
+lightdm:x:112:119:Light Display Manager:/var/lib/lightdm:/bin/false
+pulse:x:113:120:PulseAudio daemon,,,:/var/run/pulse:/bin/false
+rtkit:x:114:122:RealtimeKit,,,:/proc:/bin/false
+usbmux:x:115:46:usbmux daemon,,,:/var/lib/usbmux:/bin/false
+Debian-exim:x:111:123::/var/spool/exim4:/bin/false
+ntp:x:108:117::/home/ntp:/bin/false
+ftp:x:116:124:ftp daemon,,,:/srv/ftp:/bin/false
+
+# utilizando o parametro -n N, eh possivel especificar
+# a quantidade de linhas que se deseja visualizar.
+#
+cosmo@study:~/myProject/lpi$ tail -n 2 /etc/passwd
+cosmo:x:1000:1000:cosmo,,,:/home/cosmo:/bin/bash
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+
+# Neste caso, atraves dos parametros -n +5 eh possivel
+# visualizar as linhas do arquivo mas a partir da quinta
+# linha do arquivo.
+#
+cosmo@study:~/myProject/lpi$ tail -n +5 /etc/passwd
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+systemd-timesync:x:100:103:systemd Time Synchronization,,,:/run/systemd:/bin/false
+systemd-network:x:101:104:systemd Network Management,,,:/run/systemd/netif:/bin/false
+systemd-resolve:x:102:105:systemd Resolver,,,:/run/systemd/resolve:/bin/false
+systemd-bus-proxy:x:103:106:systemd Bus Proxy,,,:/run/systemd:/bin/false
+cosmo:x:1000:1000:cosmo,,,:/home/cosmo:/bin/bash
+sshd:x:104:65534::/var/run/sshd:/usr/sbin/nologin
+
+###
+#
+# TR
+#
+###
+
+# o comando TR eh utilizado para converter ou apagar caracteres.
+#
+# tr [opcao] [set1] [set2]
+#
+#       [:alnum:] - todas letras e numeros
+#       [:alpha:] - todas as letras
+#       [:blank:] - todos os espacos#
+#       [:cntrl:] - todos os caracteres de controle
+#       [:digit:] - todos os digitos
+#       [:graph:] - todos os caracteres que podem ser impressos na tela
+#       [:lower:] - letras minusculas
+#       [:print:] - caracteres que podem ser impressos, incluindo o espaco
+#       [:punct:] - caracteres de pontuacao
+#       [:space:] - horizontal ou vertical espacos
+#       [:upper:] - letras maiusculas
+#       [:xdigit:] - caracteres hexadecimal
+
+# sera convertido todos os caracteres alfabeticos de letras minusculas
+# para mailsculas.
+#
+cosmo@study:~/myProject/lpi$ tail -n 5 /etc/passwd | tr '[a-z]' '[A-Z]'
+SYSTEMD-NETWORK:X:101:104:SYSTEMD NETWORK MANAGEMENT,,,:/RUN/SYSTEMD/NETIF:/BIN/FALSE
+SYSTEMD-RESOLVE:X:102:105:SYSTEMD RESOLVER,,,:/RUN/SYSTEMD/RESOLVE:/BIN/FALSE
+SYSTEMD-BUS-PROXY:X:103:106:SYSTEMD BUS PROXY,,,:/RUN/SYSTEMD:/BIN/FALSE
+COSMO:X:1000:1000:COSMO,,,:/HOME/COSMO:/BIN/BASH
+SSHD:X:104:65534::/VAR/RUN/SSHD:/USR/SBIN/NOLOGIN
+
+# outra forma de converter letras minusculas para maiusculas eh utilizado
+# uma expressao do unix.
+#
+cosmo@study:~/myProject/lpi$ cat entrada.txt | tr [:lower:] [:upper:] > saida.txt
+
+# sera convertido os caracteres "systemd" para "SYSTEMD". Neste caso, eh levado
+# em consideracao os caracteres "s y s t e m d" e nao a palavra "systemd".
+#
+cosmo@study:~/myProject/lpi$ tail -n 5 /etc/passwd | tr systemd SYSTEMD
+SYSTEMD-rESolvE:x:102:105:SYSTEMD RESolvEr,,,:/run/SYSTEMD/rESolvE:/bin/falSE
+SYSTEMD-buS-proxY:x:103:106:SYSTEMD BuS ProxY,,,:/run/SYSTEMD:/bin/falSE
+coSMo:x:1000:1000:coSMo,,,:/hoME/coSMo:/bin/baSh
+SShD:x:104:65534::/var/run/SShD:/uSr/Sbin/nologin
+MESSagEbuS:x:105:110::/var/run/DbuS:/bin/falSE
+
+###
+#
+# UNEXPAND
+#
+###
+
+# o objetivo do comando UNEXPAND eh o de converter o caractere espaco
+# no caractere tab.
+#
+# unexpando [opcao] [arquivo]
+#
+# -a	- converte todos os espacos em tab.
+
+###
+#
+# UNIQ
+#
+###
+
+# o comando uniq tem como funcionalidade a de remover ou reportar linhas repetidas
+# em um arquivo.
+#
+# uniq [opcao] [entrada] [saida]
+#
+# -c	- exibe a quantidade de linha que foram repitidas;
+# -i	- nao leva em consideracao case sensitive;
+# -d	- exibe somente as linhas repetidas e a quantidade;
+# -u	- exibe somente as linhas que estao repetidas somente uma vez; 
+
+cosmo@debian:~/myProject/lpi$ cat uniq.db 
+reading.txt
+book
+book
+Paper
+paper
+article
+article
+magazine
+reading.txt
+
+# vai exibir quantas vezes uma linha foi repetida
+#
+cosmo@debian:~/myProject/lpi$ uniq -c grep.db 
+      1 reading.txt
+      2 book
+      1 Paper
+      1 paper
+      2 article
+      1 magazine
+      1 reading.txt
+
+# exibe as linhas que estao repetidas e a quantidade.
+#
+cosmo@debian:~/myProject/lpi$ uniq -ci grep.db 
+      1 reading.txt
+      2 book
+      2 Paper
+      2 article
+      1 magazine
+      1 reading.txt
+
+# exibe as linhas repetidas e trabalha em modo case sensitivo
+#
+cosmo@debian:~/myProject/lpi$ uniq -cd grep.db 
+      2 book
+      2 article
+
+# exibe as linhas que foram repetidas somente uma unica vez.
+#
+cosmo@debian:~/myProject/lpi$ uniq -cu grep.db 
+      1 reading.txt
+      1 Paper
+      1 paper
+      1 magazine
+      1 reading.txt
+
+###
+#
+# WC
+#
+###
+
+# conta a quantidade linhas, palavras e bytes em cada arquivos.
+#
+# wc [opcao] [arquivo]
+#
+# -c	- byte
+# -m	- caracteres
+# -l	- linha
+# -w	- palavra
+
+cosmo@study:~/myProject/lpi$ cat fmt.db
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+diam enim, faucibus ut cursus vel, dictum et risus. Donec elementum,
+lacus in pulvinar pretium, ex risus porttitor tortor, ac faucibus
+leo ante sed mauris. Proin volutpat urna ut faucibus placerat. Ut
+dictum tristique nibh quis ornare.
+
+cosmo@study:~/myProject/lpi$ ls -l fmt.db
+-rw-r--r-- 1 cosmo cosmo 305 May 11 11:56 fmt.db
+
+# contagem de bytes
+#
+cosmo@study:~/myProject/lpi$ wc -c fmt.db
+305 fmt.db
+
+# contagem de linhas
+#
+cosmo@study:~/myProject/lpi$ wc -l fmt.db
+5 fmt.db
+
+# exibe a quantidade de caracteres da linha mais longa do arquivo
+#
+cosmo@study:~/myProject/lpi$ wc -L fmt.db
+68 fmt.db
+
+# contagem de caracteres
+#
+cosmo@study:~/myProject/lpi$ wc -m fmt.db
+305 fmt.db
+
+# contagem de palavras
+#
+cosmo@study:~/myProject/lpi$ wc -w fmt.db
+46 fmt.db

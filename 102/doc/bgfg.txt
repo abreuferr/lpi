@@ -1,0 +1,60 @@
+# uma das formas de colocar o aplicativo em backgroud
+#
+# & - desvincular o aplicativo do terminal
+# [1] - numero da tarefa
+# [8612] - PID do processo
+#
+
+# o aplitcativo foi desvinculado do terminar e executado
+# em modo backgroup pois foi utilizado o caractere "&"
+# 
+cosmo@debian:~/myProject/lpi$ qbittorrent &
+[1] 8612
+
+# outra forma de desvincular o aplicativo do terminal e 
+# colocar o aplicativo em backgroud.
+#
+# nesse caso, o aplicativo eh colocado em backgroud atraves
+# da sequencia de teclas Ctrl+z. Quando o aplicativo eh 
+# desvinculado do terminal e colocado em backgroud desta 
+# forma o aplicativo eh colocado em backgroud de forma pausada.
+#
+# ^Z - colocar o aplicativo em backgroud
+# [1] - numero da tarefa atual
+# Stopped = pausado
+#
+cosmo@debian:~/myProject/lpi$ qbittorrent 
+^Z
+[1]+  Stopped                 qbittorrent
+
+# depois de colocar o aplicativo em backgroud, mas
+# PAUSADO, eh necessario executar o aplicativo BG 
+# para realmente colocar o aplicativo em backgroud
+#
+# o simbolo & indica que o aplicativo foi colocado
+# em modo backgroud.
+#
+cosmo@debian:~/myProject/lpi$ bg
+[1]+ qbittorrent &
+
+# colocar o aplicativo em foregroud
+#
+cosmo@debian:~/myProject/lpi$ fg 
+qbittorrent
+
+# forma de verificar quais sao os aplicativos
+# que estao sendo executados em backgroud.
+#
+# essa tarefa eh executada atraves do aplicativo
+# JOBS [opcao]
+# -l = PID do processo.
+#
+cosmo@debian:~/myProject/lpi$ qbittorrent 
+^Z
+[1]+  Stopped                 qbittorrent
+cosmo@debian:~/myProject/lpi$ bg
+[1]+ qbittorrent &
+cosmo@debian:~/myProject/lpi$ jobs
+[1]+  Running                 qbittorrent &
+cosmo@debian:~/myProject/lpi$ jobs -l
+[1]+  8834 Running                 qbittorrent &
