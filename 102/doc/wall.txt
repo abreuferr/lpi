@@ -1,8 +1,0 @@
-# o aplicativo wall eh utilizado para enviar uma mensagem para todos
-# os usuarios que estao conectados no computador.
-#
-cosmo@debian:~/myProject/lpi$ wall teste
-                                                                               
-Broadcast message from cosmo@debian (pts/1) (Tue Jun 13 17:20:52 2017):        
-                                                                               
-teste

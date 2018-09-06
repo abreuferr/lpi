@@ -1,9 +1,0 @@
-# o comando INSMOD tem por objetivo o de inserir um determinado
-# modulo no linux kernel.
-#
-# para inserir o modulo, eh necessario informar o caminho completo
-# do arquivo .KO
-#
-# o comando insmod não trabalha com dependencia.
-#
-cosmo@debian:~/myProject/lpi$ sudo insmod /lib/modules/3.16.0-4-amd64/kernel/drivers/acpi/fan.ko 

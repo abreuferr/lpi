@@ -1,9 +1,0 @@
-cosmo@study:~/myProject/lpi$ stat fmt.db
-  File: ‘fmt.db’
-  Size: 307       	Blocks: 8          IO Block: 4096   regular file
-Device: 801h/2049d	Inode: 27424       Links: 1
-Access: (0644/-rw-r--r--)  Uid: ( 1000/   cosmo)   Gid: ( 1000/   cosmo)
-Access: 2017-05-11 16:15:41.024133978 -0300
-Modify: 2017-05-11 16:15:30.144133889 -0300
-Change: 2017-05-11 16:15:30.152133889 -0300
- Birth: -

@@ -1,4 +1,0 @@
-# o D-Bus ou DBus eh um barramento que permite a intercomunicacao
-# entre os programas/processos localizados no mesmo computador.
-#
-# o DBus permite uma comunicacao transparente entre os processo/programas.

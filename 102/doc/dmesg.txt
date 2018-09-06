@@ -1,8 +1,0 @@
-# o aplicativo dmesg tem por objetivo o de exibir as mensagens que aparecem
-# durante o boot do linux.
-#
-# como sao muitas as mensagens, costuma-se utilizar o comando para poder
-# visualizar todas as mensagens ou procurar por um determinado parametro
-#
-#	dmesg | less
-#	dmesg | grep eth0
