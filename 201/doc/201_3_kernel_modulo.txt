@@ -18,20 +18,26 @@ Linux workstation 4.9.0-4-amd64 #1 SMP Debian 4.9.51-1 (2017-09-28) x86_64 GNU/L
 # MODULOS DO KERNEL
 #
 
-# diretorio a onde sao armazenados os modulos do kernel.
+# DIRETORIO
 #
-$ /lib/modules/`uname -r`/kernel/
+$ /lib/modules/$(uname -r)/kernel/ ; diretorio a onde fica armazenado os modulos do kernel
 
 # MODULES.DEP
 #
 # arquivo que contem informacoes referentes aos mododulos que estao
 # disponiveis para ser utilizado e quais sao as dependencias de cada modulo.
 #
-# /lib/modules/`uname -r`/modules.dep
+# /lib/modules/$(uname -r)/modules.dep
 #
 # para atualizar, basta executar o comando "depmod -a"
-
 #
+# quando o comando MODPROBE carrega um modulo, o mesmo consulta o arquivo
+# MODULES.DEP para saber quais sao as dependencias do modulo que esta 
+# sendo carregado.
+
+# COMANDOS
+#
+
 # LSMOD
 # 
 # comando utilizado para listar os modulos que estao sendo utilizados
@@ -41,6 +47,7 @@ $ /lib/modules/`uname -r`/kernel/
 #
 # o comando lsmod extrai as informacoes do arquivo /proc/modules
 #
+# NOME DO MODULO        TAMANHO UTILIZADO POR
 Module                  Size  Used by
 iptable_nat            16384  1
 nf_nat_ipv4            16384  1 iptable_nat
@@ -90,3 +97,30 @@ parm:           psv:Disable or override all passive trip points. (int)
 # modprobe [modulo] - comando utilizado para adicionar um modulo e os modulos
 # dependentes no kernel.
 #
+
+# RMMOD
+#
+# comando utilizado para remover um modulo do kernel.
+#
+# rmmod [modulo-nome]
+#
+# o comando RMMOD nao consegue remover um modulo enquanto o mesmo estiver
+# sendo utilizado.
+#
+# o comando RMMOD nao remove que foram adicionados juntos com o modulo
+# principal. Isto eh, o RMMOD nao trabalha com dependencia.
+
+# INSMOD
+#
+# comando utilizado para carregar um modulo do kernel
+#
+# diferente do comando MODPROBE, o comando INSMOD nao carrega os modules
+# dependentes a este modulo, eh necessario carregar cada modulo de forma
+# manual
+#
+# INSMOD [opcao] [modulo] [simbolo]
+#
+# para inserir um modulo atraves do comando INSMOD eh necessario indicar
+# o caminho completo do arquivo que coresponde ao modulo.
+#
+# INSMOD /lib/modules/$(uname -r)/kernel/drives/mod.ko
