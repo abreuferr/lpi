@@ -13,9 +13,7 @@
 $ sudo apt-get install tgt ; instalacao
 $ sudo vi /etc/tgt/conf.d/iscsi.conf ; arquivo de configuracao
 <target 192.168.10.60:target01>
-        # provided device as an iSCSI Target
         backing-store /dev/sdg
-        initiator-address 192.168.10.65
         incominguser admin admin
         outgoinguser admin admin
 </target>
@@ -29,12 +27,12 @@ $ sudo tgtadm --mode target --op show ; checando a configuracao
 $ sudo apt-get install open-iscsi ; instalacao
 
 $ sudo vi /etc/iscsi/iscsid.conf
+    node.startup = automatic
 	node.session.auth.username = admin
 	node.session.auth.password = admin
 
 $ sudo systemctl restart open-iscsi.service ; reinicializar o iscsi
 
-$ sudo iscsiadm -m discovery -t st -p 192.168.10.60 ; inicalizar a comunicacao entre o initiator e target
 $ sudo iscsiadm --mode discovery -t sendtargets --portal 192.168.10.60 ; inicalizar a comunicacao entre o initiator e target
 
 $ sudo iscsiadm --mode node --targetname 192.168.10.60:target01 --portal 192.168.10.60 --login
@@ -42,8 +40,6 @@ $ sudo iscsiadm --mode node --targetname 192.168.10.60:target01 --portal 192.168
 $ ls /dev/disk/by-id/wwn-XYZ
 $ ls /dev/disk/by-id/scsi-ABC
 
-$ sudo vi /etc/iscsi/nodes/192.168.10.60:target01/192.168.10.60,3260,1/default ; configuracao do node
-	node.startup = automatic
-	node.session.auth.authmethod = CHAP
-	node.session.auth.username = admin
-	node.session.auth.password = admin
+$ sudo cat /etc/fstab
+    # iscsi
+    UUID=7d654fd1-2dd9-47f2-be05-6c3881fce84a /mnt/iscsi ext4 defaults,auto,_netdev 0 0
