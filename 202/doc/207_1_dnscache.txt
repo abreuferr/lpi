@@ -1,9 +1,9 @@
-#: Title : DNS Howto
+#: Title : DNS Cache
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Configuracao do Bind9 no GNU/Linux Debian Stable
+#: Description : Configuracao do Bind9 como DNS Cache
 #: Options : None
 
-# INSTALACAO -  DNS PRIMARIO (NS1) e DNS SECUNDARIO (NS2)
+# INSTALACAO
 #
 $ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
 $ sudo chown -R bind:bind /etc/bind ; alterando permissao

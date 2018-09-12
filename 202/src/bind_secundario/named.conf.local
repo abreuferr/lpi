@@ -1,0 +1,24 @@
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+// Slave zones
+//
+zone "particula.local" {
+	type slave;
+	file "/etc/bind/db.particula.local";
+	masters { 192.168.0.5; };       # ns1 private IP
+	allow-notify { 192.168.0.5; };
+};
+
+// Reverse zone
+zone "0.168.192.in-addr.arpa" {
+	type slave;
+	file "/etc/bind/db.0.168.192.in-addr.arpa";
+	masters { 192.168.0.5; };       # ns1 private IP
+};
+
