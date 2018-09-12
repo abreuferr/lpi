@@ -1,0 +1,35 @@
+#: Title : dns chroot
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : configuracao do dns com a opcao de chroot
+#: Options : None
+
+# INSTALACAO master/slave
+#
+$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc ; instalacao do bind9 e ferramentas
+$ sudo chown -R bind:bind /etc/bind ; alterando permissao do diretorio
+
+# CHROOT master/slave
+#
+$ sudo systemctl stop bind9.service ; parando o servico do bind9
+
+$ sudo vi /etc/default/bind9 ; alterando diretorio de trabalho
+	OPTIONS="-u bind -t /var/lib/named"
+
+$ sudo mkdir -p /var/lib/named/etc ; criando novo diretorio de trabalho
+$ sudo mkdir /var/lib/named/dev ; criando novo diretorio de trabalho
+$ sudo mkdir -p /var/lib/named/var/cache/bind ; criando novo diretorio de trabalho
+$ sudo mkdir -p /var/lib/named/var/run/bind/run ; criando novo diretorio de trabalho
+
+$ sudo mv /etc/bind /var/lib/named/etc ; movendo os arquivos de configuracao para o novo diretorio de trabalho
+$ sudo ln -s /var/lib/named/etc/bind /etc/bind ; criando link simbolico para outros aplicativos
+
+$ sudo mknod /var/lib/named/dev/null c 1 3 ; alterando permissao
+$ sudo mknod /var/lib/named/dev/random c 1 8 ; alterando permissao
+$ sudo chmod 666 /var/lib/named/dev/null /var/lib/named/dev/random ; alerando permissao
+$ sudo chown -R bind:bind /var/lib/named/var/* ; alterando permissao
+$ sudo chown -R bind:bind /var/lib/named/etc/bind ; alterando permissao
+
+$ cd /var/lib/named/var/cache/bind ; acessando o novo diretorio de trabalho
+$ sudo touch managed-keys.bind ; criando arquivo de chave de gerenciamento
+
+$ sudo systemctl start bind9.service ; inicalizando o servico
