@@ -3,11 +3,6 @@
 #: Description : configuracao do dns com a opcao de chroot
 #: Options : None
 
-# INSTALACAO master/slave
-#
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc ; instalacao do bind9 e ferramentas
-$ sudo chown -R bind:bind /etc/bind ; alterando permissao do diretorio
-
 # CHROOT master/slave
 #
 $ sudo systemctl stop bind9.service ; parando o servico do bind9
