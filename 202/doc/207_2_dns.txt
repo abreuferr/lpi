@@ -21,9 +21,7 @@ $ sudo systemctl restart bind9
 
 2.1. CONFIGURACAO DO DNS PRIMARIO (NS1)
 #
-# Local File
-#
-$ sudo vi /etc/bind/named.conf.local (master)
+$ sudo vi /etc/bind/named.conf.local
 	// Master zones
 	zone "particula.local" {
 	        type master;
@@ -39,9 +37,7 @@ $ sudo vi /etc/bind/named.conf.local (master)
 	    	allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
 	};
 
-# Forward Zone File
-#
-$ sudo vi /etc/bind/db.particula.local (master)
+$ sudo vi /etc/bind/db.particula.local
 	; Start of Authority (SOA) record
 	$TTL 604800
 	@ IN SOA ns1.particula.local. root.particula.local. (
