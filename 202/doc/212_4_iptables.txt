@@ -1,0 +1,28 @@
+#: Title : 212.4 Security tasks - Iptables
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Firewall do gateway
+#: Options : None
+
+# script de firewall
+#
+$ /etc/init.d/firewall.sh
+    #!/bin/bash
+    IPTABLES=/sbin/iptables
+
+    # clean all possible old mess
+    $IPTABLES -F 
+    $IPTABLES -t nat -F 
+    $IPTABLES -t mangle -F
+
+    # masquerading
+    $IPTABLES -t nat -A POSTROUTING -o ens32 -j MASQUERADE
+    echo 1 > /proc/sys/net/ipv4/ip_forward
+
+    # opening all 
+    $IPTABLES -P INPUT ACCEPT
+    $IPTABLES -P OUTPUT ACCEPT
+    $IPTABLES -P FORWARD ACCEPT
+
+    $IPTABLES -t nat -P POSTROUTING ACCEPT
+    $IPTABLES -t nat -P PREROUTING ACCEPT
+    $IPTABLES -t filter -P FORWARD ACCEPT

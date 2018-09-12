@@ -11,6 +11,8 @@
 # -q - captura os dados de forma sucinta
 # -w [FILE] - salva os dados em um arquivo
 # -r [FILE] - leitura do arquivo gerado pela opcao -w
+# -v - modo verboso
+# port [XY] - fica monitorando uma determinada porta
 #
 # no exemplo abaixo a estacao 192.168.0.1, porta 53392, acessa o servidor 192.168.0.42, porta 22. 
 #
