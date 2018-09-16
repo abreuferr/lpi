@@ -112,7 +112,7 @@ $ nslookup web1.particula.local ; informacao sobre um determinado host
 $ nslookup -query=ns www.particula.local ; NS record
 $ nslookup -debugparticula.local ; Debug
 
-$ dig particula.local A record
+$ dig particula.local A ; A record
 $ dig particula.local MX ; MX record
 $ dig particula.local SOA ; SOA record
 $ dig particula.local TTL ; TTL record
