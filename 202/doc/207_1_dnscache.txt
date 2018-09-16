@@ -9,111 +9,118 @@ $ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instala
 $ sudo chown -R bind:bind /etc/bind ; alterando permissao
 $ sudo systemctl restart bind9.service ; reinicializando o bind
 
-# CONFIGURACAO DO DNS PRIMARIO (NS1)
+# LOG
 #
-$ sudo vi /etc/bind/named.conf.local
-	// Master zones
-	zone "particula.local" {
-	        type master;
-	        file "/etc/bind/db.particula.local";	# zone file path
-	        allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
-    		notify yes;
-	};
+$ sudo mkdir /var/log/bind ; criando o diretorio a onde o arquivo de log sera armazenado
+$ sudo touch /var/log/bind/named.log ; criando o arquivo de log
+$ sudo chown -R bind:bind /var/log/bind ; alterando a permissao do diretorio de log
 
-	// Reverse
-	zone "0.168.192.in-addr.arpa" {
-	        type master;
-	        file "/etc/bind/db.0.168.192.in-addr.arpa";	# zone file path
-	    	allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
-	};
-
-$ sudo vi /etc/bind/db.particula.local
-	; Start of Authority (SOA) record
-	$TTL 604800
-	@ IN SOA ns1.particula.local. root.particula.local. (
-				2010101301;	Serial
-				3600;		Refresh [1h]
-				600;		Retry   [10m]
-				86400;		Expire  [1d]
-				600 );		Negative Cache TTL [1h]
-
-	; Name Server (NS) records.
-				IN NS ns1.particula.local.
-				IN NS ns2.particula.local.
-
-	; Mail Exchange (MX) records.
-				IN MX 10 srv6.particula.local.
-
-	; Address (A) records. (real-names of machines)
-				IN A 192.168.0.5
-	ns1                    	IN A 192.168.0.5
-	ns2                    	IN A 192.168.0.6
-	srv1                  	IN A 192.168.0.7
-	srv2                  	IN A 192.168.0.8
-	srv3                  	IN A 192.168.0.9
-	srv4                  	IN A 192.168.0.10
-	srv5                  	IN A 192.168.0.11
-	srv6                  	IN A 192.168.0.12
-
-	; Aliases in Canonical Name (CNAME) records...
-	www			IN CNAME srv5
-
-$ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
-	; Start of Authority (SOA) record
-	$TTL   900
-	@ IN SOA ns1.particula.local. root.particula.local. (
-				2010101301;	Serial
-				3600;		Refresh [1h]
-				600;		Retry   [10m]
-				86400;		Expire  [1d]
-				600 );		Negative Cache TTL [1h]
-
-	; Name Server (NS) records.
-				IN NS ns1.particula.local.
-				IN NS ns2.particula.local.
-
-	; Addresses point to canonical names (PTR) for reverse lookups
-	5                       IN PTR    ns1.particula.local.
-	6                       IN PTR    ns2.particula.local.
-	7                       IN PTR    srv1.particula.local.
-	8                       IN PTR    srv2.particula.local.
-	9                       IN PTR    srv3.particula.local.
-	10                      IN PTR    srv4.particula.local.
-
-$ sudo named-checkconf ; verificar as configuracoes
-$ sudo systemctl restart bind9 ; reinicializando o servico
-
-# CONFIGURACAO DO DNS SECUNDARIO (NS2)
+# CONFIGURACAO
 #
-$ sudo vi /etc/bind/named.conf.local (slave)
-	// Slave zones
-	//
-	zone "particula.local" {
-		type slave;
-		file "/etc/bind/db.particula.local";
-		masters { 192.168.0.5; };	# ns1 private IP
-		allow-notify { 192.168.0.5; };
-	};
+$ sudo vi /etc/bind/named.conf.options
+    include "/etc/bind/rndc.key";
 
-	// Reverse zone
-	zone "0.168.192.in-addr.arpa" {
-		type slave;
-		file "/etc/bind/db.0.168.192.in-addr.arpa";
-		masters { 192.168.0.5; };	# ns1 private IP
-	};
+    controls {
+            inet 127.0.0.1 port 953
+            allow { 127.0.0.1; } keys { "rndc-key"; };
+    };
 
-$ sudo systemctl restart bind9 ; reinicializando o servico
+    acl "clients" {
+            127.0.0.0/8;
+            192.168.0.0/24;
+    };
 
-# TROUBLESHOOT
+    options {
+            directory "/var/cache/bind";
+            pid-file "/var/run/named/named.pid";
+            dump-file "/var/cache/bind/named.dump";
+            statistics-file "/var/cache/bind/named.stats";
+           (...)
+            # no forwarding, plus listen on IPv4 only
+            forwarders {};
+            listen-on-v6 { none; };
+            # Maximum number of simultaneous client TCP connections to accept.
+            tcp-clients 50;
+            # Disable built-in server information zones.
+            version none;
+            hostname none;
+            server-id none;
+            # Attempt to do all the work required to answer the query.
+            recursion yes;
+            recursive-clients 500;
+            allow-recursion { clients; };
+            allow-query { clients; };
+            # Only LAN users are allowed to receive zone transfers from the server.
+            allow-transfer { clients; };
+            auth-nxdomain no;
+            notify no;
+            dnssec-enable yes;
+            dnssec-validation auto;
+    };
+
+    # Specifications of what to log, and where the log messages are sent.
+    logging {
+            channel "common_log" {
+                    file "/var/log/bind/named.log" versions 10 size 5m;
+                    severity error;
+                    print-category yes;
+                    print-severity yes;
+                    print-time yes;
+            };
+            category default { "common_log"; };
+            category general { "common_log"; };
+            category queries { "common_log"; };
+            category client { "common_log"; };
+            category security { "common_log"; };
+            category query-errors { "common_log"; };
+            category lame-servers { null; };
+    };
+
+$ vi /etc/bind/named.conf.local
+    zone "particula.local" {
+            type master;
+            file "/etc/bind/db.particula.local";
+    };
+    zone "0.168.192.in-addr.arpa" {
+            type master;
+            file "/etc/bind/db.0.168.192.in-addr.arpa";
+    };
+
+$ vi /etc/bind/db.particula.local
+    $TTL    86400
+
+    @       IN      SOA     localhost. root.localhost. (
+            2018091601      ; Serial
+            86400           ; Refresh
+            3600            ; Retry
+            604800          ; Expire
+            7200 )          ; Negative Cache TTL
+
+    @               IN      NS      localhost.
+    @               IN      A       192.168.0.4
+    dnscache        IN      A       192.168.0.4
+    gateway         IN      A       192.168.0.3
+
+$ /etc/bind/db.0.168.192.in-addr.arpa
+    $TTL    86400
+    @       IN      SOA     localhost. root.localhost. (
+            2018091601      ; Serial
+            86400           ; Refresh
+            3600            ; Retry
+            604800          ; Expire
+            7200 )          ; Negative Cache TTL
+    @       IN      NS      localhost.
+    3       IN      PTR     gateway.particula.local. ;192.168.0.3
+    4       IN      PTR     dnscache.particula.local. ;192.168.0.4
+
+$ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
+$ sudo systemctl restart bind9.service ; reinicializando o servico do bind9
+
+# TESTE (DNSCACHE)
 #
-$ nslookup particula.local ; "A" record do dominio
-$ nslookup 192.168.0.5 ; dominio reverso
-$ nslookup web1.particula.local ; informacao sobre um determinado host
-$ nslookup -query=ns www.particula.local ; NS record
-$ nslookup -debugparticula.local ; Debug
+$ sudo netstat -nltup | grep :53
+$ dig kernel.org | grep time ; checar o tempo de resposta do dig
 
-$ dig particula.local A record
-$ dig particula.local MX ; MX record
-$ dig particula.local SOA ; SOA record
-$ dig particula.local TTL ; TTL record
-$ dig particula.local ANY +noall +answer ; ANY record
+# TESTE (ESTACAO)
+#
+$ dig kernel.org | grep time ; checar o tempo de resposta do dig
