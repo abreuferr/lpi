@@ -1,0 +1,75 @@
+include "/etc/bind/rndc.key";
+
+controls {
+	inet 127.0.0.1 port 953
+	allow { 127.0.0.1; } keys { "rndc-key"; };
+};
+
+acl "clients" {
+	127.0.0.0/8;
+	192.168.0.0/24;
+};
+
+options {
+	directory "/var/cache/bind";
+        pid-file "/var/run/named/named.pid";
+        dump-file "/var/cache/bind/named.dump";
+        statistics-file "/var/cache/bind/named.stats";
+
+	// If there is a firewall between you and nameservers you want
+	// to talk to, you may need to fix the firewall to allow multiple
+	// ports to talk.  See http://www.kb.cert.org/vuls/id/800113
+
+	// If your ISP provided one or more IP addresses for stable 
+	// nameservers, you probably want to use them as forwarders.  
+	// Uncomment the following block, and insert the addresses replacing 
+	// the all-0's placeholder.
+
+	// forwarders {
+	// 	0.0.0.0;
+	// };
+
+	//========================================================================
+	// If BIND logs error messages about the root key being expired,
+	// you will need to update your keys.  See https://www.isc.org/bind-keys
+	//========================================================================
+
+	# no forwarding, plus listen on IPv4 only
+	forwarders {};
+	listen-on-v6 { none; };
+	# Maximum number of simultaneous client TCP connections to accept.
+	tcp-clients 50;
+	# Disable built-in server information zones.
+	version none;
+	hostname none;
+	server-id none;
+	# Attempt to do all the work required to answer the query.
+	recursion yes;
+	recursive-clients 500;
+        allow-recursion { clients; };
+        allow-query { clients; };
+	# Only LAN users are allowed to receive zone transfers from the server.
+        allow-transfer { clients; };
+	auth-nxdomain no;
+        notify no;
+	dnssec-enable yes;
+	dnssec-validation auto;
+};
+
+# Specifications of what to log, and where the log messages are sent.
+logging {
+        channel "common_log" {
+                file "/var/log/bind/named.log" versions 10 size 5m;
+		severity error;
+                print-category yes;
+                print-severity yes;
+                print-time yes;
+        };
+        category default { "common_log"; };
+        category general { "common_log"; };
+        category queries { "common_log"; };
+	category client { "common_log"; };
+	category security { "common_log"; };
+	category query-errors { "common_log"; };
+	category lame-servers { null; };
+};
