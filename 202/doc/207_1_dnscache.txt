@@ -97,6 +97,11 @@ $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa
 $ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
 $ sudo systemctl restart bind9.service ; reinicializando o servico do bind9
 
+$ sudo vi /etc/resolv.conf
+    domain particula.local
+    search particula.local
+    nameserver 127.0.0.1
+
 # TESTE (DNSCACHE)
 #
 $ sudo netstat -nltup | grep :53
