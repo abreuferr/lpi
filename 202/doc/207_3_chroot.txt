@@ -3,7 +3,7 @@
 #: Description : configuracao do dns com a opcao de chroot
 #: Options : None
 
-# CHROOT master/slave
+# CHROOT dnscache/master/slave
 #
 $ sudo systemctl stop bind9.service ; parando o servico do bind9
 
