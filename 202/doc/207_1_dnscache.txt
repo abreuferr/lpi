@@ -9,12 +9,6 @@ $ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instala
 $ sudo chown -R bind:bind /etc/bind ; alterando permissao
 $ sudo systemctl restart bind9.service ; reinicializando o bind
 
-# LOG
-#
-$ sudo mkdir /var/log/bind ; criando o diretorio a onde o arquivo de log sera armazenado
-$ sudo touch /var/log/bind/named.log ; criando o arquivo de log
-$ sudo chown -R bind:bind /var/log/bind ; alterando a permissao do diretorio de log
-
 # CONFIGURACAO
 #
 $ sudo vi /etc/bind/named.conf.options
@@ -56,24 +50,6 @@ $ sudo vi /etc/bind/named.conf.options
             notify no;
             dnssec-enable yes;
             dnssec-validation auto;
-    };
-
-    # Specifications of what to log, and where the log messages are sent.
-    logging {
-            channel "common_log" {
-                    file "/var/log/bind/named.log" versions 10 size 5m;
-                    severity error;
-                    print-category yes;
-                    print-severity yes;
-                    print-time yes;
-            };
-            category default { "common_log"; };
-            category general { "common_log"; };
-            category queries { "common_log"; };
-            category client { "common_log"; };
-            category security { "common_log"; };
-            category query-errors { "common_log"; };
-            category lame-servers { null; };
     };
 
 $ vi /etc/bind/named.conf.local
