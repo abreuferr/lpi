@@ -20,87 +20,34 @@ $ sudo vi /etc/bind/named.conf.options
     };
 
     acl "clients" {
-            127.0.0.0/8;
             192.168.0.0/24;
+            localhost;
+            localhost;
     };
 
     options {
             directory "/var/cache/bind";
-            pid-file "/var/run/named/named.pid";
-            dump-file "/var/cache/bind/named.dump";
-            statistics-file "/var/cache/bind/named.stats";
 
-           (...)
-           
-           # no forwarding, plus listen on IPv4 only
-            forwarders {};
-            listen-on-v6 { none; };
-           
-           # Maximum number of simultaneous client TCP connections to accept.
-            tcp-clients 50;
-           
-           # Disable built-in server information zones.
-            version none;
-            hostname none;
-            server-id none;
-           
-           # Attempt to do all the work required to answer the query.
             recursion yes;
-            recursive-clients 500;
-            allow-recursion { clients; };
             allow-query { clients; };
-            # Only LAN users are allowed to receive zone transfers from the server.
-            allow-transfer { clients; };
-            auth-nxdomain no;
-            notify no;
+
+            forwarders {
+                192.168.0.5;
+                192.168.0.6;
+            };
+            forward only;
+
             dnssec-enable yes;
             dnssec-validation auto;
     };
 
-$ sudo vi /etc/bind/named.conf.local
-    zone "particula.local" {
-            type master;
-            file "/etc/bind/db.particula.local";
-    };
-    zone "0.168.192.in-addr.arpa" {
-            type master;
-            file "/etc/bind/db.0.168.192.in-addr.arpa";
-    };
-
-$ sudo vi /etc/bind/db.particula.local
-    $TTL    86400
-
-    @       IN      SOA     localhost. root.localhost. (
-            2018091601      ; Serial
-            86400           ; Refresh
-            3600            ; Retry
-            604800          ; Expire
-            7200 )          ; Negative Cache TTL
-
-    @               IN      NS      localhost.
-    @               IN      A       192.168.0.4
-    dnscache        IN      A       192.168.0.4
-    gateway         IN      A       192.168.0.3
-
-$ sudo vi /etc/bind/db.0.168.192.in-addr.arpa
-    $TTL    86400
-    @       IN      SOA     localhost. root.localhost. (
-            2018091601      ; Serial
-            86400           ; Refresh
-            3600            ; Retry
-            604800          ; Expire
-            7200 )          ; Negative Cache TTL
-    @       IN      NS      localhost.
-    3       IN      PTR     gateway.particula.local. ;192.168.0.3
-    4       IN      PTR     dnscache.particula.local. ;192.168.0.4
-
 $ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
 $ sudo systemctl restart bind9.service ; reinicializando o servico do bind9
 
-$ sudo vi /etc/resolv.conf
+$ sudo vi /etc/resolv.conf ; de todas as estacoes da rede
     domain particula.local
     search particula.local
-    nameserver 127.0.0.1
+    nameserver 192.168.0.4
 
 # TESTE (DNSCACHE)
 #
