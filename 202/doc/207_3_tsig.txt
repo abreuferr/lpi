@@ -8,111 +8,60 @@
 # a funcao da tecnologia tsig eh a de prover a seguranca na comunicacao
 # entre os servidores de DNS, ns1 e ns2.
 
-# CONFIGURACAO DO DNS PRIMARIO (NS1)
+# CONFIGURACAO DO DNS PRIMARIO (NS1 - 192.168.0.5)
+#
+$ cd /etc/bind/
+$ sudo dnssec-keygen -a HMAC-MD5 -b 128 -n HOST rndc-key ; criar as chaves de criptografia
+#
+# -a especificar qual eh o algoritmo que sera utilizado para criar as chaves
+# -b especifica o tamanho da chave
+# -n especifica o tipo de chave
+#
+$ sudo cat Krndc-key.+157+27182.private
+$ sudo vi /etc/bind/tsig.key
+    key "TRANSFER" {
+              algorithm hmac-md5;
+              secret "B72d9UgSPcSt6BMmMg5F6w==";
+    };
+
+    server 192.168.0.6 {
+	    keys {
+		    TRANSFER;
+	    };
+    };
+
+$ sudo vi /etc/bind/named.conf.local
+    include "/etc/bind/tsig.key";
+$ sudo systemctl restart bind9.service
+
+# CONFIGURACAO DO DNS SECUNDARIO (NS2 - 192.168.0.6)
+#
+$ sudo vi /etc/bind/tsig.key
+    key "TRANSFER" {
+              algorithm hmac-md5;
+              secret "B72d9UgSPcSt6BMmMg5F6w==";
+    };
+
+    server 192.168.0.5 {
+	    keys {
+		    TRANSFER;
+	    };
+    };
+
+$ sudo vi /etc/bind/named.conf.local
+    include "/etc/bind/tsig.key";
+
+$ sudo systemctl restart bind9.service
+
+# CONFIGURACAO DO DNS PRIMARIO (NS1 - 192.168.0.5)
 #
 $ sudo vi /etc/bind/named.conf.local
-	// Master zones
-	zone "particula.local" {
-	        type master;
-	        file "/etc/bind/db.particula.local";	# zone file path
-	        allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
-    		notify yes;
-	};
+    // Master zones
+    zone "particula.local" {
+            type master;
+            file "/etc/bind/db.particula.local";
+            allow-transfer { key TRANSFER; };
+            notify yes;
+    };
 
-	// Reverse
-	zone "0.168.192.in-addr.arpa" {
-	        type master;
-	        file "/etc/bind/db.0.168.192.in-addr.arpa";	# zone file path
-	    	allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
-	};
-
-$ sudo vi /etc/bind/db.particula.local
-	; Start of Authority (SOA) record
-	$TTL 604800
-	@ IN SOA ns1.particula.local. root.particula.local. (
-				2010101301;	Serial
-				3600;		Refresh [1h]
-				600;		Retry   [10m]
-				86400;		Expire  [1d]
-				600 );		Negative Cache TTL [1h]
-
-	; Name Server (NS) records.
-				IN NS ns1.particula.local.
-				IN NS ns2.particula.local.
-
-	; Mail Exchange (MX) records.
-				IN MX 10 srv6.particula.local.
-
-	; Address (A) records. (real-names of machines)
-				IN A 192.168.0.5
-	ns1                    	IN A 192.168.0.5
-	ns2                    	IN A 192.168.0.6
-	srv1                  	IN A 192.168.0.7
-	srv2                  	IN A 192.168.0.8
-	srv3                  	IN A 192.168.0.9
-	srv4                  	IN A 192.168.0.10
-	srv5                  	IN A 192.168.0.11
-	srv6                  	IN A 192.168.0.12
-
-	; Aliases in Canonical Name (CNAME) records...
-	www			IN CNAME srv5
-
-$ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
-	; Start of Authority (SOA) record
-	$TTL   900
-	@ IN SOA ns1.particula.local. root.particula.local. (
-				2010101301;	Serial
-				3600;		Refresh [1h]
-				600;		Retry   [10m]
-				86400;		Expire  [1d]
-				600 );		Negative Cache TTL [1h]
-
-	; Name Server (NS) records.
-				IN NS ns1.particula.local.
-				IN NS ns2.particula.local.
-
-	; Addresses point to canonical names (PTR) for reverse lookups
-	5                       IN PTR    ns1.particula.local.
-	6                       IN PTR    ns2.particula.local.
-	7                       IN PTR    srv1.particula.local.
-	8                       IN PTR    srv2.particula.local.
-	9                       IN PTR    srv3.particula.local.
-	10                      IN PTR    srv4.particula.local.
-
-$ sudo named-checkconf ; verificar as configuracoes
-$ sudo systemctl restart bind9 ; reinicializando o servico
-
-# CONFIGURACAO DO DNS SECUNDARIO (NS2)
-#
-$ sudo vi /etc/bind/named.conf.local (slave)
-	// Slave zones
-	//
-	zone "particula.local" {
-		type slave;
-		file "/etc/bind/db.particula.local";
-		masters { 192.168.0.5; };	# ns1 private IP
-		allow-notify { 192.168.0.5; };
-	};
-
-	// Reverse zone
-	zone "0.168.192.in-addr.arpa" {
-		type slave;
-		file "/etc/bind/db.0.168.192.in-addr.arpa";
-		masters { 192.168.0.5; };	# ns1 private IP
-	};
-
-$ sudo systemctl restart bind9 ; reinicializando o servico
-
-# TROUBLESHOOT
-#
-$ nslookup particula.local ; "A" record do dominio
-$ nslookup 192.168.0.5 ; dominio reverso
-$ nslookup web1.particula.local ; informacao sobre um determinado host
-$ nslookup -query=ns www.particula.local ; NS record
-$ nslookup -debugparticula.local ; Debug
-
-$ dig particula.local A record
-$ dig particula.local MX ; MX record
-$ dig particula.local SOA ; SOA record
-$ dig particula.local TTL ; TTL record
-$ dig particula.local ANY +noall +answer ; ANY record
+$ sudo systemctl restart bind9.service
