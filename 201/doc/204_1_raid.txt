@@ -42,7 +42,9 @@ $ sudo apt-get install mdadm -y -d
 #
 $ sudo mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/sd[bc]1 ; raid 0
 $ sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sd[bc]1 ; raid 1
+$ sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sd[bc]1 --spare-devices=1 /dev/sd[d]1 ; raid 1 com um disco rigido como spare
 $ sudo mdadm --create /dev/md0 --level=5 --raid-devices=3 /dev/sd[bcd]1 ; raid 5
+$ sudo mdadm --create /dev/md0 --level=5 --raid-devices=3 /dev/sd[bcd]1 --spare-devices=1 /dev/sd[e]1 ; raid 5 com um disco rigido como spare
 
 # INFORMACAO
 #
