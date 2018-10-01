@@ -141,6 +141,21 @@ $ ip route flush de [IFACE] ; apagar todas as rotas de uma determinada interface
 #
 $ ip neigh show ; exibir o ip de todos os vizinhos do computador
 
+# EXEMPLO
+#
+# ip 192.168.0.10 ; gateway da rede
+# 192.168.0.11 ; host da rede
+#
+$ sudo ip link set dev ens36 up ; ativar interface de rede
+$ sudo ip addr flush dev ens36 ; remover todas as configuracoes da interface de rede
+$ sudo ip addr add 192.168.0.10/24 dev ens36 ; atribuir um numero ip a uma interface de rede
+$ ping -I ens36 192.168.0.11 ; comando ping atraves da interface de rede ens36
+$ sudo tcpdump -i ens36 ; utilizacao do aplicativo tcpdump para verificar a configuracao
+
+$ sudo ifconfig eth1 192.168.0.11 netmask 255.255.255.0 broadcast 192.168.0.255 ; atribuir um numero ip a uma interface de rede
+$ sudo route add default gw 192.168.0.10 eth1 ; atribuindo uma rota
+$ ping -I eth1 192.168.0.10 ; comando ping atraves da interface de rede eth1
+
 ######
 # ARP
 ######
