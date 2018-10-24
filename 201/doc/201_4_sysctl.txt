@@ -1,0 +1,20 @@
+# coamndo utilizado para configurar os parametros do kernel em 
+# tempo de execucao/real-time
+
+# o aplicativo sysctl atua obre os arquivos presente no diretorio
+# /proc/sys/...
+
+# sysctl [opcao]
+#
+#   -a - visualizar todos os parametros do kernel
+#   -w [nome.variavel = valor] - alterar um dos parametros
+#   -p [arquivo] - o sysctl le os parametros de um arquivo
+
+# /etc/sysctl.conf - arquivo de configuracao
+
+# /etc/sysctl.d/* conf - arquivo de configuracao personalizado
+
+# exemplo
+#
+# sysctl -w net.ipv4.ip_forward = 0/1
+# echo 0/1 > net.ipv4.ip_forward
