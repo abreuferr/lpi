@@ -1,0 +1,62 @@
+#: Title : cryptsetup
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : software utilizado para criptografar o conteudo de uma perticao
+#: Options : None
+
+# INSTALACAO
+#
+$ sudo apt-get install cryptsetup
+
+# CRIPTOGRAFAR PARTICAO
+#
+# sudo cryptsetup [OPCAO] luksOpen [DEVICE]
+#
+$ sudo cryptsetup -y -v luksFormat /dev/sdb1
+    -y - definir senha
+    -v - modo verbose
+
+# MUDAR A SENHA
+#
+$ sudo cryptsetup luksAddKey /dev/sdb1
+
+# APAGAR SENHA
+#
+$ sudo cryptsetup luksRemoveKey /dev/sdb1
+
+# INICALIZAR/MAPEAR O VOLUME
+#
+# sudo cryptsetup luksOpen [DEVICE] [NOME_VOLUME]
+#
+$ sudo cryptsetup luksOpen /dev/sdb1 crypt
+
+# VISUALIZAR O MAPEAMENTO
+# 
+$ sudo ls -l /dev/mapper/crypt
+
+# VISUALIZAR O STATUS DO MAPEAMENTO
+#
+# sudo cryptsetup -v status [NOME_VOLUME]
+#
+$ sudo cryptseup -v status crypt
+
+# DUMP
+#
+# sudo cryptsetup luksDump [DEVICE]
+#
+$ sudo cryptsetup luksDump /dev/sdb1
+
+# FORMATAR E MONTAR A PARTICAO
+#
+$ sudo dd if=/dev/zero of=/dev/mapper/crypt
+$ sudo mkfs -t ext4 /dev/mapper/crypt
+$ sudo mount /dev/mapper/crypt /mnt/crypt
+
+# DESMONTAR
+#
+$ sudo umount /mnt/crypt
+$ sudo cryptsetup LuksClose crypt
+
+# MONTAR
+#
+$ sudo cryptsetup luksOpen /dev/sdb1 crypt
+$ sudo mount /dev/mapper/crypt /mnt/crypt
