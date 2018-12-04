@@ -1,0 +1,37 @@
+#: Title : cryptsetup
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : software utilizado para criptografar o conteudo de uma perticao
+#: Options : None
+
+# INSTALACAO
+#
+$ sudo apt-get install cryptsetup
+
+# identificar particao a ser criptografada
+#
+$ sudo lsblk
+
+# formatar a particao a ser formatada
+#
+$ sudo cryptsetup luksFormat /dev/sde1
+
+# criar o sistema de arquivos criptografado
+#
+$ sudo cryptsetup luksOpen /dev/sde1 particao_cpriptografada
+
+# criar o sistema de arquivos linux
+#
+$ sudo mkfs -t ext4 /dev/mapper/particao_criptografada
+
+# montar a particao
+#
+$ sudo mkdir -p /mnt/part_cript
+$ sudo mount /dev/mapper/particao_criptografada /mnt/part_cript
+
+# exibir informacao
+#
+$ sudo cryptsetup luksDump /dev/sde1
+
+# visualizar o status do mapeamento
+#
+$ sudo cryptsetup -v status particao_criptografada
