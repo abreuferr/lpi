@@ -72,10 +72,19 @@ $ sudo vi /etc/fstab
 # SIMULACAO DE PROBLEMA
 #
 $ sudo mdadm --manage /dev/md0 --fail /dev/sdc1 ; simulacao da falha em um dos discos rigidos
+	Personalities : [raid1] [linear] [multipath] [raid0] [raid6] [raid5] [raid4] [raid10] 
+	md127 : active raid1 sdc[1](F) sdb[0] sdd[2]
+		2095104 blocks super 1.2 [2/2] [UU]
 
 $ sudo mdadm /dev/md0 -r /dev/sdc1 ; remocao do disco rigido com falha
+	Personalities : [raid1] [linear] [multipath] [raid0] [raid6] [raid5] [raid4] [raid10] 
+	md127 : active raid1 sdb[0] sdd[2]
+		2095104 blocks super 1.2 [2/2] [UU]
 
-$ sudo mdadm /dev/md0 -a /dev/sdc1 ; adicao de um novo disco rigido no raid
+$ sudo mdadm /dev/md0 -a /dev/sdg1 ; adicao de um novo disco rigido no raid
+	Personalities : [raid1] [linear] [multipath] [raid0] [raid6] [raid5] [raid4] [raid10] 
+	md127 : active raid1 sdg[3](S) sdb[0] sdd[2]
+		2095104 blocks super 1.2 [2/2] [UU]
 
 # EXCLUSAO DO RAID
 #
