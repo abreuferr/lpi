@@ -93,7 +93,7 @@ $ route del default ; apagar a rota default
 
 # PLACA DE REDE - EXIBIR INFORMACAO
 #
-$ ip link show ; exibir as inforacoes das placas de redes ativas
+$ ip link show ; exibir as inforacoes das placas de redes
 $ ip link show [IFACE]; exibir as inforacoes de uma determinada placa de rede
 $ ip -s link show dev [IFACE] ; exibir estatisticas de uma determinada placa de rede
 $ ip addr show ; exibir informacoes detalhadas em todas as placas de rede
@@ -135,7 +135,7 @@ $ ip route add default via [IP_GATEWAY] dev [IFACE] ; adicionar a rota padrao em
 $ ip route delete [REDE/MASK] via [IP-GATEWAY] ; apagar uma rota em uma determinada rede para um determinado gateway
 $ ip route delete [REDE/MASK] dev [IP-GATEWAY] ; apagar uma rota em uma determinada rede para um determinado gateway
 $ ip route delete [REDE/MASK] via [IFACE] ; remover a rota de uma determinada placa de rede
-$ ip route flush de [IFACE] ; apagar todas as rotas de uma determinada interface
+$ ip route flush dev [IFACE] ; apagar todas as rotas de uma determinada interface
 
 # VIZINHO - NEIGH
 #
