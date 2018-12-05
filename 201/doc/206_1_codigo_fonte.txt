@@ -23,16 +23,27 @@ COPYING
 $ tar xzvf arquivo.tar.gz
 $ tar xjvf arquivo.tar.bz2
 $ tar xJvf arquivo.tar.xz
+$ sudo tar xJvf arquivo.tar.xz -C /usr/local/src
 
 # CONFIGURACAO
 #
-# o comando "configure" tem por objetivo o de verificar as dependencia, 
-# como por exemplo, biblioteca e compilador.
+# o comando "./configure" tem por objetivo o de 
+# verificar as dependencia, como por exemplo, 
+# biblioteca e compilador.
 # 
 # criacao do arquivo Mikefile ou Makefile.ini
 #
-# --prefix=[DIR] ; informa qual diretorio do sistema de arquivos o 
-# o binario, os manuais e afins deverao ser instalados.
+# --prefix=[DIR] ; informa qual diretorio do 
+# sistema de arquivos o binario, os manuais 
+# e afins deverao ser instalados.
+#
+# o comando "./configure" precisa ser executado
+# por um usuario que possu as devidas permissoes
+# 
+# o comando "./configure" precisa ser executado
+# no diretorio correto para que seja gerado o
+# arquivo "Makefile" ou "Makefile.in" de forma
+# correta.
 #
 $ ./configure --prefix=/usr/local
 
@@ -42,7 +53,13 @@ $ make ; comando utilizado para compilar o programa
 
 # INSTALACAO
 #
-$ make install ; comando utilizado para instalar os componentes do programa
+# para fazer a instalacao do software compilado, eh
+# necessario que o usuario tenha permissao de root, 
+# a menos que dirante a execucao do comando ./configure
+# o usuario utilize a opcao --prefix e aponte para um
+# diretorio em que o usuario tenha permissao de escrita.
+#
+$ sudo make install ; comando utilizado para instalar os componentes do programa
 
 # LIMPEZA
 #
