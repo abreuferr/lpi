@@ -2,6 +2,35 @@
 # OPERACAO DE BACKUP
 ###
 
+# TIPOS DE BACKUP
+#
+- full	- copia de todos os dados.
+	- executado com menos frequencia que os outros tipos
+	de backup devido ao volume de dados que sao copiados.
+	- deve ser ecutado de preferencia no final de semana.
+	- requer mais espaco de armazenamento e demora mais
+	tempo que os outros tipos de backup.
+- incremental	- eh feito o backup somente dos dados que foram
+		ALTERADOS ate a ULTIMA OPERACAO DE BACKUP.
+		- consome MENOS TEMPO para fazer o backup e requer
+		menos espaco de armazenamento.
+		- demora no processo para restaurar o backup,
+		primeiro o FULL e depois o INCREMENTAL.
+- diferencial 	- eh feito o backup somente dos dados que foram
+		alterados ate o ULTIMO FULL BACKUP.
+		- INTERMEDIARIO entre o FULL e o INCREMENTAL.
+
+# FREQUENCIA
+#
+- durante a semana, realizar o backup de forma incremental
+todos os dias.
+- durante o final de semana, realizar o backup completo.
+- NAO realiza um backup COMPACTADO, pois se por acaso o
+arquivo estiver corrompido, todos os arquivos serao
+perdidos.
+- semana - incremental
+- fim de semana - full
+
 # DIRETORIO
 #
 /etc - arquivos de configuracao
@@ -9,23 +38,30 @@
 /var - diretorio que contem arquivos de log
 /usr - programas instalados pelo usuario
 /opt - programas instalados pelo usuario
+/proc - NAO eh necessario fazer o backup
 
 # SOFTWARE AGLUTINADOR
 # 
-sudo apt-get install cpio ; instalacao
+$ sudo apt-get install cpio ; instalacao
 
-sudo find /etc/ | cpio -ov > etc.cpio ; aglutinar o sarquivos do diretorio /etc em um arquvo cpio
-sudo find /home/ | cpio -ov > home.cpio
-sudo find /var/ | cpio -ov > var.cpio
-sudo find /usr/ | cpio -ov > usr.cpio
-sudo find /opt | cpio -ov > opt.cpio
+$ sudo find /etc/ | cpio -ov > etc.cpio ; aglutinar o sarquivos do diretorio /etc em um arquvo cpio
+$ sudo find /home/ | cpio -ov > home.cpio
+$ sudo find /var/ | cpio -ov > var.cpio
+$ sudo find /usr/ | cpio -ov > usr.cpio
+$ sudo find /opt | cpio -ov > opt.cpio
 
-cpio -ivd < etc.cpio '*.conf' ; desaglutinar os arquivos .conf nos seus respectivos diretorios
+$ cpio -ivd < etc.cpio '*.conf' ; desaglutinar os arquivos .conf nos seus respectivos diretorios
 
 # COPIA VIA REDE
 #
-rsync -av *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos arquivos cpio para o servidor de backup e de forma incremental
-rsync -av -e ssh *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dados de forma segura e de forma incremental
-rsync -ave ssh *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dadso de forma segura e de forma incremental
+$ rsync -av *.cpio cosmo@192.168.10.65:/home/cosmo/backup/ ; copia dos arquivos cpio para o servidor de backup e de forma incremental
+$ rsync -av -e ssh *.cpio cosmo@192.168.10.65:/home/cosmo/backup/ ; copia dos dados de forma segura e de forma incremental
+$ rsync -ave ssh *.cpio cosmo@192.168.10.65:/home/cosmo/backup/ ; copia dos dadso de forma segura e de forma incremental
+$ scp *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dados de forma segura mas NAO eh realizado de forma incremental
 
-scp *.cpio cosmo@192.168.10.65:/home/cosmo/ ; copia dos dados de forma segura mas NAO eh realizado de forma incremental
+# DISCO RIGIDO/PARTICAO
+#
+# o aplicativo DD pode ser utilizado para fazer o backup
+# de uma particao para outra particao ou para um arquivo.
+#
+$ dd if=[ORIGEM] of=[DESTINO] ; dd if=/dev/sda of=/dev/sdb OU dd if=/dev/sda of=/arquivo.img
