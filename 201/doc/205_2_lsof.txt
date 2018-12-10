@@ -4,10 +4,6 @@
 # quais aplicativos abriram esse arquivos. Eh posssivel exibir
 # tambem quais bibliotecas utilizam determinada biblioteca.
 #
-$ sudo lsof | grep vim
-vim       2315      cosmo  cwd       DIR                8,9     4096     262145 /home/cosmo
-vim       2315      cosmo  rtd       DIR                8,1     1024          2 /
-vim       2315      cosmo  txt       REG                8,5  1876072     262805 /usr/bin/vim.basic
-vim       2315      cosmo  mem       REG                8,1    47616      35079 /lib/x86_64-linux-gnu/libnss_files-2.13.so
-vim       2315      cosmo    0u      CHR              136,1      0t0          4 /dev/pts/1
-vim       2315      cosmo    4u      REG                8,8    12288         12 /tmp/.teste.txt.swp
+sudo lsof -a /mnt/sdg 
+COMMAND   PID  USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+vi      15063 cosmo    3u   REG   8,97     4096   12 /mnt/sdg/.teste_lsof.txt.swp
