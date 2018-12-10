@@ -4,16 +4,16 @@ $ sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libe
 
 # DOWNLOAD DO KERNEL
 #
-$ wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.13.3.tar.xz
+$ wget https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.17.tar.xz
 
 # DESCOMPACTAR
 #
-$ sudo tar -xJvf linux-4.13.3.tar.xz -C /usr/src/
+$ sudo tar -xJvf linux-4.17.tar.xz -C /usr/src/
 
 # LINK SIMBOLICO
 #
 $ cd /usr/src/
-$ sudo ln -s linux-4.13.3 linux
+$ sudo ln -s linux-4.17 linux
 
 # CONFIGURACAO
 #
@@ -69,7 +69,7 @@ $ sudo reboot
 # aplicando patch no kernel linux
 #
 $ sudo cd /usr/src/linux
-$ sudo bzcat patch.versao.bz2 | patch -p1
+$ sudo xz -dc ../patch-4.17.10.xz | patch -p1
 
 #
 # reverter o patch aplicado no kernel linux
@@ -77,4 +77,4 @@ $ sudo bzcat patch.versao.bz2 | patch -p1
 # opcao -R
 #
 $ sudo cd /usr/src/linux
-$ sudo bzcat patch.versao.bz2 | patch -p1 -R
+$ $ sudo xz -dc ../patch-4.17.10.xz | patch -p1 -R
