@@ -1,0 +1,70 @@
+#: Title : ssh
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : configuracao do servidor ssh e politicas de seguranca
+#: Options : None
+
+Description: Candidates should be able to configure and secure an SSH daemon. 
+This objective includes managing keys and configuring SSH for users. Candidates 
+should also be able to forward an application protocol over SSH and manage the SSH login.
+
+Key Knowledge Areas:
+- OpenSSH configuration files, tools and utilities
+- Login restrictions for the superuser and the normal users
+- Managing and using server and client keys to login with and without password
+- Usage of multiple connections from multiple hosts to guard against loss of connection 
+  to remote host following configuration changes
+
+Terms and Utilities:
+- ssh
+- sshd
+- /etc/ssh/sshd_config
+- /etc/ssh/
+- Private and public key files
+- PermitRootLogin, PubKeyAuthentication, AllowUsers, PasswordAuthentication, Protocol
+
+# INSTALACAO
+#
+$ sudo apt-get install openssh-server openss-client
+
+# CONFIGURACAO BASICA DE SEGURANCA
+#
+$ sudo cat /etc/ssh/sshd_config
+	Port 2222 # alterar a porta padrao de acesso
+	AllowUsers <USER> # limitar o acesso a determinados usuarios
+	AllowGroups <GROUP> # limitar o acesso a determinado grupo de usuario
+	DenyUsers <USER> # negar o acesso a determinados usuarios
+	DenyGroups <GROUP> # negar o acesso a um determinado grupo de usuarios
+	PermitRootLogin <NO/YES> # permitir ou nao o login do usuario root
+	Protocol 2 # especifica qual o protocolo de seguranca a ser utilizado
+	PermitEmptyPasswords <YES/NO> # permitir ou nao a utilizacao de senhas em branco
+	ClientAliveInterval <NUM> # depois de X segundos sem nenhuma atividade, o usuario eh deslogado
+	ClientAliveContMax <NUM> # quantidade de mensagens enviadas pelo cliente
+	X11Forwarding <YES/NO> # permitir ou nao o redirecionamento do X11 para o cliente
+$ sudo systemctl restart sshd.service # reinicializar o servidor ssh
+$ sudo systemctl status sshd.service # status do servidor ssh
+$ sudo usermod -a -G <GRUPO> <USUARIO> # adicionar usuario em um grupo
+
+# CHAVE PUBLICA/PRIVADA
+#
+$ ssh-keygen # gerando as chaves de autenticacao, RSA 2048 bits
+$ ssh-keygen -b 4096 # gerando as chaves de autenticacao, RSA 4096 bits 
+$ ssh-keygen -p # remover ou alterar a frase de acesso
+$ ssh-keygen -l # exibir a fingerprint da chave de autenticacao
+$ ls .ssh/
+	id_rsa # chave privada
+	id_rsa.pub # chave publica
+$ ssh-copy-id <USERNAME@SERVER> # copiando a chave publica para o servidor
+$ cat ~/.ssh/id_rsa.pub | ssh <USERNAME@SERVER> "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys" # outra forma de copiar a chave
+$ sudo vi /etc/ssh/sshd.conf
+	PasswordAuthentication no # desabilitar a autenticacao atraves de senha
+$ sudo systemctl restart sshd.service
+$ sudo systemctl status sshd.service
+
+# SSH
+#
+$ ssh -v -p 22 -C user@server # -C compressao
+$ ssh  -L 9999:127.0.0.1:80 user@remoteserver # SSH Tunnel (port forward)
+$ ssh -v -R 0.0.0.0:1999:127.0.0.1:902 192.168.1.100 user@remoteserver # SSH Reverse Tunnel
+$ ssh -v -R 0.0.0.0:1999 192.168.1.100 user@remoteserver # SSH Reverse Proxy
+$ torsocks ssh myuntracableuser@remoteserver # SSH over Tor Network
+$ vim scp://user@remoteserver//etc/hosts # Edit text files with VIM over ssh/scp

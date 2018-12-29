@@ -3,6 +3,23 @@
 #: Description : Configuracao do Bind9 no GNU/Linux Debian Stable
 #: Options : None
 
+Key Knowledge Areas:
+- BIND 9 configuration files, terms and utilities
+- Utilities to request information from the DNS server
+- Layout, content and file location of the BIND zone files
+- Various methods to add a new host in the zone files, including reverse zones
+
+Terms and Utilities:
+- /var/named/
+- zone file syntax
+- resource record formats
+- named-checkzone
+- named-compilezone
+- masterfile-format
+- dig
+- nslookup
+- host
+
 # INSTALACAO -  DNS PRIMARIO (NS1) e DNS SECUNDARIO (NS2)
 #
 $ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
@@ -110,7 +127,7 @@ $ nslookup particula.local ; "A" record do dominio
 $ nslookup 192.168.0.5 ; dominio reverso
 $ nslookup web1.particula.local ; informacao sobre um determinado host
 $ nslookup -query=ns www.particula.local ; NS record
-$ nslookup -debugparticula.local ; Debug
+$ nslookup -debug particula.local ; Debug
 
 $ dig particula.local A ; A record
 $ dig particula.local MX ; MX record
