@@ -1,7 +1,26 @@
 #: Title : DNS TSIG
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Configuracao do Bind9 com a opcao de TSIG
-#: Options : None
+#: Description : 207.3 Securing a DNS server
+#: Options : Weight: 2
+
+Description: Candidates should be able to configure a DNS 
+server to run as a non-root user and run in a chroot jail. 
+This objective includes secure exchange of data between DNS servers.
+
+Key Knowledge Areas:
+- BIND 9 configuration files
+- Configuring BIND to run in a chroot jail
+- Split configuration of BIND using the forwarders statement
+- Configuring and using transaction signatures (TSIG)
+- Awareness of DNSSEC and basic tools
+- Awareness of DANE and related records
+
+Terms and Utilities:
+- /etc/named.conf
+- /etc/passwd
+- DNSSEC
+- dnssec-keygen
+- dnssec-signzone
 
 # TEORIA
 #
@@ -11,57 +30,78 @@
 # CONFIGURACAO DO DNS PRIMARIO (NS1 - 192.168.0.5)
 #
 $ cd /etc/bind/
-$ sudo dnssec-keygen -a HMAC-MD5 -b 128 -n HOST rndc-key ; criar as chaves de criptografia
-#
+
 # -a especificar qual eh o algoritmo que sera utilizado para criar as chaves
 # -b especifica o tamanho da chave
 # -n especifica o tipo de chave
-#
-$ sudo cat Krndc-key.+157+27182.private
-$ sudo vi /etc/bind/tsig.key
-    key "TRANSFER" {
-              algorithm hmac-md5;
-              secret "B72d9UgSPcSt6BMmMg5F6w==";
-    };
+$ dnssec-keygen -a HMAC-MD5 -b 512 -n USER ns-particula-local_rndc-key ; criar as chaves de criptografia
 
-    server 192.168.0.6 {
-	    keys {
-		    TRANSFER;
-	    };
-    };
+$ sudo cat Kns-particula-local_rndc-key.+157+11082.private
+	Private-key-format: v1.3
+	Algorithm: 157 (HMAC_MD5)
+	Key: xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==
+	Bits: AAA=
+	Created: 20190102190149
+	Publish: 20190102190149
+	Activate: 20190102190149
 
 $ sudo vi /etc/bind/named.conf.local
-    include "/etc/bind/tsig.key";
+	// TSIG
+	key "ns-particula-local_rndc-key" {
+        	algorithm hmac-md5;
+	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
+	};
+
+	server 192.168.0.6 {
+        	keys { ns-particula-local_rndc-key; };
+	};
+
+	// Master zones
+	zone "particula.local" {
+        	type master;
+	        file "/etc/bind/db.particula.local";
+        	allow-update { key "ns-particula-local_rndc-key"; };
+	        notify yes;
+	};
+
+	// Reverse
+	zone "0.168.192.in-addr.arpa" {
+        	type master;
+	        file "/etc/bind/db.0.168.192.in-addr.arpa";
+        	allow-update { key "ns-particula-local_rndc-key"; };
+	};
+
 $ sudo systemctl restart bind9.service
 
 # CONFIGURACAO DO DNS SECUNDARIO (NS2 - 192.168.0.6)
 #
-$ sudo vi /etc/bind/tsig.key
-    key "TRANSFER" {
-              algorithm hmac-md5;
-              secret "B72d9UgSPcSt6BMmMg5F6w==";
-    };
-
-    server 192.168.0.5 {
-	    keys {
-		    TRANSFER;
-	    };
-    };
 
 $ sudo vi /etc/bind/named.conf.local
-    include "/etc/bind/tsig.key";
+	// TSIG
+	key "ns-particula-local_rndc-key" {
+        	algorithm hmac-md5;
+	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
+	};
 
-$ sudo systemctl restart bind9.service
+	server 192.168.0.5 {
+        	keys { ns-particula-local_rndc-key; };
+	};
 
-# CONFIGURACAO DO DNS PRIMARIO (NS1 - 192.168.0.5)
-#
-$ sudo vi /etc/bind/named.conf.local
-    // Master zones
-    zone "particula.local" {
-            type master;
-            file "/etc/bind/db.particula.local";
-            allow-transfer { key TRANSFER; };
-            notify yes;
-    };
+	// Slave zones
+	//
+	zone "particula.local" {
+        	type slave;
+	        file "/etc/bind/db.particula.local";
+        	masters { 192.168.0.5; };
+	        allow-transfer { key "ns-particula-local_rndc-key"; };
+	};
+
+	// Reverse zone
+	zone "0.168.192.in-addr.arpa" {
+        	type slave;
+	        file "/etc/bind/db.0.168.192.in-addr.arpa";
+        	masters { 192.168.0.5; };
+	        allow-transfer { key "ns-particula-local_rndc-key"; };
+	};
 
 $ sudo systemctl restart bind9.service

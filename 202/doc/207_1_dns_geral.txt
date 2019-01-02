@@ -1,7 +1,7 @@
 #: Title : DNS Howto
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Teoria sobre DNS
-#: Options : None
+#: Description : 207.1 Basic DNS server configuration
+#: Option: Weight 3
 
 Key Knowledge Areas:
 - BIND 9.x configuration files, terms and utilities
@@ -42,4 +42,3 @@ rndc [opcao] [comando]
 	reload - re-ler os aquivos de configuracao e zonas
 	stats - exibe o status do daemon named
 	stop - para o daemon named
-

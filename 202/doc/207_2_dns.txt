@@ -1,7 +1,7 @@
 #: Title : DNS Howto
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Configuracao do Bind9 no GNU/Linux Debian Stable
-#: Options : None
+#: Description : 207.2 Create and maintain DNS zones
+#: Options : Weight: 3
 
 Key Knowledge Areas:
 - BIND 9 configuration files, terms and utilities
@@ -43,6 +43,20 @@ $ sudo vi /etc/bind/named.conf.local
 	        file "/etc/bind/db.0.168.192.in-addr.arpa";	# zone file path
 	    	allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
 	};
+
+$ sudo vi /etc/bind/named.conf.options
+        // forwarders {
+        //      0.0.0.0;
+        // };
+        
+	# query range you allow
+        allow-query { localhost; 192.168.0.0/24; };
+        # the range to transfer zone files
+        allow-transfer { localhost; 192.168.0.0/24; };
+        # recursion range you allow
+        allow-recursion { localhost; 192.168.0.0/24; };
+
+	listen-on-v6 { none; };
 
 $ sudo vi /etc/bind/db.particula.local
 	; Start of Authority (SOA) record
@@ -118,6 +132,20 @@ $ sudo vi /etc/bind/named.conf.local (slave)
 		file "/etc/bind/db.0.168.192.in-addr.arpa";
 		masters { 192.168.0.5; };	# ns1 private IP
 	};
+
+$ sudo vi /etc/bind/named.conf.options
+        // forwarders {
+        //      0.0.0.0;
+        // };
+        
+	# query range you allow
+        allow-query { localhost; 192.168.0.0/24; };
+        # the range to transfer zone files
+        allow-transfer { localhost; 192.168.0.0/24; };
+        # recursion range you allow
+        allow-recursion { localhost; 192.168.0.0/24; };
+
+	listen-on-v6 { none; };
 
 $ sudo systemctl restart bind9 ; reinicializando o servico
 

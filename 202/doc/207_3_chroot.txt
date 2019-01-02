@@ -1,30 +1,60 @@
 #: Title : dns chroot
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : configuracao do dns com a opcao de chroot
-#: Options : None
+#: Description : 207.3 Securing a DNS server
+#: Options : Weight: 2
+
+207.3 Securing a DNS server
+Weight: 2
+
+Description: Candidates should be able to configure a DNS server 
+to run as a non-root user and run in a chroot jail. This objective 
+includes secure exchange of data between DNS servers.
+
+Key Knowledge Areas:
+- BIND 9 configuration files
+- Configuring BIND to run in a chroot jail
+- Split configuration of BIND using the forwarders statement
+- Configuring and using transaction signatures (TSIG)
+- Awareness of DNSSEC and basic tools
+- Awareness of DANE and related records
+
+Terms and Utilities:
+- /etc/named.conf
+- /etc/passwd
+- DNSSEC
+- dnssec-keygen
+- dnssec-signzone
 
 # CHROOT dnscache/master/slave
 #
 $ sudo systemctl stop bind9.service ; parando o servico do bind9
 
-$ sudo vi /etc/default/bind9 ; alterando diretorio de trabalho
-	OPTIONS="-u bind -t /var/lib/named"
+$ sudo vi /etc/systemd/system/bind9.service
+	[Unit]
+	Description=BIND Domain Name Server
+	Documentation=man:named(8)
+	After=network.target
 
-$ sudo mkdir -p /var/lib/named/etc ; criando novo diretorio de trabalho
-$ sudo mkdir /var/lib/named/dev ; criando novo diretorio de trabalho
-$ sudo mkdir -p /var/lib/named/var/cache/bind ; criando novo diretorio de trabalho
-$ sudo mkdir -p /var/lib/named/var/run/bind/run ; criando novo diretorio de trabalho
+	[Service]
+	ExecStart=/usr/sbin/named -f -u bind -t /var/lib/named
+	ExecReload=/usr/sbin/rndc reload
+	ExecStop=/usr/sbin/rndc stop
 
-$ sudo mv /etc/bind /var/lib/named/etc ; movendo os arquivos de configuracao para o novo diretorio de trabalho
-$ sudo ln -s /var/lib/named/etc/bind /etc/bind ; criando link simbolico para outros aplicativos
+	[Install]
+	WantedBy=multi-user.target
 
-$ sudo mknod /var/lib/named/dev/null c 1 3 ; alterando permissao
-$ sudo mknod /var/lib/named/dev/random c 1 8 ; alterando permissao
-$ sudo chmod 666 /var/lib/named/dev/null /var/lib/named/dev/random ; alerando permissao
-$ sudo chown -R bind:bind /var/lib/named/var/* ; alterando permissao
-$ sudo chown -R bind:bind /var/lib/named/etc/bind ; alterando permissao
-
-$ cd /var/lib/named/var/cache/bind ; acessando o novo diretorio de trabalho
-$ sudo touch managed-keys.bind ; criando arquivo de chave de gerenciamento
-
+$ sudo systemctl reenable bind9
+$ sudo mkdir -p /var/lib/named/{etc,dev,var/cache/bind,var/run/named}
+$ sudo mknod /var/lib/named/dev/null c 1 3
+$ sudo mknod /var/lib/named/dev/random c 1 8
+$ sudo mknod /var/lib/named/dev/urandom c 1 9
+$ sudo mv /etc/bind /var/lib/named/etc
+$ sudo ln -s /var/lib/named/etc/bind /etc/bind
+$ sudo chown bind:bind -R /var/lib/named/
+$ sudo chmod 775 -R /var/lib/named/
+$ sudo chgrp bind -R /var/lib/named/
+$ sudo vi /etc/init.d/bind9
+	PIDFILE=/var/lib/named/var/run/named/named.pid
+$ sudo echo "\$AddUnixListenSocket /var/lib/named/dev/log" > /etc/rsyslog.d/bind-chroot.conf
+$ sudo systemctl restart rsyslog.service ; reinicializado o servico de syslog
 $ sudo systemctl start bind9.service ; inicalizando o servico
