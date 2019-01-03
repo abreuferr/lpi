@@ -1,13 +1,214 @@
 #: Title : Apache 2
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Configuracao do Apache2 no GNU/Linux Debian Stable
-#: Options : None
+#: Description : 208.1 Implementing a web server
+#: Options : Weight: 4
 
-# INSTALACAO
+Description: Candidates should be able to install and configure a 
+web server. This objective includes monitoring the server’s load 
+and performance, restricting client user access, configuring support 
+for scripting languages as modules and setting up client user 
+authentication. Also included is configuring server options to restrict 
+usage of resources. Candidates should be able to configure a web server 
+to use virtual hosts and customize file access.
+
+Key Knowledge Areas:
+- Apache 2.4 configuration files, terms and utilities
+- Apache log files configuration and content
+- Access restriction methods and files
+- mod_perl and PHP configuration
+- Client user authentication files and utilities
+- Configuration of maximum requests, minimum and maximum servers and clients
+- Apache 2.4 virtual host implementation (with and without dedicated IP addresses)
+- Using redirect statements in Apache’s configuration files to customize file access
+
+Terms and Utilities:
+- access logs and error logs
+- .htaccess
+- httpd.conf
+- mod_auth_basic, mod_authz_host and mod_access_compat
+- htpasswd
+- AuthUserFile, AuthGroupFile
+- apachectl, apache2ctl
+- httpd, apache2
+
+###
 #
-$ sudo apt install apache2 -y -d ; instalacao
+# Apache 2.4 configuration files, terms and utilities
+#
+###
+$ sudo apt-get install apache2 -y -d ; instalacao
 $ sudo systemctl status apache2 ; status do servico apache
 $ sudo systemctl restart apache2 ; restart do servico apache
 
-# CONFIGURACAO
+###
 #
+# Apache log files configuration and content
+#
+###
+$ sudo cat /var/log/apache2/access.log
+$ sudo cat /var/log/apache2/error.log
+
+# Apache log format
+LogFormat "%h %l %u %t \"%r\" %>s %b"
+
+- %h – endereco IP do cliente que acesso a pagina
+- %l – a identidade do cliente determinada pelo identd na maquina do cliente. caractere - se por acaso a informacao nao estiver disponivel
+- %u – o userid do cliente se for requisitado a autenticacao. caractere - se a informacao nao estiver disponivel
+- %t – data e hora em que foi solicitado a requisicao
+- \"%r\" – informacoes como o metodo http utilizado, o caminh do da requisicao de informacao e protocolo http utilizado pelo cliente
+- %>s – o codigo do status que o servidor envia de volta para o cliente
+- %b – o tamanho do objeto requisitado
+
+###
+#
+# Configuration of maximum requests, minimum and maximum servers and clients
+#
+###
+$ sudo apt-get install libapache2-mpm-itk -y -d ; instalacao
+$ sudo cat /etc/apache2/mods-enabled/mpm_prefork.conf
+	# prefork MPM
+	# StartServers: number of server processes to start
+	# MinSpareServers: minimum number of server processes which are kept spare
+	# MaxSpareServers: maximum number of server processes which are kept spare
+	# MaxRequestWorkers: maximum number of server processes allowed to start
+	# MaxConnectionsPerChild: maximum number of requests a server process serves
+
+	<IfModule mpm_prefork_module>
+		StartServers		5
+		MinSpareServers		5
+		MaxSpareServers		10
+		MaxRequestWorkers	150
+		MaxConnectionsPerChild	0
+	</IfModule>
+
+###
+#
+# Apache 2.4 virtual host implementation (with and without dedicated IP addresses)
+#
+###
+
+$ sudo mkdir -p /var/www/particula.local/html
+$ sudo vi /var/www/particula.local/html/index.html
+	<!DOCTYPE html>
+	<html lang="en" dir="ltr">
+        	<head>
+                	<meta charset="utf-8">
+	                <title>Welcome to particula.local</title>
+	        </head>
+	        <body>                
+        	        <h1>Success! particula.local home page!</h1>
+	        </body>                             
+	</html>
+
+$ sudo chown -R www-data: /var/www/particula.local
+
+$ sudo vi /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+	    ServerName particula.local
+	    ServerAlias www.particula.local
+	    ServerAdmin webmaster@particula.local
+	    DocumentRoot /var/www/particula.local/html
+
+	    <Directory /var/www/particula.local/html>
+	        Options -Indexes +FollowSymLinks
+	        AllowOverride All
+		LimitRequestBody 512000
+	    </Directory>
+
+	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+	OU
+
+	<VirtualHost 192.168.0.8:80>
+	    ServerName particula.local
+	    ServerAlias www.particula.local
+	    ServerAdmin webmaster@particula.local
+	    DocumentRoot /var/www/particula.local/html
+
+	    <Directory /var/www/particula.local/html>
+	        Options -Indexes +FollowSymLinks
+	        AllowOverride All
+	    </Directory>
+
+	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+	# ServerName: dominio que o site ira responder
+	# ServerAlias: todos os outros dominios ou subdominios que que ira ser utilizado por esse host
+	# DocumentRoot: diretorio a onde sera armazenado os arquivos deste dominio
+	# Options: opcoes a ser utilizdas nesse dominio
+		# Indexes: previnde as diretivas listadas
+		# FollowSymLinks: quando essa opcao eh ativada, o apache ira seguir os links simbolicos
+		# AllowOverride: especifica quais diretivas que foram declaradas no arquivo .htaccess e que serao sobrepostas as direticas da configuracao padrao
+	# ErrorLog, CustomLog: especifica os arquivos de log
+
+$ sudo a2ensite particula.local ; ativar as diretivas de configuracao
+$ sudo systemctl reload apache2 ; reler as configuracoes do apache
+$ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/ ; criacao do link simbolico de forma manual
+$ sudo apachectl configtest ; checagem da configuracao do apache2
+
+###
+#
+# Client user authentication files and utilities - .htaccess
+#
+###
+
+$ sudo /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+	    ServerName particula.local
+	    ServerAlias www.particula.local
+	    ServerAdmin webmaster@particula.local
+	    DocumentRoot /var/www/particula.local/html
+
+	    <Directory /var/www/particula.local/html>
+	        Options Indexes Includes FollowSymLinks MultiViews
+	        AllowOverride All
+	        Require all granted
+	    </Directory>
+
+	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+	OU
+
+	<VirtualHost 192.168.0.8:80>
+	    ServerName particula.local
+	    ServerAlias www.particula.local
+	    ServerAdmin webmaster@particula.local
+	    DocumentRoot /var/www/particula.local/html
+
+	    <Directory /var/www/particula.local/html>
+	        Options Indexes Includes FollowSymLinks MultiViews
+	        AllowOverride All
+	        Require all granted
+	    </Directory>
+
+	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+$ sudo systemctl restart apache2 ; reinicializar o apache2
+$ sudo apachectl configtest ; checagem da configuracao do apache2
+$ sudo htpasswd -c /var/www/particula.local/webpass cosmo
+$ sudo chown www-data /var/www/particula.local/webpass
+$ sudo chmod 640 /var/www/particula.local/webpass 
+$ sudo vi /var/www/particula.local/html/.htaccess
+	AuthType Basic
+	AuthName "Restricted Access"
+	AuthUserFile /var/www/particula.local/webpass
+	Require user cosmo
+
+###
+#
+# Security
+#
+###
+
+$ sudo vi /etc/apache2/apache2.conf
+	# nao exibe a versao do apache
+	ServerSignature Off
+	ServerTokens Prod
