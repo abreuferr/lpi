@@ -1,24 +1,34 @@
 #: Title : DNS Cache
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Configuracao do Bind9 como DNS Cache
-#: Options : None
+#: Description : 207.1 Basic DNS server configuration
+#: Options : Weight: 3
+
+Description: Candidates should be able to configure BIND to function as a 
+caching-only DNS server. This objective includes the ability to manage a 
+running server and configuring logging.
+
+Key Knowledge Areas:
+- BIND 9.x configuration files, terms and utilities
+- Defining the location of the BIND zone files in BIND configuration files
+- Reloading modified configuration and zone files
+- Awareness of dnsmasq, djbdns and PowerDNS as alternate name servers
+
+The following is a partial list of the used files, terms and utilities:
+- /etc/named.conf
+- /var/named/
+- /usr/sbin/rndc
+- kill
+- host
+- dig
 
 # INSTALACAO
 #
 $ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
 $ sudo chown -R bind:bind /etc/bind ; alterando permissao
-$ sudo systemctl restart bind9.service ; reinicializando o bind
 
 # CONFIGURACAO
 #
 $ sudo vi /etc/bind/named.conf.options
-    include "/etc/bind/rndc.key";
-
-    controls {
-            inet 127.0.0.1 port 953
-            allow { 127.0.0.1; } keys { "rndc-key"; };
-    };
-
     acl "clients" {
             192.168.0.0/24;
             localhost;
@@ -26,14 +36,12 @@ $ sudo vi /etc/bind/named.conf.options
     };
 
     options {
-            directory "/var/cache/bind";
-
             recursion yes;
             allow-query { clients; };
 
             forwarders {
-                192.168.0.5;
-                192.168.0.6;
+                8.8.8.8;
+                8.8.4.4;
             };
             forward only;
 
