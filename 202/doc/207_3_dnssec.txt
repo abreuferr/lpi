@@ -1,47 +1,106 @@
 #: Title : DNSSEC Howto
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Configuracao do dnssec Bind9 no GNU/Linux Debian Stable
-#: Options : None
+#: Description : 207.3 Securing a DNS server
+#: Options : Weight: 2
 
-1. INSTALACAO (NS1/NS2)
-#
-# instalacao do dnssec
-#
-$ sudo apt-get install libnet-dns-zonefile-fast-perl libnet-dns-sec-perl libmailtools-perl libcrypt-openssl-random-perl -y -d
+Description: Candidates should be able to configure a DNS server 
+to run as a non-root user and run in a chroot jail. This objective 
+includes secure exchange of data between DNS servers.
 
-2. CONFIGIRACAO DNS PRIMARIO (NS1)
-#
-# Reincializacao do Bind
-#
-$ sudo systemctl restart bind9
+Key Knowledge Areas:
+- BIND 9 configuration files
+- Configuring BIND to run in a chroot jail
+- Split configuration of BIND using the forwarders statement
+- Configuring and using transaction signatures (TSIG)
+- Awareness of DNSSEC and basic tools
+- Awareness of DANE and related records
 
-2.1. CONFIGURACAO DO DNS PRIMARIO (NS1)
+Terms and Utilities:
+- /etc/named.conf
+- /etc/passwd
+- DNSSEC
+- dnssec-keygen
+- dnssec-signzone
+
+##
 #
-# Local File
+# NS1 (MASTER)
 #
+##
+
+$ sudo apt-get install libnet-dns-zonefile-fast-perl libnet-dns-sec-perl libmailtools-perl libcrypt-openssl-random-perl -y -d ; instalacao
 $ sudo vi /etc/bind/named.conf.options
 	options {
 		(...)
-
         	dnssec-enable yes;
         	dnssec-validation yes;
         	dnssec-lookaside auto;
-
 		(...)
 	};
 
-2.2. CRIACAO DO ZONE SIGNING KEY(ZSK)
-#
-# criacao da chave
-#
-$ sudo cd /etc/bind/
-$ sudo dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE particula.local
+$ sudo dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE particula.local ; CRIACAO DO Zone Signing Key(ZSK)
+$ sudo dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n ZONE particula.local ; CRIACAO DO Key Signing Key(KSK)
+$ sudo chown bind:bind Kparticula.local*
 
-2.3. CRIACAO DO Key Signing Key(KSK)
-#
-# criacao da chave
-#
-$ sudo cd /etc/bind/
-$ sudo dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n ZONE particula.local
+$ sudo vi /etc/bind/db.particula.local
+	$INCLUDE /etc/bind/Kparticula.local.+007+09260.key
+	$INCLUDE /etc/bind/Kparticula.local.+007+40014.key
 
+$ sudo dnssec-signzone -A -3 $(head -c 10 /dev/random | sha1sum | cut -b 1-16) -N INCREMENT -o particula.local -t db.particula.local
 
+$ sudo vi /etc/bind/named.conf.local
+	// Master zones
+	zone "particula.local" {
+	(...)
+	        file "/etc/bind/db.particula.local.signed";
+	(...)
+	};
+
+$ sudo systemctl restart bind9.service
+
+$ dig DNSKEY particula.local. @localhost +multiline ; teste da configuracao
+$ dig A particula.local. @localhost +noadditional +dnssec +multiline ; teste da configuracao
+
+##
+#
+# NS2 (SLAVE)
+#
+##
+
+$ sudo vi /etc/bind/named.conf.options
+	options {
+		(...)
+        	dnssec-enable yes;
+        	dnssec-validation yes;
+        	dnssec-lookaside auto;
+		(...)
+	};
+
+$ sudo vi /etc/bind/named.conf.local
+	// Slave zones
+	zone "particula.local" {
+	(...)
+	        file "/etc/bind/db.particula.local.signed";
+	(...)
+	};
+
+$ sudo systemctl restart bind9.service
+
+$ sudo vi /etc/bind/zonesigner.sh ; toda vez que os arquivo db.particula.local for alterado, eh necessario assinar o arquivo novamente
+	#!/bin/sh
+	PDIR=`pwd`
+	ZONEDIR="/etc/bind" #location of your zone files
+	ZONE=$1
+	ZONEFILE=$2
+	DNSSERVICE="bind9" #On CentOS/Fedora replace this with "named"
+	cd $ZONEDIR
+	SERIAL=`/usr/sbin/named-checkzone $ZONE $ZONEFILE | egrep -ho '[0-9]{10}'`
+	sed -i 's/'$SERIAL'/'$(($SERIAL+1))'/' $ZONEFILE
+	/usr/sbin/dnssec-signzone -A -3 $(head -c 10 /dev/random | sha1sum | cut -b 1-16) -N increment -o $1 -t $2
+	service $DNSSERVICE reload
+	cd $PDIR
+
+$ sudo chmod +x /etc/bind/zonesigner.sh
+$ sudo zonesigner.sh particula.local db.particula.local
+$ crontab -e
+	0       0       */3     *       *       /etc/bind/zonesigner.sh particula.local db.particula.local
