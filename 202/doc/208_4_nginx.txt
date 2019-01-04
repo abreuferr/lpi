@@ -1,0 +1,151 @@
+#: Title : Nginx
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 208.4 Implementing Nginx as a web server and a reverse proxy
+#: Options : Weight: 2
+
+Description: Candidates should be able to install and configure a reverse proxy 
+server, Nginx. Basic configuration of Nginx as a HTTP server is included.
+
+Key Knowledge Areas:
+- Nginx
+- Reverse Proxy
+- Basic Web Server
+
+Terms and Utilities:
+- /etc/nginx/
+- nginx
+
+$ sudo apt-get update
+$ sudo apt-get upgrade
+
+$ sudo apt-get install nginx -y -d
+
+$ sudo systemctl start nginx
+$ sudo systemctl enable nginx
+
+$ sudo systemctl status nginx
+$ sudo systemctl is-active nginx
+
+#
+# BASICO
+#
+
+$ sudo mkdir -p /var/www/particula.local/html
+$ sudo vi /var/www/particula.local/html/index.html
+	<!DOCTYPE html>
+	<html>
+		<head>
+			<title>Nginx - particula.local</title>
+		</head>
+		<body>
+			<h1>Welcome to particula.local</h1>
+			<p>Particula.local Test Page running on NGINX Web Server</p>
+		</body>
+	</html>
+
+$ sudo vi /etc/nginx/sites-available/particula.local
+	server {
+		listen 80;
+		root /var/www/particula.local/html;
+		index index.html;
+		server_name www.particula.local particula.local;
+
+		# compressao
+		gzip on;
+		gzip_comp_level    5;
+		gzip_min_length    256;
+		gzip_proxied       any;
+
+		# log files
+		access_log  /var/log/nginx/particula.local_access.log;
+		error_log   /var/log/nginx/particula.local_error.lg;
+	}
+
+$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
+
+$ sudo nginx -t ; testar os arquivos de configuracao
+
+$ sudo systemctl restart nginx
+
+#
+# SSL
+#
+
+$ sudo openssl req -x509 -days 703 -sha256 -newkey rsa:2048 -nodes -keyout /etc/ssl/private/particula_local.key -out /etc/ssl/certs/particula_local-cert.pem
+
+$ sudo vi /etc/nginx/sites-available/particula.local
+	server {
+		listen 80;
+		root /var/www/particula.local/html;
+		index index.html;
+		server_name www.particula.local particula.local;
+
+		# compressao
+		gzip on;
+		gzip_comp_level    5;
+		gzip_min_length    256;
+		gzip_proxied       any;
+
+		# Rewrite HTTP to HTTPS
+		return 301 https://$host$request_uri;
+
+		# log files
+		access_log  /var/log/nginx/particula.local_access.log;
+		error_log   /var/log/nginx/particula.local_error.lg;
+	}
+
+	server {
+	        listen 443 ssl;
+	        root /var/www/particula.local/html;
+	        index index.html;
+	        server_name www.particula.local particula.local;
+
+		# log files
+		access_log  /var/log/nginx/particula.local_access.log;
+		error_log   /var/log/nginx/particula.local_error.lg;
+
+		# compressao
+		gzip on;
+		gzip_comp_level    5;
+		gzip_min_length    256;
+		gzip_proxied       any;
+
+		# ssl
+	        ssl_certificate /etc/ssl/certs/particula_local-cert.pem;
+	        ssl_certificate_key /etc/ssl/private/particula_local.key;
+	}
+
+$ sudo nginx -t ; testar os arquivos de configuracao
+
+$ sudo systemctl restart nginx
+
+#
+# PROXY REVERSO (SEM SSL)
+# (servidor nginx - 192.168.0.9)
+#
+
+$ sudo apt-get install nginx -y -d
+
+$ sudo vi /etc/nginx/sites-available/particula.local
+	server {
+        	listen 80;
+
+	        server_name www.particula.local;
+
+	        # log files
+	        access_log  /var/log/nginx/particula.local_access.log;
+        	error_log   /var/log/nginx/particula.local_error.lg;
+
+	        location / {
+        	        proxy_pass_header Authorization;
+	                proxy_pass http://192.168.0.9;
+        	        proxy_set_header Host $host;
+                	proxy_set_header X-Real-IP $remote_addr;
+	                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        	        proxy_set_header X-Forwarded-Proto $scheme;
+	        }
+	}
+
+$ sudo nginx -t
+
+$ sudo systemctl restart nginx
