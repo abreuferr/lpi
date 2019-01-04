@@ -32,7 +32,7 @@ $ sudo vi /etc/bind/named.conf.options
     acl "clients" {
             192.168.0.0/24;
             localhost;
-            localhost;
+            localnets;
     };
 
     options {
@@ -43,10 +43,11 @@ $ sudo vi /etc/bind/named.conf.options
                 8.8.8.8;
                 8.8.4.4;
             };
-            forward only;
+	    forward only;
 
-            dnssec-enable yes;
-            dnssec-validation auto;
+	    auth-nxdomain no;    # conform to RFC1035
+	    listen-on-v6 { none; };
+
     };
 
 $ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
