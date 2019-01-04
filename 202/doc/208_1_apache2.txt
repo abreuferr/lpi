@@ -65,20 +65,15 @@ LogFormat "%h %l %u %t \"%r\" %>s %b"
 #
 ###
 $ sudo apt-get install libapache2-mpm-itk -y -d ; instalacao
-$ sudo cat /etc/apache2/mods-enabled/mpm_prefork.conf
-	# prefork MPM
-	# StartServers: number of server processes to start
-	# MinSpareServers: minimum number of server processes which are kept spare
-	# MaxSpareServers: maximum number of server processes which are kept spare
-	# MaxRequestWorkers: maximum number of server processes allowed to start
-	# MaxConnectionsPerChild: maximum number of requests a server process serves
-
-	<IfModule mpm_prefork_module>
-		StartServers		5
-		MinSpareServers		5
-		MaxSpareServers		10
-		MaxRequestWorkers	150
-		MaxConnectionsPerChild	0
+$ sudo vi /etc/apache2/mods-available/mpm_event.conf
+	<IfModule mpm_event_module>
+		StartServers		3
+		MinSpareThreads		25
+		MaxSpareThreads		75
+		ThreadLimit		64
+		ThreadsPerChild		25
+		MaxRequestWorkers	30
+		MaxConnectionsPerChild	1000
 	</IfModule>
 
 ###
@@ -88,7 +83,7 @@ $ sudo cat /etc/apache2/mods-enabled/mpm_prefork.conf
 ###
 
 $ sudo mkdir -p /var/www/particula.local/html
-$ sudo vi /var/www/particula.local/html/index.html
+$ sudo vi /var/www/particula.local/html/index.html ; pagina web para teste
 	<!DOCTYPE html>
 	<html lang="en" dir="ltr">
         	<head>

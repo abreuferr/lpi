@@ -1,0 +1,70 @@
+#: Title : Apache 2
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 208.2 Apache configuration for HTTPS
+#: Options : Weight: 3
+
+Description: Candidates should be able to configure a web server to provide HTTPS.
+
+Key Knowledge Areas:
+- SSL configuration files, tools and utilities
+- Generate a server private key and CSR for a commercial CA
+- Generate a self-signed Certificate
+- Install the key and certificate, including intermediate CAs
+- Configure Virtual Hosting using SNI
+- Awareness of the issues with Virtual Hosting and use of SSL
+- Security issues in SSL use, disable insecure protocols and ciphers
+
+Terms and Utilities:
+- Apache2 configuration files
+- /etc/ssl/, /etc/pki/
+- openssl, CA.pl
+- SSLEngine, SSLCertificateKeyFile, SSLCertificateFile
+- SSLCACertificateFile, SSLCACertificatePath
+- SSLProtocol, SSLCipherSuite, ServerTokens, ServerSignature, TraceEnable
+
+$ sudo a2enmod ssl ; ativar o modulo SSL do apache
+$ sudo a2ensite default-ssl ; ativar o modulo default-ssl
+$ sudo systemctl restart apache2
+
+$ sudo mkdir /etc/apache2/ssl ; criar o diretorio a onde sera armazenado o certificado
+$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt ; criacao do certificado digital
+$ sudo chmod 600 /etc/apache2/ssl/* ; seguranca
+
+$ sudo vi /etc/apache2/sites-enabled/particula.local.conf
+	NameVirtualHost *:443
+	NameVirtualHost *:80
+
+	<VirtualHost *:80>
+	        ServerName particula.local
+	        ServerAlias www.particula.local
+	        ServerAdmin webmaster@particula.local
+	        DocumentRoot /var/www/particula.local/html
+	
+	        Redirect permanent "/" "https://www.particula.local/"
+
+	        <Directory /var/www/particula.local/html>
+	                Options Indexes Includes FollowSymLinks MultiViews
+	                AllowOverride All
+	                Require all granted
+	                LimitRequestBody 512000
+	        </Directory>
+
+	        ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+	<VirtualHost *:443>
+	        ServerName particula.local
+	        ServerAlias www.particula.local
+	        ServerAdmin webmaster@particula.local
+	        DocumentRoot /var/www/particula.local/html
+
+	        SSLEngine on
+	        SSLCertificateFile /etc/apache2/ssl/apache.crt
+	        SSLCertificateKeyFile /etc/apache2/ssl/apache.key
+
+	        ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+$ sudo systemctl restart apache2
