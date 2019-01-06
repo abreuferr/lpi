@@ -148,4 +148,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 
 $ sudo nginx -t
 
+$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
+
 $ sudo systemctl restart nginx
