@@ -59,6 +59,13 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 	        ServerAdmin webmaster@particula.local
 	        DocumentRoot /var/www/particula.local/html
 
+	        <Directory /var/www/particula.local/html>
+	                Options Indexes Includes FollowSymLinks MultiViews
+	                AllowOverride All
+	                Require all granted
+	                LimitRequestBody 512000
+	        </Directory>
+
 	        SSLEngine on
 	        SSLCertificateFile /etc/apache2/ssl/apache.crt
 	        SSLCertificateKeyFile /etc/apache2/ssl/apache.key
