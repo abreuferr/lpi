@@ -136,6 +136,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        access_log  /var/log/nginx/particula.local_access.log;
         	error_log   /var/log/nginx/particula.local_error.lg;
 
+		# proxy reverso
 	        location / {
         	        proxy_pass_header Authorization;
 	                proxy_pass http://192.168.0.9;
@@ -149,5 +150,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 $ sudo nginx -t
 
 $ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
+
+$ sudo systemctl restart nginx
 
 $ sudo systemctl restart nginx
