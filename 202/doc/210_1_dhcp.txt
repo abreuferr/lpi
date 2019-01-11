@@ -1,0 +1,47 @@
+#: Title : DHCP configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 210.1 DHCP configuration
+#: Options : Weight: 2
+
+Description: Candidates should be able to configure a DHCP server. 
+This objective includes setting default and per client options, 
+adding static hosts and BOOTP hosts. Also included is configuring 
+a DHCP relay agent and maintaining the DHCP server.
+
+Key Knowledge Areas:
+- DHCP configuration files, terms and utilities
+- Subnet and dynamically-allocated range setup
+- Awareness of DHCPv6 and IPv6 Router Advertisements
+
+Terms and Utilities:
+- dhcpd.conf
+- dhcpd.leases
+- DHCP Log messages in syslog or systemd journal
+- arp
+- dhcpd
+- radvd
+- radvd.conf
+
+$ sudo apt-get install isc-dhcp-server ; instalacao do servidor dhcp
+
+$ sudo vi /etc/default/isc-dhcp-server
+	INTERFACESv4="ens32"
+
+$ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bkp ; copia de seguranca
+
+$ sudo vi /etc/dhcp/dhcpd.conf
+	# If this DHCP server is the official DHCP server for the local
+	# network, the authoritative directive should be uncommented.
+	authoritative;
+
+	subnet 192.168.0.0 netmask 255.255.255.224 {
+        	range 192.168.0.100 192.168.0.200;
+	        option domain-name-servers nscache.particula.local, ns1.particula.local, ns2.particula.local;
+	        option domain-name "particula.local";
+	        option routers 192.168.0.2;
+	        option broadcast-address 192.168.0.254;
+	        default-lease-time 600;
+	        max-lease-time 7200;
+	}
+
+$ sudo systemctl restart isc-dhcp-server.service
