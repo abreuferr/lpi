@@ -22,13 +22,26 @@ Terms and Utilities:
 - Private and public key files
 - PermitRootLogin, PubKeyAuthentication, AllowUsers, PasswordAuthentication, Protocol
 
-# INSTALACAO
 #
-$ sudo apt-get install openssh-server openss-client
+# cliente
+#
+$ sudo apt-get install openssh-client ; instalacao do client na estacao
 
-# CONFIGURACAO BASICA DE SEGURANCA
+$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" ; criando chaves de autenticacao
+
+$ ls -l /home/cosmo/.ssh ; chaves geradas
+	-rw------- 1 cosmo cosmo 1766 Jan 11 13:36 id_rsa
+	-rw-r--r-- 1 cosmo cosmo  403 Jan 11 13:36 id_rsa.pub
+
+$ ssh-copy-id <USERNAME@SERVER> ; copiando a chave publica para o servidor
+
 #
-$ sudo cat /etc/ssh/sshd_config
+# servidor
+#
+
+$ sudo apt-get install openssh-server openss-client ; instalacao
+
+$ sudo cat /etc/ssh/sshd_config ; configuracao
 	Port 2222 # alterar a porta padrao de acesso
 	AllowUsers <USER> # limitar o acesso a determinados usuarios
 	AllowGroups <GROUP> # limitar o acesso a determinado grupo de usuario
@@ -40,31 +53,5 @@ $ sudo cat /etc/ssh/sshd_config
 	ClientAliveInterval <NUM> # depois de X segundos sem nenhuma atividade, o usuario eh deslogado
 	ClientAliveContMax <NUM> # quantidade de mensagens enviadas pelo cliente
 	X11Forwarding <YES/NO> # permitir ou nao o redirecionamento do X11 para o cliente
+
 $ sudo systemctl restart sshd.service # reinicializar o servidor ssh
-$ sudo systemctl status sshd.service # status do servidor ssh
-$ sudo usermod -a -G <GRUPO> <USUARIO> # adicionar usuario em um grupo
-
-# CHAVE PUBLICA/PRIVADA
-#
-$ ssh-keygen # gerando as chaves de autenticacao, RSA 2048 bits
-$ ssh-keygen -b 4096 # gerando as chaves de autenticacao, RSA 4096 bits 
-$ ssh-keygen -p # remover ou alterar a frase de acesso
-$ ssh-keygen -l # exibir a fingerprint da chave de autenticacao
-$ ls .ssh/
-	id_rsa # chave privada
-	id_rsa.pub # chave publica
-$ ssh-copy-id <USERNAME@SERVER> # copiando a chave publica para o servidor
-$ cat ~/.ssh/id_rsa.pub | ssh <USERNAME@SERVER> "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys" # outra forma de copiar a chave
-$ sudo vi /etc/ssh/sshd.conf
-	PasswordAuthentication no # desabilitar a autenticacao atraves de senha
-$ sudo systemctl restart sshd.service
-$ sudo systemctl status sshd.service
-
-# SSH
-#
-$ ssh -v -p 22 -C user@server # -C compressao
-$ ssh  -L 9999:127.0.0.1:80 user@remoteserver # SSH Tunnel (port forward)
-$ ssh -v -R 0.0.0.0:1999:127.0.0.1:902 192.168.1.100 user@remoteserver # SSH Reverse Tunnel
-$ ssh -v -R 0.0.0.0:1999 192.168.1.100 user@remoteserver # SSH Reverse Proxy
-$ torsocks ssh myuntracableuser@remoteserver # SSH over Tor Network
-$ vim scp://user@remoteserver//etc/hosts # Edit text files with VIM over ssh/scp
