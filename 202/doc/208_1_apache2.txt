@@ -36,7 +36,9 @@ Terms and Utilities:
 # Apache 2.4 configuration files, terms and utilities
 #
 ###
-$ sudo apt-get install apache2 -y -d ; instalacao
+$ sudo apt-get install apache2 ; instalacao do apache 
+$ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d ; instalacao do modulo PHP no Apache2
+$ sudo apt-get install libapache2-mod-perl2 ; instalacao do modulo Perl no Apache2
 $ sudo systemctl status apache2 ; status do servico apache
 $ sudo systemctl restart apache2 ; restart do servico apache
 
@@ -144,6 +146,41 @@ $ sudo a2ensite particula.local ; ativar as diretivas de configuracao
 $ sudo systemctl reload apache2 ; reler as configuracoes do apache
 $ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/ ; criacao do link simbolico de forma manual
 $ sudo apachectl configtest ; checagem da configuracao do apache2
+
+###
+#
+# Apache 2.4 + Modulo Perl
+#
+###
+
+$ sudo vi /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+	(...)
+	PerlModule ModPerl::Registry
+	<Directory /var/www/particula.local/html>
+		SetHandler perl-script
+		PerlHandler ModPerl::Registry
+		PerlSendHeader On
+		Options +ExecCGI
+		AllowOverride None
+		Order allow,deny
+		allow from all
+	</Directory>
+	(...)
+
+$ sudo vi /var/www/particula.local/html/perltest.pl
+	##!/usr/bin/perl -w
+	print "Content-type: text/html\r\n\r\n";
+	print "Hello there!<br />\nJust testing .<br />\n";
+
+	for ($i=0; $i<10; $i++)
+	{
+		print $i."<br />";
+	}
+
+$ sudo systemctl restart apache2
+
+$ w3m http://www.particula.local/perltest.pl ; comando que deve ser executado na estacao
 
 ###
 #
