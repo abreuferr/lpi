@@ -63,10 +63,10 @@ $ sudo vi /etc/bind/db.particula.local
 	$TTL 604800
 	@ IN SOA ns1.particula.local. root.particula.local. (
 				2010101301;	Serial
-				3600;		Refresh [1h]
-				600;		Retry   [10m]
-				86400;		Expire  [1d]
-				600 );		Negative Cache TTL [1h]
+				28800;		Refresh
+				3600;		Retry
+				604800;		Expire
+				3600 );		Negative Cache TTL
 
 	; Name Server (NS) records.
 				IN NS ns1.particula.local.
@@ -93,11 +93,11 @@ $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 	; Start of Authority (SOA) record
 	$TTL   900
 	@ IN SOA ns1.particula.local. root.particula.local. (
-				2010101301;	Serial
-				3600;		Refresh [1h]
-				600;		Retry   [10m]
-				86400;		Expire  [1d]
-				600 );		Negative Cache TTL [1h]
+                                2010101301;     Serial
+                                28800;          Refresh
+                                3600;           Retry
+                                604800;         Expire
+                                3600 );         Negative Cache TTL
 
 	; Name Server (NS) records.
 				IN NS ns1.particula.local.
