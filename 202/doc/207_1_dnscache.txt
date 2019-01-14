@@ -21,8 +21,28 @@ The following is a partial list of the used files, terms and utilities:
 - host
 - dig
 
-# INSTALACAO
+# RNDC
 #
+# rndc - aplicativo utilizado para gerenciar o daemon named
+# /etc/rndc.conf - arquivo de configuracao
+# /etc/named.conf - arquivo de configuracao do daemon named
+
+rndc [opcao] [comando]
+
+[opcao]
+	-c <configuration file> - especifica o arquivo de configuracao que esta localizado em outro diretorio.
+	-p <port number> - especifica o numero da porta, padrao 953.
+	-s <server> - especifica outro servidor que nao o padrao, /etc/rndc.conf.
+	-y <key name> - especifica outra chave alem da chave padrao localizada no aqruivo /etc/rndc.conf.
+
+[comando]
+	halt - eh utilizado para parar o daemon named
+	querylog - log todas as queries criada pelo named
+	refresh - utilizado para re-ler a base de dados do named
+	reload - re-ler os aquivos de configuracao e zonas
+	stats - exibe o status do daemon named
+	stop - para o daemon named
+
 $ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
 $ sudo chown -R bind:bind /etc/bind ; alterando permissao
 
