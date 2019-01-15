@@ -22,6 +22,7 @@ Terms and Utilities:
 - SSLCACertificateFile, SSLCACertificatePath
 - SSLProtocol, SSLCipherSuite, ServerTokens, ServerSignature, TraceEnable
 
+$ sudo apt-get install apache2 openssl ; instalacao do apache2 e do modulo ssl
 $ sudo a2enmod ssl ; ativar o modulo SSL do apache
 $ sudo a2ensite default-ssl ; ativar o modulo default-ssl
 $ sudo systemctl restart apache2
