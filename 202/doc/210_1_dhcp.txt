@@ -30,18 +30,33 @@ $ sudo vi /etc/default/isc-dhcp-server
 $ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bkp ; copia de seguranca
 
 $ sudo vi /etc/dhcp/dhcpd.conf
-	# If this DHCP server is the official DHCP server for the local
-	# network, the authoritative directive should be uncommented.
+	# variavel global
 	authoritative;
 
+	# variavel local
 	subnet 192.168.0.0 netmask 255.255.255.224 {
+		# range de ip
         	range 192.168.0.100 192.168.0.200;
+
+		# servidores de dns
 	        option domain-name-servers nscache.particula.local, ns1.particula.local, ns2.particula.local;
+
+		# dominio
 	        option domain-name "particula.local";
+
+		# gateway da rede
 	        option routers 192.168.0.2;
+
+		# broadcast da rede
 	        option broadcast-address 192.168.0.254;
+
+		# intervalo de checagem de ip		
 	        default-lease-time 600;
+
+		# periodo maximo de alocacao do ip
 	        max-lease-time 7200;
 	}
 
-$ sudo systemctl restart isc-dhcp-server.service
+$ sudo systemctl restart isc-dhcp-server.service ; reinicializando o servico do servico do dhcp
+
+$ cat /var/dhcp/dhcpd.leases ; arquivo a onde fica armazenado a relacao IP <> Host
