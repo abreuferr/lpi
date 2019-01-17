@@ -1,0 +1,45 @@
+#: Title : 211: E-Mail Services
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 211.1 Using e-mail servers
+#: Options : Weight: 4
+
+Description: Candidates should be able to manage an e-mail 
+server, including the configuration of e-mail aliases, e-mail 
+quotas and virtual e-mail domains. This objective includes 
+configuring internal e-mail relays and monitoring e-mail servers.
+
+Key Knowledge Areas:
+- Configuration files for postfix
+- Basic TLS configuration for postfix
+- Basic knowledge of the SMTP protocol
+- Awareness of sendmail and exim
+
+Terms and Utilities:
+- Configuration files and commands for postfix
+- /etc/postfix/
+- /var/spool/postfix/
+- sendmail emulation layer commands
+- /etc/aliases
+- mail-related logs in /var/log/
+
+$ sudo apt-get install postfix -y -d ; instalacao do postfix
+	Internet site
+	mail.particula.local
+
+$ sudo vi /etc/postfix/main.cf ; configuracao do postfix
+	myhostname = mail.particula.local
+	mydomain = particula.local
+	myorigin = $mydomain
+	mydestination = $myhostname, localhost.$mydomain, $mydomain, mail.$mydomain, www.$mydomain
+	mail_spool_directory = /var/spool/mail
+	mynetworks = 127.0.0.0/8, 192.168.0.0/24
+
+$ sudo systemctl restart postfix ; reinicializar o postfix
+
+$ sudo postfix check ; checar a configuracao do postfix
+
+$ sudo apt-get install bsd-mailx mailutils ; software para fazer teste do postfix
+
+$ echo "This is message body" | mailx -s "This is Subject" -r "cosmo@particula.local>" -a /home/cosmo/attachment someone@particula.local ; teste
+
+$ sudo cat /var/log/mail.log

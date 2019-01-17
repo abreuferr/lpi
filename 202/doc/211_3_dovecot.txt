@@ -1,0 +1,38 @@
+#: Title : Managing Remote E-Mail Delivery 
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 211.3 Managing Remote E-Mail Delivery
+#: Options : Weight: 2
+
+Description: Candidates should be able to install and 
+configure POP and IMAP daemons.
+
+Key Knowledge Areas:
+- Dovecot IMAP and POP3 configuration and administration
+- Basic TLS configuration for Dovecot
+- Awareness of Courier
+
+Terms and Utilities:
+- /etc/dovecot/
+- dovecot.conf
+- doveconf
+- doveadm
+
+$ sudo apt-get -y install dovecot-imapd dovecot-pop3d -y -d ; instalacao do dovecot
+
+$ sudo vi /etc/dovecot/dovecot.conf ; configuracao
+	protocols = imap pop3 lmtp
+	listen = *, ::
+	userdb {
+		driver = pam
+	}
+
+	passdb {
+		driver = passwd
+	}
+
+$ sudo vi /etc/dovecot/conf.d/10-mail.conf
+	mail_location = mbox:~/mail:INBOX=/var/mail/%u
+
+$ sudo /etc/dovecot/conf.d/10-ssl.conf
+	ssl_cert = </etc/letsencrypt/live/particula.local/fullchain.pem
+	ssl_key = </etc/letsencrypt/live/particula.local/privkey.pem
