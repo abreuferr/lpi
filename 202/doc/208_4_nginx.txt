@@ -15,23 +15,31 @@ Terms and Utilities:
 - /etc/nginx/
 - nginx
 
+#
+# INICIO
+#
+
 $ sudo apt-get update
 $ sudo apt-get upgrade
 
-$ sudo apt-get install nginx -y -d
+$ wget http://nginx.org/keys/nginx_signing.key ; obter a chave de criptografia
+$ sudo sudo apt-key add nginx_signing.key ; adicionar a chave de criptografia
+$ sudo vim /etc/apt/sources.list.d/nginx-stable.list ; adicionando o repositorio do nginx
+	deb http://nginx.org/packages/debian/ stretch nginx
 
-$ sudo systemctl start nginx
-$ sudo systemctl enable nginx
+$ sudo apt-get install nginx -y -d ; instalacao do nginx
 
-$ sudo systemctl status nginx
-$ sudo systemctl is-active nginx
+$ sudo systemctl start nginx ; inicializacao do servico nginx
+$ sudo systemctl enable nginx ; habilitar o nginx no boot
+
+$ sudo systemctl status nginx ; status do servico do nginx
 
 #
 # BASICO
 #
 
-$ sudo mkdir -p /var/www/particula.local/html
-$ sudo vi /var/www/particula.local/html/index.html
+$ sudo mkdir -p /var/www/particula.local/html ; diretorio a onde sera armazenado o codigo do site
+$ sudo vi /var/www/particula.local/html/index.html ; pagina para teste
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -43,29 +51,24 @@ $ sudo vi /var/www/particula.local/html/index.html
 		</body>
 	</html>
 
-$ sudo vi /etc/nginx/sites-available/particula.local
+$ sudo vi /etc/nginx/sites-available/particula.local ; arquivo de configuracao do site particula.local
 	server {
+		# geral
 		listen 80;
 		root /var/www/particula.local/html;
 		index index.html;
 		server_name www.particula.local particula.local;
-
-		# compressao
-		gzip on;
-		gzip_comp_level    5;
-		gzip_min_length    256;
-		gzip_proxied       any;
 
 		# log files
 		access_log  /var/log/nginx/particula.local_access.log;
 		error_log   /var/log/nginx/particula.local_error.lg;
 	}
 
-$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
+$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled/ ; ativando o dominio virtual
 
 $ sudo nginx -t ; testar os arquivos de configuracao
 
-$ sudo systemctl restart nginx
+$ sudo systemctl restart nginx ; reinicializar o servico do nginx
 
 #
 # SSL
@@ -73,20 +76,15 @@ $ sudo systemctl restart nginx
 
 $ sudo openssl req -x509 -days 703 -sha256 -newkey rsa:2048 -nodes -keyout /etc/ssl/private/particula_local.key -out /etc/ssl/certs/particula_local-cert.pem
 
-$ sudo vi /etc/nginx/sites-available/particula.local
+$ sudo vi /etc/nginx/sites-available/particula.local ; configuracao do nginx para trabalhar com certificado ssl
 	server {
+		# geral
 		listen 80;
 		root /var/www/particula.local/html;
 		index index.html;
 		server_name www.particula.local particula.local;
 
-		# compressao
-		gzip on;
-		gzip_comp_level    5;
-		gzip_min_length    256;
-		gzip_proxied       any;
-
-		# Rewrite HTTP to HTTPS
+		# redirecionar HTTP to HTTPS
 		return 301 https://$host$request_uri;
 
 		# log files
@@ -95,6 +93,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	}
 
 	server {
+		# geral ssl
 	        listen 443 ssl;
 	        root /var/www/particula.local/html;
 	        index index.html;
@@ -104,32 +103,24 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		access_log  /var/log/nginx/particula.local_access.log;
 		error_log   /var/log/nginx/particula.local_error.lg;
 
-		# compressao
-		gzip on;
-		gzip_comp_level    5;
-		gzip_min_length    256;
-		gzip_proxied       any;
-
-		# ssl
+		# certificado ssl
 	        ssl_certificate /etc/ssl/certs/particula_local-cert.pem;
 	        ssl_certificate_key /etc/ssl/private/particula_local.key;
 	}
 
 $ sudo nginx -t ; testar os arquivos de configuracao
 
-$ sudo systemctl restart nginx
+$ sudo systemctl restart nginx ; reinicializar o servico do nginx
 
 #
 # PROXY REVERSO (SEM SSL)
 # (servidor nginx - 192.168.0.9)
 #
 
-$ sudo apt-get install nginx -y -d
-
-$ sudo vi /etc/nginx/sites-available/particula.local
+$ sudo vi /etc/nginx/sites-available/particula.local ; configuracao do dominio particula.local
 	server {
+		# geral
         	listen 80;
-
 	        server_name www.particula.local;
 
 	        # log files
@@ -158,20 +149,20 @@ $ sudo systemctl restart nginx
 # (servidor nginx - 192.168.0.9)
 #
 
-$ sudo apt-get install nginx -y -d
-
 $ sudo vi /etc/nginx/sites-available/particula.local
 	# http
 	server {
+		$ geral
 		listen 80;
+
 		# redirecionamento do http para o https
 		return 301 https://$host$request_uri;
 	}
 
 	# https
 	server {
+		# geral ssl
         	listen 443;
-
 	        server_name particula.local www.particula.local;
 
 		# ssl
@@ -198,8 +189,8 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        }
 	}
 
-$ sudo nginx -t
+$ sudo nginx -t ; testa o arquivo de configuracao
 
-$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
+$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled ; ativa o site
 
-$ sudo systemctl restart nginx
+$ sudo systemctl restart nginx ; reinicializa o servico de nginx
