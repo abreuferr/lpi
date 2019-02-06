@@ -24,16 +24,26 @@ Terms and Utilities:
 # o que NAO eh uma boa escolha pois se por acaso o proxy for comprometido,
 # o gateway da rede foi comprometido.
 
-$ sudo apt-get install squid ; instalacao do proxy Squid
+$ sudo apt-get install squid -y -d ; instalacao do proxy Squid
 
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP ; copia de seguranca do arquivo de configuracao do squid
 
 $ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
+	# definicao da porta de trabalho
+	# squid trabalhando em modo proxy transparente
+	http_port 3128 transparent
+
+	# Cache
+	cache_mem 700 MB
+	maximum_object_size_in_memory 32 KB
+	maximum_object_size 1024 MB 
+	minimum_object_size 0 KB
+	cache_swap_low 90
+	cache_swap_high 95
+	cache_dir ufs /etc/squid/cache 30000 16 256
+
 	# arquivo de acesso
 	access_log /var/log/squid/access.log
-
-	# squid trabalhando em modo proxy transparente, nao requer autenticacao
-	http_port 3128 transparent
 
 	# definicao das portas e configuracao
 	acl all src 0.0.0.0/0.0.0.0
