@@ -1,0 +1,127 @@
+#: Title : Security tasks
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 212.4 Security tasks
+#: Options : Weight: 3
+
+Description: Candidates should be able to receive security alerts from various sources, install, 
+configure and run intrusion detection systems and apply security patches and bugfixes.
+
+Key Knowledge Areas:
+- Tools and utilities to scan and test ports on a server
+- Locations and organizations that report security alerts as Bugtraq, CERT or other sources
+- Tools and utilities to implement an intrusion detection system (IDS)
+- Awareness of OpenVAS and Snort
+
+Terms and Utilities:
+- telnet
+- nmap
+- fail2ban
+- nc
+- iptables
+
+# INSTALACAO
+
+$ sudo apt-get install -y gcc make libpcre3-dev zlib1g-dev libluajit-5.1-dev libpcap-dev openssl libssl-dev libnghttp2-dev libdumbnet-dev bison flex libdnet -y -d ; instalacao dos pacotes para poder instalar o snort via codigo fonte
+
+$ mkdir ~/snort_src && cd ~/snort_src ; diretorio de trabalho
+
+$ wget https://www.snort.org/downloads/snort/daq-2.0.6.tar.gz ; download
+$ wget https://www.snort.org/downloads/snort/snort-2.9.12.tar.gz ; download
+
+$ tar -xzvf daq-2.0.6.tar.gz ; descompactar
+$ cd daq-2.0.6/ ; acessar o diretorio
+$ ./configure && make && sudo make install ; configurar, compilar e instalar
+
+$ tar xzvf snort-2.9.12.tar.gz ; descomparctar
+$ cd snort-2.9.12/ ; acessar o diretorio
+$ ./configure --enable-sourcefire && make && sudo make install ; configurar, compilar e instalar
+
+$ sudo ldconfig
+$ sudo ln -s /usr/local/bin/snort /usr/sbin/snort
+
+# CONFIGURACAO
+
+$ sudo groupadd snort
+$ sudo useradd snort -r -s /sbin/nologin -c SNORT_IDS -g snort
+
+$ sudo mkdir -p /etc/snort/rules
+$ sudo mkdir /var/log/snort
+$ sudo mkdir /usr/local/lib/snort_dynamicrules
+
+$ sudo chmod -R 5775 /etc/snort
+$ sudo chmod -R 5775 /var/log/snort
+$ sudo chmod -R 5775 /usr/local/lib/snort_dynamicrules
+$ sudo chown -R snort:snort /etc/snort
+$ sudo chown -R snort:snort /var/log/snort
+$ sudo chown -R snort:snort /usr/local/lib/snort_dynamicrules
+
+$ sudo touch /etc/snort/rules/white_list.rules
+$ sudo touch /etc/snort/rules/black_list.rules
+$ sudo touch /etc/snort/rules/local.rules
+
+$ sudo cp ~/snort_src/snort-2.9.12/etc/*.conf* /etc/snort
+$ sudo cp ~/snort_src/snort-2.9.12/etc/*.map /etc/snort
+
+# REGRAS
+
+$ wget https://www.snort.org/rules/community -O ~/snort_src/community.tar.gz
+
+$ tar -xvf ~/community.tar.gz -C ~/snort_src/
+
+$ sudo cp ~/snort_src/community-rules/* /etc/snort/rules
+
+$ sudo sed -i 's/include \$RULE\_PATH/#include \$RULE\_PATH/' /etc/snort/snort.conf
+
+# CONFIGURACAO
+
+$ sudo vi /etc/snort/snort.conf
+	# Setup the network addresses you are protecting
+	ipvar HOME_NET 192.168.0.0/24
+
+	# Set up the external network addresses. Leave as "any" in most situations
+	ipvar EXTERNAL_NET !$HOME_NET
+
+	# Path to your rules files (this can be a relative path)
+	var RULE_PATH /etc/snort/rules
+	var SO_RULE_PATH /etc/snort/so_rules
+	var PREPROC_RULE_PATH /etc/snort/preproc_rules
+
+	# Set the absolute path appropriately
+	var WHITE_LIST_PATH /etc/snort/rules
+	var BLACK_LIST_PATH /etc/snort/rules
+
+	# unified2
+	# Recommended for most installs
+	output unified2: filename snort.log, limit 128
+
+	include $RULE_PATH/local.rules
+	include $RULE_PATH/community.rules
+
+$ sudo snort -T -c /etc/snort/snort.conf ; testar as configuracoes
+
+# SNORT EM BACKGROUD
+
+$ sudo nano /lib/systemd/system/snort.service
+	[Unit]
+	Description=Snort NIDS Daemon
+	After=syslog.target network.target
+
+	[Service]
+	Type=simple
+	ExecStart=/usr/local/bin/snort -q -u snort -g snort -c /etc/snort/snort.conf -i ens32
+
+	[Install]
+	WantedBy=multi-user.target
+
+$ sudo systemctl daemon-reload
+
+$ sudo systemctl start snort
+
+$ sudo systemctl status snort
+
+# TESTE
+
+$ sudo vi /etc/snort/rules/local.rules
+	alert icmp any any -> $HOME_NET any (msg:"ICMP test"; sid:10000001; rev:001;)
+
+$ sudo snort -A console -i eth0 -u snort -g snort -c /etc/snort/snort.conf
