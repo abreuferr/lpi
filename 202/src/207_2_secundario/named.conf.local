@@ -1,0 +1,14 @@
+// Slave zones
+zone "particula.local" {
+	type slave;
+	file "/etc/bind/db.particula.local";
+	masters { 192.168.0.5; };
+	allow-notify { 192.168.0.5; };
+};
+
+// Reverse zone
+zone "0.168.192.in-addr.arpa" {
+	type slave;
+	file "/etc/bind/db.0.168.192.in-addr.arpa";
+	masters { 192.168.0.5; };
+};

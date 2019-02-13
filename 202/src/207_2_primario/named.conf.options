@@ -1,0 +1,18 @@
+options {
+	directory "/var/cache/bind";
+
+        # query range you allow
+        allow-query { localhost; 192.168.0.0/24; };
+        
+	# the range to transfer zone files
+        allow-transfer { localhost; 192.168.0.0/24; };
+        
+	# recursion range you allow
+        allow-recursion { localhost; 192.168.0.0/24; };
+
+	dnssec-validation auto;
+
+	auth-nxdomain no;
+	listen-on-v6 { none; };
+};
+

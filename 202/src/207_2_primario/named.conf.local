@@ -9,14 +9,14 @@
 // Master zones
 zone "particula.local" {
 	type master;
-	file "/etc/bind/db.particula.local";    # zone file path
-	allow-transfer { 192.168.0.6; };    # ns2 private IP address - secondary
+	file "/etc/bind/db.particula.local";
+	allow-transfer { 192.168.0.6; };
 	notify yes;
 };
 
 // Reverse
 zone "0.168.192.in-addr.arpa" {
 	type master;
-	file "/etc/bind/db.0.168.192.in-addr.arpa"; # zone file path
-	allow-transfer { 192.168.0.6; };    # ns2 private IP address - secondary
+	file "/etc/bind/db.0.168.192.in-addr.arpa";
+	allow-transfer { 192.168.0.6; };
 };

@@ -1,0 +1,25 @@
+; Start of Authority (SOA) record
+$TTL   900
+@ IN SOA ns1.particula.local. root.particula.local. (
+	2019020501;     Serial
+	3600;           Refresh [1h]
+	600;            Retry   [10m]
+	86400;          Expire  [1d]
+	600 );          Negative Cache TTL [1h]
+
+; Name Server (NS) records.
+	IN NS ns1.particula.local.
+	IN NS ns2.particula.local.
+
+; Addresses point to canonical names (PTR) for reverse lookups
+5	IN PTR    ns1.particula.local.
+6	IN PTR    ns2.particula.local.
+7	IN PTR    nscache.particula.local.
+8	IN PTR    apache.particula.local.
+9 	IN PTR    nginx.particula.local.
+10 	IN PTR    nginxpr.particula.local.
+11 	IN PTR    samba.particula.local.
+12 	IN PTR    nfs.particula.local.
+13 	IN PTR    dhcp.particula.local.
+14 	IN PTR    snort.particula.local.
+15 	IN PTR    mail.particula.local.
