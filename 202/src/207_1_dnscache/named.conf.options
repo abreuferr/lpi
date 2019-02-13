@@ -1,0 +1,39 @@
+// acl que define o controle de acesso
+//
+acl "clients" {
+	// hosts da rede 192.168.0.0
+	192.168.0.0/24;
+	// o host em si
+	localhost;
+	// todos os hosts da rede local
+	localnets;
+};
+
+options {
+	directory "/var/cache/bind";
+
+	// especifica se o named consulta outros servidores
+	// em nome do cliente. como eh um servidor cache, ele
+	// deve fazer essa tarefa.
+	//
+	recursion yes;
+
+	// quais hosts ou rede podem consultar seus servidore
+	// de nome.
+	//
+	allow-query { clients; };
+
+	// designar um ou mais servidores como encaminhadores.
+	// nesse caso, sera o servidor primario e secondario.
+	//
+	forwarders { 192.168.0.5; 192.168.0.6;};
+
+	// executar o encaminhamento.
+	//
+	forward only;
+
+	// desativar a consulta de ipv6, trabalhar somente
+	// com ipv4.
+	//
+	listen-on-v6 { none; };
+};
