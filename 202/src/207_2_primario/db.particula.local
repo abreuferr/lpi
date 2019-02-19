@@ -1,31 +1,33 @@
 ; Start of Authority (SOA) record
 $TTL 604800
 @ IN SOA ns1.particula.local. root.particula.local. (
-			2019020501;     Serial
-			3600;           Refresh [1h]
-			600;            Retry   [10m]
-			86400;          Expire  [1d]
-			600 );          Negative Cache TTL [1h]
+		2019021404;     Serial
+		3600;           Refresh [1h]
+		600;            Retry   [10m]
+		86400;          Expire  [1d]
+		600 );          Negative Cache TTL [1h]
 
 ; Name Server (NS) records.
-particula.local.	IN NS ns1.particula.local.
-particula.local.	IN NS ns2.particula.local.
+		IN NS ns1.particula.local.
+		IN NS ns2.particula.local.
 
 ; Mail Exchange (MX) records.
-			IN MX 10 mail.particula.local.
+		IN MX 10 mail.particula.local.
 
 ; Address (A) records. (real-names of machines)
-ns1			IN A 192.168.0.5
-ns2			IN A 192.168.0.6
-nscache			IN A 192.168.0.7
-apache			IN A 192.168.0.8
-nginx			IN A 192.168.0.9
-nginxpr			IN A 192.168.0.10
-samba			IN A 192.168.0.11
-nfs			IN A 192.168.0.12
-dhcp			IN A 192.168.0.13
-snort			IN A 192.168.0.14
-mail			IN A 192.168.0.15
+		IN A 192.168.0.5
+		IN A 192.168.0.6
+ns1		IN A 192.168.0.5
+ns2		IN A 192.168.0.6
+nscache		IN A 192.168.0.7
+apache		IN A 192.168.0.8
+nginx		IN A 192.168.0.9
+nginxpr		IN A 192.168.0.10
+samba		IN A 192.168.0.11
+nfs		IN A 192.168.0.12
+dhcp		IN A 192.168.0.13
+snort		IN A 192.168.0.14
+mail		IN A 192.168.0.15
 
 ; Aliases in Canonical Name (CNAME) records...
-www			IN CNAME apache
+www		IN CNAME apache

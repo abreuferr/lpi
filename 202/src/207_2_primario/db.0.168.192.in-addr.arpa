@@ -1,7 +1,7 @@
 ; Start of Authority (SOA) record
 $TTL   900
 @ IN SOA ns1.particula.local. root.particula.local. (
-	2019020501;     Serial
+	2019021404;     Serial
 	3600;           Refresh [1h]
 	600;            Retry   [10m]
 	86400;          Expire  [1d]

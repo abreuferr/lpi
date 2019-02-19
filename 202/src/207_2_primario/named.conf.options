@@ -1,5 +1,6 @@
 options {
-	directory "/var/cache/bind";
+	// diretorio de trabalho
+	directory "/etc/bind";
 
         # query range you allow
         allow-query { localhost; 192.168.0.0/24; };
@@ -15,4 +16,3 @@ options {
 	auth-nxdomain no;
 	listen-on-v6 { none; };
 };
-
