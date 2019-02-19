@@ -1,35 +1,39 @@
-// acl que define o controle de acesso
+# Limiting access to local networks only
 acl "clients" {
-	// hosts da rede 192.168.0.0
 	192.168.0.0/24;
-
-	// o host em si
 	localhost;
-
-	// todos os hosts da rede local
 	localnets;
 };
 
 options {
-	directory "/var/cache/bind";
+	listen-on port 53 { any; };
+	listen-on-v6 { none; };
+	directory "/etc/bind";
 
-	// especifica se o named consulta outros servidores
-	// em nome do cliente. como eh um servidor cache, ele
-	// deve fazer essa tarefa.
+	# Maximum number of simultaneous client TCP connections to accept
+	tcp-clients 50;
+
+	# Disable built-in server information zones
+	version none;
+	hostname none;
+	server-id none;
+
+	# Attempt to do all the work required to answer the query
 	recursion yes;
-
-	// quais hosts ou rede podem consultar seus servidore
-	// de nome.
+	allow-recursion { clients; };
 	allow-query { clients; };
 
-	// designar um ou mais servidores como encaminhadores.
-	// nesse caso, sera o servidor primario e secondario.
-	forwarders { 192.168.0.5; 192.168.0.6;};
+	# Only LAN users are allowed to receive zone transfers from the server
+	allow-transfer { clients; };
 
-	// executar o encaminhamento.
+	# o processo de resolucao sera transferido para os servidores ns1 e ns2
+	forwarders {192.168.0.5; 192.168.0.6;};
+
 	forward only;
 
-	// desativar a consulta de ipv6, trabalhar somente
-	// com ipv4.
-	listen-on-v6 { none; };
+	# dnssec
+	dnssec-enable yes;
+	dnssec-validation yes;
+
+	auth-nxdomain no;
 };
