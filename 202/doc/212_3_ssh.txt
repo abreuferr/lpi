@@ -51,7 +51,7 @@ $ sudo cat /etc/ssh/sshd_config ; configuracao
 	Protocol 2 # especifica qual o protocolo de seguranca a ser utilizado
 	PermitEmptyPasswords <YES/NO> # permitir ou nao a utilizacao de senhas em branco
 	ClientAliveInterval <NUM> # depois de X segundos sem nenhuma atividade, o usuario eh deslogado
-	ClientAliveContMax <NUM> # quantidade de mensagens enviadas pelo cliente
+	ClientAliveCountMax <NUM> # quantidade de mensagens enviadas pelo cliente
 	X11Forwarding <YES/NO> # permitir ou nao o redirecionamento do X11 para o cliente
 
 $ sudo systemctl restart sshd.service # reinicializar o servidor ssh
