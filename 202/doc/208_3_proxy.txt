@@ -26,55 +26,30 @@ Terms and Utilities:
 
 $ sudo apt-get install squid -y -d ; instalacao do proxy Squid
 
+$ sudo mkdir -p /var/cache/squid ; criacao do diretorio de cache do squid
+$ sudo chown -R squid.squid /var/cache/squid ; alterando permissao
+$ sudo cd /var/cache/squid
+$ sudo squid -z -F ; criar os diretorios de cache do squid
+
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP ; copia de seguranca do arquivo de configuracao do squid
 
 $ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
-	# definicao da porta de trabalho
-	# squid trabalhando em modo proxy transparente
+	cache_effective_user squid
+
+	acl network_lan src 192.168.0.0/24
+
 	http_port 3128 transparent
 
-	# Cache
-	cache_mem 700 MB
-	maximum_object_size_in_memory 32 KB
-	maximum_object_size 1024 MB 
-	minimum_object_size 0 KB
-	cache_swap_low 90
-	cache_swap_high 95
-	cache_dir ufs /etc/squid/cache 30000 16 256
+	cache_dir ufs /var/cache/squid 2000 16 256
 
-	# arquivo de acesso
-	access_log /var/log/squid/access.log
-
-	# definicao das portas e configuracao
-	acl all src 0.0.0.0/0.0.0.0
-	acl manager proto cache_object
-	acl SSL_ports port 443 563
-	acl Safe_ports port 21 80 443 563 70 210 280 488 59 777 901 1025-65535
-	acl purge method PURGE
-	acl CONNECT method CONNECT
-
-	# politica em relacao as portas
-	http_access allow manager localhost
-	http_access deny manager
-	http_access allow purge localhost
-	http_access deny purge
-	http_access deny !Safe_ports
-	http_access deny CONNECT !SSL_ports
-
-	# definicao das variaveis localhost e redelocal
-	acl redelocal src 192.168.0.0/24
-	acl localhost src 127.0.0.1/24
-
-	# somente localhost e redelocal possuem o acesso
-	http_access allow localhost
-	http_access allow redelocal
-
-	# restante da rede eh bloqueada
+	http_access allow network_lan
 	http_access deny all
 
 $ sudo systemctl restart squid.service
 
 $ firewall.squid.sh
-	# ens34 eh a interface interna do gateway
-	iptables -t nat -A PREROUTING -i ens34 -p tcp -m tcp --dport 80 -j DNAT --to-destination 192.168.0.2:3128
-
+	# web proxy squid
+	# ens32 - interface externa
+	# ens34 - interface interna
+	$IPTABLES -t nat -A PREROUTING -i ens32 -p tcp --dport 80 -j DNAT --to 192.168.0.2:3128
+	$IPTABLES -t nat -A PREROUTING -i ens34 -p tcp --dport 80 -j REDIRECT --to-port 3128
