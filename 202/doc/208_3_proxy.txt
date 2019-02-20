@@ -28,13 +28,11 @@ $ sudo apt-get install squid -y -d ; instalacao do proxy Squid
 
 $ sudo mkdir -p /var/cache/squid ; criacao do diretorio de cache do squid
 $ sudo chown -R proxy.proxy /var/cache/squid ; alterando permissao
-$ sudo cd /var/cache/squid ; criando diretorio raiz de cache
-$ sudo squid -z -F ; criar os diretorios de cache do squid
 
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP ; copia de seguranca do arquivo de configuracao do squid
 
 $ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
-	cache_effective_user squid
+	cache_effective_user proxy
 
 	acl network_lan src 192.168.0.0/24
 
