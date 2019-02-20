@@ -30,7 +30,7 @@ Terms and Utilities:
 - /var/log/samba/
 
 #
-# FILE SHARE - SERVER
+# BASICO
 #
 
 $ sudo apt-get update ; atualizacao do debian
@@ -44,17 +44,14 @@ $ sudo apt-get install samba -y -d ; instalacao do samba
 $ sudo systemctl status smbd ; status do servico smbd
 $ sudo systemctl status nmbd ; status do servico nmdb
 
+#
+# FILE SHARE - SERVER
+#
+
 $ sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bkp ; copia de seguranca
 
-$ sudo vi /etc/samba/smb.conf
-	interfaces = 127.0.0.0/8 ens32
-	bind interfaces only = yes
-
-$ sudo systemctl restart nmbd
-$ sudo systemctl restart smbd
-
 # em uma primeira etapara, serao criados alguns usuarios 
-# para os mesmos possam acessar os arquivos cmpartilhados.
+# para os mesmos possam acessar os arquivos compartilhados.
 # configuracao mais simples do samba, compartilhar arquivo.
 #
 # eh interessante colocar a pasta de compartilhamento dentro
@@ -70,8 +67,9 @@ $ sudo systemctl restart smbd
 $ sudo mkdir /home/samba ; criar diretorio
 $ sudo chgrp sambashare /home/samba ; atribuir permissao
 
-$ sudo useradd -M -d /home/samba/[USER] -s /usr/sbin/nologin -G sambashare [USER] ; criar usuario
-
+$ sudo useradd -M -d /home/samba/sbadmin -s /usr/sbin/nologin -G sambashare sbadmin ; adicionar usuario de administracao
+$ sudo useradd -M -d /home/samba/[USER] -s /usr/sbin/nologin -G sambashare [USER] ; criar usuario para acessar o compartilhamento
+#
 # -M - nao sera criado o diretorio do usuario
 # -d /home/samba/[USER] - define o diretorio do usuario
 # -s /usr/sbin/nologin - desabilita o acesso ao shell
@@ -82,50 +80,60 @@ $ sudo chown [USER]:sambashare /home/samba/[USER] ; atribuir permissao
 $ sudo mkdir /home/samba/[USER] ; atribuir permissao
 $ sudo chmod 2770 /home/samba/[USER] ; atribuir permissao
 
-$ sudo smbpasswd -a [USER] ; definir a senha
-$ sudo smbpasswd -e [USER] ; ativar a conta
+$ sudo smbpasswd -a [USER] ; definir a senha do usuario no samba
+$ sudo smbpasswd -e [USER] ; ativar a conta do usuario no samba
 
-$ sudo useradd -M -d /home/samba/sbadmin -s /usr/sbin/nologin -G sambashare sbadmin
-
-$ sudo smbpasswd -a [USER] ; definir a senha
-$ sudo smbpasswd -e [USER] ; ativar a conta
-
-$ sudo mkdir /home/samba/geral ; criar diretorio
-$ sudo chown sbadmin:sambashare /home/samba/geral ; atribuir permissao
-
-$ sudo chmod 2770 /home/samba/geral ; atribuir permissao
+$ sudo smbpasswd -a sbadmin ; definir a senha do administrador no samba
+$ sudo smbpasswd -e sbadmin ; ativar a conta do administrador no samba
 
 $ sudo vi /etc/samba/smb.conf
-[geral] ; nome do compartilhamento
-    path = /home/samba/geral ; pasta que sera compartilhada
-    browseable = yes ; a pasta ira aparecer na lista de pastas compartilhadas
-    read only = no ; nesse caso sera possivel escrever na pasta
-    force create mode = 0660 ; permissao de acesso
-    force directory mode = 2770 ; permissao de acesso
-    valid users = @sambashare @sbadmin ; usuario e/ou grupo que podem acessar a pasta
+	[global] ; parametros globais
+		workgroup = WORKGROUP
+		server string = Samba Server
 
-[caio] ; nome do compartilhamento
-    path = /home/samba/geral ; pasta que sera compartilhada
-    browseable = no ; pode ser visualizado por qualquer usuario do grupo @sambashare e usuario @sbadmin
-    read only = no ; sera possivel escrever na pasta
-    force create mode = 0660 ; permissao de acesso
-    force directory mode = 2770 ; permissao de acesso
-    valid users = caio @sbadmin ; usuarios e/ou grupos que podem acessar a pasta
+		interfaces = 127.0.0.0/8 192.168.0.0/24
+		hosts allow = 127. 192.168.0.
+
+		log file = /var/log/samba/log.%m
+		max log size = 1000
+
+		security = user
+		passdb backend = tdbsam
+		map to guest = bad user
+		guest account = nobody
+
+	[geral] ; nome do compartilhamento
+		path = /home/samba/geral ; pasta que sera compartilhada
+		browseable = yes ; a pasta ira aparecer na lista de pastas compartilhadas
+		read only = no ; nesse caso sera possivel escrever na pasta
+		force create mode = 0660 ; permissao de acesso
+		force directory mode = 2770 ; permissao de acesso
+		valid users = @sambashare @sbadmin ; usuario e/ou grupo que podem acessar a pasta
+
+	[caio] ; nome do compartilhamento
+		path = /home/samba/geral ; pasta que sera compartilhada
+		browseable = no ; pode ser visualizado por qualquer usuario do grupo @sambashare e usuario @sbadmin
+		read only = no ; sera possivel escrever na pasta
+		force create mode = 0660 ; permissao de acesso
+		force directory mode = 2770 ; permissao de acesso
+		valid users = caio @sbadmin ; usuarios e/ou grupos que podem acessar a pasta
 
 $ sudo testparm ; aplicativo utilizado para testar os parametros e verificar se existe algum problema na sintaxe do arquivo de configuracao
-
 $ sudo systemctl restart nmbd
 
 #
 # FILE SHARE - CLIENT
 #
-
 $ sudo apt-get install smbclient cifs-utils -y -d ; instalacao do cliente samba
-
-$ smbclient //[IP_SERVER]/[USER_FOLDER] -U [USER] ; instalacao do 
+$ smbclient //[IP_SERVER]/[USER_FOLDER] -U [USER]
+$ sudo mount -o username=[USER] //[IP_SERVER]/[USER_FOLDER] /[DIR]/[USER]
 
 #
 # FILE SHARE - SERVER
 #
-
 $ sudo smbstatus ; aplicativo utilizado para exibir informacoes sobre as conexoes entre as estacoes e o servidor samba
+
+#
+# FILE SHARE - CLIENT
+#
+$ sudo smbclient -L [IP_SERVER] -N ; exibir informacoes das conexoes ativas
