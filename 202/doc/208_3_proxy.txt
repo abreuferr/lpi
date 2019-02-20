@@ -27,7 +27,7 @@ Terms and Utilities:
 $ sudo apt-get install squid -y -d ; instalacao do proxy Squid
 
 $ sudo mkdir -p /var/cache/squid ; criacao do diretorio de cache do squid
-$ sudo chown -R squid.squid /var/cache/squid ; alterando permissao
+$ sudo chown -R proxy.proxy /var/cache/squid ; alterando permissao
 $ sudo cd /var/cache/squid
 $ sudo squid -z -F ; criar os diretorios de cache do squid
 
