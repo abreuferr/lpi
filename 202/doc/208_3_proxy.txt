@@ -32,22 +32,36 @@ $ sudo chown -R proxy.proxy /var/cache/squid ; alterando permissao
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP ; copia de seguranca do arquivo de configuracao do squid
 
 $ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
-	cache_effective_user proxy
-
-	acl network_lan src 192.168.0.0/24
-
 	http_port 3128 transparent
 
-	cache_dir ufs /var/cache/squid 2000 16 256
+	acl localhost src 127.0.0.1/32
+	acl localnet src 192.168.0.0/24
 
-	http_access allow network_lan
+	acl SSL_ports port 443
+	acl Safe_ports port 80          # http
+	acl Safe_ports port 21          # ftp
+	acl Safe_ports port 443         # https
+	acl Safe_ports port 70          # gopher
+	acl Safe_ports port 210         # wais
+	acl Safe_ports port 1025-65535  # unregistered ports
+	acl Safe_ports port 280         # http-mgmt
+	acl Safe_ports port 488         # gss-http
+	acl Safe_ports port 591         # filemaker
+	acl Safe_ports port 777         # multiling http
+	acl CONNECT method CONNECT
+	http_access deny !Safe_ports
+	http_access deny CONNECT !SSL_ports
+
+	http_access allow localnet
+	http_access allow localhost
 	http_access deny all
+
+	cache_effective_user proxy
+	cache_dir ufs /var/cache/squid 2000 16 256
 
 $ sudo systemctl restart squid.service
 
 $ firewall.squid.sh
 	# web proxy squid
-	# ens32 - interface externa
 	# ens34 - interface interna
-	$IPTABLES -t nat -A PREROUTING -i ens32 -p tcp --dport 80 -j DNAT --to 192.168.0.2:3128
-	$IPTABLES -t nat -A PREROUTING -i ens34 -p tcp --dport 80 -j REDIRECT --to-port 3128
+	iptables -t nat -A PREROUTING -i ens34 -p tcp --dport 80 -j REDIRECT --to-port 3128

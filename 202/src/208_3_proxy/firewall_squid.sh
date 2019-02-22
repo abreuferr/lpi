@@ -21,7 +21,5 @@ $IPTABLES -t nat -P PREROUTING ACCEPT
 $IPTABLES -t filter -P FORWARD ACCEPT
 
 # web proxy squid
-# ens32 - interface externa
 # ens34 - interface interna
-$IPTABLES -t nat -A PREROUTING -i ens32 -p tcp --dport 80 -j DNAT --to 192.168.0.2:3128
-$IPTABLES -t nat -A PREROUTING -i ens34 -p tcp --dport 80 -j REDIRECT --to-port 3128
+iptables -t nat -A PREROUTING -i ens34 -p tcp --dport 80 -j REDIRECT --to-port 3128
