@@ -27,6 +27,9 @@ $ sudo chown -R bind:bind /etc/bind ; alterando permissao
 # CONFIGURACAO
 #
 $ sudo vi /etc/bind/named.conf.options
+	// indicando o diretorio de trabalho do bind.
+	// diretorio a onde sao armazenados os arquivos
+	// de configuracao da zona.
 	options {
 		directory "/etc/bind";
 	};
