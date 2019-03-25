@@ -22,25 +22,49 @@ Terms and Utilities:
 - SSLCACertificateFile, SSLCACertificatePath
 - SSLProtocol, SSLCipherSuite, ServerTokens, ServerSignature, TraceEnable
 
-$ sudo apt-get install apache2 openssl ; instalacao do apache2 e do modulo ssl
-$ sudo a2enmod ssl ; ativar o modulo SSL do apache
+# instalacao do apache2 e do modulo ssl
+$ sudo apt-get install apache2 openssl
+
+# ativar o modulo SSL do apache
+$ sudo a2enmod ssl
+
+# ativar o modulo default-ssl
 $ sudo a2ensite default-ssl ; ativar o modulo default-ssl
+
+# reinicializar o apache2
 $ sudo systemctl restart apache2
 
-$ sudo mkdir /etc/apache2/ssl ; criar o diretorio a onde sera armazenado o certificado
-$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt ; criacao do certificado digital
-$ sudo chmod 600 /etc/apache2/ssl/* ; seguranca
+# criar o diretorio a onde sera armazenado o certificado
+$ sudo mkdir /etc/apache2/ssl
 
+# criacao do certificado digital
+$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
+
+# alterando permissao
+$ sudo chmod 600 /etc/apache2/ssl/*
+
+# arquivo de configurca
 $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
+	# virtual host trabalhar tanto na porta 80/HTTP
+	# quanto na porta 443/HTTPS 
 	NameVirtualHost *:443
 	NameVirtualHost *:80
 
+	# inicio da configuracao do virtualhost, HTTP
 	<VirtualHost *:80>
+		# dominio do dominio virtual
 	        ServerName particula.local
+
+		# alias do dominio virtual
 	        ServerAlias www.particula.local
+
+		# e-mail do administrator do site
 	        ServerAdmin webmaster@particula.local
+
+		# diretorio a onde fica armazenado o arquivos do site
 	        DocumentRoot /var/www/particula.local/html
 	
+		# redirecionamento do HTTP para o HTTPS
 	        Redirect permanent "/" "https://www.particula.local/"
 
 	        <Directory /var/www/particula.local/html>
@@ -50,14 +74,23 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 	                LimitRequestBody 512000
 	        </Directory>
 
+		# arquivos de log
 	        ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
 	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
+	# inicio da configuracao do virtualhost, HTTPS
 	<VirtualHost *:443>
+		# nome do dominio virtual
 	        ServerName particula.local
+
+		# alias do dominio virtual
 	        ServerAlias www.particula.local
+
+		# e-mail do administrador do dominio virtual
 	        ServerAdmin webmaster@particula.local
+
+		# diretorio a onde fica armazenado os arquivos do site
 	        DocumentRoot /var/www/particula.local/html
 
 	        <Directory /var/www/particula.local/html>
@@ -67,12 +100,19 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 	                LimitRequestBody 512000
 	        </Directory>
 
+		# ativando a engine SSL
 	        SSLEngine on
+
+		# certificado
 	        SSLCertificateFile /etc/apache2/ssl/apache.crt
+
+		# chave privada
 	        SSLCertificateKeyFile /etc/apache2/ssl/apache.key
 
+		# arquivo de log
 	        ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
 	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
+# reinicializado o site para aplicar as configuracoes feitas
 $ sudo systemctl restart apache2

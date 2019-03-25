@@ -32,9 +32,7 @@ Terms and Utilities:
 - httpd, apache2
 
 ###
-#
 # Apache 2.4 configuration files, terms and utilities
-#
 ###
 $ sudo apt-get install apache2 ; instalacao do apache 
 $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d ; instalacao do modulo PHP no Apache2
@@ -43,9 +41,7 @@ $ sudo systemctl status apache2 ; status do servico apache
 $ sudo systemctl restart apache2 ; restart do servico apache
 
 ###
-#
 # Apache log files configuration and content
-#
 ###
 $ sudo cat /var/log/apache2/access.log
 $ sudo cat /var/log/apache2/error.log
@@ -62,11 +58,11 @@ LogFormat "%h %l %u %t \"%r\" %>s %b"
 - %b – o tamanho do objeto requisitado
 
 ###
-#
 # Configuration of maximum requests, minimum and maximum servers and clients
-#
 ###
 $ sudo apt-get install libapache2-mpm-itk -y -d ; instalacao
+
+# configuracao do modulo MPM, modulo instalado por padrao.
 $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 	<IfModule mpm_event_module>
 		StartServers		3
@@ -79,13 +75,14 @@ $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 	</IfModule>
 
 ###
-#
 # Apache 2.4 virtual host implementation (with and without dedicated IP addresses)
-#
 ###
 
+# diretorio a onde sera armazenado os arquivos do site
 $ sudo mkdir -p /var/www/particula.local/html
-$ sudo vi /var/www/particula.local/html/index.html ; pagina web para teste
+
+# arquivo indice do site
+$ sudo vi /var/www/particula.local/html/index.html
 	<!DOCTYPE html>
 	<html lang="en" dir="ltr">
         	<head>
@@ -97,50 +94,78 @@ $ sudo vi /var/www/particula.local/html/index.html ; pagina web para teste
 	        </body>                             
 	</html>
 
+# alterando a permissao do diretorio a onde esta armazenado
+# os arquivos referentes ao dominio particula.local
 $ sudo chown -R www-data: /var/www/particula.local
 
+# arquivo de configuracao do dominio particula.local
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
+	# criacao do virtual host
+	# qualquer ip * e porta 80
 	<VirtualHost *:80>
-	    ServerName particula.local
-	    ServerAlias www.particula.local
-	    ServerAdmin webmaster@particula.local
-	    DocumentRoot /var/www/particula.local/html
+		# ServerName: dominio que o site ira responder
+		ServerName particula.local
+		
+		# ServerAlias: todos os outros dominios ou subdominios que que ira ser utilizado por esse host
+		ServerAlias www.particula.local
 
-	    <Directory /var/www/particula.local/html>
-	        Options -Indexes +FollowSymLinks
-	        AllowOverride All
-		LimitRequestBody 512000
-	    </Directory>
+		# e-mail do administrador do site
+		ServerAdmin webmaster@particula.local
 
-	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+		# DocumentRoot: diretorio a onde sera armazenado os arquivos deste dominio
+		DocumentRoot /var/www/particula.local/html
+
+		# diretivas referente ao diretorio
+		<Directory /var/www/particula.local/html>
+			# Indexes: previne as diretivas listadas.
+			# FollowSymLinks: quando essa opcao eh ativada, 
+			# o apache ira seguir os links simbolicos
+			Options -Indexes +FollowSymLinks
+		
+			# AllowOverride: especifica quais diretivas que 
+			# foram declaradas no arquivo .htaccess e que serao 
+			# sobrepostas as direticas da configuracao padrao
+			AllowOverride All
+		</Directory>
+
+		# nome o localizacao dos arquivos de log
+		ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+		CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
 	OU
 
+	# criacao do virtual host
 	<VirtualHost 192.168.0.8:80>
-	    ServerName particula.local
-	    ServerAlias www.particula.local
-	    ServerAdmin webmaster@particula.local
-	    DocumentRoot /var/www/particula.local/html
+		# ServerName: dominio que o site ira responder
+		ServerName particula.local
+		
+		# ServerAlias: todos os outros dominios ou subdominios que que ira ser utilizado por esse host
+		ServerAlias www.particula.local
 
-	    <Directory /var/www/particula.local/html>
-	        Options -Indexes +FollowSymLinks
-	        AllowOverride All
-	    </Directory>
+		# e-mail do administrador do site
+		ServerAdmin webmaster@particula.local
 
-	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+		# DocumentRoot: diretorio a onde sera armazenado os arquivos deste dominio
+		DocumentRoot /var/www/particula.local/html
+
+		# diretivas referente ao diretorio
+		<Directory /var/www/particula.local/html>
+			# Indexes: previnde as diretivas listadas.
+			# FollowSymLinks: quando essa opcao eh ativada, 
+			# o apache ira seguir os links simbolicos
+			Options -Indexes +FollowSymLinks
+		
+			# AllowOverride: especifica quais diretivas que 
+			# foram declaradas no arquivo .htaccess e que serao 
+			# sobrepostas as direticas da configuracao padrao
+			AllowOverride All
+		</Directory>
+
+		# nome o localizacao dos arquivos de log
+		ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+		CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
-
-	# ServerName: dominio que o site ira responder
-	# ServerAlias: todos os outros dominios ou subdominios que que ira ser utilizado por esse host
-	# DocumentRoot: diretorio a onde sera armazenado os arquivos deste dominio
-	# Options: opcoes a ser utilizdas nesse dominio
-		# Indexes: previnde as diretivas listadas
-		# FollowSymLinks: quando essa opcao eh ativada, o apache ira seguir os links simbolicos
-		# AllowOverride: especifica quais diretivas que foram declaradas no arquivo .htaccess e que serao sobrepostas as direticas da configuracao padrao
-	# ErrorLog, CustomLog: especifica os arquivos de log
 
 $ sudo a2ensite particula.local ; ativar as diretivas de configuracao
 $ sudo systemctl reload apache2 ; reler as configuracoes do apache
@@ -148,9 +173,7 @@ $ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/site
 $ sudo apachectl configtest ; checagem da configuracao do apache2
 
 ###
-#
 # Apache 2.4 + Modulo Perl
-#
 ###
 
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
@@ -161,10 +184,11 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 		SetHandler perl-script
 		PerlHandler ModPerl::Registry
 		PerlSendHeader On
+
+		# ativando a opcao de trabalhar com uma linguagem
+		# de programacao
 		Options +ExecCGI
 		AllowOverride None
-		Order allow,deny
-		allow from all
 	</Directory>
 	(...)
 
@@ -183,9 +207,7 @@ $ sudo systemctl restart apache2
 $ w3m http://www.particula.local/perltest.pl ; comando que deve ser executado na estacao
 
 ###
-#
-# Client user authentication files and utilities - .htaccess
-#
+# Client USER authentication files and utilities - .htaccess
 ###
 
 $ sudo /etc/apache2/sites-available/particula.local.conf
@@ -197,10 +219,13 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 
 	    <Directory /var/www/particula.local/html>
 	        Options Indexes Includes FollowSymLinks MultiViews
+		
+		# habilitar a autenticacao atraves do arquivo .htaccess
 	        AllowOverride All
 	        Require all granted
 	    </Directory>
 
+	    # arquivo de log
 	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
 	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
@@ -215,29 +240,67 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 
 	    <Directory /var/www/particula.local/html>
 	        Options Indexes Includes FollowSymLinks MultiViews
+
+		# habilitar a autenticacao atraves do arquivo .htaccess
 	        AllowOverride All
 	        Require all granted
 	    </Directory>
 
+	    # arquivo de log
 	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
 	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
 $ sudo systemctl restart apache2 ; reinicializar o apache2
 $ sudo apachectl configtest ; checagem da configuracao do apache2
+
+# criar o arquivo webpass a onde sera armazenado o usuario
+# <cosmo> e a senha dele.
 $ sudo htpasswd -c /var/www/particula.local/webpass cosmo
+
+# alterando as permissoes do arquivo
 $ sudo chown www-data /var/www/particula.local/webpass
-$ sudo chmod 640 /var/www/particula.local/webpass 
+$ sudo chmod 640 /var/www/particula.local/webpass
+
+# arquivos .htaccess para o controle de acesso ao site 
 $ sudo vi /var/www/particula.local/html/.htaccess
 	AuthType Basic
+	# texto que ira aparecer na caixa de dialogo
 	AuthName "Restricted Access"
+
+	# arquivo a onde fica armazenado o usuario e senha
 	AuthUserFile /var/www/particula.local/webpass
+
+	# autenticacao de usuario
 	Require user cosmo
 
 ###
-#
-# Security
-#
+# Client GROUP authentication files and utilities - .htaccess
+###
+
+$ htpasswd /var/www/particula.local/htgroup cosmo
+$ cat /var/www/particula.local/htgroup
+	admins: cosmo admin
+
+# alterando as permissoes do arquivo
+$ sudo chown www-data /var/www/particula.local/htgroup
+$ sudo chmod 640 /var/www/particula.local/htgroup
+
+# arquivos .htaccess para o controle de acesso ao site 
+$ sudo vi /var/www/particula.local/html/.htaccess
+	AuthType Basic
+
+	# texto que ira aparecer na caixa de dialogo
+	AuthName "Restricted Access"
+
+	# arquivo a onde fica armazenado o grupo de usuarios
+	AuthGroupFile "/var/www/particula.local/htgroup"
+
+	# autenticacao de usuario
+	Require group admins
+
+###
+# Security Apache
 ###
 
 $ sudo vi /etc/apache2/apache2.conf
