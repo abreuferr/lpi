@@ -29,38 +29,55 @@ $ sudo systemctl restart bind9.service ; reinicializando o bind
 # CONFIGURACAO DO DNS PRIMARIO (NS1)
 #
 $ sudo vi /etc/bind/named.conf.local
-	// Master zones
+	// configuracao da zona particula.local
 	zone "particula.local" {
+		// servidor do tipo master
 	        type master;
-	        file "/etc/bind/db.particula.local";	# zone file path
-	        allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
+
+		// arquivo de configuracao da zona particula.local
+	        file "db.particula.local";
+
+		// os dados da configuracao do servidor master serao
+		//transferidos para o servidor slave. essa transferencia
+		// se chama de transferencia de zona.	
+	        allow-transfer { 192.168.0.6; };
+
+		// o servidor master ira notificar o servidor slave de
+		// que houve uma alteracao na confiuracao da zona.
     		notify yes;
 	};
 
-	// Reverse
+	// configuracao reversa da zona particula.local
 	zone "0.168.192.in-addr.arpa" {
+		// servidor do tipo master.
 	        type master;
-	        file "/etc/bind/db.0.168.192.in-addr.arpa";	# zone file path
-	    	allow-transfer { 192.168.0.6; };	# ns2 private IP address - secondary
+
+		// arquivo de configuracao da zona particula.local
+	        file "db.0.168.192.in-addr.arpa";
+
+		// os dados da zona serao transferidos para o servidor
+		// slave.
+	    	allow-transfer { 192.168.0.6; };
 	};
 
 $ sudo vi /etc/bind/named.conf.options
-        // forwarders {
-        //      0.0.0.0;
-        // };
-        
-	# query range you allow
-        allow-query { localhost; 192.168.0.0/24; };
-        # the range to transfer zone files
-        allow-transfer { localhost; 192.168.0.0/24; };
-        # recursion range you allow
-        allow-recursion { localhost; 192.168.0.0/24; };
+	// acl para controle de quem requisita resolucao
+	acl goodclients {
+        	192.168.0.0/24;
+	};
 
-	listen-on-v6 { none; };
+	options {
+        	// diretorio a onde estao os arquivos de configuracao da
+        	// zona particula.local
+	        directory "/etc/bind";
+
+	        // quais os hosts ou rede podem fazer requisicao
+	        allow-query { goodclients; };
+	};
 
 $ sudo vi /etc/bind/db.particula.local
 	; Start of Authority (SOA) record
-	$TTL 604800
+	$TTL 604800`
 	@ IN SOA ns1.particula.local. root.particula.local. (
 				2010101301;	Serial
 				28800;		Refresh
@@ -117,35 +134,39 @@ $ sudo systemctl restart bind9 ; reinicializando o servico
 # CONFIGURACAO DO DNS SECUNDARIO (NS2)
 #
 $ sudo vi /etc/bind/named.conf.local (slave)
-	// Slave zones
-	//
+	// configuracao da zona particula.local
 	zone "particula.local" {
+		// servidor do tipo slave
 		type slave;
-		file "/etc/bind/db.particula.local";
-		masters { 192.168.0.5; };	# ns1 private IP
+
+		// arquivo de configuracao da zona
+		file "db.particula.local";
+
+		// endereco do servidor master
+		masters { 192.168.0.5; };
+
+		// notificar o servidor master
 		allow-notify { 192.168.0.5; };
 	};
 
-	// Reverse zone
+	// configuracao reversa da zona partiicula.local
 	zone "0.168.192.in-addr.arpa" {
+		// servidor do tipo slave
 		type slave;
-		file "/etc/bind/db.0.168.192.in-addr.arpa";
-		masters { 192.168.0.5; };	# ns1 private IP
+
+		// arquivo de configuracao da zona
+		file "db.0.168.192.in-addr.arpa";
+
+		// endereco ip do servidor master
+		masters { 192.168.0.5; };
 	};
 
 $ sudo vi /etc/bind/named.conf.options
-        // forwarders {
-        //      0.0.0.0;
-        // };
-        
-	# query range you allow
-        allow-query { localhost; 192.168.0.0/24; };
-        # the range to transfer zone files
-        allow-transfer { localhost; 192.168.0.0/24; };
-        # recursion range you allow
-        allow-recursion { localhost; 192.168.0.0/24; };
-
-	listen-on-v6 { none; };
+	options {
+		// diretorio a onde estao localizados os arquivos
+		// da zona particula.local
+		directory "/etc/bind";
+	};
 
 $ sudo systemctl restart bind9 ; reinicializando o servico
 
