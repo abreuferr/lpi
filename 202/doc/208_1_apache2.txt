@@ -32,13 +32,56 @@ Terms and Utilities:
 - httpd, apache2
 
 ###
-# Apache 2.4 configuration files, terms and utilities
+# Apache 2.4 instalation
 ###
 $ sudo apt-get install apache2 ; instalacao do apache 
 $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d ; instalacao do modulo PHP no Apache2
 $ sudo apt-get install libapache2-mod-perl2 ; instalacao do modulo Perl no Apache2
 $ sudo systemctl status apache2 ; status do servico apache
 $ sudo systemctl restart apache2 ; restart do servico apache
+
+###
+# Apache 2.4 configuration files, terms and utilities
+###
+
+# principal arquivo de configuracao do apache2e que contem 
+# os paramatros globais de configuracao do apache2.
+$ /etc/apache2/apache2.conf
+
+# diretorio que contem varios arquivos de configuracao
+$ /etc/apache2/conf-available
+
+# diretorio que contem varios arquivos de configuracao e
+# que estao ativos. Link simbolico para os arquivos presentes
+# no diretorio /etc/apache2/conf-available
+$ /etc/apache2/conf-enable
+
+# arquivos que contem variaveis de configuracao do apache2
+$ /etc/apache2/envvars
+
+# diretorio que contem uma serie de arquivos de configuracao
+# do modulos presentes no apache2.
+$ /etc/apache2/mods-available
+
+# diretorio que contem uma serie de arquivos de configuracao
+# dos modulos presentes no apache2. neste caso, os arquivos
+# sao links simbolicos que apontam para o diretorio
+# /etc/apache2/mods-available e sao utilizados para ativar
+# os modulos.
+$ /etc/apache2/mods-enable
+
+# arquivo que define quais portas o apache2 ira escutar
+# e trabalhar.
+$ /etc/apache2/ports.conf
+
+# diretorio que contem arquivos de configuracao dos 
+# dominios virtuais.
+$ /etc/apache2/sites-available
+
+# diretorio que contem os arquivos de configuracao
+# dos sites que estao ativos. os arquivos sao links
+# simbolicos que apontam para o diretorio /sites-available
+$ /etc/apache2/sites-enable
 
 ###
 # Apache log files configuration and content
@@ -65,12 +108,28 @@ $ sudo apt-get install libapache2-mpm-itk -y -d ; instalacao
 # configuracao do modulo MPM, modulo instalado por padrao.
 $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 	<IfModule mpm_event_module>
+		# numero de processos filhos disparados inicialmente
+		# mais o servidor principal.
 		StartServers		3
+
+		# numeo minimo de thread servidores inativos,
+		# aguardando conexao.
 		MinSpareThreads		25
+
+		# numeo maximo de thread servidores inativos,
+		# aguardando conexao.
 		MaxSpareThreads		75
+
+		# numero limite de threads.
 		ThreadLimit		64
+
+		# numero de threads em processos filho.
 		ThreadsPerChild		25
+
+		# numero maximo de requisicoes simultaneos.
 		MaxRequestWorkers	30
+
+		# numero maximo de conexoes por processos filho.
 		MaxConnectionsPerChild	1000
 	</IfModule>
 
@@ -167,15 +226,24 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 		CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
-$ sudo a2ensite particula.local ; ativar as diretivas de configuracao
-$ sudo systemctl reload apache2 ; reler as configuracoes do apache
-$ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/ ; criacao do link simbolico de forma manual
+# ativar as diretivas de configuracao
+$ sudo a2ensite particula.local
+
+# reler as configuracoes do apache
+$ sudo systemctl reload apache2
+
+# criacao do link simbolico de forma manual
+$ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/
+
+# checagem da configuracao do apache2
 $ sudo apachectl configtest ; checagem da configuracao do apache2
 
 ###
 # Apache 2.4 + Modulo Perl
 ###
 
+# alterando o arquivo de configuracao do dominio para permitir que o mesmo
+# possa trabalhar com a liguagem de programacao Perl.
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 	(...)
@@ -192,6 +260,7 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	</Directory>
 	(...)
 
+# arquivo para teste.
 $ sudo vi /var/www/particula.local/html/perltest.pl
 	##!/usr/bin/perl -w
 	print "Content-type: text/html\r\n\r\n";
@@ -202,9 +271,11 @@ $ sudo vi /var/www/particula.local/html/perltest.pl
 		print $i."<br />";
 	}
 
+# reinicializar o apache2
 $ sudo systemctl restart apache2
 
-$ w3m http://www.particula.local/perltest.pl ; comando que deve ser executado na estacao
+# teste
+$ w3m http://www.particula.local/perltest.pl
 
 ###
 # Client USER authentication files and utilities - .htaccess
@@ -212,43 +283,25 @@ $ w3m http://www.particula.local/perltest.pl ; comando que deve ser executado na
 
 $ sudo /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
-	    ServerName particula.local
-	    ServerAlias www.particula.local
-	    ServerAdmin webmaster@particula.local
-	    DocumentRoot /var/www/particula.local/html
-
+	    (...)
 	    <Directory /var/www/particula.local/html>
-	        Options Indexes Includes FollowSymLinks MultiViews
-		
 		# habilitar a autenticacao atraves do arquivo .htaccess
 	        AllowOverride All
 	        Require all granted
 	    </Directory>
-
-	    # arquivo de log
-	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	    (...)
 	</VirtualHost>
 
 	OU
 
 	<VirtualHost 192.168.0.8:80>
-	    ServerName particula.local
-	    ServerAlias www.particula.local
-	    ServerAdmin webmaster@particula.local
-	    DocumentRoot /var/www/particula.local/html
-
+	    (...)
 	    <Directory /var/www/particula.local/html>
-	        Options Indexes Includes FollowSymLinks MultiViews
-
 		# habilitar a autenticacao atraves do arquivo .htaccess
 	        AllowOverride All
 	        Require all granted
 	    </Directory>
-
-	    # arquivo de log
-	    ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-	    CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	    (...)
 	</VirtualHost>
 
 $ sudo systemctl restart apache2 ; reinicializar o apache2
@@ -264,7 +317,9 @@ $ sudo chmod 640 /var/www/particula.local/webpass
 
 # arquivos .htaccess para o controle de acesso ao site 
 $ sudo vi /var/www/particula.local/html/.htaccess
+	# ativando a autenticacao.
 	AuthType Basic
+
 	# texto que ira aparecer na caixa de dialogo
 	AuthName "Restricted Access"
 
@@ -303,6 +358,9 @@ $ sudo vi /var/www/particula.local/html/.htaccess
 # Security Apache
 ###
 
+# neste caso, a configuracao abaixo sera refletida em todos
+# os dominios virtuais, visto que os parametros foram
+# acrescentados no arquivo de configuracao geral do apache.
 $ sudo vi /etc/apache2/apache2.conf
 	# nao exibe a versao do apache
 	ServerSignature Off
