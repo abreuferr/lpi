@@ -22,7 +22,7 @@ Terms and Utilities:
 #
 # no texto abaixo, o proxy foi instalado no mesmo computador do gateway,
 # o que NAO eh uma boa escolha pois se por acaso o proxy for comprometido,
-# o gateway da rede foi comprometido.
+# o gateway da rede tambem sera comprometido.
 
 # instalacao do proxy Squid
 $ sudo apt-get install squid -y -d ; instalacao do proxy Squid
