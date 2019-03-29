@@ -1,0 +1,100 @@
+#: Title : openldap client configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 210.4 openldap client configuration
+#: Options : Weight: 2
+
+Description: Candidates should be able to perform queries and updates 
+to an LDAP server. Also included is importing and adding items, as well 
+as adding and managing users.
+
+Key Knowledge Areas:
+- LDAP utilities for data management and queries
+- Change user passwords
+- Querying the LDAP directory
+
+Terms and Utilities:
+- ldapsearch
+- ldappasswd
+- ldapadd
+- ldapdelete
+
+#
+# BASICO
+#
+
+# atualizacao do debian
+$ sudo apt-get update
+$ sudo apt-get upgrade
+
+# instalacao do servidor openldap
+$ sudo apt-get install ldapscripts -y -d
+
+#
+# ARQUIVO LDIF
+#
+
+# arquivo ldif para OU
+$ vi ou.ldif
+	dn: ou=people,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: people
+
+	dn: ou=groups,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: groups
+
+# arquivo ldif para CN
+$ vi cn.ldif
+	dn: cn=department,ou=groups,dc=particula,dc=local
+	objectClass: posixGroup
+	cn: department
+	gidNumber: 5000
+
+# arquivo ldif para UID/USUARIO
+$ vi uid.ldif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: shadowAccount
+	uid: cosmo
+	sn: cosmo
+	givenName: cosmo
+	cn: cosmo
+	displayName: cosmo
+	uidNumber: 2000
+	gidNumber: 2000
+	userPassword: {SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
+	gecos: cosmo
+	loginShell: /bin/bash
+	homeDirectory: /home/cosmo
+
+#
+# COMANDO LDAPADD
+#
+
+# inserir dados atraves de um arquivo ldif
+$ sudo ldapadd -x -W -D cn=admin,dc=particula,dc=local -f OU/CN/UID.ldif
+
+#
+# COMANDO SLAPCAT
+#
+
+# comando utilizado para extrair/dump da base de dados do servidor ldap
+# para um arquivo ldif;
+$ sudo slapcat -v -l backup_ldap.ldif
+
+#
+# COMANDO LDAPSEARCH
+#
+
+# verificar se os dados inseridos estao corretos
+$ sudo ldapsearch -x -b "dc=particula,dc=local"
+
+# verificar se os dados inseridos estao corretos com filtro
+$ sudo ldapsearch -x -LLL -b dc=particula,dc=local 'uid=cosmo' cn gidNumber
+	-x - busca simples, nao utiliza o metodo SASL
+	-LLL - resultado de forma resumida
+	uid= - filtro
+	cn gidNumber - exibe o resultado de forma resumida
+
+ldapsearch -x -W -D "cn=admin,dc=particula,dc=local" -b "uid=caio,ou=people,dc=particla,dc=local" "(objectclass=*)"

@@ -1,0 +1,149 @@
+#: Title : openldap server configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 210.4 openldap server configuration
+#: Options : Weight: 4
+
+Description: Candidates should be able to configure a 
+basic OpenLDAP server including knowledge of LDIF format 
+and essential access controls.
+
+Key Knowledge Areas:
+- OpenLDAP
+- Directory based configuration
+- Access Control
+- Distinguished Names
+- Changetype Operations
+- Schemas and Whitepages
+- Directories
+- Object IDs, Attributes and Classes
+
+Terms and Utilities:
+- slapd
+- slapd-config
+- LDIF
+- slapadd
+- slapcat
+- slapindex
+- /var/lib/ldap/
+- loglevel
+
+#
+# BASICO
+#
+
+# atualizacao do debian
+$ sudo apt-get update
+$ sudo apt-get upgrade
+
+# instalacao do servidor openldap
+$ sudo apt-get install slapd ldap-utils ldapscripts -y -d
+
+#
+# CONFIGURACAO
+#
+
+# backup do arquivo de configuracao
+$ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
+
+# configuracao inicial
+$ sudo vi /etc/ldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://192.168.0.14 ldap://192.168.0.14:666
+
+# reconfigurando o pacote slapd
+$ sudo dpkg-reconfigure slapd
+	No
+	particula.local
+	particula-company
+	<senha>
+	<senha>
+	HDB
+	Yes
+	Yes
+
+# verificando se a configuracao esta toda correta
+$ sudo ldapsearch -x
+
+#
+# SENHA
+#
+
+# comando utilizado para gerar o hash da senha do usuario
+# para ser inserido no arquivo LDIF na hora se inserir 
+# o usuario na base de dados do ldap.
+# desta forma, o campo "userPassword" do arquivo ldif
+# nao vai estar em texto plano, mas um hash da senha
+$ sudo slappasswd
+	<SENHA>
+	<SENHA>
+	{SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
+
+#
+# ARQUIVO LDIF
+#
+
+# arquivo ldif para OU
+$ vi ou.ldif
+	dn: ou=people,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: people
+
+	dn: ou=groups,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: groups
+
+# arquivo ldif para CN
+$ vi cn.ldif
+	dn: cn=department,ou=groups,dc=particula,dc=local
+	objectClass: posixGroup
+	cn: department
+	gidNumber: 5000
+
+# arquivo ldif para UID/USUARIO
+$ vi uid.ldif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: shadowAccount
+	uid: cosmo
+	sn: cosmo
+	givenName: cosmo
+	cn: cosmo
+	displayName: cosmo
+	uidNumber: 2000
+	gidNumber: 2000
+	userPassword: {SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
+	gecos: cosmo
+	loginShell: /bin/bash
+	homeDirectory: /home/cosmo
+
+#
+# COMANDO LDAPADD
+#
+
+# inserir dados atraves de um arquivo ldif
+$ sudo ldapadd -x -W -D cn=admin,dc=particula,dc=local -f OU/CN/UID.ldif
+
+#
+# COMANDO SLAPCAT
+#
+
+# comando utilizado para extrair/dump da base de dados do servidor ldap
+# para um arquivo ldif;
+$ sudo slapcat -v -l backup_ldap.ldif
+
+#
+# COMANDO LDAPSEARCH
+#
+
+# verificar se os dados inseridos estao corretos
+$ sudo ldapsearch -x -b "dc=particula,dc=local"
+
+# verificar se os dados inseridos estao corretos com filtro
+$ sudo ldapsearch -x -LLL -b dc=particula,dc=local 'uid=cosmo' cn gidNumber
+	-x - busca simples, nao utiliza o metodo SASL
+	-LLL - resultado de forma resumida
+	uid= - filtro
+	cn gidNumber - exibe o resultado de forma resumida
+
+ldapsearch -x -W -D "cn=admin,dc=particula,dc=local" -b "uid=caio,ou=people,dc=particla,dc=local" "(objectclass=*)"
