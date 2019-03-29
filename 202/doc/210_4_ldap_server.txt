@@ -147,3 +147,21 @@ $ sudo ldapsearch -x -LLL -b dc=particula,dc=local 'uid=cosmo' cn gidNumber
 	cn gidNumber - exibe o resultado de forma resumida
 
 ldapsearch -x -W -D "cn=admin,dc=particula,dc=local" -b "uid=caio,ou=people,dc=particla,dc=local" "(objectclass=*)"
+
+#
+# GERENCIAMENTO GRAFICO - LDAP Account Manager (LAM)
+#
+
+# instalacao
+$ sudo apt-get install ldap-account-manager -y
+
+# restringir/liberar o acesso
+$ sudo nano /etc/apache2/conf-enabled/ldap-account-manager.conf
+	# Require all granted
+	Require ip 192.168.0.0/24
+
+# reinicializar o apache2
+$ sudo systemctl restart apache2
+
+# acessar o aplicativo
+http://LDAP_SERVER_IP/lam
