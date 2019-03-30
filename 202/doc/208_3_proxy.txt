@@ -24,6 +24,10 @@ Terms and Utilities:
 # o que NAO eh uma boa escolha pois se por acaso o proxy for comprometido,
 # o gateway da rede tambem sera comprometido.
 
+#
+# INSTALACAO
+#
+
 # instalacao do proxy Squid
 $ sudo apt-get install squid -y -d ; instalacao do proxy Squid
 
@@ -32,6 +36,10 @@ $ sudo mkdir -p /var/cache/squid ; criacao do diretorio de cache do squid
 
 # alterando permissao
 $ sudo chown -R proxy.proxy /var/cache/squid ; alterando permissao
+
+#
+# CONFIGURACAO BASICA
+#
 
 # copia de seguranca do arquivo de configuracao do squid
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP
@@ -70,7 +78,7 @@ $ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
 	http_access allow localnet
 	http_access allow localhost
 
-	# o restante he bloqueado
+	# o restante eh bloqueado
 	http_access deny all
 
 	# o diretorio a onde esta armazenado o cache do proxy
