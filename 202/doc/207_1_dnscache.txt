@@ -1,6 +1,6 @@
 #: Title : DNS Cache
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 207.1 Basic DNS server configuration
+#: Description : Basic DNS server configuration
 #: Options : Weight: 3
 
 Description: Candidates should be able to configure BIND to function as a 
@@ -21,27 +21,64 @@ The following is a partial list of the used files, terms and utilities:
 - host
 - dig
 
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
-$ sudo chown -R bind:bind /etc/bind ; alterando permissao
+#
+# INSTALACAO
+#
 
+# atualizar o debian
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao
+$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d
+
+# alterando permissao
+$ sudo chown -R bind:bind /etc/bind
+
+#
 # CONFIGURACAO
 #
+
+# configuracao geral do bind
 $ sudo vi /etc/bind/named.conf.options
-	// indicando o diretorio de trabalho do bind.
-	// diretorio a onde sao armazenados os arquivos
-	// de configuracao da zona.
 	options {
+		// indicando o diretorio de trabalho do bind.
+		// diretorio a onde sao armazenados os arquivos
+		// de configuracao da zona.
 		directory "/etc/bind";
+
+		// omite informacoes referente a versao do bind
+		// por motivos de seguranca.
+		version none;
+
+		// o bind vai ficar escutando a porta 53.
+		listen-on port 53 { 127.0.0.1; any; };
+
+		// restricao dos hosts que podem fazer requisicao.		
+		allow-query     { localhost; any; };
+
+		// restringir o acesso ao cache do bind.
+		allow-query-cache       { localhost; any; };
 	};
 
+# checando os arquivos de configuracao
 $ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
-$ sudo systemctl restart bind9.service ; reinicializando o servico do bind9
 
-# TESTE (DNSCACHE)
+# reler o arquivo de configuracao do bind.
+$ sudo rndc reload
+
+# reler o arquivo de configuracao named.conf
+$ sudo rndc reconfig
+
+# reinicializar o servico atraves do systemctl
+$ sudo systemctl restart bind9.service
+
 #
+# TESTE
+#
+
+# teste do cache executado no DNSCACHE
 $ sudo netstat -nltup | grep :53
 $ dig kernel.org | grep time ; checar o tempo de resposta do dig
 
-# TESTE (ESTACAO)
-#
+# teste do cache executado na estacao
 $ dig kernel.org | grep time ; checar o tempo de resposta do dig
