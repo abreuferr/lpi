@@ -1,6 +1,6 @@
 #: Title : dns forwarder
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 207.1 Basic DNS server configuration
+#: Description : Basic DNS server configuration
 #: Options : Weight: 3
 
 Description: Candidates should be able to configure BIND to function as a 
@@ -21,11 +21,21 @@ The following is a partial list of the used files, terms and utilities:
 - host
 - dig
 
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
-$ sudo chown -R bind:bind /etc/bind ; alterando permissao
+#
+# INSTALACAO
+#
 
+# instalacao
+$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d
+
+# alterando permissao
+$ sudo chown -R bind:bind /etc/bind
+
+#
 # CONFIGURACAO
 #
+
+# configuracao do bind para ser um servidor dns forward
 $ sudo vi /etc/bind/named.conf.options
 	// foi criada a acl de nome "clients" como o objetivo 
 	// de restringir quais hosts podem fazer a requisicao
@@ -36,6 +46,9 @@ $ sudo vi /etc/bind/named.conf.options
 	};
 
 	options {
+        	// diretorio a onde estao armazenados os arquivos de configurcao
+        	directory "/etc/bind";
+
 		// se por acaso a resposta estiver no cache, o
 		// servidor ira enviar para o resolver. se por
 		// acaso nao tiver a resposta, ira requisitar
@@ -49,8 +62,8 @@ $ sudo vi /etc/bind/named.conf.options
 		// lista de servidores dns que serao utilizados
 		// para reponder a requisicao por acaso dos hosts.
 		forwarders {
-		8.8.8.8;
-		8.8.4.4;
+			8.8.8.8;
+			8.8.4.4;
 		};
 
 		// o servidor ira executar somente o processo de
@@ -59,19 +72,25 @@ $ sudo vi /etc/bind/named.conf.options
 		forward only;
 };
 
-$ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
-$ sudo systemctl restart bind9.service ; reinicializando o servico do bind9
+# checando os arquivos de configuracao
+$ sudo named-checkconf /etc/bind/named.conf
 
-$ sudo vi /etc/resolv.conf ; de todas as estacoes da rede
+# reinicializando o servico do bind9
+$ sudo systemctl restart bind9.service
+
+# de todas as estacoes da rede
+$ sudo vi /etc/resolv.conf
 	domain particula.local
 	search particula.local
 	nameserver 192.168.0.4
 
-# TESTE (DNSCACHE)
 #
+# TESTE
+#
+
+# (DNSCACHE)
 $ sudo netstat -nltup | grep :53
 $ dig kernel.org | grep time ; checar o tempo de resposta do dig
 
-# TESTE (ESTACAO)
-#
+# (ESTACAO)
 $ dig kernel.org | grep time ; checar o tempo de resposta do dig
