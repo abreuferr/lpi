@@ -26,12 +26,36 @@ Terms and Utilities:
 - mountd
 - portmapper
 
-# NFS_SERVER ( nfsserver - 192.168.0.11)
 #
+# TEORIA
+#
+
+# server - 192.168.0.11 
+# client - 192.168.0.0/24
+
+#
+# INSTALACAO
+#
+
+# SERVER
+$ sudo apt-get update && sudo apt-get upgrade ; atualizar o host
 $ sudo apt-get install nfs-kernel-server nfs-common -y -d ; instalacao dos componentes do NFS Server
 $ sudo mkdir -p /mnt/nfs ; diretorio que sera exportado
 $ sudo chown root:users -R /mnt/nfs ; propriedades do diretorio
 $ sudo chmod 775 -R /mnt/nfs ; propriedades do diretorio
+
+# CLIENT
+$ sudo apt-get update && sudo apt-get upgrade ; atualizar o host
+$ sudo apt-get install nfs-common -y -d ; instalacao dos componentes necessarios para o NFS Client
+$ sudo mkdir -p /mnt/nfs ; diretorio que sera compartilhado
+$ sudo chown root:users -R /mnt/nfs ; propriedades do diretorio
+$ sudo chmod 775 -R /mnt/nfs ; propriedades do diretorio
+
+#
+# EXPORTANDO DIRETORIO
+#
+
+# SERVER
 $ sudo vi /etc/exports ; configuracao do nfs server
 	# rw - permite a leitura e escrita no diretorio
 	# ro - permite somente a opcao de leitura, opcao de escrita fica desabilidatea
@@ -42,32 +66,64 @@ $ sudo vi /etc/exports ; configuracao do nfs server
 	# no_root_squash - Impede que usuarios root conectados remotamente tenham privilegios de root
 	# lock- trava de acesso a arquivo, impedindo assim que dois ou mais clientes ao acessar o mesmo arquivo ao mesmo tempo.
 	# wdelay - atraso no processo de escrita se por acaso outro processo estiver escrevendo no disco rigido
+	#
+	# exemplo
+	# directory hostname(options)
+        # /mnt/nfs  192.168.10.0/24(rw,sync,no_root_squash,no_subtree_check)
 
-	directory hostname(options)
-        /mnt/nfs       192.168.10.0/24(rw,sync,no_root_squash,no_subtree_check)
+# SERVER
+# comando utilizado para manipular o diretorio exportado atraves do arquivo /etc/export.
+# o comando permite manipular o arquivo /etc/export sem a necessidade de reinicializar
+# o servico do nfs atraves do systemd.
+#
+# o comando exportfs deve ser executado no servidor nfs.
+$ sudo exportfs [opcao]
+	# [none] - exibi quais sao os diretorios que estao exportados (ativos).
+	# -a - export diretorios presentes no arquivo /etc/exports.
+	# -ar - re-export diretorios presentes no arquivo /etc/exports.
+	# -au - unexport diretorio presentes no arquivo /etc/exports.
+	# -v - modo verbose, com mais detalhes.
 
-$ sudo sudo exportfs [opcao]
-	# [none] - exibi quais sao os diretorios que estao exportados (ativos)
-	# -a - export/unexport todos os direotrios especificados no arquivo /etc/exports
-	# -i - ignora o arquivo /etc/exports
-	# -r - export diretorios presentes no arquivo /etc/exports, -ra
-	# -u - unexport diretorio presentes no arquivo /etc/exports, -ua
-	# -o <dir> - espcifica o diretorio que sera exportado
-	# -v - modo verbose
+# CLIENT
+# montando o diretorio exportado pelo servidor NFS
+# de forma manual.
+$ sudo mount -t nfs 192.168.0.11:/mnt/nfs /mnt/nfs
 
+# caso o computador seja reinicializado, o diretorio
+# exportado pelo servidor nfs sera montador de forma
+# automatica.
+$ cat /etc/fstab
+	192.168.0.11:/mnt/nfs /mnt/nfs nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0
+
+#
+# INFORMACAO
+#
+
+# SERVER
+# obter informacao dos diretorios que estao montados.
+$ sudo cat /proc/fs/nfs/exports
+
+# CLIENT
 $ sudo showmount [opcao]
+	# -e [IP_SERVER]- exibe uma lista dos diretorios expostados
 	# -a - exibe o nome ou ip das estacoes que importaram os direorios
 	# -d - lista os direotios montados nos clientes
 	# -e - exibe uma lista dos diretorios expostados
 
-$ sudo systemctl restart nfs-kernel-server.service ; reinicializado o servico
+# SERVER/CLIENT
+# exibir estatistica
+$ sudo nfsstat [OPCAO]
+	-m - exibir informacao do lado do cliente
+	-c - exibir informacao do lado do cliente
+	-s - exibir informacao do lado do servidor
+	-r - exibir informacao do lado do servidor/cliente
 
-# NFS_CLIENT
-#
-$ sudo apt-get install nfs-common -y -d ; instalacao dos componentes necessarios para o NFS Client
-$ sudo mkdir -p /mnt/nfs ; diretorio que sera compartilhado
-$ sudo chown root:users -R /mnt/nfs ; propriedades do diretorio
-$ sudo chmod 775 -R /mnt/nfs ; propriedades do diretorio
-$ sudo mount 192.168.0.11:/mnt/nfs /mnt/nfs ; montando o diretorio remoto
-$ cat /etc/fstab
-	192.168.0.11:/mnt/nfs /mnt/nfs nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0
+# CLIENT
+$ sudo cat /proc/mounts
+
+# CLIENT
+# obter informacoes atraves do aplicativo rpcinfo.
+$ sudo rpcinfo [OPCAO]
+	-p - exibe as portas que estao sendo mapeadas.
+	-s - exibe informacoes, como por exemplo, versao e servico.
+	-m - exibir dados estatisticos.
