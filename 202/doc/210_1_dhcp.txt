@@ -1,12 +1,12 @@
-#: Title : DHCP configuration
+#: Title : DHCP Server Configuration
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 210.1 DHCP configuration
+#: Description : DHCP configuration
 #: Options : Weight: 2
 
-Description: Candidates should be able to configure a DHCP server. 
-This objective includes setting default and per client options, 
-adding static hosts and BOOTP hosts. Also included is configuring 
-a DHCP relay agent and maintaining the DHCP server.
+Description: Candidates should be able to configure a DHCP server. This 
+objective includes setting default and per client options, adding static 
+hosts and BOOTP hosts. Also included is configuring a DHCP relay agent 
+and maintaining the DHCP server.
 
 Key Knowledge Areas:
 - DHCP configuration files, terms and utilities
@@ -22,41 +22,99 @@ Terms and Utilities:
 - radvd
 - radvd.conf
 
-$ sudo apt-get install isc-dhcp-server ; instalacao do servidor dhcp
+#
+# TEORIA
+#
 
+# server - 192.168.0.13
+# client - 192.168.0.0/24
+
+#
+# INSTALACAO
+#
+
+# SERVER
+$ sudo apt-get update && sudo apt-get upgrade ; atualizar o host
+$ sudo apt-get install isc-dhcp-server -y -d ; instalacao dos componentes do DHCP Server
+
+# CLIENT
+$ sudo apt-get update && sudo apt-get upgrade ; atualizar o host
+$ sudo apt-get install isc-dhcp-client isc-dhcp-common -y -d ; instalacao dos componentes do DHCP Client
+
+#
+# CONFIGURACAO
+#
+
+# SERVER
+
+# backup de seguranca do arquivo de configuracao.
+$ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.BKP
+
+# definir qual interface de rede do servidor sera monitorada
+# pelo servidor dhcp.
 $ sudo vi /etc/default/isc-dhcp-server
-	INTERFACESv4="ens32"
+	INTERFACESv4=i"ens33"
 
-$ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bkp ; copia de seguranca
-
+# editando o servidor dhcp
 $ sudo vi /etc/dhcp/dhcpd.conf
-	# variavel global
+	# periodo em que um determinado IP fica reservado
+	# para um determinado host.
+	default-lease-time 600;
+
+	# tempo maximo em que um IP fica reservado para
+	# um host.
+	max-lease-time 7200;
+
+	# dominio
+	option domain-name "particula.local";
+
+	# dns server
+	option domain-name-servers ns1.particula.local, ns2.particula.local;
+
+	# smtp server
+	option smtp-server mail.particula.local;
+
+	# pop3 server
+	option pop-server mail.particula.local;
+
+	# servidor de hora
+	option time-servers ntp.particula.local;
+
+	# essa opcao deve ser ativada se por acaso
+	# este servidor dhcp for o servidor principal
+	# da rede.
 	authoritative;
 
-	# variavel local
-	subnet 192.168.0.0 netmask 255.255.255.224 {
-		# range de ip
+	# subrede que sera utilizada pelo servidor dhcp.
+	subnet 192.168.0.0 netmask 255.255.255.0 {
+        	# range de IPs que serao reservados
+       		# para o servico de dhcp.
         	range 192.168.0.100 192.168.0.200;
 
-		# servidores de dns
-	        option domain-name-servers nscache.particula.local, ns1.particula.local, ns2.particula.local;
+        	# opcao utilizada para definir a rota
+        	# da rede, definir o IP do gateway da
+        	# rede.
+        	option routers 192.168.0.2;
 
-		# dominio
-	        option domain-name "particula.local";
-
-		# gateway da rede
-	        option routers 192.168.0.2;
-
-		# broadcast da rede
-	        option broadcast-address 192.168.0.254;
-
-		# intervalo de checagem de ip		
-	        default-lease-time 600;
-
-		# periodo maximo de alocacao do ip
-	        max-lease-time 7200;
+        	# endereco utilizado para definir o
+        	# IP do endereco de broadcast.
+        	option broadcast-address 192.168.0.254;
 	}
 
-$ sudo systemctl restart isc-dhcp-server.service ; reinicializando o servico do servico do dhcp
+	# fixar o ip para uma estacao
+	host workstation {
+        	# endereco mac-address.
+        	hardware ethernet 00:0c:29:cb:71:f4;
+        	# fixar o endereco deste host.
+        	fixed-address 192.168.0.171;
+	}
 
-$ cat /var/dhcp/dhcpd.leases ; arquivo a onde fica armazenado a relacao IP <> Host
+# CLIENT
+
+# configurar a placa de rede do host para trabalhar
+# com o dhcp. O exemplo a baixo eh referente a
+# distribuicao GNU/Linux Debian.
+$ sudo vi /etc/network/interfaces
+	(...)
+	allow-hotplug ens33
+	iface ens33 inet dhcp
