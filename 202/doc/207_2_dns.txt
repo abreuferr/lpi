@@ -1,6 +1,6 @@
-#: Title : DNS Howto
+#: Title : dns howto
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 207.2 Create and maintain DNS zones
+#: Description : create and maintain dns zones
 #: Options : Weight: 3
 
 Key Knowledge Areas:
@@ -10,7 +10,7 @@ Key Knowledge Areas:
 - Various methods to add a new host in the zone files, including reverse zones
 
 Terms and Utilities:
-- /var/named/
+- /var/named/ or /etc/bind/
 - zone file syntax
 - resource record formats
 - named-checkzone
@@ -20,14 +20,45 @@ Terms and Utilities:
 - nslookup
 - host
 
-# INSTALACAO -  DNS PRIMARIO (NS1) e DNS SECUNDARIO (NS2)
 #
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d ; instalacao
-$ sudo chown -R bind:bind /etc/bind ; alterando permissao
-$ sudo systemctl restart bind9.service ; reinicializando o bind
+# INSTALACAO
+#
+# o processo de atualizacao do SO e instalacao deve
+# ser executado tanto no servidor primario, ns1, quanto
+# no secundario, ns2.
 
+# atualizacao do debian.
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do bind e alterando permissao.
+$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d
+$ sudo chown -R bind:bind /etc/bind
+
+#
 # CONFIGURACAO DO DNS PRIMARIO (NS1)
 #
+
+# ajustes no arquivo named.conf.options
+$ sudo vi /etc/bind/named.conf.options
+	// acl para controle de quem podera fazer requisicao 
+	// de resolucao.
+	acl goodclients {
+		// rede que podera fazer reqisicao de resolucao
+		// de nome.
+        	192.168.0.0/24;
+	};
+
+	options {
+        	// diretorio a onde estao os arquivos de 
+		// configuracao da zona particula.local
+        	directory "/etc/bind";
+
+        	// quais os hosts ou rede podem fazer requisicao
+        	allow-query { goodclients; };
+	};
+
+# arquivo que contem as entradas das zonas que
+# o bind ira gerenciar.
 $ sudo vi /etc/bind/named.conf.local
 	// configuracao da zona particula.local
 	zone "particula.local" {
@@ -48,6 +79,8 @@ $ sudo vi /etc/bind/named.conf.local
 	};
 
 	// configuracao reversa da zona particula.local
+	// o arquivo de nome "addr.arpa" indica que eh um
+	// arquivo de dns reverso.
 	zone "0.168.192.in-addr.arpa" {
 		// servidor do tipo master.
 	        type master;
@@ -60,80 +93,96 @@ $ sudo vi /etc/bind/named.conf.local
 	    	allow-transfer { 192.168.0.6; };
 	};
 
-$ sudo vi /etc/bind/named.conf.options
-	// acl para controle de quem requisita resolucao
-	acl goodclients {
-        	192.168.0.0/24;
-	};
-
-	options {
-        	// diretorio a onde estao os arquivos de configuracao da
-        	// zona particula.local
-	        directory "/etc/bind";
-
-	        // quais os hosts ou rede podem fazer requisicao
-	        allow-query { goodclients; };
-	};
-
+// arquivo de configuracao da zona particula.local.
+// Hostname > IP.
 $ sudo vi /etc/bind/db.particula.local
 	; Start of Authority (SOA) record
 	$TTL 604800`
 	@ IN SOA ns1.particula.local. root.particula.local. (
-				2010101301;	Serial
-				28800;		Refresh
-				3600;		Retry
-				604800;		Expire
-				3600 );		Negative Cache TTL
+		// numero de serie.
+		2010101301;	Serial
+		// frequencia com que o servidor slave checa a
+		// procura de alteracao.
+		28800;		Refresh
+		// em caso de falha, tempo para nova tentativa.
+		3600;		Retry
+		// tempo em que a informacao sobre a zona fica
+		// invalida.
+		604800;		Expire
+		// tempo de vida.
+		3600 );		Negative Cache TTL
 
-	; Name Server (NS) records.
-				IN NS ns1.particula.local.
-				IN NS ns2.particula.local.
+	; registro dos Name Server (NS).
+		IN NS ns1.particula.local.
+		IN NS ns2.particula.local.
 
-	; Mail Exchange (MX) records.
-				IN MX 10 srv6.particula.local.
+	; registro do Mail Exchange (MX).
+		IN MX 10 srv6.particula.local.
 
-	; Address (A) records. (real-names of machines)
-				IN A 192.168.0.5
-	ns1                    	IN A 192.168.0.5
-	ns2                    	IN A 192.168.0.6
-	srv1                  	IN A 192.168.0.7
-	srv2                  	IN A 192.168.0.8
-	srv3                  	IN A 192.168.0.9
-	srv4                  	IN A 192.168.0.10
-	srv5                  	IN A 192.168.0.11
-	srv6                  	IN A 192.168.0.12
+	; registro de associacao Hostname e IP Address (A)
+		IN A 192.168.0.5
+	ns1     IN A 192.168.0.5
+	ns2     IN A 192.168.0.6
+	srv1    IN A 192.168.0.7
+	srv2    IN A 192.168.0.8
+	srv3    IN A 192.168.0.9
+	srv4    IN A 192.168.0.10
+	srv5    IN A 192.168.0.11
+	srv6    IN A 192.168.0.12
 
-	; Aliases in Canonical Name (CNAME) records...
-	www			IN CNAME srv5
+	; registro do apelido, Canonical Name (CNAME)
+	www	IN CNAME srv5
 
+# arquivo de configuracao do dns reverso (IP > Hostname)
 $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 	; Start of Authority (SOA) record
 	$TTL   900
 	@ IN SOA ns1.particula.local. root.particula.local. (
-                                2010101301;     Serial
-                                28800;          Refresh
-                                3600;           Retry
-                                604800;         Expire
-                                3600 );         Negative Cache TTL
+		// numero de serie.
+		2010101301;	Serial
+		// frequencia com que o servidor slave checa a
+		// procura de alteracao.
+		28800;		Refresh
+		// em caso de falha, tempo para nova tentativa.
+		3600;		Retry
+		// tempo em que a informacao sobre a zona fica
+		// invalida.
+		604800;		Expire
+		// tempo de vida.
+                3600 );         Negative Cache TTL
 
-	; Name Server (NS) records.
-				IN NS ns1.particula.local.
-				IN NS ns2.particula.local.
+	; registro com os servidores Name Servers.
+		IN NS ns1.particula.local.
+		IN NS ns2.particula.local.
 
-	; Addresses point to canonical names (PTR) for reverse lookups
-	5                       IN PTR    ns1.particula.local.
-	6                       IN PTR    ns2.particula.local.
-	7                       IN PTR    srv1.particula.local.
-	8                       IN PTR    srv2.particula.local.
-	9                       IN PTR    srv3.particula.local.
-	10                      IN PTR    srv4.particula.local.
+	; registro com as associacoes reversas, IP to Hostname.
+	5       IN PTR    ns1.particula.local.
+	6       IN PTR    ns2.particula.local.
+	7       IN PTR    srv1.particula.local.
+	8       IN PTR    srv2.particula.local.
+	9       IN PTR    srv3.particula.local.
+	10      IN PTR    srv4.particula.local.
 
-$ sudo named-checkconf ; verificar as configuracoes
-$ sudo systemctl restart bind9 ; reinicializando o servico
+# comando utilizado para checar a sintaxe dos
+# arquivos de configuracao do Bind.
+$ sudo named-checkconf
 
+# reler os arquivos de configuracao do Bind.
+$ sudo rndc reload
+
+#
 # CONFIGURACAO DO DNS SECUNDARIO (NS2)
 #
-$ sudo vi /etc/bind/named.conf.local (slave)
+
+# arquivos de configuracao do bind
+$ sudo vi /etc/bind/named.conf.options
+	options {
+		// diretorio a onde estao localizados os arquivos
+		// da zona particula.local
+		directory "/etc/bind";
+	};
+
+$ sudo vi /etc/bind/named.conf.local
 	// configuracao da zona particula.local
 	zone "particula.local" {
 		// servidor do tipo slave
@@ -149,7 +198,7 @@ $ sudo vi /etc/bind/named.conf.local (slave)
 		allow-notify { 192.168.0.5; };
 	};
 
-	// configuracao reversa da zona partiicula.local
+	// configuracao reversa da zona particula.local
 	zone "0.168.192.in-addr.arpa" {
 		// servidor do tipo slave
 		type slave;
@@ -161,25 +210,45 @@ $ sudo vi /etc/bind/named.conf.local (slave)
 		masters { 192.168.0.5; };
 	};
 
-$ sudo vi /etc/bind/named.conf.options
-	options {
-		// diretorio a onde estao localizados os arquivos
-		// da zona particula.local
-		directory "/etc/bind";
-	};
+# reinicializar o bind.
+$ sudo rndc reload
 
-$ sudo systemctl restart bind9 ; reinicializando o servico
-
+#
 # TROUBLESHOOT
 #
+
+# utilizacao do aplicativo NSLOOKUP
 $ nslookup particula.local ; "A" record do dominio
 $ nslookup 192.168.0.5 ; dominio reverso
 $ nslookup web1.particula.local ; informacao sobre um determinado host
 $ nslookup -query=ns www.particula.local ; NS record
 $ nslookup -debug particula.local ; Debug
 
+# utilizacao do aplicativo DIG
 $ dig particula.local A ; A record
 $ dig particula.local MX ; MX record
 $ dig particula.local SOA ; SOA record
 $ dig particula.local TTL ; TTL record
 $ dig particula.local ANY +noall +answer ; ANY record
+
+# aplicativo HOST
+$ host [OPCAO] [DOMINIO]
+	-a - todos os protocolos
+	-d - modo detalhado
+	-l [IP_NS1/IP_NS2] - transferencia de zona
+	-t [REGISTRO] - any, mx, ns, axfr, cname - consulta
+	-C - exibe registros SOA do dominio
+
+#
+# UTILITARIO
+#
+
+# aplicativo rndc
+$ sudo rndc [OPCAO]
+	stats/status - exibe estatistica
+	reload - reler os arquivos de configuracao e zona
+	stop - parar o bind
+	halt - parar o servidor sem salvar pendencias
+	flush - apagar todo o cache do servidor
+	reconfig - reler o arquivo de configuracao e somente nova zona
+
