@@ -1,10 +1,7 @@
 #: Title : dns chroot
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 207.3 Securing a DNS server
+#: Description : isecuring a dns server
 #: Options : Weight: 2
-
-207.3 Securing a DNS server
-Weight: 2
 
 Description: Candidates should be able to configure a DNS server 
 to run as a non-root user and run in a chroot jail. This objective 
@@ -25,10 +22,17 @@ Terms and Utilities:
 - dnssec-keygen
 - dnssec-signzone
 
+#
 # CHROOT dnscache/master/slave
 #
-$ sudo systemctl stop bind9.service ; parando o servico do bind9
+# parando o servico do bind
+$ sudo systemctl stop bind9.service
 
+# esta sendo criado um novo arqivo de configuracao
+# do bind junto ao systemd para que o processo do
+# bind seja executado com um usuario sem permissao
+# root. No exemplo abaixo, o processo do bind sera
+# executado com o usuario de nome BIND.
 $ sudo vi /etc/systemd/system/bind9.service
 	[Unit]
 	Description=BIND Domain Name Server
@@ -43,7 +47,11 @@ $ sudo vi /etc/systemd/system/bind9.service
 	[Install]
 	WantedBy=multi-user.target
 
-$ sudo systemctl reenable bind9
+# ativando o bind
+$ sudo systemctl renable bind9
+
+# diretorios e permissoes a onde serao armazenados 
+# os arquivos de configuracao.
 $ sudo mkdir -p /chroot/{etc,dev,var/cache/bind,var/run/named}
 $ sudo mknod /chroot/dev/null c 1 3
 $ sudo mknod /chroot/dev/random c 1 8
