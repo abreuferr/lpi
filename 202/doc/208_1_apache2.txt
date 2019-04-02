@@ -1,6 +1,6 @@
-#: Title : Apache 2
+#: Title : apache2
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 208.1 Implementing a web server
+#: Description : Implementing a web server
 #: Options : Weight: 4
 
 Description: Candidates should be able to install and configure a 
@@ -31,44 +31,52 @@ Terms and Utilities:
 - apachectl, apache2ctl
 - httpd, apache2
 
-###
-# Apache 2.4 instalation
-###
-$ sudo apt-get install apache2 ; instalacao do apache 
-$ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d ; instalacao do modulo PHP no Apache2
-$ sudo apt-get install libapache2-mod-perl2 ; instalacao do modulo Perl no Apache2
-$ sudo systemctl status apache2 ; status do servico apache
-$ sudo systemctl restart apache2 ; restart do servico apache
+#
+# INSTALACAO
+#
 
-###
-# Apache 2.4 configuration files, terms and utilities
-###
+# instalacao do apache 
+$ sudo apt-get install apache2
+
+# instalacao do modulo para controlar requisicao do apache2
+$ sudo apt-get install libapache2-mpm-itk -y -d
+
+# instalacao do modulo PHP no Apache2
+$ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
+
+# instalacao do modulo Perl no Apache2
+$ sudo apt-get install libapache2-mod-perl2
+
+#
+# CONFIGURACAO
+#
 
 # principal arquivo de configuracao do apache2e que contem 
 # os paramatros globais de configuracao do apache2.
 $ /etc/apache2/apache2.conf
 
-# diretorio que contem varios arquivos de configuracao
-$ /etc/apache2/conf-available
+# diretorio que contem varios arquivos de configuracao.
+$ /etc/apache2/conf-available/
 
 # diretorio que contem varios arquivos de configuracao e
 # que estao ativos. Link simbolico para os arquivos presentes
-# no diretorio /etc/apache2/conf-available
-$ /etc/apache2/conf-enable
+# no diretorio /etc/apache2/conf-available.
+$ /etc/apache2/conf-enable/
 
-# arquivos que contem variaveis de configuracao do apache2
+# arquivo que contem uma serie de variaveis de configuracao 
+# do apache2.
 $ /etc/apache2/envvars
 
 # diretorio que contem uma serie de arquivos de configuracao
 # do modulos presentes no apache2.
-$ /etc/apache2/mods-available
+$ /etc/apache2/mods-available/
 
 # diretorio que contem uma serie de arquivos de configuracao
 # dos modulos presentes no apache2. neste caso, os arquivos
 # sao links simbolicos que apontam para o diretorio
 # /etc/apache2/mods-available e sao utilizados para ativar
 # os modulos.
-$ /etc/apache2/mods-enable
+$ /etc/apache2/mods-enable/
 
 # arquivo que define quais portas o apache2 ira escutar
 # e trabalhar.
@@ -76,48 +84,49 @@ $ /etc/apache2/ports.conf
 
 # diretorio que contem arquivos de configuracao dos 
 # dominios virtuais.
-$ /etc/apache2/sites-available
+$ /etc/apache2/sites-available/
 
 # diretorio que contem os arquivos de configuracao
 # dos sites que estao ativos. os arquivos sao links
 # simbolicos que apontam para o diretorio /sites-available
 $ /etc/apache2/sites-enable
 
-###
-# Apache log files configuration and content
-###
+#
+# LOG
+#
+
+# arquivo de log referente aos acesso
 $ sudo cat /var/log/apache2/access.log
+
+# arquivo de log referente aos erros
 $ sudo cat /var/log/apache2/error.log
 
-# Apache log format
-LogFormat "%h %l %u %t \"%r\" %>s %b"
+# parametros definidos no arquivo
+# /etc/apache2/apache2.conf
+	LogFormat "%h %l %u %t \"%r\" %>s %b"
 
-- %h – endereco IP do cliente que acesso a pagina
-- %l – a identidade do cliente determinada pelo identd na maquina do cliente. caractere - se por acaso a informacao nao estiver disponivel
-- %u – o userid do cliente se for requisitado a autenticacao. caractere - se a informacao nao estiver disponivel
-- %t – data e hora em que foi solicitado a requisicao
-- \"%r\" – informacoes como o metodo http utilizado, o caminh do da requisicao de informacao e protocolo http utilizado pelo cliente
-- %>s – o codigo do status que o servidor envia de volta para o cliente
-- %b – o tamanho do objeto requisitado
+	%h – endereco IP do cliente que acesso a pagina
+	%l – a identidade do cliente determinada pelo identd na maquina do cliente.
+	%u – o userid do cliente se for requisitado a autenticacao.
+	%t – data e hora em que foi solicitado a requisicao
+	\"%r\" – informacoes como o metodo http utilizado, o caminh do da requisicao de informacao e protocolo http utilizado pelo cliente
+	%>s – o codigo do status que o servidor envia de volta para o cliente
+	%b – o tamanho do objeto requisitado
 
-###
-# Configuration of maximum requests, minimum and maximum servers and clients
-###
-$ sudo apt-get install libapache2-mpm-itk -y -d ; instalacao
+#
+# MAXIMUM REQUESTS
+#
 
 # configuracao do modulo MPM, modulo instalado por padrao.
 $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 	<IfModule mpm_event_module>
-		# numero de processos filhos disparados inicialmente
-		# mais o servidor principal.
+		# numero inicial de processos que o apache inicializa.
 		StartServers		3
 
-		# numeo minimo de thread servidores inativos,
-		# aguardando conexao.
+		# numero minimo de thread inativos, aguardando conexao.
 		MinSpareThreads		25
 
-		# numeo maximo de thread servidores inativos,
-		# aguardando conexao.
+		# numero maximo de thread inativos, aguardando conexao.
 		MaxSpareThreads		75
 
 		# numero limite de threads.
@@ -133,11 +142,12 @@ $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 		MaxConnectionsPerChild	1000
 	</IfModule>
 
-###
-# Apache 2.4 virtual host implementation (with and without dedicated IP addresses)
-###
+#
+# VIRTUAL HOST
+#
 
 # diretorio a onde sera armazenado os arquivos do site
+# particula.com.br/www.particula.local
 $ sudo mkdir -p /var/www/particula.local/html
 
 # arquivo indice do site
@@ -162,16 +172,18 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	# criacao do virtual host
 	# qualquer ip * e porta 80
 	<VirtualHost *:80>
-		# ServerName: dominio que o site ira responder
+		# dominio que o site ira responder.
 		ServerName particula.local
 		
-		# ServerAlias: todos os outros dominios ou subdominios que que ira ser utilizado por esse host
+		# todos os outros dominios ou subdominios que 
+		# que ira ser utilizado por esse host.
 		ServerAlias www.particula.local
 
-		# e-mail do administrador do site
+		# e-mail do administrador do site.
 		ServerAdmin webmaster@particula.local
 
-		# DocumentRoot: diretorio a onde sera armazenado os arquivos deste dominio
+		# DocumentRoot: diretorio a onde sera armazenado 
+		# os arquivos deste dominio.
 		DocumentRoot /var/www/particula.local/html
 
 		# diretivas referente ao diretorio
@@ -185,30 +197,33 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 			# foram declaradas no arquivo .htaccess e que serao 
 			# sobrepostas as direticas da configuracao padrao
 			AllowOverride All
+			Require all granted
 		</Directory>
 
 		# nome o localizacao dos arquivos de log
 		ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-		CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+		CustomLog ${APACHE_LOG_DIR}/particula.local-access.log combined
 	</VirtualHost>
 
 	OU
 
 	# criacao do virtual host
 	<VirtualHost 192.168.0.8:80>
-		# ServerName: dominio que o site ira responder
+		# dominio que o site ira responder
 		ServerName particula.local
 		
-		# ServerAlias: todos os outros dominios ou subdominios que que ira ser utilizado por esse host
+		# todos os outros dominios ou subdominios que 
+		# ser utilizado por esse host.
 		ServerAlias www.particula.local
 
-		# e-mail do administrador do site
+		# e-mail do administrador do site.
 		ServerAdmin webmaster@particula.local
 
-		# DocumentRoot: diretorio a onde sera armazenado os arquivos deste dominio
+		# DocumentRoot: diretorio a onde sera armazenado 
+		# os arquivos deste dominio.
 		DocumentRoot /var/www/particula.local/html
 
-		# diretivas referente ao diretorio
+		# diretivas referente ao diretorio.
 		<Directory /var/www/particula.local/html>
 			# Indexes: previnde as diretivas listadas.
 			# FollowSymLinks: quando essa opcao eh ativada, 
@@ -230,17 +245,17 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 $ sudo a2ensite particula.local
 
 # reler as configuracoes do apache
-$ sudo systemctl reload apache2
+$ sudo apache2ctl restart
 
 # criacao do link simbolico de forma manual
 $ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/
 
 # checagem da configuracao do apache2
-$ sudo apachectl configtest ; checagem da configuracao do apache2
+$ sudo apache2ctl configtest
 
-###
-# Apache 2.4 + Modulo Perl
-###
+#
+# MODULO PERL
+#
 
 # alterando o arquivo de configuracao do dominio para permitir que o mesmo
 # possa trabalhar com a liguagem de programacao Perl.
@@ -272,7 +287,7 @@ $ sudo vi /var/www/particula.local/html/perltest.pl
 	}
 
 # reinicializar o apache2
-$ sudo systemctl restart apache2
+$ sudo apache2ctr restart
 
 # teste
 $ w3m http://www.particula.local/perltest.pl
