@@ -1,6 +1,6 @@
-#: Title : DNS TSIG
+#: Title : dns tsig
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 207.3 Securing a DNS server
+#: Description : Securing a DNS server
 #: Options : Weight: 2
 
 Description: Candidates should be able to configure a DNS 
@@ -25,17 +25,24 @@ Terms and Utilities:
 # TEORIA
 #
 # a funcao da tecnologia tsig eh a de prover a seguranca na comunicacao
-# entre os servidores de DNS, ns1 e ns2.
+# entre os servidores de DNS responsavei por uma zona. Alem da comunicao, 
+# a tecnologia tsig tambem eh utilizado na seguranca para a transferencia 
+# dos dados da zona do servidor primario para o servidor secundario.
 
+#
 # CONFIGURACAO DO DNS PRIMARIO (NS1 - 192.168.0.5)
 #
+
+# criacao da chave de criptografia que sera utilizada na troca
+# de informacoes e configuracao entre os servidores primario e 
+# sencundario.
 $ cd /etc/bind/
+$ dnssec-keygen -a HMAC-MD5 -b 512 -n USER ns-particula-local_rndc-key
+	-a especificar qual eh o algoritmo que sera utilizado para criar as chaves
+	-b especifica o tamanho da chave
+	-n especifica o tipo de chave
 
-# -a especificar qual eh o algoritmo que sera utilizado para criar as chaves
-# -b especifica o tamanho da chave
-# -n especifica o tipo de chave
-$ dnssec-keygen -a HMAC-MD5 -b 512 -n USER ns-particula-local_rndc-key ; criar as chaves de criptografia
-
+# conteudo da chave privada
 $ sudo cat Kns-particula-local_rndc-key.+157+11082.private
 	Private-key-format: v1.3
 	Algorithm: 157 (HMAC_MD5)
@@ -46,17 +53,18 @@ $ sudo cat Kns-particula-local_rndc-key.+157+11082.private
 	Activate: 20190102190149
 
 $ sudo vi /etc/bind/named.conf.local
-	// TSIG
+	// chave de criptografia tsig
 	key "ns-particula-local_rndc-key" {
         	algorithm hmac-md5;
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
 	};
 
+	// servidor secundario/slave
 	server 192.168.0.6 {
         	keys { ns-particula-local_rndc-key; };
 	};
 
-	// Master zones
+	// configuracao da zona particula.local
 	zone "particula.local" {
         	type master;
 	        file "/etc/bind/db.particula.local";
@@ -64,31 +72,34 @@ $ sudo vi /etc/bind/named.conf.local
 	        notify yes;
 	};
 
-	// Reverse
+	// configuracao do dns reverso da zona particula.local
 	zone "0.168.192.in-addr.arpa" {
         	type master;
 	        file "/etc/bind/db.0.168.192.in-addr.arpa";
         	allow-update { key "ns-particula-local_rndc-key"; };
 	};
 
-$ sudo systemctl restart bind9.service
+# relendo os arquivos de configuracao do bind.
+$ sudo rndc reload
 
+#
 # CONFIGURACAO DO DNS SECUNDARIO (NS2 - 192.168.0.6)
 #
 
 $ sudo vi /etc/bind/named.conf.local
-	// TSIG
+	// chave de criptografia tsig gerada no servidor
+	// primario/master.
 	key "ns-particula-local_rndc-key" {
         	algorithm hmac-md5;
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
 	};
 
+	// servidor primario
 	server 192.168.0.5 {
         	keys { ns-particula-local_rndc-key; };
 	};
 
-	// Slave zones
-	//
+	// configuracoes da zona particula.local
 	zone "particula.local" {
         	type slave;
 	        file "/etc/bind/db.particula.local";
@@ -96,7 +107,7 @@ $ sudo vi /etc/bind/named.conf.local
 	        allow-transfer { key "ns-particula-local_rndc-key"; };
 	};
 
-	// Reverse zone
+	// configuracao do dns reverso da zona particula.local
 	zone "0.168.192.in-addr.arpa" {
         	type slave;
 	        file "/etc/bind/db.0.168.192.in-addr.arpa";
@@ -104,4 +115,5 @@ $ sudo vi /etc/bind/named.conf.local
 	        allow-transfer { key "ns-particula-local_rndc-key"; };
 	};
 
-$ sudo systemctl restart bind9.service
+# relendo os arquivos de configuracao do bind.
+$ sudo rndc reload
