@@ -1,6 +1,6 @@
 #: Title : dns forwarder
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Basic DNS server configuration
+#: Description : basic dns server configuration
 #: Options : Weight: 3
 
 Description: Candidates should be able to configure BIND to function as a 
@@ -39,14 +39,15 @@ $ sudo chown -R bind:bind /etc/bind
 $ sudo vi /etc/bind/named.conf.options
 	// foi criada a acl de nome "clients" como o objetivo 
 	// de restringir quais hosts podem fazer a requisicao
-	// de resolucao. Hosts fora desta estacao nao poderao
-	// fazer requisicao de resolucao.
+	// de resolucao. Hosts fora desta rede nao podem
+	// fazer requisicao de resolucao de nomes.
 	acl "clients" {
 		192.168.0.0/24;
 	};
 
 	options {
-        	// diretorio a onde estao armazenados os arquivos de configurcao
+        	// diretorio a onde estao armazenados os arquivos 
+		// de configurcao do bind e da zona.
         	directory "/etc/bind";
 
 		// se por acaso a resposta estiver no cache, o
@@ -59,24 +60,32 @@ $ sudo vi /etc/bind/named.conf.options
 		// fazer a requisicao de resolucao.
 		allow-query { clients; };
 
+		// o servidor ira executar somente o processo de
+		// consulta, nao sera responsavel por manter uma
+		// zona.
+		forward only;
+
 		// lista de servidores dns que serao utilizados
-		// para reponder a requisicao por acaso dos hosts.
+		// para reponder a requisicao por parte dos hosts
+		// presentes na rede definida na ACL.
 		forwarders {
 			8.8.8.8;
 			8.8.4.4;
 		};
 
-		// o servidor ira executar somente o processo de
-		// consulta, nao sera responsavel por manter uma
-		// zona.
-		forward only;
 };
 
 # checando os arquivos de configuracao
-$ sudo named-checkconf /etc/bind/named.conf
+$ sudo named-checkconf /etc/bind/named.conf.options
 
-# reinicializando o servico do bind9
-$ sudo systemctl restart bind9.service
+# utilizacao da ferramenta rndc para reler
+# as configuracoes feitas no arquivo de configuracao
+# do bind, named.conf.options.
+$ sudo rndc reload
+
+# comando utilizado para limpar o cache do servidor
+# de nome bind.
+$ sudo rndc flush
 
 # de todas as estacoes da rede
 $ sudo vi /etc/resolv.conf
@@ -88,9 +97,8 @@ $ sudo vi /etc/resolv.conf
 # TESTE
 #
 
-# (DNSCACHE)
-$ sudo netstat -nltup | grep :53
-$ dig kernel.org | grep time ; checar o tempo de resposta do dig
+# (DNSFORWARD)
+$ dig kernel.org | grep time
 
 # (ESTACAO)
-$ dig kernel.org | grep time ; checar o tempo de resposta do dig
+$ dig kernel.org | grep time
