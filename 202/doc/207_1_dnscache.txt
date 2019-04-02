@@ -1,6 +1,6 @@
-#: Title : DNS Cache
+#: Title : dns cache
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : Basic DNS server configuration
+#: Description : basic dns cache configuration
 #: Options : Weight: 3
 
 Description: Candidates should be able to configure BIND to function as a 
@@ -60,17 +60,26 @@ $ sudo vi /etc/bind/named.conf.options
 		allow-query-cache       { localhost; any; };
 	};
 
-# checando os arquivos de configuracao
-$ sudo named-checkconf /etc/bind/named.conf ; checando os arquivos de configuracao
+# checando os arquivos de configuracao.
+# o aplicativo named-checkconf checa somente a sintaxe do 
+# arquivo de configuracao do bind.
+$ sudo named-checkconf /etc/bind/named.conf
+
+#
+# RNDC
+#
 
 # reler o arquivo de configuracao do bind.
 $ sudo rndc reload
 
-# reler o arquivo de configuracao named.conf
+# reler o arquivo de configuracao named.conf.
 $ sudo rndc reconfig
 
-# reinicializar o servico atraves do systemctl
-$ sudo systemctl restart bind9.service
+# obter informacoes do servidor bind.
+$ sudo rndc status
+
+# limpar o cache do servidor bind.
+$ sudo rndc flush
 
 #
 # TESTE
@@ -78,7 +87,7 @@ $ sudo systemctl restart bind9.service
 
 # teste do cache executado no DNSCACHE
 $ sudo netstat -nltup | grep :53
-$ dig kernel.org | grep time ; checar o tempo de resposta do dig
+$ dig kernel.org | grep time
 
 # teste do cache executado na estacao
-$ dig kernel.org | grep time ; checar o tempo de resposta do dig
+$ dig kernel.org | grep time
