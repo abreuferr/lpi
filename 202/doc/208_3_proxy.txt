@@ -1,6 +1,6 @@
-#: Title : Implementing a proxy server
+#: Title : implementando um servidor proxy
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 208.3 Implementing a proxy server
+#: Description : implementando um servidor proxy
 #: Options : Weight: 2
 
 Description: Candidates should be able to install and configure a 
@@ -28,24 +28,25 @@ Terms and Utilities:
 # INSTALACAO
 #
 
-# instalacao do proxy Squid
-$ sudo apt-get install squid -y -d ; instalacao do proxy Squid
+# instalacao do proxy Squid.
+$ sudo apt-get install squid -y -d
 
-# criacao do diretorio de cache do squid
-$ sudo mkdir -p /var/cache/squid ; criacao do diretorio de cache do squid
+# criacao do diretorio de cache do squid.
+$ sudo mkdir -p /var/cache/squid
 
-# alterando permissao
-$ sudo chown -R proxy.proxy /var/cache/squid ; alterando permissao
+# alterando permissao.
+$ sudo chown -R proxy.proxy /var/cache/squid
 
 #
 # CONFIGURACAO BASICA
 #
 
-# copia de seguranca do arquivo de configuracao do squid
+# copia de seguranca do arquivo de configuracao do squid.
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP
 
-$ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
-	# o software squid ira utilizar a porta 3128 para trabalhar
+# configuracao basica do squid
+$ sudo vi /etc/squid/squid.conf
+	# o software squid ira utilizar a porta 3128 para trabalhar.
 	http_port 3128 transparent
 
 	# ACL - access control list
@@ -69,20 +70,20 @@ $ sudo vi /etc/squid/squid.conf ; configuracao basica do squid
 	acl CONNECT method CONNECT
 
 	# negar o acesso em portas que nao estejam registradas 
-	# nos comandos acima
+	# nos comandos acima.
 	http_access deny !Safe_ports
 	http_access deny CONNECT !SSL_ports
 
 	# protocolo HTTP liberado o acesso para as acl LOCALNET
-	# e LOCALHOST
+	# e LOCALHOST.
 	http_access allow localnet
 	http_access allow localhost
 
-	# o restante eh bloqueado
+	# o restante eh negado o acesso.
 	http_access deny all
 
 	# o diretorio a onde esta armazenado o cache do proxy
-	# estara responsavel pelo usuario PROXY
+	# estara responsavel pelo usuario PROXY.
 	cache_effective_user proxy
 
 	# caracteristicas do cache
