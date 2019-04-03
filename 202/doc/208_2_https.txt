@@ -1,6 +1,6 @@
-#: Title : Apache 2
+#: Title : Apache2 e HTTPS
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 208.2 Apache configuration for HTTPS
+#: Description : Apache configuration for HTTPS
 #: Options : Weight: 3
 
 Description: Candidates should be able to configure a web server to provide HTTPS.
@@ -22,6 +22,9 @@ Terms and Utilities:
 - SSLCACertificateFile, SSLCACertificatePath
 - SSLProtocol, SSLCipherSuite, ServerTokens, ServerSignature, TraceEnable
 
+# atualizacao do gnu/debian
+$ sudo apt-get update && sudo apt-get upgrade
+
 # instalacao do apache2 e do modulo ssl
 $ sudo apt-get install apache2 openssl
 
@@ -29,7 +32,7 @@ $ sudo apt-get install apache2 openssl
 $ sudo a2enmod ssl
 
 # ativar o modulo default-ssl
-$ sudo a2ensite default-ssl ; ativar o modulo default-ssl
+$ sudo a2ensite default-ssl
 
 # reinicializar o apache2
 $ sudo systemctl restart apache2
