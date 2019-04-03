@@ -23,26 +23,25 @@ Terms and Utilities:
 - PermitRootLogin, PubKeyAuthentication, AllowUsers, PasswordAuthentication, Protocol
 
 #
-# cliente
-#
-$ sudo apt-get install openssh-client ; instalacao do client na estacao
-
-$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" ; criando chaves de autenticacao
-
-$ ls -l /home/cosmo/.ssh ; chaves geradas
-	-rw------- 1 cosmo cosmo 1766 Jan 11 13:36 id_rsa
-	-rw-r--r-- 1 cosmo cosmo  403 Jan 11 13:36 id_rsa.pub
-
-$ ssh-copy-id <USERNAME@SERVER> ; copiando a chave publica para o servidor
-
-#
-# servidor
+# SERVER - INSTALACAO
 #
 
+# atualizacao do gnu/linux debian
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do opnssh
 $ sudo apt-get install openssh-server openss-client ; instalacao
 
-$ sudo cat /etc/ssh/sshd_config ; configuracao
-	Port 2222 # alterar a porta padrao de acesso
+#
+# SERVER - CONFIGURACAO - GERAL
+#
+
+# backup do arquivo de configuracao do ssh server
+$ sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.BKP
+
+# configuracao
+$ sudo vi /etc/ssh/sshd_config
+	Port 22 # porta de trabalho do servidor ssh
 	AllowUsers <USER> # limitar o acesso a determinados usuarios
 	AllowGroups <GROUP> # limitar o acesso a determinado grupo de usuario
 	DenyUsers <USER> # negar o acesso a determinados usuarios
@@ -54,4 +53,45 @@ $ sudo cat /etc/ssh/sshd_config ; configuracao
 	ClientAliveCountMax <NUM> # quantidade de mensagens enviadas pelo cliente
 	X11Forwarding <YES/NO> # permitir ou nao o redirecionamento do X11 para o cliente
 
-$ sudo systemctl restart sshd.service # reinicializar o servidor ssh
+#
+# SERVER - CONFIGURACAO - AUTENTICACAO VIA PAR DE CHAVES
+#
+
+# configuracao
+$ sudo vi /etc/ssh/sshd_config
+	# desabilita a autenticacao via senha.
+	PasswordAuthentication no
+
+	# desabilita o processo de challenge-response
+	# no processo de autenticacao.	
+	ChallengeResponseAuthentication no
+
+	# utiliza a tecnologia PAM para executar o processo
+	# de autenticacao.	
+	UsePAM yes
+
+# reinicializar o servidor ssh
+$ sudo systemctl restart sshd.service
+
+#
+# CLIENT
+#
+
+# instalacao do client na estacao
+$ sudo apt-get install openssh-client
+
+# criando chaves de autenticacao
+$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local"
+
+# criando a chave de autorizacao
+$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+
+# chaves geradas
+$ ls -l /home/cosmo/.ssh
+	# chave privada
+	-rw------- 1 cosmo cosmo 1766 Jan 11 13:36 id_rsa
+	# chave publica
+	-rw-r--r-- 1 cosmo cosmo  403 Jan 11 13:36 id_rsa.pub
+
+# copiando a chave publica para o servidor
+$ ssh-copy-id <USERNAME@SERVER>
