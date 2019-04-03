@@ -1,6 +1,6 @@
-#: Title : Nginx
+#: Title : nginx
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 208.4 Implementing Nginx as a web server and a reverse proxy
+#: Description : implementando um servidor web e proxy reverso com o nginx
 #: Options : Weight: 2
 
 Description: Candidates should be able to install and configure a reverse proxy 
@@ -16,27 +16,37 @@ Terms and Utilities:
 - nginx
 
 #
-# INICIO
+# INSTALCAO
 #
 
-$ sudo apt-get update ; atualizando o debian
-$ sudo apt-get upgrade ; atualizando o debian
+# atualizacao do gnu/linux debian
+$ sudo apt-get update
+$ sudo apt-get upgrade
 
-$ wget http://nginx.org/keys/nginx_signing.key ; obter a chave de criptografia
-$ sudo sudo apt-key add nginx_signing.key ; adicionar a chave de criptografia
-$ sudo vim /etc/apt/sources.list.d/nginx-stable.list ; adicionando o repositorio do nginx
+# obter a chave de criptografia do repositorio
+$ wget http://nginx.org/keys/nginx_signing.key
+
+# adicionar a chave de criptografia do repositorio no apt
+$ sudo sudo apt-key add nginx_signing.key
+
+# adicionando o repositorio do nginx ao apt
+$ sudo vim /etc/apt/sources.list.d/nginx-stable.list
 	deb http://nginx.org/packages/debian/ stretch nginx
 
-$ sudo apt-get update ; atualizacao do debian
-$ sudo apt-get install nginx -y -d ; instalacao do nginx
+# atualizacao do debian
+$ sudo apt-get update
 
-$ sudo systemctl start nginx ; inicializacao do servico nginx
-$ sudo systemctl enable nginx ; habilitar o nginx no boot
+# instalacao do nginx
+$ sudo apt-get install nginx -y -d
 
-$ sudo systemctl status nginx ; status do servico do nginx
+# inicializacao do servico nginx
+$ sudo systemctl start nginx
+
+# habilitar o nginx no boot
+$ sudo systemctl enable nginx
 
 #
-# CONFIGURACAO NGINX - BASICO
+# CONFIGURACAO
 #
 # o arquivo /etc/ngix/nginx.conf corresponde ao arquivo de
 # configuracao geral do nginx. qualquer tipo de alteracao
@@ -46,21 +56,37 @@ $ sudo systemctl status nginx ; status do servico do nginx
 $ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
 
 $ sudo vi /etc/nginx/nginx.conf
+	# usuario dono do nginx.
+	user www-data;
+	# numero de processos em execucao.
 	worker_processes auto;
+	# local do arquivo de pid.
+	pid /run/nginx.pid;
+	# arquivos de configuracao dos dominios virtuais.
+	include /etc/nginx/modules-enabled/*.conf;
 	http{
-	(...)
+		(...)
+		# nao exibe a versao do software nginx
+		server_tokens off;
 
-	# nao exibe a versao do software nginx
-	server_tokens off;
+		# arquivos de log nginx.`
+		access_log /var/log/nginx/access.log;
+        	error_log /var/log/nginx/error.log;
 
-	(...)
+		# configuracao dos virtual host.
+		include /etc/nginx/conf.d/*.conf;
+		include /etc/nginx/sites-enabled/*;
+		(...)
 	}
 
 #
-# VIRTUAL HOST - BASICO
+# VIRTUAL HOST
 #
 
-$ sudo mkdir -p /var/www/particula.local/html ; diretorio a onde sera armazenado o codigo do site
+# diretorio a onde sera armazenado o codigo do virtual host.
+$ sudo mkdir -p /var/www/particula.local/html
+
+# arquivo com a pagina indice do site.
 $ sudo vi /var/www/particula.local/html/index.html ; pagina para teste
 	<!DOCTYPE html>
 	<html>
@@ -73,7 +99,8 @@ $ sudo vi /var/www/particula.local/html/index.html ; pagina para teste
 		</body>
 	</html>
 
-$ sudo vi /etc/nginx/sites-available/particula.local ; arquivo de configuracao do site particula.local
+# arquivo de configuracao do dominio virtual particula.local.
+$ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# porta em que o nginx ira trabalhar, ipv4 e ipv6
 		listen 80;
@@ -101,12 +128,24 @@ $ sudo vi /etc/nginx/sites-available/particula.local ; arquivo de configuracao d
 		gzip_types    text/html text/plain text/css image/*;
 	}
 
-$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled/ ; ativando o dominio virtual
+# ativando o dominio virtual particula.local
+$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled/
 
-$ sudo nginx -t ; testar os arquivos de configuracao
+#
+# APLICATIVO NGINX
+#
 
-$ sudo systemctl restart nginx ; reinicializar o servico do nginx
-$ sudo nginx -s reload ; reler os arquivos de configuracao do nginx
+# testar os arquivos de configuracao.
+$ sudo nginx -t
+
+# reler os arquivos de configuracao do nginx.
+$ sudo nginx -s reload
+
+# para o servico do nginx.
+$ sudo nginx -s stop
+
+# para o servico do nginx sem desconectar as conexoes ativas.
+$ sudo nginx -s quit
 
 #
 # SSL
@@ -186,9 +225,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 # testar os arquivos de configuracao
 $ sudo nginx -t
 
-# reinicializar o servico do nginx
-$ sudo systemctl restart nginx
-
 # reler os arquivos de configuracao do nginx
 $ sudo nginx -s reload
 
@@ -197,16 +233,21 @@ $ sudo nginx -s reload
 # (servidor nginx - 192.168.0.9)
 #
 
-$ sudo mkdir -p /var/www/particula.local/cache ; diretorio a onde sera armazenado o cache
+# diretorio a onde sera armazenado o cache
+$ sudo mkdir -p /var/www/particula.local/cache
 
-$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP ; copia de seguranca
+# copia de seguranca
+$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
 
-$ sudo vi /etc/nginx/nginx.conf ; configuracao do cache
+# configuracao do cache
+$ sudo vi /etc/nginx/nginx.conf
 	http {
 		proxy_cache_path /var/www/particula.local/cache/ keys_zone=one:10m max_size=500m inactive=24h use_temp_path=off;
 	}
 
-$ sudo vi /etc/nginx/sites-available/particula.local ; configuracao do dominio particula.local
+# configuracao do dominio virtual particula.local
+# para trabalhar com proxy reverso
+$ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# geral
         	listen 80;
@@ -220,6 +261,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local ; configuracao do dominio p
 		# proxy reverso
 	        location / {
         	        proxy_pass_header Authorization;
+			# ip do servidor web.
 	                proxy_pass http://192.168.0.9;
         	        proxy_set_header Host $host;
                 	proxy_set_header X-Real-IP $remote_addr;
@@ -228,22 +270,25 @@ $ sudo vi /etc/nginx/sites-available/particula.local ; configuracao do dominio p
 	        }
 	}
 
+# ativando o arquivo de configuracao do dominio virtual particula.local.
 $ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
 
+# testando os arquivos de configuracao do nginx.
 $ sudo nginx -t
 
-$ sudo systemctl restart nginx ; reinicializa o servico de nginx
-$ sudo nginx -s reload ; reler os arquivos de configuracao do nginx
+# reler os arquivos de configuracao do nginx
+$ sudo nginx -s reload
 
 #
 # PROXY REVERSO (COM SSL)
 # (servidor nginx - 192.168.0.9)
 #
 
+# arquivo de configuracao do dominio virtual particula.local.
 $ sudo vi /etc/nginx/sites-available/particula.local
 	# http
 	server {
-		$ geral
+		# o nginx fica escutando a porta 80, ipv4/6
 		listen 80;
 		listen [::]:80;
 
@@ -257,13 +302,15 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		# geral ssl
 	        listen 443 ssl http2;
 		listen [::]:443 ssl http2;
+
+		# nome do dominio virtual.
 	        server_name particula.local www.particula.local;
 
 	        # log files
 	        access_log  /var/log/nginx/particula.local_access.log;
         	error_log   /var/log/nginx/particula.local_error.lg;
 
-		# ssl
+		# trabalhando com o SSL
 		ssl on;
 		ssl_certificate /etc/nginx/ssl/cert.crt;
 		ssl_certificate_key /etc/nginx/ssl/cert.key;
@@ -280,14 +327,18 @@ $ sudo vi /etc/nginx/sites-available/particula.local
                 	proxy_set_header X-Real-IP $remote_addr;
 	                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         	        proxy_set_header X-Forwarded-Proto $scheme;
+
+			# webserver nginx
 	                proxy_pass http://192.168.0.9;
 			proxy_redirect https://192.168.0.9;
 	        }
 	}
 
-$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled ; ativa o site
+# ativando o arquivo de configuracao do dominio virtual particula.local.
+$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
 
-$ sudo nginx -t ; testa o arquivo de configuracao
+# comando utilizado para testar o arquivo de configuracao do ngin
+$ sudo nginx -t
 
-$ sudo systemctl restart nginx ; reinicializa o servico de nginx
-$ sudo nginx -s reload ; reler os arquivos de configuracao do nginx
+# reler os arquivos de configuracao do nginx
+$ sudo nginx -s reload
