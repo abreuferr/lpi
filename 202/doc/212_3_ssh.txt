@@ -1,18 +1,19 @@
 #: Title : ssh
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
 #: Description : configuracao do servidor ssh e politicas de seguranca
-#: Options : None
+#: Options : Weight 4
 
 Description: Candidates should be able to configure and secure an SSH daemon. 
 This objective includes managing keys and configuring SSH for users. Candidates 
-should also be able to forward an application protocol over SSH and manage the SSH login.
+should also be able to forward an application protocol over SSH and manage the 
+SSH login.
 
 Key Knowledge Areas:
 - OpenSSH configuration files, tools and utilities
 - Login restrictions for the superuser and the normal users
 - Managing and using server and client keys to login with and without password
-- Usage of multiple connections from multiple hosts to guard against loss of connection 
-  to remote host following configuration changes
+- Usage of multiple connections from multiple hosts to guard against loss of 
+  connection to remote host following configuration changes.
 
 Terms and Utilities:
 - ssh
@@ -41,17 +42,28 @@ $ sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.BKP
 
 # configuracao
 $ sudo vi /etc/ssh/sshd_config
-	Port 22 # porta de trabalho do servidor ssh
-	AllowUsers <USER> # limitar o acesso a determinados usuarios
-	AllowGroups <GROUP> # limitar o acesso a determinado grupo de usuario
-	DenyUsers <USER> # negar o acesso a determinados usuarios
-	DenyGroups <GROUP> # negar o acesso a um determinado grupo de usuarios
-	PermitRootLogin <NO/YES> # permitir ou nao o login do usuario root
-	Protocol 2 # especifica qual o protocolo de seguranca a ser utilizado
-	PermitEmptyPasswords <YES/NO> # permitir ou nao a utilizacao de senhas em branco
-	ClientAliveInterval <NUM> # depois de X segundos sem nenhuma atividade, o usuario eh deslogado
-	ClientAliveCountMax <NUM> # quantidade de mensagens enviadas pelo cliente
-	X11Forwarding <YES/NO> # permitir ou nao o redirecionamento do X11 para o cliente
+	# porta de trabalho do servidor ssh
+	Port 22
+	# limitar o acesso a determinados usuarios
+	AllowUsers <USER>
+	# limitar o acesso a determinado grupo de usuario
+	AllowGroups <GROUP>
+	# negar o acesso a determinados usuarios
+	DenyUsers <USER>
+	# negar o acesso a um determinado grupo de usuarios
+	DenyGroups <GROUP>
+	# permitir ou nao o login do usuario root
+	PermitRootLogin <NO/YES>
+	# especifica qual o protocolo de seguranca a ser utilizado
+	Protocol 2
+	# permitir ou nao a utilizacao de senhas em branco
+	PermitEmptyPasswords <YES/NO>
+	# depois de X segundos sem nenhuma atividade, o usuario eh deslogado
+	ClientAliveInterval <NUM>
+	# quantidade de mensagens enviadas pelo cliente
+	ClientAliveCountMax <NUM>
+	# permitir ou nao o redirecionamento do X11 para o cliente
+	X11Forwarding <YES/NO>
 
 #
 # SERVER - CONFIGURACAO - AUTENTICACAO VIA PAR DE CHAVES
@@ -74,7 +86,7 @@ $ sudo vi /etc/ssh/sshd_config
 $ sudo systemctl restart sshd.service
 
 #
-# CLIENT
+# CLIENT - CHAVE DE AUTENTICACAO
 #
 
 # instalacao do client na estacao
@@ -93,5 +105,54 @@ $ ls -l /home/cosmo/.ssh
 	# chave publica
 	-rw-r--r-- 1 cosmo cosmo  403 Jan 11 13:36 id_rsa.pub
 
-# copiando a chave publica para o servidor
+# copiando a chave publica para o servidor de forma segura.
 $ ssh-copy-id <USERNAME@SERVER>
+
+#
+# CLIENT - SSH
+#
+$ ssh [OPCAP] [USUARIO]@[SERVIDOR]
+	-p [PORTA] - especificar a porta que o servidor trabalha.
+	-l [USUARIO] - especifica o usuario de logon.
+	-i [CHAVE_PUBLICA] - especifica o arquivo com a chave publica.
+
+#
+# CLIENT - SSO (Single Sign On)
+#
+
+# inicializar o ssh-agent.
+$ eval `ssh-agent`
+
+# adicionar a identificacao.
+$ ssh-add
+
+# confirmar a adicao da identificacao.
+$ ssh-add -l
+
+# acessar o servidor ssh sem a necessidade de inserir
+# a passphrase
+$ ssh <USER>@<SERVIDOR_SSH>
+
+# desativaro ssh-agent
+$ eval `ssh-agent -k`
+
+#
+# CLIENT - SCP
+#
+# aplicativo utilizado para copiar arquivos de forma segura.
+
+# local para remoto.
+$ scp [OPCAO] /DIR/ARQUIVO [USUARIO]@[HOST_DESTINO:]/DIR_DESTINO
+
+# remoto para remoto
+$ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO [USUARIO]@[HOST_DESTINO:]/DIR_DESTINO
+
+# remoto para local
+$ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO /DIR_DESTINO
+
+	-P [PORTA] - especifica a porta do servidor ssh remoto.
+	-p - preserva a data e propriedades do arquivo.
+	-q - opcao utilizada para suprimir a barra de progresso e mensagem de erro.
+	-C - forca a utilizacao de compressao dos dados durante a copia.
+	-r - recursividade
+
