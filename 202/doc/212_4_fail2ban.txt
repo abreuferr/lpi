@@ -1,0 +1,75 @@
+#: Title : fail2ban
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : instalacao e configuracao do aplicativo fail2ban
+#: Options : Weight 3
+
+Description: Candidates should be able to receive security alerts 
+from various sources, install, configure and run intrusion detection 
+systems and apply security patches and bugfixes.
+
+Key Knowledge Areas:
+- Tools and utilities to scan and test ports on a server
+- Locations and organizations that report security alerts as Bugtraq, 
+  CERT or other sources.
+- Tools and utilities to implement an intrusion detection system (IDS)
+- Awareness of OpenVAS and Snort
+
+Terms and Utilities:
+- telnet
+- nmap
+- fail2ban
+- nc
+- iptables
+
+#
+# TEORIA
+#
+
+# fail2ban eh um framework desenvolvido em Python que monitora os logs, 
+# verificando a tentativas de conexao sem sucesso, bloqueando o IP suspeito 
+# depois de um determinado numero de tentativas. Ele pode ser configurado 
+# para monitorar os serviços ssh, pam, xinetd, apache, vsftpd, proftpd, 
+# wuftpd, postfix, couriersmtp, entre outros servicos, podendo adicionar 
+# uma regra no firewall para bloquear um possivel ataque, o que eh muito 
+# util em situacoes onde o administrador de sistemas tem que lidar com 
+# milhares de conexoes.
+#
+# no texto abaixo, o software fail2ban sera instalado no gateway da rede.
+
+#
+# INSTALACAO
+#
+
+# atualizacao do gnu/linux debian.
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do fail2ban
+$ sudo apt-get install fail2ban -y -d
+
+#
+# CONFIGURACAO
+#
+
+# arquivo de configuracao do gerenciamento do
+# daemon, log, socket e pid do fail2ban.
+$ /etc/fail2ban/fail2ban.conf
+
+# arquivo de configuracao do fail2ban priopriamente
+# dito.
+$ /etc/fail2ban/jail.conf
+	[sshd-iptables]
+	enabled = true
+	filter = sshd
+	action = iptables[name=SSH, port=ssh, protocol=tcp]
+	sendmail-whois[name=SSH, dest=root]
+	logpath = /var/log/secure
+	maxretry = 5
+
+	[vsftpd-tcpwrapper]
+	enabled = true
+	filter = vsftpd
+	action = hostsdeny[file=/etc/hosts.deny]
+	sendmail-whois[name=VSFTPD, dest=root]
+	logpath = /var/log/vsftpd.log
+	maxretry = 5
+	bantime = 1800
