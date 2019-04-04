@@ -1,6 +1,6 @@
-#: Title : Security tasks
+#: Title : snort
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 212.4 Security tasks
+#: Description : snort
 #: Options : Weight: 3
 
 Description: Candidates should be able to receive security alerts from various sources, install, 
