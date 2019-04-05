@@ -1,6 +1,6 @@
 #: Title : openldap server configuration
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 210.4 openldap server configuration
+#: Description : openldap server configuration
 #: Options : Weight: 4
 
 Description: Candidates should be able to configure a 
@@ -57,7 +57,7 @@ $ sudo dpkg-reconfigure slapd
 	particula-company
 	<senha>
 	<senha>
-	HDB
+	MDB
 	Yes
 	Yes
 
