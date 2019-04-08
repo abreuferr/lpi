@@ -1,6 +1,6 @@
 #: Title : Managing Remote E-Mail Delivery 
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 211.3 Managing Remote E-Mail Delivery
+#: Description : Managing Remote E-Mail Delivery
 #: Options : Weight: 2
 
 Description: Candidates should be able to install and 
