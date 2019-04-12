@@ -1,0 +1,170 @@
+#: Title : SAMBA Server Configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : samba server configuration
+#: Options : Weight 5
+
+Description: Candidates should be able to set up a Samba server 
+for various clients. This objective includes setting up Samba 
+as a standalone server as well as integrating Samba as a member 
+in an Active Directory. Furthermore, the configuration of simple 
+CIFS and printer shares is covered. Also covered is a configuring 
+a Linux client to use a Samba server. Troubleshooting installations 
+is also tested.
+
+Key Knowledge Areas:
+- Samba 4 documentation
+- Samba 4 configuration files
+- Samba 4 tools and utilities and daemons
+- Mounting CIFS shares on Linux
+- Mapping Windows user names to Linux user names
+- User-Level, Share-Level and AD security
+
+Terms and Utilities:
+- smbd, nmbd, winbindd
+- smbcontrol, smbstatus, testparm, smbpasswd, nmblookup
+- samba-tool
+- net
+- smbclient
+- mount.cifs
+- /etc/samba/
+- /var/log/samba/
+
+#
+# INSTALACAO
+#
+
+# atualizacao do gnu/linux debian
+$ sudo apt-get update
+$ sudo apt-get upgrade
+
+# instalacao do samba
+$ sudo apt-get install samba samba-common -y -d
+
+# durante a instalacao do samba, eh criado o grupo
+# SAMBASHARE que sera utilizado mais para a frente.
+
+# status dos servicos do samba
+$ sudo systemctl status smbd
+$ sudo systemctl status nmbd
+
+#
+# USUARIO
+#
+# em uma primeira etapara, serao criados alguns usuarios 
+# para os mesmos possam acessar os arquivos compartilhados.
+# configuracao mais simples do samba, compartilhar arquivo.
+#
+# eh interessante colocar a pasta de compartilhamento dentro
+# de uma particao que esteja sendo gerenciada pelo LVM. Desta
+# forma, eh possivel redimensionar o tamanho da pasta de acordo
+# com as necessidades.
+
+# adicionar usuario
+# sudo useradd [USER] -m -G [GROUP]
+$ sudo useradd cosmo -m -G sambashare
+$ sudo useradd caio -m -G sambashare
+
+# cadastrar a senha o usuario adicionado
+# no comando anterior.
+# sudo smbpasswd -a [USER]
+$ sudo smbpasswd -a cosmo
+$ sudo smbpasswd -a caio
+
+#
+# PASTAS COMPARTILHADA
+#
+# pastas que serao utilizadas para compartilhar
+# diretorios no servidor samba.
+
+# o diretorio ALLUSERS sera acessado somente por
+# usuarios membros do grupo SAMBASHARE.
+$ sudo mkdir -p /home/samba/allusers
+$ sudo chown -R root:sambashare /home/samba/allusers/
+$ sudo chmod -R 0770 /home/samba/allusers/
+
+# o diretorio ANONYMOUS sera acessado por QUALQUER
+# usuario da rede.
+$ sudo mkdir -p /home/samba/anonymous
+$ sudo chown -R nobody:nogroup /home/samba/anonymous/
+$ sudo chmod -R 0775 /home/samba/anonymous/
+
+#
+# FILE SHARE - SERVER
+#
+
+# copia de seguranca do arquivo de configuracao
+$ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bkp
+
+# editando o arquivo de configuracao do samba
+$ sudo vi /etc/samba/smb.conf
+	[global]
+	workgroup = WORKGROUP
+	server string = Samba Server %v
+	netbios name = debian
+	security = user
+
+	# log
+	syslog = 0
+	log file = /var/log/samba/log.%m
+
+	# nesse compartilhamento, somente os membros
+	# do grupo SAMBASHARE terao o acesso a pasta
+	# compartilhada. Sera necessario inserir 
+	# usuario e senha.
+	[allusers]
+	comment = All Users
+	path = /home/shares/allusers
+	valid users = @sambashare
+	force group = sambashare
+	create mask = 0660
+	directory mask = 0771
+	writable = yes
+	browsable = yes
+	guest ok = no
+
+	# nesse compartilhamento, o acesso a pasta
+	# pode ser acessado por qualquer usuario
+	# que estao na rede.
+	[anonymous]
+	path = /home/samba/anonymous
+	force user = nobody
+	create mask = 0660
+	directory mask = 0771
+	browsable =yes
+	writable = yes
+	guest ok = yes
+	read only = no
+
+# aplicativo utilizado para testar os parametros e verificar se 
+# existe algum problema na sintaxe do arquivo de configuracao
+$ sudo testparm
+
+# reinicializar os servicos do samba
+$ sudo systemctl restart nmbd.service
+$ sudo systemctl restart smbd.service
+
+#
+# FILE SHARE - CLIENT
+#
+
+# instalacao do cliente samba
+$ sudo apt-get install smbclient cifs-utils -y -d
+
+# compartilhamento
+# de forma interativa
+$ smbclient //[IP_SERVER]/[USER_FOLDER] -U [USER]
+# acesso de forma "permanente"
+$ sudo mount -o username=[USER] //[IP_SERVER]/[USER_FOLDER] /[DIR]/[USER]
+
+#
+# INFORMACAO
+#
+
+# SERVER
+# aplicativo utilizado para exibir informacoes sobre 
+# as conexoes entre as estacoes e o servidor samba
+$ sudo smbstatus
+
+# CLIENT
+# exibir informacoes das conexoes ativas
+$ sudo smbclient -L [IP_SERVER] -N
