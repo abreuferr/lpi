@@ -98,10 +98,18 @@ $ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bkp
 # editando o arquivo de configuracao do samba
 $ sudo vi /etc/samba/smb.conf
 	[global]
+	# Samba joins the WORKGROUP workgroup
 	workgroup = WORKGROUP
+
+	# Describe the server to the clients by using a hostname
 	server string = Samba Server %v
 	netbios name = debian
+	
+	# Using "User Level Security"
 	security = user
+
+	# Only allow connections from machines on our LAN
+	hosts allow = 127.0.0.0/8 192.168.0.0/24
 
 	# log
 	syslog = 0
