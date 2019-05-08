@@ -22,6 +22,24 @@ The following is a partial list of the used files, terms and utilities:
 - dig
 
 #
+# TEORIA
+#
+
+# o servidor de dns do tipo caching eh a mais simples implementacao
+# de um servidor de dns.
+#
+# o servidor do tipo dns caching-only resolve nomes, o qual a resposta
+# eh enviada para o cliente e armazenada localmente para futuras requisicoes.
+#
+# o dns caching-only nao gerencia nenhuma zona.
+#
+# o servidor dns caching-only eh utilizado para diminuir a latencia na
+# resolucao de um nome de dominio visto que as resolucoes anteriores foram 
+# armazenadas localmente em cache.
+#
+# o caching-only tambem diminui o trafego na rede interna.
+
+#
 # INSTALACAO
 #
 
@@ -40,6 +58,8 @@ $ sudo chown -R bind:bind /etc/bind
 
 # configuracao geral do bind
 $ sudo vi /etc/bind/named.conf.options
+	// a diretiva OPTIONS tem por objetivo a de configurar opcoes
+	// e padroes de configuracao de servidores de nomes globais.
 	options {
 		// indicando o diretorio de trabalho do bind.
 		// diretorio a onde sao armazenados os arquivos
@@ -53,32 +73,39 @@ $ sudo vi /etc/bind/named.conf.options
 		// o bind vai ficar escutando a porta 53.
 		listen-on port 53 { 127.0.0.1; any; };
 
-		// restricao dos hosts que podem fazer requisicao.		
+		// especifica quais hosts que podem fazer requisicao.
+		// de resolucao de nome.		
 		allow-query     { localhost; any; };
 
-		// restringir o acesso ao cache do bind.
+		// especifica quais hosts podem ter o acesso ao cache 
+		/ do bind.
 		allow-query-cache       { localhost; any; };
 	};
 
-# checando os arquivos de configuracao.
-# o aplicativo named-checkconf checa somente a sintaxe do 
-# arquivo de configuracao do bind.
+# o aplicativo named-checkconf checa a sintaxe do 
+# arquivo de configuracao do bind, named.conf.
+#
 $ sudo named-checkconf /etc/bind/named.conf
 
 #
 # RNDC
 #
 
-# reler o arquivo de configuracao do bind.
+# reler os arquivos de configuracao do bind
+# sem interromper o servico.
+#
 $ sudo rndc reload
 
 # reler o arquivo de configuracao named.conf.
+#
 $ sudo rndc reconfig
 
 # obter informacoes do servidor bind.
+#
 $ sudo rndc status
 
 # limpar o cache do servidor bind.
+#
 $ sudo rndc flush
 
 #
