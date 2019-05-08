@@ -73,7 +73,7 @@ $ sudo vi /etc/bind/named.conf.options
 		// o bind vai ficar escutando a porta 53.
 		listen-on port 53 { 127.0.0.1; any; };
 
-		// especifica quais hosts que podem fazer requisicao.
+		// especifica quais hosts que podem fazer requisicao
 		// de resolucao de nome.		
 		allow-query     { localhost; any; };
 
