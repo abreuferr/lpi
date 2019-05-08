@@ -78,14 +78,23 @@ $ sudo vi /etc/bind/named.conf.options
 		// dominio.
 		allow-query { clients; };
 
-		// o servidor do tipo FORWARDER executa somente o 
+		// - o servidor do tipo FORWARDER executa somente o 
 		// processo de consulta, ele nao eh responsavel por
 		// manter uma zona.
+		// - ONLY limita as consultas a somente os
+		// servidores que estao cadastrados na opcao
+		// FORWARDERS, no exemplo abaixo, 8.8.8.8 e 4.4.4.4
+		// - FIRST - primeira requisicao eh enviada para um
+		// servidor FORWARDERS. A proxima para o outro servidor.
+		// FORWARDERS.
 		forward only;
 
-		// lista de servidores dns que serao utilizados
+		// - lista de servidores dns que serao utilizados
 		// para reponder a requisicao por parte dos hosts
 		// presentes na rede definida na ACL.
+		// - primeiro eh consultado no cache local, se por
+		// acaso nao for encontrado a resposta, sera encaminhado
+		// para os encaminhadores.
 		forwarders {
 			8.8.8.8;
 			8.8.4.4;
@@ -94,6 +103,10 @@ $ sudo vi /etc/bind/named.conf.options
 };
 
 # checando os arquivos de configuracao
+# named-checkconf [OPCAO] [ARQUIVO]
+#	-p - exibe o conteudo o darquivo named.conf
+#	-x - semelhante a opcao -p mas omite os dados secretos.
+#	-z - executa o teste em todos os arquivos de configuracao.
 $ sudo named-checkconf /etc/bind/named.conf.options
 
 # utilizacao da ferramenta rndc para reler
