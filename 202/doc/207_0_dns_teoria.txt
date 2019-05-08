@@ -1,0 +1,132 @@
+#: Title : teoria de dns
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : teoria de dns
+#: Options : texto para estudo
+
+# dns - domain name system.
+
+# traducao do dominio em IP e vice-versa (resolucao reversa de nome)
+
+# trabalha com um banco de dados distribuido, arquitetura descentralizada.
+
+# root domain 
+# 	- a raiz da arvore eh chamada de "." (root), e abaixo 
+#	dele se encontram os
+# 	- dominios de primeiro nivel (first level).
+#	- dominio de primeiro nivel - br, us, uk.
+#	- root server/hint server
+#	- os 13 root server sao responsaveis pelos root/hint servers.
+#
+# Top Level Domain (TLD)
+#	- o TLD eh o topo da hierarquia em termos de domain name. 
+#	- exemplos de TLD - edu, com, br, uk.
+#
+# First Level Domain 
+#	- mit, sun, google
+#
+# Subdomains
+# 	- sao subdominios de um domínio, como por exemplo, 
+#	SUPORTE.ubuntu.com
+
+# Fully Qualified Domain Name (FQDN) - www.particula.local
+# 	www.particula.local - resolucao de nome - 192.168.0.5/0.6
+
+# taxonomia de servidores de nome
+#
+# 	autoritativo 
+#	- representante oficial de uma zona.
+#
+# 	master 
+#	- servidor principal de uma zona.
+#
+# 	slave 
+#	- servidor secundario/backup de um servidor master.
+#	- os dados do primario sao transferidos para o secundario.
+#
+# 	caching 
+#	- servidor dns que armazena as consultas anteriores cujo
+#	objetivo eh o de agilizar futuras requisicoes por parte das
+#	estacoes.
+#	- requisita informacoes do master ou slave e armazena o
+#	resultado localmente para armazenar o resultado localmente
+# 	para agilizar futuras requisicoes.
+#
+# 	encaminhador 
+#	- servidor que executa consultas em nome de outro servidor.
+#
+#	recursivo 
+#	- consulta em seu nome ate retornar uma resposta ou erro.
+#	- ao receber requisicoes de resolucao de nomes, faz
+#	requisicao para os servidores autoritativo e conforme
+#	a resposta, realiza a requisicao para outros servidore
+#	autoritativos ate obtera resposta satisfatoria.
+#	- retorna somente respostas reais ou mensagens de erro.
+#	- retorna somente respostas reais ou mensagens de erro.
+#
+#	nao-recursivo 
+#	- prefere-se a um outro servidor caso ele nao consiga responder.
+#	- se tiver a resposta a uma consulta colocada anteriormente
+#	em cache ou for autorizado para o dominio ao qual pertence a 
+#	consulta, ele fornece uma reposta apropriada. Caso contrario, 
+#	ele indica um servidor que possa ter a resposta.
+#
+#	caching dns server
+#	- esse tipo de servidor tambem eh conhecido como "resolver" porque
+#	ele lida com consultas recursivas e salva localmente o resultado
+#	para futuras requisicoes.
+#
+#	forwarding 
+#	- caching server e transfere as requisicoes para outros servidores.
+#	- muito parecido com o "caching dns server" por manter localmente os
+#	resultados das requisicoes. Entretanto, ele não faz nenhuma das
+#	requisicoes em si, ele delega para outro servidor o processo de
+#	resolucao e recebe a resposta que ira encaminhar para o cliente.
+#	- um tipo de servidor que somente faz requisicao de resolucao e
+#	salva o resultado localmente (cache).
+
+# cada zona sempre possui um servidor de nome master.
+#
+# um servidor do tipo slave sempre obtem os dados de configuracao 
+# de uma zona atraves da operacao de "transferencia de zona",
+# operacao que consiste na transferencia dos aquivos de confi_
+# guracao do servidor master para os servidores slave.
+#
+# 01 servidor master / N servidor slave.
+
+# caracteristicas do DNS.
+#	- arquitetura hierarquica
+#	- sistema descentralizado e distribuido do DNS.
+
+# servidor autoritativo
+#	- ao receber requisicoes de resolucao de nome, responde
+#	um endereco caso possua, uma referencia caso conheca o 
+#	caminho da resolucao ou uma negacao caso nao conheca.
+
+# resolver/solucionador
+#	- resolver eh um programa ou rotina de bibliotecas
+#	que executa uma requisicao/query, como por exemplo,
+#	a traducao de um endereco IP  de um dominio, e obtem
+#	o resultado da requisicao/query.
+#	- o resolver tambem pode ser o cliente DNS.
+
+# o dns eh um sistema do tipo cliente/servidor. O lado do servdor
+# tem por incumbencia a de responder a consulta tanto de cliente
+# internos como de clientes externos e de outros servidores na
+# internet. Todos os hosts devem ser clientes dns.
+
+# name server
+#	- computador responsavel por traduzir nome em IP e o
+#	inveso.
+#
+#	- se por acaso o servidor for responsavel pela zona, ele
+#	ira responder pelas requisicoes. Ja se o servidor nao for
+#	responsavel pela zona, o servidor de nome ira delegar para
+#	outro servidor. Nao sei a resposta, repasso a requisicao 
+#	para outro servidor.
+#
+#	- o servidor pode ser autoritativo, servidor que responde
+#	por uma zona.
+
+# zone file
+#	arquivo que contem informacoes sobre a relacao entre domain 
+#	name e endereco IP. Arquivo de configuracao da zona.
