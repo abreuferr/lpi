@@ -54,6 +54,7 @@ $ sudo vi /etc/bind/named.conf.options
         	directory "/etc/bind";
 
         	// quais os hosts ou rede podem fazer requisicao
+		// de resolucao de um nome
         	allow-query { goodclients; };
 	};
 
