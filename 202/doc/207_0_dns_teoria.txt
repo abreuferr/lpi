@@ -130,3 +130,82 @@
 # zone file
 #	arquivo que contem informacoes sobre a relacao entre domain 
 #	name e endereco IP. Arquivo de configuracao da zona.
+
+#
+# NAMED.CONF
+#
+
+# o arquivo namd.conf possui as seguintes opcoes:
+# - comment
+#	- adicionar comentario no arquivo named.conf
+#	- // ou /*[TEXTO]*/ ou #
+#
+# - include
+#	- possibilidade de incluir configuracao adicional que esta
+#	armazenado em outro arquivo (include "/etc/bind/named.conf.local)
+#	- para subdividir ou organizar uma configuracao grande, eh possivel
+#	colocar diferentes trechos de configuracao em varios arquivos.
+#	- include ˜caminho";
+#
+# - options
+#	- possibilidade de configurar opcoes e padroes de configuracao de 
+#	servidores de nomes globais.
+#
+# - server
+#	- especifica opcoes por servidor
+#
+# - key
+#	- define informacoes de autenticacao
+#
+# - acl
+#	- define lista de controle de acesso
+#
+# - zone
+#	- define uma zona de registros. 
+#	- configuracao da zona
+#
+# - logging
+#	- diretivas que define o log do bind
+#	- file - o nome do arquvo de log
+#	- severity - severidade das informacoes
+#		(critical, error, warning, notice, info, debug)
+
+#
+# NAMED.CONF - OPTIONS
+#
+#
+# - version 
+#	- ocultar definir a versao do bind.
+#	- [none ou "string"] - ocultar definir a versao do bind.
+#
+# - directory
+#	- especifica o diretorio de trabalho do bind e arquivos de
+#	configuracao da zona.
+#	- directory = "/ec/bind";
+#
+# - notify
+#	- o servidor master notifica ou nao o servidor slave de que
+#	 houve algum tipo de alteracao na configuracao do master.
+#	- notify [yes/no];
+# - also-notify
+#	- especifica os IPs dos servidores que serao notificados e 
+#	nao sao servidores NS.
+#	- also-notify [IP_ADDRESS]
+#
+# - recursion
+#	- especifica se o named consulta outros servidores de nome
+#	em nome do cliente.
+#	- recursion = [yes/no]
+# - allow-recursion
+#	- lista de endereco que irao responder a recursao.
+#	- especifica quais hosts ou rede que podem consultar o servidor
+#	para executar recursividade.
+#	- allow-recursion = [IP_ADDRESS];
+#
+# - listen-on
+#	- especificaas portas e interfaces de rede nas quais o processo 
+#	named fica na escuta esperando resposta.
+# 	- listen-on [PORTA] [IP_ADDRESS];
+# - query-source
+#	- especifica a interface e porta e porta que o named utiliza
+#	para consultar outros servidores de nomes. Default porta 53.
