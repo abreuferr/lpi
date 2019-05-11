@@ -53,29 +53,32 @@ $ sudo vi /etc/bind/named.conf.options
 		// configuracao da zona particula.local
         	directory "/etc/bind";
 
-        	// quais os hosts ou rede podem fazer requisicao
+        	// quais os hosts ou rede que podem fazer requisicao
 		// de resolucao de um nome
         	allow-query { goodclients; };
 	};
 
 # arquivo que contem as entradas das zonas que
 # o bind ira gerenciar.
+#
 $ sudo vi /etc/bind/named.conf.local
 	// configuracao da zona particula.local
 	zone "particula.local" {
 		// servidor do tipo master
+		// existem servidores do tipo MASTER, SLAVE
+		// HINT e FORWARD.
 	        type master;
 
 		// arquivo de configuracao da zona particula.local
 	        file "db.particula.local";
 
 		// os dados da configuracao do servidor master serao
-		//transferidos para o servidor slave. essa transferencia
+		// transferidos para o servidor slave. essa transferencia
 		// se chama de transferencia de zona.	
 	        allow-transfer { 192.168.0.6; };
 
 		// o servidor master ira notificar o servidor slave de
-		// que houve uma alteracao na confiuracao da zona.
+		// que houve uma alteracao na configuracao da zona.
     		notify yes;
 	};
 
@@ -84,6 +87,8 @@ $ sudo vi /etc/bind/named.conf.local
 	// arquivo de dns reverso.
 	zone "0.168.192.in-addr.arpa" {
 		// servidor do tipo master.
+		// existem servidores do tipo MASTER, SLAVE
+		// HINT e FORWARD.
 	        type master;
 
 		// arquivo de configuracao da zona particula.local
@@ -98,18 +103,29 @@ $ sudo vi /etc/bind/named.conf.local
 // Hostname > IP.
 $ sudo vi /etc/bind/db.particula.local
 	; Start of Authority (SOA) record
-	$TTL 604800`
+	$TTL 604800
+	// nome do servidor - ns1.particula.local
+	// email do admin. root@particula.local
 	@ IN SOA ns1.particula.local. root.particula.local. (
-		// numero de serie.
+		// determina um numero serial de identificacao
+		// da zona.
+		// pode ser qualquer numero, mas por padrao 
+		// utiliza-se a data de criacao da zona e um serial.
+		// a cada nova alteracao, o serial deve ser alterado
+		// para um valor maior.
 		2010101301;	Serial
+
 		// frequencia com que o servidor slave checa a
 		// procura de alteracao.
 		28800;		Refresh
+
 		// em caso de falha, tempo para nova tentativa.
 		3600;		Retry
+
 		// tempo em que a informacao sobre a zona fica
 		// invalida.
 		604800;		Expire
+
 		// tempo de vida.
 		3600 );		Negative Cache TTL
 
