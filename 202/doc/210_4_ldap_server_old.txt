@@ -28,12 +28,19 @@ Terms and Utilities:
 - loglevel
 
 #
-# BASICO
+# PS
+#
+# foi utilizado a versao 8.04 da distribuicao Ubuntu
+# pois a LPIC 202 se utiliza de uma versao antiga do
+# OPENLDAP, principalmente em relacao ao arquivo de
+# configuracao do OPENLDAP.
+
+#
+# INSTALACAO
 #
 
 # atualizacao do debian
-$ sudo apt-get update
-$ sudo apt-get upgrade
+$ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do servidor openldap
 $ sudo apt-get install slapd ldap-utils ldapscripts -y -d
