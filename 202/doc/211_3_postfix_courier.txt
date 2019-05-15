@@ -1,0 +1,104 @@
+#: Title : E-Mail Services
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Using e-mail servers
+#: Options : Weight: 2
+
+Description: Candidates should be able to install and 
+configure POP and IMAP daemons.
+
+Key Knowledge Areas:
+- Dovecot IMAP and POP3 configuration and administration
+- Basic TLS configuration for Dovecot
+- Awareness of Courier
+
+Terms and Utilities:
+- /etc/dovecot/
+- dovecot.conf
+- doveconf
+- doveadm
+
+#
+# ATUALIZACAO DA DISTRIBUICAO
+#
+
+# atualizacao do gnu/linux debian
+$ sudo apt-get update
+$ sudo apt-get upgrade -y -d
+
+#
+# POSTFIX
+#
+
+# instalacao do postfix
+$ sudo apt-get install postfix mailutils telnet -y -d
+
+# reconfigurando o postfix
+$ sudo dpkg-reconfigure postfix
+	General type of mail configuration? - internet site
+	System mail name - email.particula.local
+	Root and postmaster mail recipient - cosmo
+	Other destinations to accept mail for - $myhostname, email.particula.local, localhost.particula.local, , localhost
+	Force synchronous updates on mail queue? - <No>
+	Local networks - 127.0.0.0/8
+	Mailbox size limit - 0
+	Local address extension character - +
+	Internet protocols to use - all
+
+# configuracao Maildir
+$ sudo postconf -e 'home_mailbox = Maildir/'
+
+# configuracao Virtual
+$ sudo postconf -e 'virtual_alias_maps= hash:/etc/postfix/virtual'
+$ sudo vi /etc/postfix/virtual
+	cosmo@particula.local cosmo
+	support@particula.local cosmo
+	postmaster@particula.local cosmo
+	root@particula.local cosmo
+# comando utilizado para gerar o arquivo /etc/postfix/virtual.db
+$ sudo postmap /etc/postfix/virtual
+
+# reinicializando o servico do postfix
+$ sudo systemctl restart postfix.service
+
+#
+# TESTE
+#
+
+# teste do postfix.
+$ echo "Corpo do e-mail" | mail -s "Subject do e-mail" cosmo@particula.local
+
+# teste smtp
+$ telnet localhost 25
+	ehlo localhost
+	mail from: cosmo
+	rcpt to: cosmo
+	data
+	subject: teste dovecot
+	Mail body
+	.
+	quit
+
+#
+# COURIER
+#
+
+# instalacao
+$ sudo apt-get install courier-pop courier-imap -y -d
+
+# ativando o courier no systemctl
+$ sudo systemctl enable courier-authdaemon
+
+#
+# TESTE
+#
+
+# teste do courier POP
+$ telnet localhost 110
+	user [USERNAME]
+	pass [PASSWORD]
+
+# teste do courier IMAP
+$ telnet localhost 143
+	a login [USERNAME] [PASSWORD]
+	(...)
+	a logout
