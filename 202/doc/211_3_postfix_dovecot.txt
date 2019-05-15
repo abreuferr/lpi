@@ -1,26 +1,20 @@
 #: Title : E-Mail Services
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
 #: Description : Using e-mail servers
-#: Options : Weight: 4
+#: Options : Weight: 2
 
-Description: Candidates should be able to manage an e-mail 
-server, including the configuration of e-mail aliases, e-mail 
-quotas and virtual e-mail domains. This objective includes 
-configuring internal e-mail relays and monitoring e-mail servers.
+Description: Candidates should be able to install and configure POP and IMAP daemons.
 
 Key Knowledge Areas:
-- Configuration files for postfix
-- Basic TLS configuration for postfix
-- Basic knowledge of the SMTP protocol
-- Awareness of sendmail and exim
+- Dovecot IMAP and POP3 configuration and administration
+- Basic TLS configuration for Dovecot
+- Awareness of Courier
 
 Terms and Utilities:
-- Configuration files and commands for postfix
-- /etc/postfix/
-- /var/spool/postfix/
-- sendmail emulation layer commands
-- /etc/aliases
-- mail-related logs in /var/log/
+- /etc/dovecot/
+- dovecot.conf
+- doveconf
+- doveadm
 
 #
 # ATUALIZACAO DA DISTRIBUICAO
