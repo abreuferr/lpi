@@ -35,12 +35,12 @@ $ sudo apt-get upgrade -y -d
 #
 
 # instalacao do postfix
-$ sudo apt-get install postfix mailutils -y -d
+$ sudo apt-get install postfix mailutils telnet -y -d
 
 # reconfigurando o postfix
 $ sudo dpkg-reconfigure postfix
 	General type of mail configuration? - internet site
-	System mail name - particula.local
+	System mail name - email.particula.local
 	Root and postmaster mail recipient - cosmo
 	Other destinations to accept mail for - $myhostname, email.particula.local, localhost.particula.local, , localhost
 	Force synchronous updates on mail queue? - <No>
@@ -75,7 +75,7 @@ $ ls -R Maildir
 #
 
 # instalacao
-$ sudo apt-get install dovecot-core dovecot-imapd dovecot-pop3d
+$ sudo apt-get install dovecot-core dovecot-imapd dovecot-pop3d -y -d
 
 # configuracao a conexao do Dovecot.
 $ sudo vi /etc/dovecot/dovecot.conf
@@ -94,12 +94,19 @@ $ sudo vi /etc/dovecot/conf.d/10-mail.conf
 # configurando o Dovecot para trabalhar com o
 # Postfix.
 $ sudo vi /etc/dovecot/conf.d/10-master.conf
-	# Postfix smtp-auth
-	unix_listener /var/spool/postfix/private/auth {
-		mode = 0660
-		user = postfix
-		group = postfix
- 	}
+	service imap-login {
+	  inet_listener imap {
+	    port = 143
+	  }
+	}
+
+	service auth {
+	  unix_listener /var/spool/postfix/private/auth {
+	    mode = 0660
+  	    user = postfix
+	    group = postfix
+ 	  }
+	}
 
 # reinicializando o Dovecot
 $ sudo systemctl restart dovecot.service
@@ -114,7 +121,7 @@ $ echo "Corpo do e-mail" | mail -s "Subject do e-mail" cosmo@particula.local
 # teste smtp
 $ telnet localhost 25
 	ehlo localhost
-	mail from: root
+	mail from: cosmo
 	rcpt to: cosmo
 	data
 	subject: teste dovecot
@@ -176,6 +183,8 @@ $ sudo vi /etc/postfix/main.cf
 	smtpd_tls_received_header   = yes
 	smtpd_tls_session_cache_timeout   = 3600s
 	tls_random_source =   dev:/dev/urandom
+	smtpd_tls_session_cache_database = btree:${data_directory}/smtpd_scache
+	smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 	# SASL
 	smtpd_sasl_auth_enable = yes
@@ -219,7 +228,7 @@ $ sudo vi /etc/dovecot/dovecot.conf
 	        user=postfix
 	        group=postfix
 	  }
-	 }
+	}
 	ssl=required
 	ssl_cert = </etc/ssl/certs/particula.pem
 	ssl_key = </etc/ssl/private/particula.key
@@ -238,12 +247,13 @@ $ sudo vi /etc/dovecot/conf.d/10-auth.conf
 # configurando o dovecot
 $ sudo vi /etc/dovecot/conf.d/10-master.conf
 	service imap-login {
-		inet_listener imap {
-		port = 143
-	}
-	inet_listener imaps {
-		port = 993
-		ssl = yes
+	  inet_listener imap {
+	    port = 143
+	  } 
+	  inet_listener imaps {
+	    port = 993
+	    ssl = yes
+	  }
 	}
 
 # restart
