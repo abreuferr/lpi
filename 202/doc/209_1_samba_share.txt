@@ -98,50 +98,91 @@ $ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bkp
 # editando o arquivo de configuracao do samba
 $ sudo vi /etc/samba/smb.conf
 	[global]
-	# Samba joins the WORKGROUP workgroup
+	# o servidor samba ira pertencer a um determinado grupo.
 	workgroup = WORKGROUP
 
-	# Describe the server to the clients by using a hostname
+	# descricao do servidor para os hosts da rede.
 	server string = Samba Server %v
 	netbios name = debian
 	
-	# Using "User Level Security"
+	# utilizando a diretiva de seguranca "User Level Security".
 	security = user
+	# a senha armazenada sera criptografada.
+	encrypt passwords = true
+	# tipo de banco de dados que sera utilizado para armazenar
+	# as senhas.
+	passdb backend = tdbsam
+	# sincronismo da senha do samba com a senha do unix.
+	unix password sync = yes
+	# aplicativo utilizado para sincronizar a senha
+	passwd program = /usr/bin/passwd %u
 
-	# Only allow connections from machines on our LAN
+	# definindo quais hosts de uma determinada rede pode
+	# acessar o servidor samba.
 	hosts allow = 127.0.0.0/8 192.168.0.0/24
 
-	# log
+	# arquivo de log que sera gerado.
 	syslog = 0
+	# arquivos de log que sera gerado.
 	log file = /var/log/samba/log.%m
+	# tamanho maximo do arquivo de log.
+	max log size = 1000
 
 	# nesse compartilhamento, somente os membros
 	# do grupo SAMBASHARE terao o acesso a pasta
 	# compartilhada. Sera necessario inserir 
 	# usuario e senha.
 	[allusers]
+
+	# comentario
 	comment = All Users
+
+	# especificar o diretorio que sera compartilhado.
 	path = /home/shares/allusers
+
+	# especificar os usuarios que podem acessar esse
+	# compartilhamento.
 	valid users = @sambashare
 	force group = sambashare
+	# nao sera permitido usuario convidado.
+	guest ok = no
+
+	# permissoes atribuidas aos arquivos e pastas
+	# que forem criados.
 	create mask = 0660
 	directory mask = 0771
+
+	# sera permitido a escrita no diretorio.
 	writable = yes
+
+	# sera visivel ou nao o compartilhamento.
 	browsable = yes
-	guest ok = no
 
 	# nesse compartilhamento, o acesso a pasta
 	# pode ser acessado por qualquer usuario
 	# que estao na rede.
 	[anonymous]
+	
+	# definindo o diretorio que sera compartilhado.
 	path = /home/samba/anonymous
 	force user = nobody
+
+	# permissoes atribuidas aos arquivos e pastas
+	# que forem criados.
 	create mask = 0660
 	directory mask = 0771
-	browsable =yes
+
+	# sera visivel ou nao co compartilhamento.
+	browsable = yes
+
+	# qualquer um pode escrever neste diretorio.
+	# permite escrita.
 	writable = yes
-	guest ok = yes
+	# nao sera somente leitura.
 	read only = no
+
+	# eh permitido convidado.
+	guest ok = yes
 
 # aplicativo utilizado para testar os parametros e verificar se 
 # existe algum problema na sintaxe do arquivo de configuracao
