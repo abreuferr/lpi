@@ -1,7 +1,84 @@
-#: Title : 212.4 Security tasks - Iptables
+#: Title : Security tasks - Iptables
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
 #: Description : Firewall do gateway
 #: Options : None
+
+#
+# TEORIA
+#
+
+# TABELAS DO IPTABLES
+filter 
+- tabela padrao.
+- aplica regras que permite ou bloqueia pacotes.
+	input
+	output
+	forward
+nat 
+- traducao e redirecionamento.
+- aplica regras para mudar o endereco do pacote antes de sair do chain.
+	prerouting
+	postrouting
+	output
+mangle 
+- alteracoes especializadas de pacotes.
+- aplica regras que alteram as caracteristicas do pacote antes de sair do chain.
+	input
+	output
+	forward
+	prerouting
+
+# CHAIN DO IPTABLE
+input
+	- pacote enviado para o host.
+	- lida com pacotes cujo destino eh a rede local.
+output
+	- pacote enviado do host.
+	- pacote saindo do kernel com endereco alterado.
+forward
+	- qdo os pacotes estao sendo encaminhados pelo kernel.
+	- lida com pacotes que serao encaminhados para sistemas
+	remotos.
+postrouting
+	- qdo os pacotes estao saindo apos terem sidos roteados.
+prerouting
+	- qdo os pacotes estao entrando atraves da interface de 
+	entrada, antes de softrerem roteamento.
+	- lida com pacotes antes do processo de roteamento,
+	exemplo, roteamento de porta.
+
+# ACAO DO CHAIN
+accept - o pacote eh aceito e repassado para o proximo chain.
+drop - o pacote eh descartado de forma silenciosa.
+reject - o pacote eh rejeitado e envia um comunicado para o emissor, um pacote do tipo icmp.
+log - registra o pacote e passa para o proximo chain.
+
+# COMANDOS DO IPTABLE
+-A [chain] [rule] - adiciona uma regra ao chain, ADD.
+-D [chain] [rule] - apaga uma regra ao chain, DELETE.
+-F [chain] - apaga todas as regras, FLUSH.
+-I [chain] [index] [rule] - insere uma nova regra em um determinado chain.
+-L [chain] - lista as regras de um determinado chain ou todas quando nao especificado.
+-P [chain] [target] - define como politica default em um determinado chain.
+-R [chain] [index] [rule] - substitui uma regra em um determinado localizacao.
+-S [chain] - lista as regras em detalhes em uma determinada chain.
+
+-t [table] - especifica a tabela em que uma determinada regra deva ser aplicada.
+-p [protocolo] - define o protocolo (protocol).
+-s [endereco] - endereco de origem.
+-d [endereco] - endereco de destino.
+-i [iface] - interface de rede de entrada.
+-o [iface] - interface de rede de destino.
+-j [target] - define a acao padrao para a regra se por acaso a regra for compativel.
+-sport [porta] - porta de origem, source.
+-dport [porta] - porta de destino, destination.
+
+-v - verbose.
+-n - nao resolve host ou porta.
+
+#
+# EXEMPLO
+#
 
 # script de firewall
 #
@@ -9,20 +86,21 @@ $ /etc/init.d/firewall.sh
     #!/bin/bash
     IPTABLES=/sbin/iptables
 
-    # clean all possible old mess
+    # remove todas as regras
     $IPTABLES -F 
     $IPTABLES -t nat -F 
     $IPTABLES -t mangle -F
 
-    # masquerading
+    # ativar ip masquerading
     $IPTABLES -t nat -A POSTROUTING -o ens32 -j MASQUERADE
     echo 1 > /proc/sys/net/ipv4/ip_forward
 
-    # opening all 
+    # abre todas as portas
     $IPTABLES -P INPUT ACCEPT
     $IPTABLES -P OUTPUT ACCEPT
     $IPTABLES -P FORWARD ACCEPT
 
+    # aceita conexao na tabela nat.
     $IPTABLES -t nat -P POSTROUTING ACCEPT
     $IPTABLES -t nat -P PREROUTING ACCEPT
     $IPTABLES -t filter -P FORWARD ACCEPT
