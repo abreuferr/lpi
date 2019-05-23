@@ -86,21 +86,26 @@ $ /etc/init.d/firewall.sh
     #!/bin/bash
     IPTABLES=/sbin/iptables
 
-    # remove todas as regras
-    $IPTABLES -F 
-    $IPTABLES -t nat -F 
-    $IPTABLES -t mangle -F
-
     # ativar ip masquerading
     $IPTABLES -t nat -A POSTROUTING -o ens32 -j MASQUERADE
     echo 1 > /proc/sys/net/ipv4/ip_forward
 
-    # abre todas as portas
-    $IPTABLES -P INPUT ACCEPT
-    $IPTABLES -P OUTPUT ACCEPT
-    $IPTABLES -P FORWARD ACCEPT
+    # remove todas as regras
+    iptables -F INPUT
+    iptables -F FORWARD
+    iptables -F OUTPUT
 
-    # aceita conexao na tabela nat.
-    $IPTABLES -t nat -P POSTROUTING ACCEPT
-    $IPTABLES -t nat -P PREROUTING ACCEPT
-    $IPTABLES -t filter -P FORWARD ACCEPT
+    # por padrao, DROP dos pacotes
+    iptables -P INPUT DROP
+    iptables -P FORWARD DROP
+    iptables -P OUTPUT DROP
+
+    # Let traffic on the loopback interface pass
+    iptables -A OUTPUT -d 127.0.0.1 -o lo -j ACCEPT
+    iptables -A INPUT -s 127.0.0.1 -i lo -j ACCEPT
+
+    # Let DNS traffic pass
+    iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+    iptables -A INPUT -p udp --sport 53 -j ACCEPT
+
+
