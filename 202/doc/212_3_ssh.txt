@@ -30,8 +30,8 @@ Terms and Utilities:
 # atualizacao do gnu/linux debian
 $ sudo apt-get update && sudo apt-get upgrade
 
-# instalacao do opnssh
-$ sudo apt-get install openssh-server openss-client ; instalacao
+# instalacao do openssh
+$ sudo apt-get install openssh-server openss-client
 
 #
 # SERVER - CONFIGURACAO - GERAL
@@ -44,26 +44,43 @@ $ sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.BKP
 $ sudo vi /etc/ssh/sshd_config
 	# porta de trabalho do servidor ssh
 	Port 22
+
 	# limitar o acesso a determinados usuarios
 	AllowUsers <USER>
+
 	# limitar o acesso a determinado grupo de usuario
 	AllowGroups <GROUP>
+
 	# negar o acesso a determinados usuarios
 	DenyUsers <USER>
+
 	# negar o acesso a um determinado grupo de usuarios
 	DenyGroups <GROUP>
+
 	# permitir ou nao o login do usuario root
 	PermitRootLogin <NO/YES>
+
 	# especifica qual o protocolo de seguranca a ser utilizado
 	Protocol 2
+
 	# permitir ou nao a utilizacao de senhas em branco
 	PermitEmptyPasswords <YES/NO>
+
 	# depois de X segundos sem nenhuma atividade, o usuario eh deslogado
 	ClientAliveInterval <NUM>
+
 	# quantidade de mensagens enviadas pelo cliente
 	ClientAliveCountMax <NUM>
+
 	# permitir ou nao o redirecionamento do X11 para o cliente
 	X11Forwarding <YES/NO>
+
+	# Periodo maximo em que o usuario pode ficar sem fazer nada
+	# na estacao.
+	ClientAliveInterval [NUM]
+
+	# Numero maximo de tentativa de conexao.
+	ClientAliveMaxCount [NUM]
 
 #
 # SERVER - CONFIGURACAO - AUTENTICACAO VIA PAR DE CHAVES
@@ -92,11 +109,8 @@ $ sudo systemctl restart sshd.service
 # instalacao do client na estacao
 $ sudo apt-get install openssh-client
 
-# criando chaves de autenticacao
+# criando as chaves de autenticacao
 $ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local"
-
-# criando a chave de autorizacao
-$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 # chaves geradas
 $ ls -l /home/cosmo/.ssh
@@ -104,6 +118,9 @@ $ ls -l /home/cosmo/.ssh
 	-rw------- 1 cosmo cosmo 1766 Jan 11 13:36 id_rsa
 	# chave publica
 	-rw-r--r-- 1 cosmo cosmo  403 Jan 11 13:36 id_rsa.pub
+
+# criando a chave de autorizacao
+$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 # copiando a chave publica para o servidor de forma segura.
 $ ssh-copy-id <USERNAME@SERVER>
@@ -155,4 +172,3 @@ $ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO /DIR_DESTINO
 	-q - opcao utilizada para suprimir a barra de progresso e mensagem de erro.
 	-C - forca a utilizacao de compressao dos dados durante a copia.
 	-r - recursividade
-
