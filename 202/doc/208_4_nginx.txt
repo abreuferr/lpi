@@ -69,7 +69,7 @@ $ sudo vi /etc/nginx/nginx.conf
 		# nao exibe a versao do software nginx
 		server_tokens off;
 
-		# arquivos de log nginx.`
+		# arquivos de log da execucao do nginx.
 		access_log /var/log/nginx/access.log;
         	error_log /var/log/nginx/error.log;
 
@@ -87,7 +87,7 @@ $ sudo vi /etc/nginx/nginx.conf
 $ sudo mkdir -p /var/www/particula.local/html
 
 # arquivo com a pagina indice do site.
-$ sudo vi /var/www/particula.local/html/index.html ; pagina para teste
+$ sudo vi /var/www/particula.local/html/index.html
 	<!DOCTYPE html>
 	<html>
 		<head>
@@ -106,7 +106,8 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		listen 80;
 		listen [::]:80;
 
-		# diretorio de trabalho
+		# diretorio a onde sera armazenado os arquivos do site do
+		# dominio virtual.
 		root /var/www/particula.local/html;
 
 		# nome do arquivo indice
@@ -117,13 +118,14 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 
 		# rede de trabalho
 		allow 192.168.0.0/24;
-		deny all;
+		3deny all;
 
-		# log files
+		# arquivos de log gerados pelo dominio virtual.
 		access_log  /var/log/nginx/particula.local_access.log;
 		error_log   /var/log/nginx/particula.local_error.lg;
 
-		# gzip
+		# utilizacao de compactacao na transmissao dos dados entre
+		# servidor nginx e o browser localizado na estacao.
 		gzip          on;
 		gzip_types    text/html text/plain text/css image/*;
 	}
@@ -184,7 +186,10 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        deny all;
 
 	        # redirecionar o trafego HTTP para o HTTPS
-	        return 301 https://$host$request_uri;
+	        # desta forma, se por acaso o usuario digitar
+		# na url o endereco HTTP, o nginx ira transferir
+		# para o endereco HTTPS.
+		return 301 https://$host$request_uri;
 
 	        # log files
 	        access_log  /var/log/nginx/particula.local_access.log;
@@ -196,6 +201,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 
 	server {
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
+		# e o protocolo HTTPS/SSL
 	        listen 443 ssl http2;
 	        listen [::]:443 ssl http2;
 
@@ -208,7 +214,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        # nome do dominio
 	        server_name www.particula.local particula.local;
 
-	        # log files
+	        # log files do dominio particula.local.
 	        access_log  /var/log/nginx/particula.local_access.log;
 	        error_log   /var/log/nginx/particula.local_error.lg;
 
@@ -262,6 +268,8 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        location / {
         	        proxy_pass_header Authorization;
 			# ip do servidor web.
+			# principal diretiva de configuracao do nginx para trabalhar
+			# como proxy reverso.
 	                proxy_pass http://192.168.0.9;
         	        proxy_set_header Host $host;
                 	proxy_set_header X-Real-IP $remote_addr;
