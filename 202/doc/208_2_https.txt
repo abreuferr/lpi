@@ -22,11 +22,19 @@ Terms and Utilities:
 - SSLCACertificateFile, SSLCACertificatePath
 - SSLProtocol, SSLCipherSuite, ServerTokens, ServerSignature, TraceEnable
 
+#
+# INSTALACAO
+#
+
 # atualizacao do gnu/debian
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do apache2 e do modulo ssl
 $ sudo apt-get install apache2 openssl
+
+#
+# CONFIGURACAO
+#
 
 # ativar o modulo SSL do apache
 $ sudo a2enmod ssl
@@ -58,28 +66,12 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 		# dominio do dominio virtual
 	        ServerName particula.local
 
-		# alias do dominio virtual
-	        ServerAlias www.particula.local
-
-		# e-mail do administrator do site
-	        ServerAdmin webmaster@particula.local
-
 		# diretorio a onde fica armazenado o arquivos do site
 	        DocumentRoot /var/www/particula.local/html
 	
 		# redirecionamento do HTTP para o HTTPS
 	        Redirect permanent "/" "https://www.particula.local/"
 
-	        <Directory /var/www/particula.local/html>
-	                Options Indexes Includes FollowSymLinks MultiViews
-	                AllowOverride All
-	                Require all granted
-	                LimitRequestBody 512000
-	        </Directory>
-
-		# arquivos de log
-	        ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
 	# inicio da configuracao do virtualhost, HTTPS
@@ -119,3 +111,10 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 
 # reinicializado o site para aplicar as configuracoes feitas
 $ sudo systemctl restart apache2
+
+#
+# TESTE
+#
+
+# o comando abaixo deve ser executado no servidor https.
+$ sudo openssl s_client -connect www.particula.local:443 -status -servername www.particula.local
