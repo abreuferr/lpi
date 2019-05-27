@@ -103,7 +103,15 @@ $ sudo chmod 775 -R /mnt/nfs
 
 # montando o diretorio exportado pelo servidor NFS
 # de forma manual.
+# caso nao saiba o nome do diretorio do servidor que
+# possa ser exportado, basta executar o comando 
+# "showmount -e 192.168.0.11".
 $ sudo mount -t nfs 192.168.0.11:/mnt/nfs /mnt/nfs
+
+# para verificar se realmente o diretorio exportado
+# no servidor foi montado na estacao, basta executar
+# o comando
+$ sudo df -h
 
 # caso o computador seja reinicializado, o diretorio
 # exportado pelo servidor nfs sera montador de forma
