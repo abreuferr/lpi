@@ -58,10 +58,13 @@ $ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
 $ sudo vi /etc/nginx/nginx.conf
 	# usuario dono do nginx.
 	user www-data;
+
 	# numero de processos em execucao.
 	worker_processes auto;
+
 	# local do arquivo de pid.
 	pid /run/nginx.pid;
+
 	# arquivos de configuracao dos dominios virtuais.
 	include /etc/nginx/modules-enabled/*.conf;
 	http{
@@ -73,7 +76,8 @@ $ sudo vi /etc/nginx/nginx.conf
 		access_log /var/log/nginx/access.log;
         	error_log /var/log/nginx/error.log;
 
-		# configuracao dos virtual host.
+		# diretorio a onde se localizam os arquivos de configuracao 
+		# dos dominios virtuais.
 		include /etc/nginx/conf.d/*.conf;
 		include /etc/nginx/sites-enabled/*;
 		(...)
@@ -114,11 +118,11 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		index index.html;
 
 		# nome do dominio
-		server_name www.particula.local particula.local;
+		server_name *.particula.local;
 
 		# rede de trabalho
 		allow 192.168.0.0/24;
-		3deny all;
+		deny all;
 
 		# arquivos de log gerados pelo dominio virtual.
 		access_log  /var/log/nginx/particula.local_access.log;
@@ -143,7 +147,7 @@ $ sudo nginx -t
 # reler os arquivos de configuracao do nginx.
 $ sudo nginx -s reload
 
-# para o servico do nginx.
+# para o servico do nginx de forma rapida.
 $ sudo nginx -s stop
 
 # para o servico do nginx sem desconectar as conexoes ativas.
@@ -266,15 +270,9 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 
 		# proxy reverso
 	        location / {
-        	        proxy_pass_header Authorization;
-			# ip do servidor web.
-			# principal diretiva de configuracao do nginx para trabalhar
-			# como proxy reverso.
+			# principal diretiva de configuracao do nginx para 
+			# trabalhar como proxy reverso.
 	                proxy_pass http://192.168.0.9;
-        	        proxy_set_header Host $host;
-                	proxy_set_header X-Real-IP $remote_addr;
-	                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        	        proxy_set_header X-Forwarded-Proto $scheme;
 	        }
 	}
 
