@@ -30,6 +30,14 @@ Terms and Utilities:
 - /var/log/samba/
 
 #
+# OBS
+#
+
+Esse texto se refere a configuracao do Samba para
+o compartilhamento de diretorios, sejam eles publicos
+ou de acesso restrito.
+
+#
 # INSTALACAO
 #
 
@@ -57,7 +65,7 @@ $ sudo systemctl status nmbd
 # eh interessante colocar a pasta de compartilhamento dentro
 # de uma particao que esteja sendo gerenciada pelo LVM. Desta
 # forma, eh possivel redimensionar o tamanho da pasta de acordo
-# com as necessidades.
+# com as necessidades do sysadmin.
 
 # adicionar usuario
 # sudo useradd [USER] -m -G [GROUP]
@@ -106,28 +114,39 @@ $ sudo vi /etc/samba/smb.conf
 	netbios name = debian
 	
 	# utilizando a diretiva de seguranca "User Level Security".
+	# a diretiva USER indica que as informacoes de usuario e senha
+	# serao armazenadas em um arquivos de texto. A senha eh salva
+	# de forma segura dentro do arquivo.
 	security = user
+
 	# a senha armazenada sera criptografada.
 	encrypt passwords = true
+
 	# tipo de banco de dados que sera utilizado para armazenar
 	# as senhas.
 	passdb backend = tdbsam
+
 	# sincronismo da senha do samba com a senha do unix.
 	unix password sync = yes
+
 	# aplicativo utilizado para sincronizar a senha
+	# do samba com a senha do unix.
 	passwd program = /usr/bin/passwd %u
 
-	# definindo quais hosts de uma determinada rede pode
+	# definindo quais hosts de uma determinada rede podem
 	# acessar o servidor samba.
 	hosts allow = 127.0.0.0/8 192.168.0.0/24
 
-	# arquivo de log que sera gerado.
+	# nivel de log que sera gerado.
 	syslog = 0
+
 	# arquivos de log que sera gerado.
 	log file = /var/log/samba/log.%m
+
 	# tamanho maximo do arquivo de log.
 	max log size = 1000
 
+	# nome do compartilhamento [//server/allusers].
 	# nesse compartilhamento, somente os membros
 	# do grupo SAMBASHARE terao o acesso a pasta
 	# compartilhada. Sera necessario inserir 
@@ -140,10 +159,11 @@ $ sudo vi /etc/samba/smb.conf
 	# especificar o diretorio que sera compartilhado.
 	path = /home/shares/allusers
 
-	# especificar os usuarios que podem acessar esse
-	# compartilhamento.
+	# especificar os usuarios e grupos de usuairos que 
+	# poderao o compartilhamento [allusers].
 	valid users = @sambashare
 	force group = sambashare
+
 	# nao sera permitido usuario convidado.
 	guest ok = no
 
