@@ -270,7 +270,7 @@ $ mkdir -p .mutt/certificates
 # configuracao do mutt
 $ vi .muttrc
 	set imap_user = "cosmo"
-	set imap_pass = "g4r1b4ld1"
+	set imap_pass = "[SENHA]"
 
 	# sem conexao segura
 	set smtp_url = "smtp://cosmo@email.particula.local:25/"
