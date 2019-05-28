@@ -52,10 +52,6 @@ $ sudo dpkg-reconfigure postfix
 # configuracao Maildir
 $ sudo postconf -e 'home_mailbox = Maildir/'
 
-# arquivo de configuracao do Postfix.
-$ sudo vi /etc/postfix/main.cf
-
-
 # configuracao Virtual
 $ sudo postconf -e 'virtual_alias_maps= hash:/etc/postfix/virtual'
 $ sudo vi /etc/postfix/virtual
@@ -66,6 +62,50 @@ $ sudo vi /etc/postfix/virtual
 
 # comando utilizado para gerar o arquivo /etc/postfix/virtual.db
 $ sudo postmap /etc/postfix/virtual
+
+# arquivo de configuracao do Postfix.
+$ sudo cat /etc/postfix/main.cf
+	# utilizado para especificar o hostname do servidor de email.
+	myhostname = email.particula.local
+
+	# utilizado para especificar o dominio do servidor de email.
+	mydomain = particula.local
+
+	# utilizado para especificar o dominio de origem ao qual todos 
+	# os emails que serao enviados.
+	myorigin = $mydomain
+
+	# utilizado para especificar os dominios que o servidor postfix 
+	# tomara como destino final.
+	mydestination = $myhostname, $mydomain, localhost.particula.local, , localhost
+
+	# utilizado para especificar quais servidores podem utilizar o
+	# Postfix como relay.	
+	mynetworks = 192.168.0.0/24, 127.0.0.0/8
+
+	# utilizado para especificar o endereco ip do servidor de email (relay)
+	relayhost = $myhostname
+	
+	# tipo de mailbox
+	home_mailbox = Maildir/
+	
+	# endereco da interface de rede que recebe email.
+	inet_interfaces = all
+
+	# especifica o tipo de protocolo, ipv4 ou ipv6 ou os dois.
+	inet_protocols = all
+
+	# aliases
+	alias_maps = hash:/etc/aliases
+	alias_database = hash:/etc/aliases
+
+	# tamanho da caixa postal.
+	mailbox_size_limit = 0
+
+	recipient_delimiter = +
+
+	# virtual domain.
+	virtual_alias_maps = hash:/etc/postfix/virtual
 
 # reinicializando o servico do postfix
 $ sudo systemctl restart postfix.service
@@ -83,7 +123,7 @@ $ telnet localhost 25
 	mail from: cosmo
 	rcpt to: cosmo
 	data
-	subject: teste dovecot
+	subject: teste
 	Mail body
 	.
 	quit
