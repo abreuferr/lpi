@@ -1,37 +1,46 @@
-#: Title : openldap client configuration
+#: Title : LDAP client usage
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : 210.4 openldap client configuration
+#: Description : LDAP client usage
 #: Options : Weight: 2
 
-Description: Candidates should be able to perform queries and updates 
-to an LDAP server. Also included is importing and adding items, as well 
-as adding and managing users.
+Description: Candidates should be able to perform queries 
+and updates to an LDAP server. Also included is importing 
+and adding items, as well as adding and managing users.
 
 Key Knowledge Areas:
-- LDAP utilities for data management and queries
-- Change user passwords
-- Querying the LDAP directory
 
+LDAP utilities for data management and queries
+Change user passwords
+Querying the LDAP directory
 Terms and Utilities:
-- ldapsearch
-- ldappasswd
-- ldapadd
-- ldapdelete
+
+ldapsearch
+ldappasswd
+ldapadd
+ldapdelete
 
 #
-# BASICO
+# INSTALACAO
 #
 
 # atualizacao do debian
-$ sudo apt-get update
-$ sudo apt-get upgrade
+$ sudo apt-get update && sudo apt-get upgrade
 
-# instalacao do servidor openldap
-$ sudo apt-get install ldapscripts -y -d
+# instalacao cliente ldap
+$ sudo apt-get install libnss-ldap libpam-ldapnscd ldap-utils ldapscripts -y -d
 
 #
-# ARQUIVO LDIF
+# CONFIGURACAO
 #
+
+# backup do arquivo de configuracao
+$ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
+
+# configuracao inicial do cliente ldap.
+$ sudo vi /etc/ldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://192.168.0.14 ldap://192.168.0.14:666
+	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
 
 # arquivo ldif para OU
 $ vi ou.ldif
@@ -98,3 +107,21 @@ $ sudo ldapsearch -x -LLL -b dc=particula,dc=local 'uid=cosmo' cn gidNumber
 	cn gidNumber - exibe o resultado de forma resumida
 
 ldapsearch -x -W -D "cn=admin,dc=particula,dc=local" -b "uid=caio,ou=people,dc=particla,dc=local" "(objectclass=*)"
+
+#
+# GERENCIAMENTO GRAFICO - LDAP Account Manager (LAM)
+#
+
+# instalacao
+$ sudo apt-get install ldap-account-manager -y
+
+# restringir/liberar o acesso
+$ sudo nano /etc/apache2/conf-enabled/ldap-account-manager.conf
+	# Require all granted
+	Require ip 192.168.0.0/24
+
+# reinicializar o apache2
+$ sudo systemctl restart apache2
+
+# acessar o aplicativo
+http://LDAP_SERVER_IP/lam
