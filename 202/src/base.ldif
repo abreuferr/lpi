@@ -1,0 +1,11 @@
+# people
+dn: ou=people,dc=particula,dc=local
+ou: People
+objectClass: top
+objectClass: organizationalUnit
+
+# groups
+dn: ou=group,dc=particula,dc=local
+ou: Group
+objectClass: top
+objectClass: organizationalUnit

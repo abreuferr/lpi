@@ -1,0 +1,4 @@
+dn: uid=cosmo,ou=people,dc=particula,dc=local
+changetype: modify
+add: facsimileTelephoneNumber
+facsimileTelephoneNumber: +55 51 1234 4321 
