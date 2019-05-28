@@ -28,14 +28,6 @@ Terms and Utilities:
 - loglevel
 
 #
-# PS
-#
-# foi utilizado a versao 8.04 da distribuicao Ubuntu
-# pois a LPIC 202 se utiliza de uma versao antiga do
-# OPENLDAP, principalmente em relacao ao arquivo de
-# configuracao do OPENLDAP.
-
-#
 # INSTALACAO
 #
 
@@ -61,12 +53,12 @@ $ sudo vi /etc/ldap/ldap.conf
 $ sudo dpkg-reconfigure slapd
 	No
 	particula.local
-	particula-company
+	particula.local
 	<senha>
 	<senha>
 	MDB
-	Yes
-	Yes
+	No
+	No
 
 # verificando se a configuracao esta toda correta
 $ sudo ldapsearch -x
