@@ -39,89 +39,141 @@ $ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
 # configuracao inicial do cliente ldap.
 $ sudo vi /etc/ldap/ldap.conf
 	BASE    dc=particula,dc=local
-	URI     ldap://192.168.0.14 ldap://192.168.0.14:666
 	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
 
-# arquivo ldif para OU
-$ vi ou.ldif
+#
+# LDAPSEARCH
+#
+
+# busca de registros dentro da base de dados do openldap.
+$ ldapsearch -D "cn=admin,dc=particula,dc=local" -W '(objectclass=*)'
+
+#
+# LDAPADD
+#
+
+# arquivo LDIF.
+$ cat base.ldif
+	# people
 	dn: ou=people,dc=particula,dc=local
+	ou: People
+	objectClass: top
 	objectClass: organizationalUnit
-	ou: people
 
-	dn: ou=groups,dc=particula,dc=local
+	# groups
+	dn: ou=group,dc=particula,dc=local
+	ou: Group
+	objectClass: top
 	objectClass: organizationalUnit
-	ou: groups
 
-# arquivo ldif para CN
-$ vi cn.ldif
-	dn: cn=department,ou=groups,dc=particula,dc=local
-	objectClass: posixGroup
-	cn: department
-	gidNumber: 5000
+# comando utilizado para adicionar as OUs atraves do arquivo LDIF.
+$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base.ldif
 
-# arquivo ldif para UID/USUARIO
-$ vi uid.ldif
+# arquivo LDIF.
+# o conteudo do campo userPassword foi retirado arquivo /etc/shadow
+$ cat user_cosmo.ldif
 	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	objectClass: top
+	objectClass: person
+	objectClass: organizationalPerson
 	objectClass: inetOrgPerson
 	objectClass: posixAccount
 	objectClass: shadowAccount
 	uid: cosmo
-	sn: cosmo
-	givenName: cosmo
-	cn: cosmo
-	displayName: cosmo
-	uidNumber: 2000
-	gidNumber: 2000
-	userPassword: {SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
-	gecos: cosmo
+	cn: Cosmo Comics
+	sn: Cosmo
+	givenName: Comics
+	title: Big Boss
+	telephoneNumber: +0 000 000 0000
+	mobile: +0 000 000 0000
+	postalAddress: avenida paulista 2001
+	userPassword: {CRYPT}$6$RsOxHWv/$8ELKsp8BuTx1GzXWWMfXgvA.RJcdFpKHY3tEfes1gV/wtIu2.Wumh592bZlrEq/hdDCr5aAJvXXYWCiydH3s.1:17968
+	labeledURI: https://www.particula.org/
 	loginShell: /bin/bash
-	homeDirectory: /home/cosmo
+	uidNumber: 1000
+	gidNumber: 1000
+	homeDirectory: /home/cosmo/
+	description: cosmo comics - big boss
+
+# comando utilizado para adicionar um registro no servidor ldap atraves 
+# do arquivo LDIF.
+$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base.ldif
 
 #
-# COMANDO LDAPADD
+# LDAPPASSWD
 #
 
-# inserir dados atraves de um arquivo ldif
-$ sudo ldapadd -x -W -D cn=admin,dc=particula,dc=local -f OU/CN/UID.ldif
+# alterar a senha do usuario.
+$ ldappasswd -D cn=admin,dc=particula,dc=local -W -S uid=cosmo,ou=people,dc=particula,dc=local
 
 #
-# COMANDO SLAPCAT
+# LDAPDELETE
 #
 
-# comando utilizado para extrair/dump da base de dados do servidor ldap
-# para um arquivo ldif;
-$ sudo slapcat -v -l backup_ldap.ldif
+# apagando registro na base de dados do servidor ldap.
+$ ldapdelete -D cn=admin,dc=particula,dc=local -W uid=cosmo,ou=people,dc=particula,dc=local -h openldap.particula.local
 
 #
-# COMANDO LDAPSEARCH
+# LDAPMODIFY
 #
 
-# verificar se os dados inseridos estao corretos
-$ sudo ldapsearch -x -b "dc=particula,dc=local"
+# adicionando um registro.
+$ cat add_cosmo.ldif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	changetype: add
+	objectClass: top
+	objectClass: person
+	objectClass: organizationalPerson
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: shadowAccount
+	uid: cosmo
+	cn: Cosmo Comics
+	sn: Cosmo
+	givenName: Comics
+	title: Big Boss
+	telephoneNumber: +0 000 000 0000
+	mobile: +0 000 000 0000
+	postalAddress: avenida paulista 2001
+	userPassword: {CRYPT}$6$RsOxHWv/$8ELKsp8BuTx1GzXWWMfXgvA.RJcdFpKHY3tEfes1gV/wtIu2.Wumh592bZlrEq/hdDCr5aAJvXXYWCiydH3s.1:17968
+	labeledURI: https://www.particula.org/
+	loginShell: /bin/bash
+	uidNumber: 1000
+	gidNumber: 1000
+	homeDirectory: /home/cosmo/
+	description: cosmo comics - big boss
 
-# verificar se os dados inseridos estao corretos com filtro
-$ sudo ldapsearch -x -LLL -b dc=particula,dc=local 'uid=cosmo' cn gidNumber
-	-x - busca simples, nao utiliza o metodo SASL
-	-LLL - resultado de forma resumida
-	uid= - filtro
-	cn gidNumber - exibe o resultado de forma resumida
+$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f add_cosmo.ldif
 
-ldapsearch -x -W -D "cn=admin,dc=particula,dc=local" -b "uid=caio,ou=people,dc=particla,dc=local" "(objectclass=*)"
+# apagando um registro.
+$ cat delete_cosmo.ldaif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	changetype: delete
 
-#
-# GERENCIAMENTO GRAFICO - LDAP Account Manager (LAM)
-#
+$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_cosmo.ldif
 
-# instalacao
-$ sudo apt-get install ldap-account-manager -y
+# adicionando um atributo em um registro.
+$ cat add_atributo_cosmo.ldaif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	changetype: modify
+	add: facsimileTelephoneNumber
+	facsimileTelephoneNumber: +55 51 1234 4321
 
-# restringir/liberar o acesso
-$ sudo nano /etc/apache2/conf-enabled/ldap-account-manager.conf
-	# Require all granted
-	Require ip 192.168.0.0/24
+$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f add_atributo_cosmo.ldif
 
-# reinicializar o apache2
-$ sudo systemctl restart apache2
+# modificando um atributo em um registro.
+$ cat modify_atributo_cosmo.ldaif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	changetype: modify
+	replace: uidNumber
+	uidNumber: 1001
 
-# acessar o aplicativo
-http://LDAP_SERVER_IP/lam
+$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f modify_atributo_cosmo.ldif 
+
+# apagando um atributo em um registro.
+$ cat delete_atributo_cosmo.ldif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	changetype: modify
+	delete: facsimileTelephoneNumber
+
+$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_atributo_cosmo.ldif
