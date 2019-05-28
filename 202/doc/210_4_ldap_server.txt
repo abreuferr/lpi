@@ -1,0 +1,228 @@
+#: Title : openldap server configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : openldap server configuration
+#: Options : Weight: 4
+
+Description: Candidates should be able to configure a 
+basic OpenLDAP server including knowledge of LDIF format 
+and essential access controls.
+
+Key Knowledge Areas:
+- OpenLDAP
+- Directory based configuration
+- Access Control
+- Distinguished Names
+- Changetype Operations
+- Schemas and Whitepages
+- Directories
+- Object IDs, Attributes and Classes
+
+Terms and Utilities:
+- slapd
+- slapd-config
+- LDIF
+- slapadd
+- slapcat
+- slapindex
+- /var/lib/ldap/
+- loglevel
+
+#
+# INSTALACAO
+#
+
+# atualizacao do debian
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do servidor openldap
+$ sudo apt-get install slapd ldap-utils ldapscripts -y -d
+
+#
+# CONFIGURACAO
+#
+
+# backup do arquivo de configuracao
+$ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
+
+# configuracao inicial
+$ sudo vi /etc/ldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
+
+# reconfigurando o pacote slapd
+$ sudo dpkg-reconfigure slapd
+	No
+	particula.local
+	particula.local
+	<senha>
+	<senha>
+	MDB
+	No
+	No
+
+# arquivo de configuracao.
+$ sudo cp /usr/share/slapd/slapd.conf /etc/ldap/
+
+# editando arquivo de configuracao.
+$ sudo vi /etc/ldap/slapd.conf
+	# Global Directives:
+
+	# Definição de schemas e de objectClass (se for usar samba, 
+	# instale o pacote samba-doc, procure pelo #arquivo samba.schema.gz 
+	# e o descompacte no diretório de schemas do OpenLDAP).
+	include         /etc/ldap/schema/core.schema
+	include         /etc/ldap/schema/cosine.schema
+	include         /etc/ldap/schema/nis.schema
+	include         /etc/ldap/schema/inetorgperson.schema
+
+	# Arquivo de informação de processos slapd
+	pidfile         /var/run/slapd/slapd.pid
+
+	# Lista de argumentos que são repassados ao servidor 
+	# slapd
+	argsfile        /var/run/slapd/slapd.args
+
+	# Nivel de LOG
+	loglevel      -1
+
+	# Módulos carregados dinamicamente.
+	modulepath	/usr/lib/ldap
+	moduleload	back_mdb.so
+
+	# Número máximo de entradas que é retornado para uma 
+	# operação de busca
+	sizelimit 500
+
+	# Montante real de CPU que é usado para a indexação.
+	tool-threads 1
+
+	# Tipo de armazenamento - se for o único, todas as 
+	# diretivas são apliadas a ele
+	backend	mdb
+
+	# Tipo de base de dados.
+	database        mdb
+
+	# Base do diretório
+	suffix          "dc=particula,dc=local"
+
+	# Especificação do superusuário da base de dados
+	rootdn          "cn=admin,dc=particula,dc=local"
+
+	# Especificação da semha criptografa do superusuário
+	rootpw		{SSHA}9j/BFjjG9/KSwticYF/DNL9x3l9XbVgH
+
+	# localização do banco de dados
+	directory       "/var/lib/ldap"
+
+	# Quantidade de memória RAM para o cache
+	#dbconfig set_cachesize 0 100097152 0
+
+	# Núḿero de objetos que podem ser bloqueados ao mesmo tempo
+	#dbconfig set_lk_max_objects 1500
+
+	# Número de bloqueios
+	#dbconfig set_lk_max_locks 1500
+
+	# Número de travas
+	#dbconfig set_lk_max_lockers 1500
+
+	# Opções de indexação para a base
+	index           objectClass eq
+
+	# Salvar o tempo e data em que as entradas foram modificadas
+	lastmod         on
+
+	# Checagem periodica da base de dados
+	checkpoint      512 30
+
+	# Controle de acessos base de dados
+	access to attrs=userPassword,shadowLastChange
+	        by dn="cn=admin,dc=particula,dc=local" write
+	        by anonymous auth
+	        by self write
+	        by * none
+
+	access to dn.base="" by * read
+
+	access to *
+	        by dn="cn=admin,dc=particula,dc=local" write
+	        by * read
+
+# testando o arquivo de configuracao do servidor openldap
+$ sudo slaptest -f /etc/ldap/slapd.conf
+
+# reinicializando servidor ldap.
+$ sudo systemctl restart slapd.service
+
+#
+# ARQUIVO LDIF
+#
+
+# arquivo ldif para OU
+$ vi ou.ldif
+	dn: ou=people,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: people
+
+	dn: ou=groups,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: groups
+
+# arquivo ldif para CN
+$ vi cn.ldif
+	dn: cn=department,ou=groups,dc=particula,dc=local
+	objectClass: posixGroup
+	cn: department
+	gidNumber: 5000
+
+# arquivo ldif para UID/USUARIO
+$ vi uid.ldif
+	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: shadowAccount
+	uid: cosmo
+	sn: cosmo
+	givenName: cosmo
+	cn: cosmo
+	displayName: cosmo
+	uidNumber: 2000
+	gidNumber: 2000
+	userPassword: {SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
+	gecos: cosmo
+	loginShell: /bin/bash
+	homeDirectory: /home/cosmo
+
+#
+# COMANDO SLDAPADD
+#
+
+# inserir dados atraves de um arquivo ldif
+$ sudo sldapadd -f /etc/ldap/slapd.conf -l OU/CN/UID.ldif
+
+#
+# COMANDO SLAPCAT
+#
+
+# comando utilizado para extrair/dump da base de dados do servidor ldap
+# para um arquivo ldif;
+$ sudo slapcat -v -l backup_ldap.ldif
+
+#
+# GERENCIAMENTO GRAFICO - LDAP Account Manager (LAM)
+#
+
+# instalacao
+$ sudo apt-get install ldap-account-manager -y
+
+# restringir/liberar o acesso
+$ sudo vi /etc/apache2/conf-enabled/ldap-account-manager.conf
+	# Require all granted
+	Require ip 192.168.0.0/24
+
+# reinicializar o apache2
+$ sudo systemctl restart apache2
+
+# acessar o aplicativo
+http://LDAP_SERVER_IP/lam
