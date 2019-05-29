@@ -4,7 +4,7 @@
 #: Options : Weight: 4
 
 Description: Candidates should be able to install and configure a 
-web server. This objective includes monitoring the server’s load 
+web server. This objective includes monitoring the servers load 
 and performance, restricting client user access, configuring support 
 for scripting languages as modules and setting up client user 
 authentication. Also included is configuring server options to restrict 
@@ -19,7 +19,7 @@ Key Knowledge Areas:
 - Client user authentication files and utilities
 - Configuration of maximum requests, minimum and maximum servers and clients
 - Apache 2.4 virtual host implementation (with and without dedicated IP addresses)
-- Using redirect statements in Apache’s configuration files to customize file access
+- Using redirect statements in Apaches configuration files to customize file access
 
 Terms and Utilities:
 - access logs and error logs
@@ -48,10 +48,10 @@ $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
 $ sudo apt-get install libapache2-mod-perl2
 
 #
-# CONFIGURACAO
+# DIRETORIOS/ARQUIVOS DE CONFIGURACAO
 #
 
-# principal arquivo de configuracao do apache2e que contem 
+# principal arquivo de configuracao do apache2 que contem 
 # os paramatros globais de configuracao do apache2.
 $ /etc/apache2/apache2.conf
 
@@ -105,13 +105,13 @@ $ sudo cat /var/log/apache2/error.log
 # /etc/apache2/apache2.conf
 	LogFormat "%h %l %u %t \"%r\" %>s %b"
 
-	%h – endereco IP do cliente que acesso a pagina
-	%l – a identidade do cliente determinada pelo identd na maquina do cliente.
-	%u – o userid do cliente se for requisitado a autenticacao.
-	%t – data e hora em que foi solicitado a requisicao
-	\"%r\" – informacoes como o metodo http utilizado, o caminh do da requisicao de informacao e protocolo http utilizado pelo cliente
-	%>s – o codigo do status que o servidor envia de volta para o cliente
-	%b – o tamanho do objeto requisitado
+	%h endereco IP do cliente que acesso a pagina
+	%l a identidade do cliente determinada pelo identd na maquina do cliente.
+	%u o userid do cliente se for requisitado a autenticacao.
+	%t data e hora em que foi solicitado a requisicao
+	\"%r\" informacoes como o metodo http utilizado, o caminh do da requisicao de informacao e protocolo http utilizado pelo cliente
+	%>s o codigo do status que o servidor envia de volta para o cliente
+	%b o tamanho do objeto requisitado
 
 #
 # MAXIMUM REQUESTS
@@ -191,12 +191,14 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 			# Indexes: previne as diretivas listadas.
 			# FollowSymLinks: quando essa opcao eh ativada, 
 			# o apache ira seguir os links simbolicos
-			Options -Indexes +FollowSymLinks
+			Options Indexes FollowSymLinks
 		
 			# AllowOverride: especifica quais diretivas que 
 			# foram declaradas no arquivo .htaccess e que serao 
 			# sobrepostas as direticas da configuracao padrao
-			AllowOverride All
+			AllowOverride none
+			Order allow,deny
+			Allow from all
 			Require all granted
 		</Directory>
 
@@ -228,12 +230,15 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 			# Indexes: previnde as diretivas listadas.
 			# FollowSymLinks: quando essa opcao eh ativada, 
 			# o apache ira seguir os links simbolicos
-			Options -Indexes +FollowSymLinks
+			Options Indexes FollowSymLinks
 		
 			# AllowOverride: especifica quais diretivas que 
 			# foram declaradas no arquivo .htaccess e que serao 
 			# sobrepostas as direticas da configuracao padrao
-			AllowOverride All
+			AllowOverride none
+			Order allow,deny
+			Allow from all
+			Require all granted
 		</Directory>
 
 		# nome o localizacao dos arquivos de log
@@ -292,17 +297,30 @@ $ sudo apache2ctr restart
 # teste
 $ w3m http://www.particula.local/perltest.pl
 
-###
-# Client USER authentication files and utilities - .htaccess
-###
+#
+# Autenticacao de acesso atraves de usuario e senha
+#
 
 $ sudo /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 	    (...)
 	    <Directory /var/www/particula.local/html>
-		# habilitar a autenticacao atraves do arquivo .htaccess
-	        AllowOverride All
-	        Require all granted
+		# habilitar a autenticacao
+		AuthType Basic
+		AuthName "processo de autenticacao de acesso"
+		
+		# nao existe a possibilidade de autenticacao tanto
+		# por usuario quanto por grupo. Eh necessario que
+		# seja escolhido somente uma forma de autenticacao.
+		AuthUserFiles /var/www/particula.local/webpass
+		Require valid-user
+		
+		AuthGroupFiles /var/www/particula.local/particula.group
+		Require group particula
+	        
+		AllowOverride none
+		Order allow,deny
+		Allow from all
 	    </Directory>
 	    (...)
 	</VirtualHost>
@@ -312,62 +330,43 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost 192.168.0.8:80>
 	    (...)
 	    <Directory /var/www/particula.local/html>
-		# habilitar a autenticacao atraves do arquivo .htaccess
-	        AllowOverride All
-	        Require all granted
+		# habilitar a autenticacao
+		AuthType Basic
+		AuthName "processo de autenticacao de acesso"
+
+		# nao existe a possibilidade de autenticacao tanto
+		# por usuario quanto por grupo. Eh necessario que
+		# seja escolhido somente uma forma de autenticacao.
+		AuthUserFiles /var/www/particula.local/webpass
+		Require valid-user
+
+		AuthGroupFiles /var/www/particula.local/particula.group
+		Require group particula
+
+	        AllowOverride none
+		Order allow,deny
+		Allow from all
 	    </Directory>
 	    (...)
 	</VirtualHost>
 
-$ sudo systemctl restart apache2 ; reinicializar o apache2
-$ sudo apachectl configtest ; checagem da configuracao do apache2
+# checagem da configuracao do apache2
+$ sudo apachectl configtest
+
+# reinicializar o apache2
+$ sudo systemctl restart apache2
 
 # criar o arquivo webpass a onde sera armazenado o usuario
-# <cosmo> e a senha dele.
-$ sudo htpasswd -c /var/www/particula.local/webpass cosmo
+# e a senha dele.
+$ sudo htpasswd -c /var/www/particula.local/webpass [USUARIO]
+
+# grupo de usuarios.
+$ sudo vi /var/www/particula.local/particula.group
+	particula: cosmo caio
 
 # alterando as permissoes do arquivo
 $ sudo chown www-data /var/www/particula.local/webpass
 $ sudo chmod 640 /var/www/particula.local/webpass
-
-# arquivos .htaccess para o controle de acesso ao site 
-$ sudo vi /var/www/particula.local/html/.htaccess
-	# ativando a autenticacao.
-	AuthType Basic
-
-	# texto que ira aparecer na caixa de dialogo
-	AuthName "Restricted Access"
-
-	# arquivo a onde fica armazenado o usuario e senha
-	AuthUserFile /var/www/particula.local/webpass
-
-	# autenticacao de usuario
-	Require user cosmo
-
-###
-# Client GROUP authentication files and utilities - .htaccess
-###
-
-$ htpasswd /var/www/particula.local/htgroup cosmo
-$ cat /var/www/particula.local/htgroup
-	admins: cosmo admin
-
-# alterando as permissoes do arquivo
-$ sudo chown www-data /var/www/particula.local/htgroup
-$ sudo chmod 640 /var/www/particula.local/htgroup
-
-# arquivos .htaccess para o controle de acesso ao site 
-$ sudo vi /var/www/particula.local/html/.htaccess
-	AuthType Basic
-
-	# texto que ira aparecer na caixa de dialogo
-	AuthName "Restricted Access"
-
-	# arquivo a onde fica armazenado o grupo de usuarios
-	AuthGroupFile "/var/www/particula.local/htgroup"
-
-	# autenticacao de usuario
-	Require group admins
 
 ###
 # Security Apache
