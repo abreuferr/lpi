@@ -52,7 +52,7 @@ $ sudo mkdir /etc/apache2/ssl
 $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
 
 # alterando permissao
-$ sudo chmod 600 /etc/apache2/ssl/*
+$ sudo chmod 400 /etc/apache2/ssl/*
 
 # arquivo de configurca
 $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
@@ -109,7 +109,10 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
-# reinicializado o site para aplicar as configuracoes feitas
+# testando o arquivo de configuracao.
+$ sudo apache2ctl configtest
+
+# reinicializado o site para aplicar as configuracoes feitas.
 $ sudo systemctl restart apache2
 
 #
