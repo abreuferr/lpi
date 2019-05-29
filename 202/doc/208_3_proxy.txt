@@ -28,18 +28,21 @@ Terms and Utilities:
 # INSTALACAO
 #
 
+# atualizacao do sistema operacaional.
+$ sudo apt-get update && sudo apt-get upgrade 
+
 # instalacao do proxy Squid.
 $ sudo apt-get install squid -y -d
+
+#
+# CONFIGURACAO
+#
 
 # criacao do diretorio de cache do squid.
 $ sudo mkdir -p /var/cache/squid
 
 # alterando permissao.
 $ sudo chown -R proxy.proxy /var/cache/squid
-
-#
-# CONFIGURACAO BASICA
-#
 
 # copia de seguranca do arquivo de configuracao do squid.
 $ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP
