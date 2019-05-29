@@ -28,6 +28,19 @@ Terms and Utilities:
 - loglevel
 
 #
+# TEORIA
+#
+dc=particula,dc=local
+
+ou=users,dc=particula,dc=local
+uid=cosmo,ou=users,dc=particula,dc=local
+
+ou=groups,dc=particula,dc=local
+cn=department,ou=groups,dc=particula,dc=local
+
+cn=admin,dc=particula,dc=local
+
+#
 # INSTALACAO
 #
 
@@ -37,28 +50,32 @@ $ sudo apt-get update && sudo apt-get upgrade
 # instalacao do servidor openldap
 $ sudo apt-get install slapd ldap-utils ldapscripts -y -d
 
+# visualizacao da estrutura inicial do openldap.
+$ sudo slapcat
+
 #
 # CONFIGURACAO
 #
 
+# reconfigurando o pacote slapd
+$ sudo dpkg-reconfigure slapd
+	Omit OpenLDAP server configuration? <NO>
+	DNS Domain Name: particula.local
+	Organization name: particula
+	Administrator password: <SENHA>
+	Confirm password: <SENHA>
+	Database backend to use: MDB
+	Do you want the database to be removed when slapd is purged? <NO>
+	Move old database? <YES>
+	Allow LDAPv2 protocol? <NO>
+
 # backup do arquivo de configuracao
 $ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
 
-# configuracao inicial
+# configuracao do arquivo ldap.conf
 $ sudo vi /etc/ldap/ldap.conf
 	BASE    dc=particula,dc=local
 	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
-
-# reconfigurando o pacote slapd
-$ sudo dpkg-reconfigure slapd
-	No
-	particula.local
-	particula.local
-	<senha>
-	<senha>
-	MDB
-	No
-	No
 
 # arquivo de configuracao.
 $ sudo cp /usr/share/slapd/slapd.conf /etc/ldap/
@@ -161,9 +178,9 @@ $ sudo systemctl restart slapd.service
 
 # arquivo ldif para OU
 $ vi ou.ldif
-	dn: ou=people,dc=particula,dc=local
+	dn: ou=users,dc=particula,dc=local
 	objectClass: organizationalUnit
-	ou: people
+	ou: users
 
 	dn: ou=groups,dc=particula,dc=local
 	objectClass: organizationalUnit
@@ -178,7 +195,7 @@ $ vi cn.ldif
 
 # arquivo ldif para UID/USUARIO
 $ vi uid.ldif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
+	dn: uid=cosmo,ou=users,dc=particula,dc=local
 	objectClass: inetOrgPerson
 	objectClass: posixAccount
 	objectClass: shadowAccount
@@ -189,6 +206,7 @@ $ vi uid.ldif
 	displayName: cosmo
 	uidNumber: 2000
 	gidNumber: 2000
+	# senha obtida atraves do comando "slappasswd -h {SSHA}"
 	userPassword: {SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
 	gecos: cosmo
 	loginShell: /bin/bash
