@@ -203,7 +203,7 @@ $ sudo vi /etc/postfix/master.cf
 
 # configurando o dovecot
 $ sudo vi /etc/dovecot/dovecot.conf
-	disable_plaintext_auth = no
+	disable_plaintext_auth = yes
 	mail_privileged_group = mail
 	mail_location = maildir:~/Maildir
 	userdb {
@@ -214,6 +214,7 @@ $ sudo vi /etc/dovecot/dovecot.conf
 	  driver = pam
 	}
 
+	# protocolo que o Dovecot suporta.
 	protocols = imap
 
 	service auth {
@@ -223,28 +224,46 @@ $ sudo vi /etc/dovecot/dovecot.conf
 	        group=postfix
 	  }
 	}
+	# Controle do suporte ao SSl/TLS.
+	# yes = eh utilizado pelo metodo de autenticacao.
+	# no = nao eh utilizado pelo metodo de autenticao.
+	# required = eh requerido tanto para autenticacao 
+	# em modo-texto quanto em nao-modo-texto.
 	ssl=required
+	# localizacao do certificado.
 	ssl_cert = </etc/ssl/certs/particula.pem
+	# localizacao da chave de criptografia.
 	ssl_key = </etc/ssl/private/particula.key
 
 # configurando o dovecot
 $ sudo vi /etc/dovecot/conf.d/10-ssl.conf
 	verbose_ssl = yes
+	# Controle do suporte ao SSl/TLS.
+	# yes = eh utilizado pelo metodo de autenticacao.
+	# no = nao eh utilizado pelo metodo de autenticao.
+	# required = eh requerido tanto para autenticacao 
+	# em modo-texto quanto em nao-modo-texto.
 	ssl = required
-	ssl_cert = </etc/ssl/certs/particula.pem
-	ssl_key = </etc/ssl/private/particula.pem
+	# localizacao do certificado.
+	ssl_cert = < /etc/ssl/certs/particula.pem
+	# localizacao da chave de criptografia.
+	ssl_key = < /etc/ssl/private/particula.pem
 
 # configurando o dovecot
 $ sudo vi /etc/dovecot/conf.d/10-auth.conf
+	# yes = desabilita o processo de autenticacao em modo texto plano.
+	# no = habilita o processo de autenticacao em modo texto plano.
 	disable_plaintext_auth = yes
 
 # configurando o dovecot
 $ sudo vi /etc/dovecot/conf.d/10-master.conf
 	service imap-login {
 	  inet_listener imap {
+	    # porta de rtabalho do protocolo imap.
 	    port = 143
 	  } 
 	  inet_listener imaps {
+	    # porta de trabalho do protocolo imaps.
 	    port = 993
 	    ssl = yes
 	  }
