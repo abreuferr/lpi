@@ -43,6 +43,8 @@ $ sudo vi /etc/postfix/main.cf
 
 # configuracao a conexao do Dovecot.
 $ sudo vi /etc/dovecot/dovecot.conf
+	# lista de enderecos dos hosts que o dovecot
+	# deve permitir conexao.
 	listen = *, ::
 
 # configurando o processo de autenticacao no
@@ -52,6 +54,7 @@ $ sudo vi /etc/dovecot/conf.d/10-auth.conf
 
 # configurando o Maildir no Dovecot.
 $ sudo vi /etc/dovecot/conf.d/10-mail.conf
+	# indica a localizacao do mailbox do ususario.
 	mail_location = maildir:~/Maildir
 
 # configurando o Dovecot para trabalhar com o
