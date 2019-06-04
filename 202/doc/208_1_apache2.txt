@@ -51,6 +51,17 @@ $ sudo apt-get install libapache2-mod-perl2
 # DIRETORIOS/ARQUIVOS DE CONFIGURACAO
 #
 
+#       /etc/apache2/
+#       |-- apache2.conf
+#       |       `--  ports.conf
+#       |-- mods-enabled
+#       |       |-- *.load
+#       |       `-- *.conf
+#       |-- conf-enabled
+#       |       `-- *.conf
+#       `-- sites-enabled
+#               `-- *.conf
+
 # principal arquivo de configuracao do apache2 que contem 
 # os paramatros globais de configuracao do apache2.
 $ /etc/apache2/apache2.conf
