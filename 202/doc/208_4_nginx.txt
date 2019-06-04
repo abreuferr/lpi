@@ -158,16 +158,16 @@ $ sudo nginx -s quit
 #
 
 # criando chave de criptografia
-$ sudo openssl genrsa -aes256 -out /etc/ssl/private/particula.local.key 1024
+$ sudo openssl genrsa -out /etc/ssl/private/ca.key 2048
 
 # gerando o arquivo CSR
-$ sudo openssl req -new -key /etc/ssl/private/particula.local.key -out /etc/ssl/private/particula.local.csr
+$ sudo openssl req -new -key /etc/ssl/private/ca.key -out /etc/ssl/private/ca.csr
 
 # assinar o certificado
-$ sudo openssl x509 -req -days 365 -in /etc/ssl/private/particula.local.csr -signkey /etc/ssl/private/particula.local.key -out /etc/ssl/private/particula.local.crt
+$ sudo openssl x509 -req -days 365 -in /etc/ssl/private/ca.csr -signkey /etc/ssl/private/ca.key -out /etc/ssl/private/ca.crt
 
 # alterando as permissoes dos arquivos de certificacao por motivos de seguranca
-$ sudo chmod 0400 /etc/ssl/private/particula.local.*
+$ sudo chmod 0400 /etc/ssl/private/ca.*
 
 # configuracao do nginx para trabalhar com certificado ssl
 $ sudo vi /etc/nginx/sites-available/particula.local
@@ -226,8 +226,8 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        ssl on;
 		ssl_protocols TLSv1.2;
 		ssl_ciphers HIGH:!aNULL:!MD5;
-	        ssl_certificate /etc/ssl/private/particula.local.crt;
-	        ssl_certificate_key /etc/ssl/private/particula.local.key;
+	        ssl_certificate /etc/ssl/private/ca.crt;
+	        ssl_certificate_key /etc/ssl/private/ca.key;
 		ssl_session_cache shared:SSL:10m; 
 		ssl_session_timeout 10m;
 
