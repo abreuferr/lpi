@@ -45,7 +45,7 @@ $ sudo apt-get install libapache2-mpm-itk -y -d
 $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
 
 # instalacao do modulo Perl no Apache2
-$ sudo apt-get install libapache2-mod-perl2
+$ sudo apt-get install libapache2-mod-perl2 -y -d
 
 #
 # DIRETORIOS/ARQUIVOS DE CONFIGURACAO
@@ -257,17 +257,16 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 		CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
 	</VirtualHost>
 
-# ativar as diretivas de configuracao
+# ativar as diretivas de configuracao - forma automatica
 $ sudo a2ensite particula.local
-
-# reler as configuracoes do apache
-$ sudo apache2ctl restart
-
-# criacao do link simbolico de forma manual
+# ativar as diretivas de configuracao - forma manual
 $ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/
 
 # checagem da configuracao do apache2
 $ sudo apache2ctl configtest
+
+# reler as configuracoes do apache
+$ sudo apache2ctl restart
 
 #
 # MODULO PERL
@@ -278,16 +277,18 @@ $ sudo apache2ctl configtest
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 	(...)
+	# ativando o modulo do Perl.
 	PerlModule ModPerl::Registry
 	<Directory /var/www/particula.local/html>
+		(...)
+		# ativando a opcao de trabalhar com uma linguagem
+		# de programacao
 		SetHandler perl-script
 		PerlHandler ModPerl::Registry
 		PerlSendHeader On
-
-		# ativando a opcao de trabalhar com uma linguagem
-		# de programacao
 		Options +ExecCGI
 		AllowOverride None
+		(...)
 	</Directory>
 	(...)
 
@@ -302,6 +303,9 @@ $ sudo vi /var/www/particula.local/html/perltest.pl
 		print $i."<br />";
 	}
 
+# checagem da configuracao do apache2
+$ sudo apache2ctl configtest
+
 # reinicializar o apache2
 $ sudo apache2ctr restart
 
@@ -309,7 +313,7 @@ $ sudo apache2ctr restart
 $ w3m http://www.particula.local/perltest.pl
 
 #
-# Autenticacao de acesso atraves de usuario e senha
+# AUTENTICACAO DE ACESSO ARAVES DE USUARIO E SENHA
 #
 
 $ sudo /etc/apache2/sites-available/particula.local.conf
@@ -341,22 +345,23 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost 192.168.0.8:80>
 	    (...)
 	    <Directory /var/www/particula.local/html>
-		# habilitar a autenticacao
-		AuthType Basic
-		AuthName "processo de autenticacao de acesso"
+		# tipo de autenticacao.
+                AuthType Basic
+		# texto que aparece na janela pedindo usuario/senha.
+                AuthName "area restrita"
+		# diretorio a ond fica localizado o arqiuvo com usuario e senha.
+                AuthUserFile /var/www/particula.local/webpass
+		# qual condicao precisa ser satisfeita para o processo ir adiante.
+                Require valid-user
 
-		# nao existe a possibilidade de autenticacao tanto
-		# por usuario quanto por grupo. Eh necessario que
-		# seja escolhido somente uma forma de autenticacao.
-		AuthUserFiles /var/www/particula.local/webpass
-		Require valid-user
+                Options +FollowSymLinks +Multiviews +Indexes
 
-		AuthGroupFiles /var/www/particula.local/particula.group
-		Require group particula
+		# None - ignora a existencia do arquivo .htaccess
+                AllowOverride None
 
-	        AllowOverride none
+		# controle para ter o acesso a essa pagina.
 		Order allow,deny
-		Allow from all
+    		Allow from 192.16.0.0/24
 	    </Directory>
 	    (...)
 	</VirtualHost>
