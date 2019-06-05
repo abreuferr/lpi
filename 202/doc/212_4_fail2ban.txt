@@ -50,12 +50,25 @@ $ sudo apt-get install fail2ban -y -d
 # CONFIGURACAO
 #
 
+# copia de seguranca.
+$ sudo cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.conf.origin
+
 # arquivo de configuracao do gerenciamento do
 # daemon, log, socket e pid do fail2ban.
-$ /etc/fail2ban/fail2ban.conf
+$ sudo vi /etc/fail2ban/fail2ban.conf
+	[Definition]
+	loglevel = ERROR
+	logtarget = /var/log/fail2ban.log
+	syslogsocket = auto
+	socket = /var/run/fail2ban/fail2ban.sock
+	pidfile = /var/run/fail2ban/fail2ban.pid
+	dbfile = /var/lib/fail2ban/fail2ban.sqlite3
+	dbpurgeage = 86400
 
-# arquivo de configuracao do fail2ban priopriamente
-# dito.
+# copia de seguranca.
+$ sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.conf.origin
+
+# arquivo de configuracao do fail2ban priopriamente dito.
 $ /etc/fail2ban/jail.conf
 	[sshd-iptables]
 	enabled = true
@@ -73,3 +86,13 @@ $ /etc/fail2ban/jail.conf
 	logpath = /var/log/vsftpd.log
 	maxretry = 5
 	bantime = 1800
+
+#
+# CLIENTE
+#
+
+# status do fail2ban
+$ sudo fail2ban-client status
+
+# status do fail2ban sshd
+$ sudo fail2ban-client status sshd
