@@ -1,0 +1,139 @@
+#: Title : Securing FTP servers
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Securing FTP servers
+#: Options : Weight: 2
+
+Description: Candidates should be able to configure 
+an FTP server for anonymous downloads and uploads. 
+This objective includes precautions to be taken if 
+anonymous uploads are permitted and configuring user 
+access.
+
+Key Knowledge Areas:
+- Configuration files, tools and utilities for Pure-FTPd and vsftpd
+- Awareness of ProFTPd
+- Understanding of passive vs. active FTP connections
+
+Terms and Utilities:
+- vsftpd.conf
+- important Pure-FTPd command line options
+
+#
+# INSTALACAO
+#
+
+# atualizacao do gnu/linux debian.
+$ sudo apt-get update && sudo apt-get upgrade -y -d
+
+# instalacao do proftpd.
+$ sudo apt-get install proftpd -y -d
+
+#
+# CONFIGURACAO
+#
+
+# copia de seguranca.
+$ sudo cp /etc/proftpd/proftpd.conf /etc/proftpd/proftpd.conf.origin
+
+# editando o arquivo de configuracao.
+$ sudo vi sudo /etc/proftpd/proftpd.conf
+	# DSO modules
+	Include /etc/proftpd/modules.conf
+
+	# desabilitar ipv6
+	UseIPv6                         on
+
+	# nome do servidor
+	ServerName                      "proftpd server"
+
+	# forma de inicializacao
+	ServerType                      standalone
+	DeferWelcome                    off
+
+	MultilineRFC2228                on
+	DefaultServer                   on
+	ShowSymlinks                    on
+
+	TimeoutNoTransfer               600
+	TimeoutStalled                  600
+
+	TimeoutIdle                     1200
+
+	DisplayLogin                    welcome.msg
+	DisplayChdir                    .message true
+	ListOptions                     "-l"
+
+	DenyFilter                      \*.*/
+
+	# faz com que o usuario fique preso ao seu diretorio, chroot.
+	DefaultRoot                   ~
+
+	# porta de trabalho
+	Port                            21
+
+	# numero maximo de instancias.
+	MaxInstances                    30
+
+	# define o usuario e grupo que gerencia o proftpd.
+	User                            proftpd
+	Group                           nogroup
+
+	# mascara
+	Umask                           022  022
+
+	# os arquivos podem ser sobre-escritos ou nao.
+	AllowOverwrite                  on
+
+	# log
+	TransferLog /var/log/proftpd/xferlog
+	SystemLog   /var/log/proftpd/proftpd.log
+
+
+#
+# TLS
+#
+
+# criando certificado SSL
+$ sudo openssl req -x509 -newkey rsa:1024 -keyout /etc/ssl/private/proftpd.key -out /etc/ssl/certs/proftpd.crt -nodes -days 365
+
+# alterando a permissao da chave e do certificado.
+$ sudo chmod 600 /etc/ssl/private/proftpd.key
+$ sudo chmod 600 /etc/ssl/certs/proftpd.crt
+
+# editando o arquivo de configuracao.
+$ sudo vi /etc/proftpd/proftpd.conf
+	# arquivo com as configuracoes do tls.
+	Include /etc/proftpd/tls.conf
+
+# arquivo de configuracao do tls, tls.conf
+$ sudo vi /etc/proftpd/tls.conf
+	TLSRSACertificateFile /etc/ssl/certs/proftpd.crt
+	TLSRSACertificateKeyFile /etc/ssl/private/proftpd.key
+	TLSEngine on
+	TLSLog /var/log/proftpd/tls.log
+	TLSProtocol SSLv23
+	TLSRequired on
+	TLSOptions NoCertRequest EnableDiags NoSessionReuseRequired
+	TLSVerifyClient off
+
+# reinicializando o proftpd
+$ sudo systemctl restart proftpd.service
+
+#
+# ESTACAO
+#
+
+# instalando o aplicativo lftp
+$ sudo apt-get install lftp
+
+# configuracao
+$ vi .lftprc
+	set ftp:ssl-auth TLS
+	set ftp:ssl-force true
+	set ftp:ssl-protect-list yes
+	set ftp:ssl-protect-data yes
+	set ftp:ssl-protect-fxp yes
+	set ssl:verify-certificate no
+
+# conexao
+$ lftp [USER]@[FTP_SERVER]
