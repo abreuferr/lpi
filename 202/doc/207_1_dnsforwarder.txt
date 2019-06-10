@@ -25,15 +25,12 @@ The following is a partial list of the used files, terms and utilities:
 # TEORIA
 #
 
-# um redirecionamento simplesmente transfere todas as
-# solicitacoes feita ao servidor para outro servidor
-# dns, armazenando os resultados temporariamente para
-# agilizar futuras solicitacoes, semelhante a um servidor
-# caching-only.
-#
-# o servidor do tipo forward NAO RESOLVE REQUISICAO, o
-# servidor simplesmente REDIRECIONA as requisicoes para
-# outros servidores e armazena o resultado em cache local.
+# um servidor de dns do tipo FORWARD transfere todas as
+# solicitacoes de resolucao de nome para outro servidor 
+# dns visto que o mesmo nao possui a capacidade de resolucao
+# de nome, ele simplesmente encaminha essa solicitacao para
+# outro servidor de dns. O resultado do pedido de resolucao
+# eh armazenado localmente para agilizar futuras solicitacoes.
 
 #
 # INSTALACAO
@@ -113,6 +110,7 @@ $ sudo named-checkconf /etc/bind/named.conf.options
 # as configuracoes feitas no arquivo de configuracao
 # do bind, named.conf.options.
 $ sudo rndc reload
+	server reload successful
 
 # comando utilizado para limpar o cache do servidor
 # de nome bind.
@@ -122,14 +120,53 @@ $ sudo rndc flush
 $ sudo vi /etc/resolv.conf
 	domain particula.local
 	search particula.local
-	nameserver 192.168.0.4
+	nameserver 192.168.0.5
 
 #
-# TESTE
+# TESTE - DIG
 #
 
-# (DNSFORWARD)
 $ dig kernel.org | grep time
+	;; Query time: 355 msec
+$ dig kernel.org | grep time
+	;; Query time: 1 mse
 
-# (ESTACAO)
-$ dig kernel.org | grep time
+#
+# TESTE - TCPDUMP
+#
+
+# limpando o dns-cache
+$ sudo rndc flush
+
+# gravar os dados da captura em um arquivo.
+$ sudo tcpdump -i ens33 udp port 53 -w cache.pcap
+
+# ler os resultados da captura.
+$ sudo tcpdump -n -t -r cache.pcap port 53
+	# o host 192.168.0.42 faz uma consulta ao servidor dns-forward 192.168.0.5
+	# referente ao dominio kernel.org.
+	IP 192.168.0.42.55637 > 192.168.0.5.53: 23291+ [1au] A? kernel.org. (39)
+
+	# o dns-forward 192.168.0.5 faz uma consulta ao Google, 8.8.4.4
+	IP 192.168.0.5.37668 > 8.8.4.4.53: 18870+ [1au] A? kernel.org. (39)
+
+	# O Google 8.8.4.4 envia a resposta para o dns-forward 192.168.0.5
+	IP 8.8.4.4.53 > 192.168.0.5.37668: 18870 1/0/1 A 198.145.29.83 (55)
+
+	# o dns-forward envia a resposta para o host 192.168.0.42
+	IP 192.168.0.5.53 > 192.168.0.42.55637: 23291 1/0/1 A 198.145.29.83 (55)
+
+# ler os resultados da captura.
+$ sudo tcpdump -n -t -r cache.pcap port 53
+	# o host 192.168.0.42 consulta o dns-forward 192.168.0.42 referente ao
+	# dominio kernel.org.
+	IP 192.168.0.42.60422 > 192.168.0.5.53: 29489+ [1au] A? kernel.org. (39)
+
+	# o dns-foward ja tem a resposta devido a requisicao anterior e ja
+	# envia a reposta para o host.
+	IP 192.168.0.5.53 > 192.168.0.42.60422: 29489 1/0/1 A 198.145.29.83 (55)
+
+# esse teste  demonstra que o servidor dns-forward guardou os dados da 
+# requisicao anterior e na segunda requisicao nao fez a consulta na 
+# internet, ele simplesmente leu o resultado que ele possui em cache e 
+# enviou para o host.
