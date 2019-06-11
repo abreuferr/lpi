@@ -58,6 +58,9 @@ $ sudo vi /etc/bind/named.conf.options
         	allow-query { goodclients; };
 	};
 
+# testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/bind/named.conf.options
+
 # arquivo que contem as entradas das zonas que
 # o bind ira gerenciar.
 #
@@ -99,6 +102,9 @@ $ sudo vi /etc/bind/named.conf.local
 	    	allow-transfer { 192.168.0.6; };
 	};
 
+# testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/bind/named.conf.options
+
 // arquivo de configuracao da zona particula.local.
 // Hostname > IP.
 $ sudo vi /etc/bind/db.particula.local
@@ -130,25 +136,31 @@ $ sudo vi /etc/bind/db.particula.local
 		3600 );		Negative Cache TTL
 
 	; registro dos Name Server (NS).
-		IN NS ns1.particula.local.
-		IN NS ns2.particula.local.
+	@	IN NS ns1.particula.local.
+	@	IN NS ns2.particula.local.
 
 	; registro do Mail Exchange (MX).
 		IN MX 10 srv.particula.local.
 
 	; registro de associacao Hostname e IP Address (A)
 		IN A 192.168.0.5
-	ns1     IN A 192.168.0.5
-	ns2     IN A 192.168.0.6
-	srv    IN A 192.168.0.7
+		IN A 192.168.0.6
+	ns1	IN A 192.168.0.5
+	ns2	IN A 192.168.0.6
+	srv	IN A 192.168.0.7
 
 	; registro do apelido, Canonical Name (CNAME)
 	www	IN CNAME srv
 
+# testando o arquivo de configuracao da zona.
+$ sudo named-checkzone particula.local /etc/bind/db.particula.local
+
 # arquivo de configuracao do dns reverso (IP > Hostname)
 $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 	; Start of Authority (SOA) record
-	$TTL   900
+	$TTL 604800
+	// nome do servidor master da zona - ns1.particula.local
+	// email do admin. da zona - root@particula.local
 	@ IN SOA ns1.particula.local. root.particula.local. (
 		// numero de serie.
 		2010101301;	Serial
@@ -172,10 +184,7 @@ $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 	6       IN PTR    ns2.particula.local.
 	7       IN PTR    srv.particula.local.
 
-# comando utilizado para checar a sintaxe dos
-# arquivos de configuracao do Bind.
-$ sudo named-checkconf
-$ sudo named-checkzone particula.local /etc/bind/db.particula.local
+# testando o arquivo de configuracao da zona reversa.
 $ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192.in-addr.arpa
 
 # reler os arquivos de configuracao do Bind.
@@ -221,11 +230,14 @@ $ sudo vi /etc/bind/named.conf.local
 		masters { 192.168.0.5; };
 	};
 
+# testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/bind/named.conf.options
+
 # reinicializar o bind.
-$ sudo rndc reload
+$ sudo systemctl restart bind9.service
 
 #
-# TROUBLESHOOT
+# NSLOOKUP
 #
 
 # utilizacao do aplicativo NSLOOKUP
@@ -235,12 +247,20 @@ $ nslookup web1.particula.local ; informacao sobre um determinado host
 $ nslookup -query=ns www.particula.local ; NS record
 $ nslookup -debug particula.local ; Debug
 
+#
+# DIG
+#
+
 # utilizacao do aplicativo DIG
 $ dig particula.local A ; A record
 $ dig particula.local MX ; MX record
 $ dig particula.local SOA ; SOA record
 $ dig particula.local TTL ; TTL record
 $ dig particula.local ANY +noall +answer ; ANY record
+
+#
+# HOST
+#
 
 # aplicativo HOST
 $ host [OPCAO] [DOMINIO]
@@ -255,6 +275,62 @@ $ host ns1.particula.local
 $ host www.particula.local
 $ host 192.168.0.5
 $ host -t SOA 0.168.192.in-addr.arpa
+
+#
+# TCPDUMP
+#
+
+# ns1
+# capturar pacote
+$ sudo tcpdump -i ens33 udp port 53 -w ns1.pca
+# ler pacote
+$ sudo tcpdump -n -t -r ns1.pcap port 53
+	# o host 192.168.0.42 pergunta para o NS 192.168.0.6 sobre o dominio particula.local
+	IP 192.168.0.42.59361 > 192.168.0.6.53: 54066+ [1au] A? particula.local. (44)
+
+	# o ns1 192.168.0.6 indica que o dominio particula.local responde pelo ip 192.168.0.6
+	IP 192.168.0.6.53 > 192.168.0.42.59361: 54066* 1/2/3 A 192.168.0.6 (128)
+
+# ns2
+# capturar pacote
+$ sudo tcpdump -i ens33 udp port 53 -w ns2.pca
+# ler pacote
+$ sudo tcpdump -n -t -r ns2.pcap port 53
+	# o host 192.168.0.42 pergunta para o NS 192.168.0.6 sobre o dominio particula.local
+	IP 192.168.0.42.59361 > 192.168.0.6.53: 54066+ [1au] A? particula.local. (44)
+
+	# o ns1 192.168.0.6 indica que o dominio particula.local responde pelo ip 192.168.0.6
+	IP 192.168.0.6.53 > 192.168.0.42.59361: 54066* 1/2/3 A 192.168.0.6 (128)
+
+#
+# TCPDUMP - TRANSFERENCIA DE ZONA - 192.168.0.6 > 192.168.0.7
+#
+
+# ns1 - capturando pacotes tcp
+$ sudo tcpdump -i ens33 tcp port 53 -w ns1.pcap
+
+# ler pacote
+$ sudo tcpdump -n -t -r ns1.pcap port 53
+	IP 192.168.0.7.40515 > 192.168.0.6.53: Flags [S], seq 996073118, win 29200, options [mss 1460,sackOK,TS val 1764217 ecr 0,nop,wscale 5], length 0
+	IP 192.168.0.6.53 > 192.168.0.7.40515: Flags [S.], seq 84849271, ack 996073119, win 28960, options [mss 1460,sackOK,TS val 1781125 ecr 1764217,nop,wscale 5], length 0
+	IP 192.168.0.7.40515 > 192.168.0.6.53: Flags [.], ack 1, win 913, options [nop,nop,TS val 1764217 ecr 1781125], length 0
+	IP 192.168.0.7.40515 > 192.168.0.6.53: Flags [P.], seq 1:36, ack 1, win 913, options [nop,nop,TS val 1764217 ecr 1781125], length 357116 AXFR? particula.local. (33)
+	IP 192.168.0.6.53 > 192.168.0.7.40515: Flags [.], ack 36, win 905, options [nop,nop,TS val 1781125 ecr 1764217], length 0
+	IP 192.168.0.6.53 > 192.168.0.7.40515: Flags [P.], seq 1:275, ack 36, win 905, options [nop,nop,TS val 1781125 ecr 1764217], length 2747116* 11/0/0 SOA, NS ns1.particula.local., NS ns2.particula.local., MX mail.particula.local. 10, A 192.168.0.6, A 192.168.0.9, A 192.168.0.8, A 192.168.0.6, A 192.168.0.7, CNAME apache.particula.local., SOA (272)
+	IP 192.168.0.7.40515 > 192.168.0.6.53: Flags [.], ack 275, win 946, options [nop,nop,TS val 1764217 ecr 1781125], length 0
+	IP 192.168.0.7.40515 > 192.168.0.6.53: Flags [F.], seq 36, ack 275, win 946, options [nop,nop,TS val 1764217 ecr 1781125], length 0
+	IP 192.168.0.6.53 > 192.168.0.7.40515: Flags [F.], seq 275, ack 37, win 905, options [nop,nop,TS val 1781125 ecr 1764217], length 0
+	IP 192.168.0.7.40515 > 192.168.0.6.53: Flags [.], ack 276, win 946, options [nop,nop,TS val 1764217 ecr 1781125], length 0
+	IP 192.168.0.7.50571 > 192.168.0.6.53: Flags [S], seq 2731040310, win 29200, options [mss 1460,sackOK,TS val 1764342 ecr 0,nop,wscale 5], length 0
+	IP 192.168.0.6.53 > 192.168.0.7.50571: Flags [S.], seq 1888910426, ack 2731040311, win 28960, options [mss 1460,sackOK,TS val 1781251 ecr 1764342,nop,wscale 5], length 0
+	IP 192.168.0.7.50571 > 192.168.0.6.53: Flags [.], ack 1, win 913, options [nop,nop,TS val 1764342 ecr 1781251], length 0
+	IP 192.168.0.7.50571 > 192.168.0.6.53: Flags [P.], seq 1:43, ack 1, win 913, options [nop,nop,TS val 1764342 ecr 1781251], length 4235999 AXFR? 0.168.192.in-addr.arpa. (40)
+	IP 192.168.0.6.53 > 192.168.0.7.50571: Flags [.], ack 43, win 905, options [nop,nop,TS val 1781251 ecr 1764342], length 0
+	IP 192.168.0.6.53 > 192.168.0.7.50571: Flags [P.], seq 1:247, ack 43, win 905, options [nop,nop,TS val 1781251 ecr 1764342], length 24635999* 8/0/0 SOA, NS ns1.particula.local., NS ns2.particula.local., PTR ns1.particula.local., PTR ns2.particula.local., PTR mail.particula.local., PTR apache.particula.local., SOA (244)
+	IP 192.168.0.7.50571 > 192.168.0.6.53: Flags [.], ack 247, win 946, options [nop,nop,TS val 1764343 ecr 1781251], length 0
+	IP 192.168.0.7.50571 > 192.168.0.6.53: Flags [F.], seq 43, ack 247, win 946, options [nop,nop,TS val 1764343 ecr 1781251], length 0
+	IP 192.168.0.6.53 > 192.168.0.7.50571: Flags [F.], seq 247, ack 44, win 905, options [nop,nop,TS val 1781251 ecr 1764343], length 0
+	IP 192.168.0.7.50571 > 192.168.0.6.53: Flags [.], ack 248, win 946, options [nop,nop,TS val 1764343 ecr 1781251], length 0
 
 #
 # UTILITARIO
