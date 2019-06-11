@@ -37,13 +37,13 @@ Terms and Utilities:
 # de informacoes e configuracao entre os servidores primario e 
 # sencundario.
 $ cd /etc/bind/
-$ dnssec-keygen -a HMAC-MD5 -b 512 -n USER ns-particula-local_rndc-key
+$ dnssec-keygen -a HMAC-MD5 -b 512 -n USER particula_local
 	-a especificar qual eh o algoritmo que sera utilizado para criar as chaves
 	-b especifica o tamanho da chave
 	-n especifica o tipo de chave
 
 # conteudo da chave privada
-$ sudo cat Kns-particula-local_rndc-key.+157+11082.private
+$ sudo cat Kparticula_local.+157+11082.private
 	Private-key-format: v1.3
 	Algorithm: 157 (HMAC_MD5)
 	Key: xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==
@@ -54,21 +54,21 @@ $ sudo cat Kns-particula-local_rndc-key.+157+11082.private
 
 $ sudo vi /etc/bind/named.conf.local
 	// chave de criptografia tsig
-	key "ns-particula-local_rndc-key" {
+	key "particula_local" {
         	algorithm hmac-md5;
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
 	};
 
 	// servidor secundario/slave
 	server 192.168.0.6 {
-        	keys { ns-particula-local_rndc-key; };
+        	keys { particula_local; };
 	};
 
 	// configuracao da zona particula.local
 	zone "particula.local" {
         	type master;
 	        file "/etc/bind/db.particula.local";
-        	allow-update { key "ns-particula-local_rndc-key"; };
+        	allow-update { key "particula_local"; };
 	        notify yes;
 	};
 
@@ -76,11 +76,21 @@ $ sudo vi /etc/bind/named.conf.local
 	zone "0.168.192.in-addr.arpa" {
         	type master;
 	        file "/etc/bind/db.0.168.192.in-addr.arpa";
-        	allow-update { key "ns-particula-local_rndc-key"; };
+        	allow-update { key "particula_local"; };
 	};
+
+# testar o arquivo de configuracao
+$ sudo named-checkconf /etc/bind/named.conf.options
 
 # relendo os arquivos de configuracao do bind.
 $ sudo rndc reload
+
+# visualizando log
+$ sudo cat /var/log/syslog
+Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#58421/key particula_local (particula.local): transfer of 'particula.local/IN': AXFR-style IXFR started: TSIG particula_local (serial 2019061009)
+Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#58421/key particula_local (particula.local): transfer of 'particula.local/IN': AXFR-style IXFR ended
+Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#53429/key particula_local (0.168.192.in-addr.arpa): transfer of '0.168.192.in-addr.arpa/IN': AXFR-style IXFR started: TSIG particula_local (serial 2019061009)
+Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#53429/key particula_local (0.168.192.in-addr.arpa): transfer of '0.168.192.in-addr.arpa/IN': AXFR-style IXFR ended
 
 #
 # CONFIGURACAO DO DNS SECUNDARIO (NS2 - 192.168.0.6)
@@ -89,14 +99,14 @@ $ sudo rndc reload
 $ sudo vi /etc/bind/named.conf.local
 	// chave de criptografia tsig gerada no servidor
 	// primario/master.
-	key "ns-particula-local_rndc-key" {
+	key "particula_local" {
         	algorithm hmac-md5;
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
 	};
 
 	// servidor primario
 	server 192.168.0.5 {
-        	keys { ns-particula-local_rndc-key; };
+        	keys { particula_local; };
 	};
 
 	// configuracoes da zona particula.local
@@ -104,7 +114,7 @@ $ sudo vi /etc/bind/named.conf.local
         	type slave;
 	        file "/etc/bind/db.particula.local";
         	masters { 192.168.0.5; };
-	        allow-transfer { key "ns-particula-local_rndc-key"; };
+	        allow-transfer { key "particula_local"; };
 	};
 
 	// configuracao do dns reverso da zona particula.local
@@ -112,8 +122,20 @@ $ sudo vi /etc/bind/named.conf.local
         	type slave;
 	        file "/etc/bind/db.0.168.192.in-addr.arpa";
         	masters { 192.168.0.5; };
-	        allow-transfer { key "ns-particula-local_rndc-key"; };
+	        allow-transfer { key "particula_local"; };
 	};
+
+# testar o arquivo de configuracao
+$ sudo named-checkconf /etc/bind/named.conf.options
 
 # relendo os arquivos de configuracao do bind.
 $ sudo rndc reload
+
+# visualizando log
+$ sudo cat /var/log/syslog
+Jun 10 22:04:53 ns2 named[1411]: zone 0.168.192.in-addr.arpa/IN: notify from 192.168.0.6#59970: serial 2019061009
+Jun 10 22:04:53 ns2 named[1411]: zone 0.168.192.in-addr.arpa/IN: Transfer started.
+Jun 10 22:04:53 ns2 named[1411]: transfer of '0.168.192.in-addr.arpa/IN' from 192.168.0.6#53: connected using 192.168.0.7#53429
+Jun 10 22:04:53 ns2 named[1411]: zone 0.168.192.in-addr.arpa/IN: transferred serial 2019061009: TSIG 'particula_local'
+Jun 10 22:04:53 ns2 named[1411]: transfer of '0.168.192.in-addr.arpa/IN' from 192.168.0.6#53: Transfer status: success
+Jun 10 22:04:53 ns2 named[1411]: transfer of '0.168.192.in-addr.arpa/IN' from 192.168.0.6#53: Transfer completed: 1 messages, 8 records, 329 bytes, 0.001 secs (329000 bytes/sec)
