@@ -232,9 +232,13 @@ $ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
 
 # configuracao do cache
 $ sudo vi /etc/nginx/nginx.conf
+	(...)
 	http {
+		include /etc/nginx/conf.d/*.conf;
+		include /etc/nginx/sites-enabled/*;
 		proxy_cache_path /var/www/particula.local/cache/ keys_zone=one:10m max_size=500m inactive=24h use_temp_path=off;
 	}
+	(...)
 
 # configuracao do dominio virtual particula.local
 # para trabalhar com proxy reverso
@@ -243,7 +247,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		# geral
         	listen 80;
 		listen [::]:80;
-	        server_name www.particula.local;
+	        server_name *.particula.local;
 
 	        # log files
 	        access_log  /var/log/nginx/particula.local_access.log;
