@@ -83,6 +83,9 @@ $ sudo vi /etc/nginx/nginx.conf
 		(...)
 	}
 
+# testar os arquivos de configuracao.
+$ sudo nginx -t
+
 #
 # VIRTUAL HOST
 #
@@ -103,7 +106,7 @@ $ sudo vi /var/www/particula.local/html/index.html
 		</body>
 	</html>
 
-# arquivo de configuracao do dominio virtual particula.local.
+# arquivo de configuracao BASICA do dominio virtual particula.local.
 $ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# porta em que o nginx ira trabalhar, ipv4 e ipv6
@@ -120,18 +123,9 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		# nome do dominio
 		server_name *.particula.local;
 
-		# rede de trabalho
-		allow 192.168.0.0/24;
-		deny all;
-
 		# arquivos de log gerados pelo dominio virtual.
 		access_log  /var/log/nginx/particula.local_access.log;
 		error_log   /var/log/nginx/particula.local_error.lg;
-
-		# utilizacao de compactacao na transmissao dos dados entre
-		# servidor nginx e o browser localizado na estacao.
-		gzip          on;
-		gzip_types    text/html text/plain text/css image/*;
 	}
 
 # ativando o dominio virtual particula.local
@@ -175,6 +169,9 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
 	        listen 80;
 	        listen [::]:80;
+
+		# nome do dominio
+		server_name *.particula.local;
 
 	        # redirecionar o trafego HTTP para o HTTPS
 	        # desta forma, se por acaso o usuario digitar
