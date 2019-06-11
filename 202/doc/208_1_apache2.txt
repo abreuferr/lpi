@@ -32,23 +32,7 @@ Terms and Utilities:
 - httpd, apache2
 
 #
-# INSTALACAO
-#
-
-# instalacao do apache 
-$ sudo apt-get install apache2
-
-# instalacao do modulo para controlar requisicao do apache2
-$ sudo apt-get install libapache2-mpm-itk -y -d
-
-# instalacao do modulo PHP no Apache2
-$ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
-
-# instalacao do modulo Perl no Apache2
-$ sudo apt-get install libapache2-mod-perl2 -y -d
-
-#
-# DIRETORIOS/ARQUIVOS DE CONFIGURACAO
+# TEORIA
 #
 
 #       /etc/apache2/
@@ -64,52 +48,103 @@ $ sudo apt-get install libapache2-mod-perl2 -y -d
 
 # principal arquivo de configuracao do apache2 que contem 
 # os paramatros globais de configuracao do apache2.
-$ /etc/apache2/apache2.conf
+#
+# /etc/apache2/apache2.conf
 
 # diretorio que contem varios arquivos de configuracao.
-$ /etc/apache2/conf-available/
+#
+# /etc/apache2/conf-available/
 
 # diretorio que contem varios arquivos de configuracao e
 # que estao ativos. Link simbolico para os arquivos presentes
 # no diretorio /etc/apache2/conf-available.
-$ /etc/apache2/conf-enable/
+#
+# cat /etc/apache/apache.conf
+#	Include generic snippets of statements
+#	IncludeOptional conf-enabled/*.conf
+#
+# /etc/apache2/conf-enable/
 
 # arquivo que contem uma serie de variaveis de configuracao 
 # do apache2.
-$ /etc/apache2/envvars
+#
+# /etc/apache2/envvars
 
 # diretorio que contem uma serie de arquivos de configuracao
 # do modulos presentes no apache2.
-$ /etc/apache2/mods-available/
+#
+# /etc/apache2/mods-available/
 
 # diretorio que contem uma serie de arquivos de configuracao
 # dos modulos presentes no apache2. neste caso, os arquivos
 # sao links simbolicos que apontam para o diretorio
 # /etc/apache2/mods-available e sao utilizados para ativar
 # os modulos.
-$ /etc/apache2/mods-enable/
+#
+# cat /etc/apache/apache.conf
+#	Include module configuration:
+#	IncludeOptional mods-enabled/*.load
+#	IncludeOptional mods-enabled/*.conf
+#
+# para visualizar quais modulos estao ativos no apache2
+# basta executar o comando "apache2ctl -M".
+#
+# /etc/apache2/mods-enable/
 
-# arquivo que define quais portas o apache2 ira escutar
-# e trabalhar.
-$ /etc/apache2/ports.conf
+# arquivo que define quais portas o apache2 ira trabalhar.
+#
+# cat /etc/apache/apache.conf
+#	Include list of ports to listen on
+#	Include ports.conf
+#
+# /etc/apache2/ports.conf
 
 # diretorio que contem arquivos de configuracao dos 
 # dominios virtuais.
-$ /etc/apache2/sites-available/
+#
+# /etc/apache2/sites-available/
 
 # diretorio que contem os arquivos de configuracao
 # dos sites que estao ativos. os arquivos sao links
 # simbolicos que apontam para o diretorio /sites-available
-$ /etc/apache2/sites-enable
+#
+# cat /etc/apache/apache.conf
+#	Include the virtual host configurations:
+#	IncludeOptional sites-enabled/*.conf
+#
+# /etc/apache2/sites-enable/
+
+#
+# INSTALACAO
+#
+
+# instalacao do apache 
+#
+$ sudo apt-get install apache2
+
+# instalacao do modulo para controlar requisicao do apache2
+#
+$ sudo apt-get install libapache2-mpm-itk -y -d
+
+# instalacao do modulo PHP no Apache2
+#
+$ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
+
+# instalacao do modulo Perl no Apache2
+#
+$ sudo apt-get install libapache2-mod-perl2 -y -d
+
 
 #
 # LOG
 #
 
 # arquivo de log referente aos acesso
+#
 $ sudo cat /var/log/apache2/access.log
 
 # arquivo de log referente aos erros
+#
 $ sudo cat /var/log/apache2/error.log
 
 # parametros definidos no arquivo
@@ -129,6 +164,7 @@ $ sudo cat /var/log/apache2/error.log
 #
 
 # configuracao do modulo MPM, modulo instalado por padrao.
+#
 $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 	<IfModule mpm_event_module>
 		# numero inicial de processos que o apache inicializa.
@@ -159,9 +195,11 @@ $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 
 # diretorio a onde sera armazenado os arquivos do site
 # particula.com.br/www.particula.local
+#
 $ sudo mkdir -p /var/www/particula.local/html
 
 # arquivo indice do site
+#
 $ sudo vi /var/www/particula.local/html/index.html
 	<!DOCTYPE html>
 	<html lang="en" dir="ltr">
@@ -176,9 +214,11 @@ $ sudo vi /var/www/particula.local/html/index.html
 
 # alterando a permissao do diretorio a onde esta armazenado
 # os arquivos referentes ao dominio particula.local
+#
 $ sudo chown -R www-data: /var/www/particula.local
 
 # arquivo de configuracao do dominio particula.local
+#
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	# criacao do virtual host
 	# qualquer ip * e porta 80
@@ -218,55 +258,19 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 		CustomLog ${APACHE_LOG_DIR}/particula.local-access.log combined
 	</VirtualHost>
 
-	OU
-
-	# criacao do virtual host
-	<VirtualHost 192.168.0.8:80>
-		# dominio que o site ira responder
-		ServerName particula.local
-		
-		# todos os outros dominios ou subdominios que 
-		# ser utilizado por esse host.
-		ServerAlias www.particula.local
-
-		# e-mail do administrador do site.
-		ServerAdmin webmaster@particula.local
-
-		# DocumentRoot: diretorio a onde sera armazenado 
-		# os arquivos deste dominio.
-		DocumentRoot /var/www/particula.local/html
-
-		# diretivas referente ao diretorio.
-		<Directory /var/www/particula.local/html>
-			# Indexes: previnde as diretivas listadas.
-			# FollowSymLinks: quando essa opcao eh ativada, 
-			# o apache ira seguir os links simbolicos
-			Options Indexes FollowSymLinks
-		
-			# AllowOverride: especifica quais diretivas que 
-			# foram declaradas no arquivo .htaccess e que serao 
-			# sobrepostas as direticas da configuracao padrao
-			AllowOverride none
-			Order allow,deny
-			Allow from all
-			Require all granted
-		</Directory>
-
-		# nome o localizacao dos arquivos de log
-		ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
-		CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
-	</VirtualHost>
-
 # ativar as diretivas de configuracao - forma automatica
 $ sudo a2ensite particula.local
 # ativar as diretivas de configuracao - forma manual
+#
 $ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/
 
 # checagem da configuracao do apache2
+#
 $ sudo apache2ctl configtest
 
 # reler as configuracoes do apache
-$ sudo apache2ctl restart
+#
+$ sudo apache2ctl graceful
 
 #
 # MODULO PERL
@@ -274,6 +278,7 @@ $ sudo apache2ctl restart
 
 # alterando o arquivo de configuracao do dominio para permitir que o mesmo
 # possa trabalhar com a liguagem de programacao Perl.
+#
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 	(...)
@@ -287,34 +292,37 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 		PerlHandler ModPerl::Registry
 		PerlSendHeader On
 		Options +ExecCGI
-		AllowOverride None
 		(...)
 	</Directory>
 	(...)
 
-# arquivo para teste.
-$ sudo vi /var/www/particula.local/html/perltest.pl
-	##!/usr/bin/perl -w
-	print "Content-type: text/html\r\n\r\n";
-	print "Hello there!<br />\nJust testing .<br />\n";
-
-	for ($i=0; $i<10; $i++)
-	{
-		print $i."<br />";
-	}
-
-# checagem da configuracao do apache2
+# testando o arquivo de configuracao
+#
 $ sudo apache2ctl configtest
 
 # reinicializar o apache2
+#
 $ sudo apache2ctr restart
 
+# arquivo para teste.
+#
+$ sudo vi /var/www/particula.local/html/perltest.pl
+	#!/usr/bin/perl
+	print "Content-type: text/html\n\n";
+	print "Hello, World.";
+
 # teste
+#
 $ w3m http://www.particula.local/perltest.pl
 
 #
-# AUTENTICACAO DE ACESSO ARAVES DE USUARIO E SENHA
+# AUTENTICACAO DE ACESSO ATRAVES DE USUARIO/GRUPO E SENHA
 #
+
+# ativar o modulo "authz_groupfile" para que a opcao
+# "AuthgroupFile [FILE]" possa ser utilizada.
+#
+$ sudo a2enmod authz_groupfile
 
 $ sudo /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
@@ -327,10 +335,13 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 		# nao existe a possibilidade de autenticacao tanto
 		# por usuario quanto por grupo. Eh necessario que
 		# seja escolhido somente uma forma de autenticacao.
-		AuthUserFiles /var/www/particula.local/webpass
+		AuthUserFile /var/www/particula.local/webpass.user
 		Require valid-user
-		
-		AuthGroupFiles /var/www/particula.local/particula.group
+	
+		# quando a opcao AuthGroupFile eh ativada, a opcao
+		# "Require valid-user" deve ser substituida pela
+		# opcao "Require group [GRUPO]"
+		AuthGroupFile /var/www/particula.local/webpass.group
 		Require group particula
 	        
 		AllowOverride none
@@ -340,57 +351,41 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 	    (...)
 	</VirtualHost>
 
-	OU
-
-	<VirtualHost 192.168.0.8:80>
-	    (...)
-	    <Directory /var/www/particula.local/html>
-		# tipo de autenticacao.
-                AuthType Basic
-		# texto que aparece na janela pedindo usuario/senha.
-                AuthName "area restrita"
-		# diretorio a ond fica localizado o arqiuvo com usuario e senha.
-                AuthUserFile /var/www/particula.local/webpass
-		# qual condicao precisa ser satisfeita para o processo ir adiante.
-                Require valid-user
-
-                Options +FollowSymLinks +Multiviews +Indexes
-
-		# None - ignora a existencia do arquivo .htaccess
-                AllowOverride None
-
-		# controle para ter o acesso a essa pagina.
-		Order allow,deny
-    		Allow from 192.16.0.0/24
-	    </Directory>
-	    (...)
-	</VirtualHost>
-
 # checagem da configuracao do apache2
+#
 $ sudo apachectl configtest
 
 # reinicializar o apache2
+#
 $ sudo systemctl restart apache2
 
 # criar o arquivo webpass a onde sera armazenado o usuario
 # e a senha dele.
-$ sudo htpasswd -c /var/www/particula.local/webpass [USUARIO]
+#
+$ sudo htpasswd -c /var/www/particula.local/webpass.user [USUARIO]
+
+# adicionar novos usuario ao arquivo webpass.user
+#
+$ sudo htpasswd /var/www/particula.local/webpass.user [USUARIO]
 
 # grupo de usuarios.
-$ sudo vi /var/www/particula.local/particula.group
+#
+$ sudo vi /var/www/particula.local/webpass.group
 	particula: cosmo caio
 
 # alterando as permissoes do arquivo
-$ sudo chown www-data /var/www/particula.local/webpass
-$ sudo chmod 640 /var/www/particula.local/webpass
+#
+$ sudo chown www-data /var/www/particula.local/webpass.*
+$ sudo chmod 640 /var/www/particula.local/webpass.*
 
-###
+#
 # Security Apache
-###
+#
 
 # neste caso, a configuracao abaixo sera refletida em todos
 # os dominios virtuais, visto que os parametros foram
 # acrescentados no arquivo de configuracao geral do apache.
+#
 $ sudo vi /etc/apache2/apache2.conf
 	# nao exibe a versao do apache
 	ServerSignature Off
