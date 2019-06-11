@@ -42,6 +42,9 @@ $ sudo a2enmod ssl
 # ativar o modulo default-ssl
 $ sudo a2ensite default-ssl
 
+# ativar o modulo de redirecionamento
+$ sudo a2enmod rewrite
+
 # reinicializar o apache2
 $ sudo systemctl restart apache2
 
@@ -56,21 +59,19 @@ $ sudo chmod 400 /etc/apache2/ssl/*
 
 # arquivo de configurca
 $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
-	# virtual host trabalhar tanto na porta 80/HTTP
-	# quanto na porta 443/HTTPS 
-	NameVirtualHost *:443
-	NameVirtualHost *:80
-
 	# inicio da configuracao do virtualhost, HTTP
 	<VirtualHost *:80>
 		# dominio do dominio virtual
 	        ServerName particula.local
 
+		# alias do dominio virtual
+	        ServerAlias www.particula.local
+
 		# diretorio a onde fica armazenado o arquivos do site
 	        DocumentRoot /var/www/particula.local/html
 	
 		# redirecionamento do HTTP para o HTTPS
-	        Redirect permanent "/" "https://www.particula.local/"
+	        Redirect permanent / https://www.particula.local/
 
 	</VirtualHost>
 
