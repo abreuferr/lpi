@@ -56,6 +56,7 @@ $ sudo vi /etc/squid/squid.conf
 	# definindo nome e rede
 	acl localhost src 127.0.0.1/32
 	acl localnet src 192.168.0.0/24
+	acl free_access time MTWHF 12:00-13:00
 
 	# definicao de portas
 	acl SSL_ports port 443
@@ -79,7 +80,7 @@ $ sudo vi /etc/squid/squid.conf
 
 	# protocolo HTTP liberado o acesso para as acl LOCALNET
 	# e LOCALHOST.
-	http_access allow localnet
+	http_access allow localnet free_access
 	http_access allow localhost
 
 	# o restante eh negado o acesso.
