@@ -282,17 +282,16 @@ $ sudo apache2ctl graceful
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 	(...)
-	# ativando o modulo do Perl.
+	# perl
 	PerlModule ModPerl::Registry
-	<Directory /var/www/particula.local/html>
-		(...)
-		# ativando a opcao de trabalhar com uma linguagem
-		# de programacao
-		SetHandler perl-script
-		PerlHandler ModPerl::Registry
-		PerlSendHeader On
+	SetHandler perl-script
+	PerlHandler ModPerl::Registry
+	PerlSendHeader On
+	ScriptAlias /cgi-bin/ /var/www/particula.local/cgi-bin/
+	AddHandler cgi-script .pl
+	TypesConfig /etc/mime.types
+	<Directory /var/www/particula.local/cgi-bin>
 		Options +ExecCGI
-		(...)
 	</Directory>
 	(...)
 
@@ -306,13 +305,15 @@ $ sudo apache2ctr restart
 
 # arquivo para teste.
 #
-$ sudo vi /var/www/particula.local/html/perltest.pl
+$ sudo mkdir -p /var/www/particula.local/cgi-bin/
+$ sudo vi /var/www/particula.local/cgi-bin/perltest.pl
 	#!/usr/bin/perl
 	print "Content-type: text/html\n\n";
 	print "Hello, World.";
 
 # teste
 #
+$ sudo perl -Tw /var/www/particula.local/cgi-bin/perltest.pl
 $ w3m http://www.particula.local/perltest.pl
 
 #
