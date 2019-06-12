@@ -33,9 +33,20 @@ Terms and Utilities:
 # OBS
 #
 
-Esse texto se refere a configuracao do Samba para
-o compartilhamento de diretorios, sejam eles publicos
-ou de acesso restrito.
+# Esse texto se refere a configuracao do Samba para
+# o compartilhamento de diretorios, sejam eles publicos
+# ou de acesso restrito.
+
+#
+# PRE
+#
+
+# adicionar o seguinte parametro no final do arquivo.
+$ sudo vi /etc/security/limits.conf
+	* - nofile 16384
+
+# reinicializar o computador.
+$ sudo reboot
 
 #
 # INSTALACAO
@@ -58,7 +69,7 @@ $ sudo systemctl status nmbd
 #
 # USUARIO
 #
-# em uma primeira etapara, serao criados alguns usuarios 
+# em uma primeira etapa, serao criados alguns usuarios 
 # para os mesmos possam acessar os arquivos compartilhados.
 # configuracao mais simples do samba, compartilhar arquivo.
 #
@@ -67,16 +78,24 @@ $ sudo systemctl status nmbd
 # forma, eh possivel redimensionar o tamanho da pasta de acordo
 # com as necessidades do sysadmin.
 
-# adicionar usuario
+# criar usuario
+$ sudo mkdir -p /home/samba/marcos
+$ sudo adduser --home /home/samba/marcos --no-create-home --shell /usr/sbin/nologin --ingroup sambashare marcos
+$ sudo chown marcos:sambashare /home/samba/marcos/
+$ sudo chmod 2770 /home/samba/marcos
+
+# adicionar usuario ao grupo sambashare
 # sudo useradd [USER] -m -G [GROUP]
-$ sudo useradd cosmo -m -G sambashare
 $ sudo useradd caio -m -G sambashare
 
 # cadastrar a senha o usuario adicionado
 # no comando anterior.
 # sudo smbpasswd -a [USER]
-$ sudo smbpasswd -a cosmo
+# sudo smbpasswd -e [USER]
 $ sudo smbpasswd -a caio
+$ sudo smbpasswd -e caio
+$ sudo smbpasswd -a marcos
+$ sudo smbpasswd -e marcos
 
 #
 # PASTAS COMPARTILHADA
@@ -101,7 +120,7 @@ $ sudo chmod -R 0775 /home/samba/anonymous/
 #
 
 # copia de seguranca do arquivo de configuracao
-$ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.bkp
+$ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.origin
 
 # editando o arquivo de configuracao do samba
 $ sudo vi /etc/samba/smb.conf
@@ -112,6 +131,9 @@ $ sudo vi /etc/samba/smb.conf
 	# descricao do servidor para os hosts da rede.
 	server string = Samba Server %v
 	netbios name = debian
+
+	# definir a interface de rede do computador.
+	interfaces = ens33
 	
 	# utilizando a diretiva de seguranca "User Level Security".
 	# a diretiva USER indica que as informacoes de usuario e senha
@@ -137,9 +159,6 @@ $ sudo vi /etc/samba/smb.conf
 	# acessar o servidor samba.
 	hosts allow = 127.0.0.0/8 192.168.0.0/24
 
-	# nivel de log que sera gerado.
-	syslog = 0
-
 	# arquivos de log que sera gerado.
 	log file = /var/log/samba/log.%m
 
@@ -157,7 +176,7 @@ $ sudo vi /etc/samba/smb.conf
 	comment = All Users
 
 	# especificar o diretorio que sera compartilhado.
-	path = /home/shares/allusers
+	path = /home/samba/allusers
 
 	# especificar os usuarios e grupos de usuairos que 
 	# poderao o compartilhamento [allusers].
@@ -203,6 +222,31 @@ $ sudo vi /etc/samba/smb.conf
 
 	# eh permitido convidado.
 	guest ok = yes
+
+	# foi criado uma pasta para que o usuario possa
+	# utiliza-la como repositorio de dados.
+	[marcos]
+        path = /home/samba/marcos
+        browseable = no
+        read only = no
+        force create mode = 0660
+        force directory mode = 2770
+        valid users = marcos
+
+	[printers] 
+	browseable = No 
+	comment = All Printers 
+	create mask = 0600 
+	path = /var/tmp 
+	printable = Yes                                                                                                                           
+                                                                                                                          
+	[print$]                                                                                                                                
+	comment = Printer Drivers                                                                                                                  
+	create mask = 0664                                                                                                                         
+	directory mask = 0775                                                                                                                      
+	force group = @printadmin                                                                                                                  
+	path = /var/lib/samba/drivers 
+	write list = @printadmin root 
 
 # aplicativo utilizado para testar os parametros e verificar se 
 # existe algum problema na sintaxe do arquivo de configuracao
