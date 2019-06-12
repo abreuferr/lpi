@@ -95,16 +95,7 @@ $ sudo mkdir -p /var/www/particula.local/html
 
 # arquivo com a pagina indice do site.
 $ sudo vi /var/www/particula.local/html/index.html
-	<!DOCTYPE html>
-	<html>
-		<head>
-			<title>Nginx - particula.local</title>
-		</head>
-		<body>
-			<h1>Welcome to particula.local</h1>
-			<p>Particula.local Test Page running on NGINX Web Server</p>
-		</body>
-	</html>
+	nginx.particula.local
 
 # arquivo de configuracao BASICA do dominio virtual particula.local.
 $ sudo vi /etc/nginx/sites-available/particula.local
@@ -225,10 +216,11 @@ $ sudo nginx -s reload
 #
 
 # diretorio a onde sera armazenado o cache
-$ sudo mkdir -p /var/www/particula.local/cache
+$ sudo mkdir -p /var/cache/nginx
+$ sudo chmod 770 /var/cache/nginx
 
 # copia de seguranca
-$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
+$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.origin
 
 # configuracao do cache
 $ sudo vi /etc/nginx/nginx.conf
@@ -236,7 +228,20 @@ $ sudo vi /etc/nginx/nginx.conf
 	http {
 		include /etc/nginx/conf.d/*.conf;
 		include /etc/nginx/sites-enabled/*;
-		proxy_cache_path /var/www/particula.local/cache/ keys_zone=one:10m max_size=500m inactive=24h use_temp_path=off;
+
+		proxy_cache my_cache;
+		proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m max_size=9000g inactive=1d;
+		proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+		proxy_temp_path /var/cache/nginx/temp;
+		proxy_cache_lock on;
+		proxy_bind 0.0.0.0;
+		proxy_cache_valid 200 302 10m;
+		proxy_cache_valid 301 1h;
+		proxy_cache_valid any 1m;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
 	}
 	(...)
 
@@ -251,7 +256,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 
 	        # log files
 	        access_log  /var/log/nginx/particula.local_access.log;
-        	error_log   /var/log/nginx/particula.local_error.lg;
+        	error_log   /var/log/nginx/particula.local_error.log;
 
 		# proxy reverso
 	        location / {
