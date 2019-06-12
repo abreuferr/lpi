@@ -80,6 +80,9 @@ $ sudo vi /etc/ldap/ldap.conf
 # arquivo de configuracao.
 $ sudo cp /usr/share/slapd/slapd.conf /etc/ldap/
 
+# gerando o hash da senha do usuario admin/rootpw
+$ sudo slappasswd -h {SSHA}
+
 # editando arquivo de configuracao.
 $ sudo vi /etc/ldap/slapd.conf
 	# Global Directives:
