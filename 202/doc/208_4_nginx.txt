@@ -219,6 +219,9 @@ $ sudo nginx -s reload
 $ sudo mkdir -p /var/cache/nginx
 $ sudo chmod 770 /var/cache/nginx
 
+# comando utilizado para limpara o cache
+$ sudo find /var/cache/nginx -type f -delete
+
 # copia de seguranca
 $ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.origin
 
