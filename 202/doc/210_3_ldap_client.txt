@@ -53,14 +53,14 @@ $ ldapsearch -D "cn=admin,dc=particula,dc=local" -W '(objectclass=*)'
 #
 
 # arquivo LDIF.
-$ cat base.ldif
+$ cat base_ou.ldif
 	# people
 	dn: ou=people,dc=particula,dc=local
 	ou: People
 	objectClass: top
 	objectClass: organizationalUnit
 
-	# groups
+	# group
 	dn: ou=group,dc=particula,dc=local
 	ou: Group
 	objectClass: top
@@ -97,7 +97,7 @@ $ cat user_cosmo.ldif
 
 # comando utilizado para adicionar um registro no servidor ldap atraves 
 # do arquivo LDIF.
-$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base.ldif
+$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f user_cosmo.ldif
 
 #
 # LDAPPASSWD
@@ -111,7 +111,7 @@ $ ldappasswd -D cn=admin,dc=particula,dc=local -W -S uid=cosmo,ou=people,dc=part
 #
 
 # apagando registro na base de dados do servidor ldap.
-$ ldapdelete -D cn=admin,dc=particula,dc=local -W uid=cosmo,ou=people,dc=particula,dc=local -h openldap.particula.local
+$ ldapdelete -D cn=admin,dc=particula,dc=local -W uid=cosmo,ou=people,dc=particula,dc=local
 
 #
 # LDAPMODIFY
@@ -142,14 +142,12 @@ $ cat add_cosmo.ldif
 	gidNumber: 1000
 	homeDirectory: /home/cosmo/
 	description: cosmo comics - big boss
-
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f add_cosmo.ldif
 
 # apagando um registro.
 $ cat delete_cosmo.ldaif
 	dn: uid=cosmo,ou=people,dc=particula,dc=local
 	changetype: delete
-
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_cosmo.ldif
 
 # adicionando um atributo em um registro.
@@ -158,7 +156,6 @@ $ cat add_atributo_cosmo.ldaif
 	changetype: modify
 	add: facsimileTelephoneNumber
 	facsimileTelephoneNumber: +55 51 1234 4321
-
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f add_atributo_cosmo.ldif
 
 # modificando um atributo em um registro.
@@ -167,7 +164,6 @@ $ cat modify_atributo_cosmo.ldaif
 	changetype: modify
 	replace: uidNumber
 	uidNumber: 1001
-
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f modify_atributo_cosmo.ldif 
 
 # apagando um atributo em um registro.
@@ -175,5 +171,4 @@ $ cat delete_atributo_cosmo.ldif
 	dn: uid=cosmo,ou=people,dc=particula,dc=local
 	changetype: modify
 	delete: facsimileTelephoneNumber
-
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_atributo_cosmo.ldif
