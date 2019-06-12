@@ -176,46 +176,6 @@ $ sudo slaptest -f /etc/ldap/slapd.conf
 $ sudo systemctl restart slapd.service
 
 #
-# ARQUIVO LDIF
-#
-
-# arquivo ldif para OU
-$ vi ou.ldif
-	dn: ou=users,dc=particula,dc=local
-	objectClass: organizationalUnit
-	ou: users
-
-	dn: ou=groups,dc=particula,dc=local
-	objectClass: organizationalUnit
-	ou: groups
-
-# arquivo ldif para CN
-$ vi cn.ldif
-	dn: cn=department,ou=groups,dc=particula,dc=local
-	objectClass: posixGroup
-	cn: department
-	gidNumber: 5000
-
-# arquivo ldif para UID/USUARIO
-$ vi uid.ldif
-	dn: uid=cosmo,ou=users,dc=particula,dc=local
-	objectClass: inetOrgPerson
-	objectClass: posixAccount
-	objectClass: shadowAccount
-	uid: cosmo
-	sn: cosmo
-	givenName: cosmo
-	cn: cosmo
-	displayName: cosmo
-	uidNumber: 2000
-	gidNumber: 2000
-	# senha obtida atraves do comando "slappasswd -h {SSHA}"
-	userPassword: {SSHA}sqEZ7QudyCwlOUFAm/qUy4w4IAX+8Cim
-	gecos: cosmo
-	loginShell: /bin/bash
-	homeDirectory: /home/cosmo
-
-#
 # COMANDO SLDAPADD
 #
 
