@@ -64,6 +64,11 @@ $ sudo vi /etc/bind/named.conf.options
 		// de configurcao do bind e da zona.
         	directory "/etc/bind";
 
+		// o bind ficara escutando a porta 53 e ira
+		// responder a requisicoes vindas do 127.0.0.1
+		// e de estacoes provenientes de "clients".
+		listen-on port 53 { 127.0.0.1; clients; };
+
 		// se por acaso a resposta estiver no cache, o
 		// servidor ira enviar para o resolver. se por
 		// acaso nao tiver a resposta, ira requisitar
@@ -73,7 +78,15 @@ $ sudo vi /etc/bind/named.conf.options
 		// somente estacoes que estiverem na ACL poderao
 		// fazer a requisicao QUERY de resolucao de um 
 		// dominio.
-		allow-query { clients; };
+		allow-query { 127.0.0.1; clients; };
+
+		// somente localhost e estacoes que estiverem na 
+		// ACL poderao serao atendidas requisicao de recursao.
+		allow-recursion { 127.0.0.1; clients; };
+
+		// nao sera feito o processo de transferencia de zona
+		// para nenhum servidor da rede.
+		allow-transfer { none; };
 
 		// - o servidor do tipo FORWARDER executa somente o 
 		// processo de consulta, ele nao eh responsavel por
@@ -116,7 +129,13 @@ $ sudo rndc reload
 # de nome bind.
 $ sudo rndc flush
 
-# de todas as estacoes da rede
+# resolv.conf do dns forward, 192.168.0.5
+$ sudo vi /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 127.0.0.1
+
+# resolv.conf de todas as estacoes da rede
 $ sudo vi /etc/resolv.conf
 	domain particula.local
 	search particula.local
