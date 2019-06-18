@@ -42,7 +42,7 @@ $ sudo chown -R bind:bind /etc/bind
 $ sudo vi /etc/bind/named.conf.options
 	// acl para controle de quem podera fazer requisicao 
 	// de resolucao.
-	acl goodclients {
+	acl clients {
 		// rede que podera fazer reqisicao de resolucao
 		// de nome.
         	192.168.0.0/24;
@@ -55,7 +55,7 @@ $ sudo vi /etc/bind/named.conf.options
 
         	// quais os hosts ou rede que podem fazer requisicao
 		// de resolucao de um nome
-        	allow-query { goodclients; };
+        	allow-query { clients; };
 	};
 
 # testando o arquivo de configuracao.
@@ -100,6 +100,10 @@ $ sudo vi /etc/bind/named.conf.local
 		// os dados da zona serao transferidos para o servidor
 		// slave.
 	    	allow-transfer { 192.168.0.6; };
+
+		// o servidor master ira notificar o servidor slave de
+		// que houve uma alteracao na configuracao da zona.
+    		notify yes;
 	};
 
 # testando o arquivo de configuracao.
@@ -190,6 +194,13 @@ $ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192.in-addr.arp
 # reler os arquivos de configuracao do Bind.
 $ sudo rndc reload
 
+# conteudo do arquivo resolv.conf
+$ sudo cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.0.6
+	nameserver 192.168.0.7
+
 #
 # CONFIGURACAO DO DNS SECUNDARIO (NS2)
 #
@@ -228,6 +239,9 @@ $ sudo vi /etc/bind/named.conf.local
 
 		// endereco ip do servidor master
 		masters { 192.168.0.5; };
+
+		// notificar o servidor master
+		allow-notify { 192.168.0.5; };
 	};
 
 # testando o arquivo de configuracao.
@@ -235,6 +249,13 @@ $ sudo named-checkconf /etc/bind/named.conf.options
 
 # reinicializar o bind.
 $ sudo systemctl restart bind9.service
+
+# conteudo do arquivo resolv.conf
+$ sudo cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.0.6
+	nameserver 192.168.0.7
 
 #
 # NSLOOKUP
