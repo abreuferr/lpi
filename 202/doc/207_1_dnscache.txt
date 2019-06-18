@@ -74,6 +74,14 @@ $ sudo vi /etc/bind/named.conf
 
 # configuracao geral do bind
 $ sudo vi /etc/bind/named.conf.options
+        // foi criada a acl de nome "clients" com o objetivo
+        // de definir quais hosts pertencem a ACL. Neste caso,
+        // os hosts presentes na rede 192.168.0.0/24 pertence
+        // a acl CLIENTS.
+        acl "clients" {
+                192.168.0.0/24;
+        };
+
 	// a diretiva OPTIONS tem por objetivo a de definir opcoes
 	// de configuracao do bind.
 	options {
@@ -86,17 +94,20 @@ $ sudo vi /etc/bind/named.conf.options
 		// por motivos de seguranca.
 		version none;
 
+		// habilitar a recursao.
+		recuriosn yes;
+
 		// o bind vai ficar escutando a porta 53.
-		listen-on port 53 { localhost; };
+		listen-on port 53 { localhost; clients; };
 
 		// especifica quais hosts que podem fazer requisicoes
 		// de resolucao de nome, neste caso, somente o proprio
 		// servidor cache.
-		allow-query { localhost; };
+		allow-query { localhost; clients; };
 
 		// especifica quais hosts podem ter o acesso ao cache 
 		// do bind.
-		allow-query-cache { localhost; };
+		allow-query-cache { localhost; clients };
 	};
 
 # o aplicativo named-checkconf checa a sintaxe do 
