@@ -55,6 +55,7 @@ $ sudo systemctl enable nginx
 # copia de seguranca do arquivo de configuracao do nginx
 $ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
 
+# arquivo de configuracao do nginx.
 $ sudo vi /etc/nginx/nginx.conf
 	# usuario dono do nginx.
 	user www-data;
@@ -67,6 +68,7 @@ $ sudo vi /etc/nginx/nginx.conf
 
 	# arquivos de configuracao dos dominios virtuais.
 	include /etc/nginx/modules-enabled/*.conf;
+
 	http{
 		(...)
 		# nao exibe a versao do software nginx
@@ -80,6 +82,16 @@ $ sudo vi /etc/nginx/nginx.conf
 		# dos dominios virtuais.
 		include /etc/nginx/conf.d/*.conf;
 		include /etc/nginx/sites-enabled/*;
+
+		server {
+			# seguranca
+			add_header X-Frame-Options "SAMEORIGIN" always;
+			add_header X-XSS-Protection "1; mode=block" always;
+			add_header X-Content-Type-Options "nosniff" always;
+			add_header Referrer-Policy "no-referrer-when-downgrade" always;
+			add_header Content-Security-Policy "default-src * data: 'unsafe-eval' 'unsafe-inline'" always;
+			add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+		}
 		(...)
 	}
 
@@ -123,6 +135,27 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 $ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled/
 
 #
+# AUTENTICACAO BASICA
+#
+
+# insttalacao do pacote apache2-utils
+$ sudo apt-get install apache2-utils
+
+# criar o arquivo para armazenar usuario/senha
+$ sudo htpasswd -c /var/www/particula.local/webpass <USUARIO>
+$ sudo htpasswd /var/www/particula.local/webpass <USUARIO>
+
+# configuracao do VirtualHost particula.local
+$ sudo vi /etc/nginx/site-available/particula.local.conf
+	server{
+		(...)
+		location / {
+			auth_basic "Restricted Content";
+			auth_basic_user_file /var/www/particula.local/webpass;
+		}
+	}
+
+#
 # APLICATIVO NGINX
 #
 
@@ -151,8 +184,28 @@ $ sudo openssl req -new -key /etc/ssl/private/ca.key -out /etc/ssl/private/ca.cs
 # assinar o certificado
 $ sudo openssl x509 -req -days 365 -in /etc/ssl/private/ca.csr -signkey /etc/ssl/private/ca.key -out /etc/ssl/private/ca.crt
 
+# HTTPS: criacao das chaves Diffie-Hellman
+$ sudo openssl dhparam -dsaparam -out /etc/ssl/private/dhparam.pem 2048
+
 # alterando as permissoes dos arquivos de certificacao por motivos de seguranca
 $ sudo chmod 0400 /etc/ssl/private/ca.*
+
+# arquivo de configuracao do nginx.
+$ sudo vi /etc/nginx/nginx.conf
+	http{ 
+		(.......)
+		# SSL 
+		ssl_session_timeout 1d; 
+		ssl_session_cache shared:SSL:50m; 
+		ssl_session_tickets off; 
+		# Diffie-Hellman parameter for DHE ciphersuites 
+		ssl_dhparam /etc/ssl/private/dhparam.pem; 
+		# Secure Configuration
+		ssl_protocols TLSv1.2; 
+		ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256; 
+		ssl_prefer_server_ciphers on;
+		(.......)
+	}
 
 # configuracao do nginx para trabalhar com certificado ssl
 $ sudo vi /etc/nginx/sites-available/particula.local
@@ -169,14 +222,14 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		# na url o endereco HTTP, o nginx ira transferir
 		# para o endereco HTTPS.
 		return 301 https://$host$request_uri;
-
 	}
 
 	server {
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
 		# e o protocolo HTTPS/SSL
 	        listen 443 ssl http2;
-	        listen [::]:443 ssl http2;
+	        listen [::]:443 
+		ssl http2;
 
 	        # diretorio de trabalho
 	        root /var/www/particula.local/html;
