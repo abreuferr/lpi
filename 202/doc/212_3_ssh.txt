@@ -31,7 +31,7 @@ Terms and Utilities:
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do openssh
-$ sudo apt-get install openssh-server openss-client
+$ sudo apt-get install openssh-server openss-client -y -d
 
 #
 # SERVER - CONFIGURACAO - GERAL
@@ -57,8 +57,14 @@ $ sudo vi /etc/ssh/sshd_config
 	# negar o acesso a um determinado grupo de usuarios
 	DenyGroups <GROUP>
 
-	# permitir ou nao o login do usuario root
-	PermitRootLogin <NO/YES>
+	# PermitRootLogin=without-password/prohibit-password 
+	# Eh banido qualquer tipo de autenticacao de forma interativa, 
+	# permitindo agora somente a forma de autenticacao atraves
+	# de chave publica e autenticacao GSSAPI.
+	#
+	# ou
+	# PermitRootLogin <YES>/<NO>
+	PermitRootLogin prohibit-password
 
 	# especifica qual o protocolo de seguranca a ser utilizado
 	Protocol 2
@@ -81,6 +87,19 @@ $ sudo vi /etc/ssh/sshd_config
 
 	# Numero maximo de tentativa de conexao.
 	ClientAliveMaxCount [NUM]
+
+	# log
+	SyslogFacility AUTH
+	LogLevel INFO
+
+	# o processo de autenticacao deve ocorrer em 20 segundos.
+	LoginGraceTime 20
+
+	# Definir o intervalo entre uma tentativa de autenticacao.
+	ClientAliveInterval 40
+
+	# Numero maximo de tentativas.
+	ClientAliveCountMax 3
 
 #
 # SERVER - CONFIGURACAO - AUTENTICACAO VIA PAR DE CHAVES
