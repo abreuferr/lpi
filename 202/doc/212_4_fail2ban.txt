@@ -70,22 +70,16 @@ $ sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.conf.origin
 
 # arquivo de configuracao do fail2ban priopriamente dito.
 $ /etc/fail2ban/jail.conf
-	[sshd-iptables]
+	[sshd]
 	enabled = true
-	filter = sshd
-	action = iptables[name=SSH, port=ssh, protocol=tcp]
-	sendmail-whois[name=SSH, dest=root]
-	logpath = /var/log/secure
-	maxretry = 5
+	port    = ssh
+	logpath = %(sshd_log)s
+	backend = %(sshd_backend)s
 
-	[vsftpd-tcpwrapper]
-	enabled = true
-	filter = vsftpd
-	action = hostsdeny[file=/etc/hosts.deny]
-	sendmail-whois[name=VSFTPD, dest=root]
-	logpath = /var/log/vsftpd.log
-	maxretry = 5
-	bantime = 1800
+	[sshd-ddos]
+	port    = ssh
+	logpath = %(sshd_log)s
+	backend = %(sshd_backend)s
 
 #
 # CLIENTE
