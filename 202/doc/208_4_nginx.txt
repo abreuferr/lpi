@@ -198,9 +198,11 @@ $ sudo vi /etc/nginx/nginx.conf
 		ssl_session_timeout 1d; 
 		ssl_session_cache shared:SSL:50m; 
 		ssl_session_tickets off; 
+
 		# Diffie-Hellman parameter for DHE ciphersuites 
 		ssl_dhparam /etc/ssl/private/dhparam.pem; 
-		# Secure Configuration
+
+		# configuracao do tls
 		ssl_protocols TLSv1.2; 
 		ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256; 
 		ssl_prefer_server_ciphers on;
@@ -250,6 +252,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 		ssl_ciphers HIGH:!aNULL:!MD5;
 	        ssl_certificate /etc/ssl/private/ca.crt;
 	        ssl_certificate_key /etc/ssl/private/ca.key;
+		ssl_trusted_certificate /etc/ssl/private/ca.pem;
 		ssl_session_cache shared:SSL:10m; 
 		ssl_session_timeout 10m;
 
