@@ -381,3 +381,24 @@ $ sudo rndc [OPCAO]
 	halt - parar o servidor sem salvar pendencias
 	flush - apagar todo o cache do servidor
 	reconfig - reler o arquivo de configuracao e somente nova zona
+
+#
+# TESTE DE SEGURANCA
+#
+
+# obtendo a versao do bind.
+$ sudo sudo dig +short @particula.local version.bind txt chaos
+	"9.10.3-P4-Debian"
+
+# fi adicionado a opcao de ofuscacao da versao do bind.
+$ sudo vi /etc/bind/named.conf.options
+	options {
+		version none;
+	};
+
+# re-ler os arquivos de configuracao do bind.
+$ sudo rndc reload
+
+# obtendo a versao do bind.
+$ sudo dig +short @particula.local version.bind txt chaos
+	NAO APARECEU NENHUMA INFORMACAO.
