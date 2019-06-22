@@ -95,6 +95,9 @@ $ sudo vi /etc/bind/named.conf.options
 		version none;
 
 		// habilitar a recursao.
+		// se por acaso essa opcao for definida com a 
+		// opcao NO, as estacoes que irao utilizar esse
+		// servidor nao conseguirao resolver dominios.
 		recuriosn yes;
 
 		// o bind vai ficar escutando a porta 53.
@@ -258,3 +261,45 @@ $ sudo tcpdump -t -r cache.pcap port 53
 	# cache e repassa para o host 192.168.0.42.
 	IP 192.168.0.42.33395 > 192.168.0.4.53: 48535+ [1au] A? redhat.com. (39)
 	IP 192.168.0.4.53 > 192.168.0.42.33395: 48535 1/4/5 A 209.132.183.105 (191)
+
+#
+# RECURION YES/NO
+#
+#
+# nao se esquecer de executar o comando "rndc flush"
+# para limpar o cache do servidor para nao atrapalhar 
+# os testes.
+
+# configuracao
+$ cat /etc/bind/named.conf.options
+	options {
+		(...)
+		recursion yes/no;
+		(...)
+	};
+
+# recurion NO
+$ ping slashdot.org
+	ping: slashdot.org: Temporary failure in name resolution
+
+# recursion YES
+# ping slashdot.org
+	PING slashdot.org (216.105.38.15) 56(84) bytes of data.
+	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=1 ttl=127 time=185 ms
+	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=2 ttl=127 time=192 ms
+
+#
+# BLACKHOLE
+#
+
+# outra diretiva de seguranca eh a diretiva BLACKHOLE
+# a onde eh possivel especificar quais hosts ou rede
+# nao serao atendidas pelas requisicoes de resolucao
+# de nome.
+
+$ cat /etc/bind/named.conf.options
+	options {
+		(...)
+		blackhole { HOST_REDE_BLOQUEADO; };
+		(...)
+	};
