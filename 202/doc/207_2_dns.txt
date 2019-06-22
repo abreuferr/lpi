@@ -250,6 +250,22 @@ $ sudo named-checkconf /etc/bind/named.conf.options
 # reinicializar o bind.
 $ sudo systemctl restart bind9.service
 
+# transferencia de zona.
+# transferencia dos dados de configuracao da zona do
+# servidor master para o servidor slave.
+#
+# a diretiva de configuracao do bind que permite que as
+# configuracoes do master para o slave eh:
+#	allow-transfer { IP_SLAVE; };
+#
+$ cat /var/log/syslog
+	ns1 named[622]:zone particula.local/IN: sending notifies (serial 2019062201)
+	ns1 named[622]:zone 0.168.192.in-addr.arpa/IN: sending notifies (serial 2019062201)
+	ns1 named[622]:client 192.168.0.7#51219 (particula.local): transfer of 'particula.local/IN': AXFR-style IXFR started (serial 2019062201)
+	ns1 named[622]:client 192.168.0.7#51219 (particula.local): transfer of 'particula.local/IN': AXFR-style IXFR ended
+	ns1 named[622]:client 192.168.0.7#48321 (0.168.192.in-addr.arpa): transfer of '0.168.192.in-addr.arpa/IN': AXFR-style IXFR started (serial 2019062201)
+	ns1 named[622]:client 192.168.0.7#48321 (0.168.192.in-addr.arpa): transfer of '0.168.192.in-addr.arpa/IN': AXFR-style IXFR ended
+
 # conteudo do arquivo resolv.conf
 $ sudo cat /etc/resolv.conf
 	domain particula.local
