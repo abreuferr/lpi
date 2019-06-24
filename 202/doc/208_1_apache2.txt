@@ -205,16 +205,7 @@ $ sudo mkdir -p /var/www/particula.local/html
 # arquivo indice do site
 #
 $ sudo vi /var/www/particula.local/html/index.html
-	<!DOCTYPE html>
-	<html lang="en" dir="ltr">
-        	<head>
-                	<meta charset="utf-8">
-	                <title>Welcome to particula.local</title>
-	        </head>
-	        <body>                
-        	        <h1>Success! particula.local home page!</h1>
-	        </body>                             
-	</html>
+	apache.particula.local
 
 # alterando a permissao do diretorio a onde esta armazenado
 # os arquivos referentes ao dominio particula.local
@@ -329,32 +320,39 @@ $ w3m http://www.particula.local/perltest.pl
 #
 $ sudo a2enmod authz_groupfile
 
+# arquivos com as diretivas de autenticacao.
+$ sudo vi /var/www/particula.local/.htaccess
+	# habilitar a autenticacao
+	AuthType Basic
+	AuthName "processo de autenticacao de acesso"
+		
+	# nao existe a possibilidade de autenticacao tanto
+	# por usuario quanto por grupo. Eh necessario que
+	# seja escolhido somente uma forma de autenticacao.
+	AuthUserFile /var/www/particula.local/webpass.user
+	Require valid-user
+	
+	# quando a opcao AuthGroupFile eh ativada, a opcao
+	# "Require valid-user" deve ser substituida pela
+	# opcao "Require group [GRUPO]"
+	AuthGroupFile /var/www/particula.local/webpass.group
+	Require group particula
+
 $ sudo /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
-	    (...)
-	    <Directory /var/www/particula.local/html>
-		# habilitar a autenticacao
-		AuthType Basic
-		AuthName "processo de autenticacao de acesso"
-		
-		# nao existe a possibilidade de autenticacao tanto
-		# por usuario quanto por grupo. Eh necessario que
-		# seja escolhido somente uma forma de autenticacao.
-		AuthUserFile /var/www/particula.local/webpass.user
-		Require valid-user
-	
-		# quando a opcao AuthGroupFile eh ativada, a opcao
-		# "Require valid-user" deve ser substituida pela
-		# opcao "Require group [GRUPO]"
-		AuthGroupFile /var/www/particula.local/webpass.group
-		Require group particula
-	        
-		AllowOverride none
-		Order allow,deny
-		Allow from all
-	    </Directory>
-	    (...)
-	</VirtualHost>
+		(...)
+		# a diretiva "AccessFileName" so eh necessaria
+		# se por acaso o nome do arquivo .htaccess for
+		# outro.
+		AccessFileName .htaccess
+		<Directory /var/www/particula.local/html>
+			Options Indexes FollowSymLinks MultiViews
+			AllowOverride All
+			Order allow,deny
+			Allow from all
+		</Directory>
+		(...)
+		</VirtualHost>
 
 # checagem da configuracao do apache2
 #
