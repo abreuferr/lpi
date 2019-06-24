@@ -35,7 +35,7 @@ $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install squid -y -d
 
 #
-# CONFIGURACAO
+# CONFIGURACAO - SQUID COM CACHE
 #
 
 # criacao do diretorio de cache do squid.
@@ -74,12 +74,24 @@ $ sudo vi /etc/squid/squid.conf
 	acl CONNECT method CONNECT
 
 	# negar o acesso em portas que nao estejam registradas 
-	# nos comandos acima.
+	# nas ACLs Safe_ports.
 	http_access deny !Safe_ports
 	http_access deny CONNECT !SSL_ports
 
 	# protocolo HTTP liberado o acesso para as acl LOCALNET
 	# e LOCALHOST.
+	http_access allow localnet
+	http_access allow localhost
+
+		OU
+
+	# protocolo HTTP liberado o acesso para as ACLs
+	# "acl LOCALNET FREE-ACCESS" e "LOCALHOST".
+	#
+	# no caso da acl FREE_ACCESS, sera especificado o
+	# horario em que o usuario podera acessar a internet.
+	#
+	# soma de duas ACLs e uma unica diretiva.
 	http_access allow localnet free_access
 	http_access allow localhost
 
@@ -91,6 +103,9 @@ $ sudo vi /etc/squid/squid.conf
 	cache_effective_user proxy
 
 	# caracteristicas do cache
+	# interessante armazenar os dados do cache em um disco
+	# rigido lvm ou raid. LVM para aumentar o espaco se
+	# necessario e RAID para aumentar a velocidade de acesso.
 	cache_dir ufs /var/cache/squid 2000 16 256
 
 # reinicializar o proxy squid
@@ -102,3 +117,7 @@ $ firewall.squid.sh
 	# web proxy squid
 	# ens34 - interface interna
 	iptables -t nat -A PREROUTING -i ens34 -p tcp --dport 80 -j REDIRECT --to-port 3128
+
+#
+# CONFIGURACAO - SQUID COM AUTENTICACAO
+#
