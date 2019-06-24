@@ -413,6 +413,39 @@ $ w3m http://IP_WEBSERVER/subdir/private.html
 	You don't have permission to access /private.html on this server.
 
 #
+# EXPORTAR O DIRETORIO DO USUARIO
+#
+
+# habilitar o modulo
+$ sudo a2enmod userdir
+$ sudo ln -s /etc/apache2/mods-available/userdir.conf /etc/apache2/mods-enabled/
+
+# permissao
+$ sudo chmod 711 /home/caio/
+$ sudo chown caio:caio /home/caio/public_html/
+$ sudo chmod 755 /home/caio/public_html/
+
+# index.html
+$ vi /home/caio/public_html/index.html
+
+# configurar o modulo
+$ sudo cp /etc/apache2/mods-available/userdir.conf /etc/apache2/mods-available/userdir.conf.origin
+$ sudo vi /etc/apache2/mods-available/userdir.conf
+	<IfModule mod_userdir.c>
+        	UserDir enabled caio
+        	UserDir public_html
+	</IfModule>
+
+	<Directory /home/*/public_html>
+        	AllowOverride FileInfo AuthConfig Limit Indexes
+        	Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
+        	Require method GET POST OPTIONS
+	</Directory>
+
+# teste
+$ w3m http://IP_APACHE_SERVER/~caio/
+
+#
 # Security Apache
 #
 
