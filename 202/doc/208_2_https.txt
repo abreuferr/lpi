@@ -122,3 +122,29 @@ $ sudo systemctl restart apache2
 
 # o comando abaixo deve ser executado no servidor https.
 $ sudo openssl s_client -connect www.particula.local:443 -status -servername www.particula.local
+
+#
+# SNI
+#
+
+# arquivo de configurca
+$ sudo vi /etc/apache2/sites-enabled/particula.local.conf
+	NameVirtualHost *:443
+
+	<VirtualHost *:443>
+		ServerName www.particula1.local
+		DocumentRoot /var/www/particula1.local/html
+		SSLEngine on
+	        SSLCertificateFile /etc/apache2/ssl/particula1.crt
+		SSLCertificateKeyFile /etc/apache2/ssl/particula1.key
+		SSLCertificateChainFile /path/to/DigiCertCA.crt
+	</VirtualHost>
+
+	<VirtualHost *:443>
+		ServerName www.particula2.local
+		DocumentRoot /var/www/particula2.local/html
+		SSLEngine on
+	        SSLCertificateFile /etc/apache2/ssl/particula2.crt
+		SSLCertificateKeyFile /etc/apache2/ssl/particula2.key
+		SSLCertificateChainFile /path/to/DigiCertCA.crt
+	</VirtualHost>
