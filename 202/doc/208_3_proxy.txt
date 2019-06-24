@@ -45,7 +45,7 @@ $ sudo mkdir -p /var/cache/squid
 $ sudo chown -R proxy.proxy /var/cache/squid
 
 # copia de seguranca do arquivo de configuracao do squid.
-$ sudo mv /etc/squid/squid.conf /etc/squid/squid.conf.BKP
+$ sudo mv /etc/squid/squid.conf{,.origin}
 
 # configuracao basica do squid
 $ sudo vi /etc/squid/squid.conf
