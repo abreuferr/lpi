@@ -121,3 +121,35 @@ $ firewall.squid.sh
 #
 # CONFIGURACAO - SQUID COM AUTENTICACAO
 #
+
+# instalacao do pacote apache2-utils para poder
+# utilizar o aplicativo htpasswd.
+$ sudo apt-get install apache2-utils
+
+# criacao do arquivo de senha e cadastrando usuario.
+$ sudo htpasswd -c /etc/squid/passwd caio
+
+# adicionando mais usuarios ao arquivo.
+$ sudo htpasswd /etc/squid/passwd [USUARIO]
+
+# diretivas de configuracao do squid para 
+# autenticacao baseada em usuario/senha cadastrados
+# no arquivo /etc/squid/passwd.
+$ sudo vi /etc/squid/squid.conf
+	# habilitando autenticacao.
+	auth_param basic program /usr/lib/squid3/basic_ncsa_auth /etc/squid/passwd
+	auth_param basic children 5
+	auth_param basic realm Squid proxy-caching web server
+	auth_param basic credentialsttl 2 hours
+	auth_param basic casesensitive off
+
+	# autenticacao nao funciona com o proxy transparente.
+	http_port 3128
+
+	# acl.
+	acl localnet src 192.168.0.0/24
+	acl ncsa_users proxy_auth REQUIRED
+
+	# regra.
+	http_access allow localnet ncsa_users
+	http_access deny all
