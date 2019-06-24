@@ -307,7 +307,6 @@ $ sudo vi /var/www/particula.local/cgi-bin/perltest.pl
 	print "Hello, World.";
 
 # teste
-#
 $ sudo perl -Tw /var/www/particula.local/cgi-bin/perltest.pl
 $ w3m http://www.particula.local/perltest.pl
 
@@ -380,6 +379,38 @@ $ sudo vi /var/www/particula.local/webpass.group
 #
 $ sudo chown www-data /var/www/particula.local/webpass.*
 $ sudo chmod 640 /var/www/particula.local/webpass.*
+
+#
+# RESTRICAO DE ACESSO A ARQUIVO
+#
+
+# utilizacao da diretiva <FILES> para controlar o acesso a
+# determinado arquivo.
+#
+# a diretiva <FILES> trabalha com arquivo, desta forma, nao
+# importa a onde o arquivo esteja localizado, o acesso sempre
+# sera bloqueado, mesmo que esteja dentro de um subdiretorio.
+#
+# esse bloquei é devido a diretiva "Deny all", negando todo o
+# acesso.
+
+$ sudo vi /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+	(...)
+	<Directory /var/www/particula.local/html>
+		(...)
+		<Files private.html>
+			Order allow,deny
+			Deny from all
+		</Files>
+	</Directory>
+
+# testes
+$ w3m http://IP_WEBSERVER/private.html
+	You don't have permission to access /private.html on this server.
+
+$ w3m http://IP_WEBSERVER/subdir/private.html
+	You don't have permission to access /private.html on this server.
 
 #
 # Security Apache
