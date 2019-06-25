@@ -97,6 +97,9 @@ $ sudo smbpasswd -h
 $ sudo smbpasswd -a caio
 $ sudo smbpasswd -e caio
 
+# alterar a senha do ususario de forma remota
+$ sudo smbpasswd -r [IP_SAMBA_SERVER] -U [USUARIO]
+
 #
 # PASTAS COMPARTILHADA
 #
@@ -153,7 +156,6 @@ $ sudo vi /etc/samba/smb.conf
 
 	# sincronismo da senha do samba com a senha do unix.
 	unix password sync = yes
-
 	# aplicativo utilizado para sincronizar a senha
 	# do samba com a senha do unix.
 	passwd program = /usr/bin/passwd %u
@@ -171,7 +173,7 @@ $ sudo vi /etc/samba/smb.conf
 	# opcao "guest = yes"
 	map to guest = bad user
 
-	# nome do compartilhamento [//server/allusers].
+	# nome do compartilhamento [//server/sambashare].
 	# nesse compartilhamento, somente os membros
 	# do grupo SAMBASHARE terao o acesso a pasta
 	# compartilhada. Sera necessario inserir 
@@ -243,11 +245,13 @@ $ sudo vi /etc/samba/smb.conf
         valid users = caio
 
 	[printers] 
-	browseable = No 
 	comment = All Printers 
-	create mask = 0600 
-	path = /var/tmp 
+	path = /var/spool/samba
+	browseable = No 
+	guest ok = no
+	writable = no
 	printable = Yes                                                                                                                           
+	printing = cups
                                                                                                                           
 	[print$]                                                                                                                                
 	comment = Printer Drivers                                                                                                                  
@@ -256,6 +260,8 @@ $ sudo vi /etc/samba/smb.conf
 	force group = @printadmin                                                                                                                  
 	path = /var/lib/samba/drivers 
 	write list = @printadmin root 
+	writable = yes
+	public = yes
 
 # aplicativo utilizado para testar os parametros e verificar se 
 # existe algum problema na sintaxe do arquivo de configuracao
@@ -320,3 +326,33 @@ $ sudo mv /var/lib/samba/private/*.bak /home/samba/backup_tdb/
 
 $ sudo tdbdump passdb.tdb.bak > passdb.dumpfile
 $ sudo tdbrestore passdb.tdb < passdb.dumpfile
+
+#
+# AUDITORIA/LOG
+#
+
+# componente utilizado para integrar o samba ao VFS.
+$ sudo apt-get install samba-vfs-modules -y -d
+
+# arquivo de configuracao do samba
+$ sudo vi /etc/samba/smb.conf
+	[global]
+	(...)
+	vfs objects = audit
+	audit:facility = local3
+	audit:priority = info
+	(...)
+
+# configuracao do rsyslog
+$ sudo vi /etc/rsyslog.conf
+	(...)
+	# Log SAMBA audit information
+	local3.*			/var/log/samba_audit.log
+
+# reinicializar os servicos
+$ sudo systemctl restart smbd
+$ sudo systemctl restart nmbd
+$ sudo systemctl restart rsyslog
+
+# visualizacao do log gerado pelo rsyslog
+$ sudo cat /var/log/samba_audit.log
