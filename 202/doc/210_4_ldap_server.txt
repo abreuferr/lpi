@@ -67,7 +67,6 @@ $ sudo dpkg-reconfigure slapd
 	Database backend to use: MDB
 	Do you want the database to be removed when slapd is purged? <NO>
 	Move old database? <YES>
-	Allow LDAPv2 protocol? <NO>
 
 # backup do arquivo de configuracao
 $ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
