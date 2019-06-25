@@ -48,7 +48,7 @@ cn=admin,dc=particula,dc=local
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do servidor openldap
-$ sudo apt-get install slapd ldap-utils ldapscripts -y -d
+$ sudo apt-get install slapd ldap-utils ldapscripts db-util -y -d
 
 # visualizacao da estrutura inicial do openldap.
 $ sudo slapcat
@@ -173,6 +173,30 @@ $ sudo slaptest -f /etc/ldap/slapd.conf
 
 # reinicializando servidor ldap.
 $ sudo systemctl restart slapd.service
+
+#
+# LOG
+#
+
+$ sudo vi /etc/rsyslog.cong
+	# Log OpenLDAP messages
+	local4.*                  /var/log/ldap.log
+
+$ sudo systemctl restart rsyslog
+$ sudo systemctl restart slapd
+
+#
+# BACKUP DB
+#
+$ sudo mkdir -p /var/lib/ldap/bdb_backup
+$ sudo db_hotbackup -h /var/lib/ldap -b /var/lib/ldap/bdb_backup
+$ sudo slapcat -b "dc=particula,dc=local" | sudo tee -a /var/lib/ldap/bdb_backup/particula_local.ldif
+
+# verificando integridade.
+$ sudo db_verify -h /var/lib/ldap /var/lib/ldap/*.bdb
+
+# restaurando o backup
+$ sudo db_recover -v -h /var/lib/ldap/
 
 #
 # COMANDO SLDAPADD
