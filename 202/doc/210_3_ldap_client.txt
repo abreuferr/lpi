@@ -52,27 +52,26 @@ $ ldapsearch -D "cn=admin,dc=particula,dc=local" -W '(objectclass=*)'
 # LDAPADD
 #
 
-# arquivo LDIF.
-$ cat base_ou.ldif
-	# people
-	dn: ou=people,dc=particula,dc=local
-	ou: People
+# adicionando OU (Organizational Unit)
+$ cat ou.ldif
+	# user
+	dn: ou=user,dc=particula,dc=local
+	ou: user
 	objectClass: top
 	objectClass: organizationalUnit
 
 	# group
 	dn: ou=group,dc=particula,dc=local
-	ou: Group
+	ou: group
 	objectClass: top
 	objectClass: organizationalUnit
-
-# comando utilizado para adicionar as OUs atraves do arquivo LDIF.
 $ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base.ldif
 
-# arquivo LDIF.
-# o conteudo do campo userPassword foi retirado arquivo /etc/shadow
-$ cat user_cosmo.ldif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
+# adicionando USUARIO
+$ sudo slappasswd
+	{SSHA}RZHmkGBwC2JotUhVIES6QVVwfjmkG6cr
+$ cat user.ldif
+	dn: uid=cosmo,ou=user,dc=particula,dc=local
 	objectClass: top
 	objectClass: person
 	objectClass: organizationalPerson
@@ -87,17 +86,29 @@ $ cat user_cosmo.ldif
 	telephoneNumber: +0 000 000 0000
 	mobile: +0 000 000 0000
 	postalAddress: avenida paulista 2001
-	userPassword: {CRYPT}$6$RsOxHWv/$8ELKsp8BuTx1GzXWWMfXgvA.RJcdFpKHY3tEfes1gV/wtIu2.Wumh592bZlrEq/hdDCr5aAJvXXYWCiydH3s.1:17968
+	userPassword: {SSHA}RZHmkGBwC2JotUhVIES6QVVwfjmkG6cr
 	labeledURI: https://www.particula.org/
 	loginShell: /bin/bash
 	uidNumber: 1000
 	gidNumber: 1000
 	homeDirectory: /home/cosmo/
 	description: cosmo comics - big boss
+$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f user.ldif
 
-# comando utilizado para adicionar um registro no servidor ldap atraves 
-# do arquivo LDIF.
-$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f user_cosmo.ldif
+# adicinando grupo
+$ cat group.ldif
+	dn: cn=ti, ou=user, dc=particula, dc=local
+	cn: ti
+	objectClass: groupOfNames
+	member: cn=cosmo, ou=user, dc=particula, dc=local
+$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f group.ldif
+
+#
+# LDAPSEARCH
+#
+
+# busca por um UID
+$ sudo ldapsearch -x -b "dc=particula,dc=local" "(uid=cosmo)"
 
 #
 # LDAPPASSWD
@@ -172,3 +183,7 @@ $ cat delete_atributo_cosmo.ldif
 	changetype: modify
 	delete: facsimileTelephoneNumber
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_atributo_cosmo.ldif
+
+#
+# LOG
+#
