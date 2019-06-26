@@ -34,18 +34,18 @@ Terms and Utilities:
 #
 
 # SERVER
-$ sudo apt-get update && sudo apt-get upgrade ; atualizar o host
-$ sudo apt-get install isc-dhcp-server -y -d ; instalacao dos componentes do DHCP Server
+$ sudo apt-get update && sudo apt-get upgrade 
+$ sudo apt-get install isc-dhcp-server dhcpdump isc-dhcp-common -y -d
 
 # CLIENT
-$ sudo apt-get update && sudo apt-get upgrade ; atualizar o host
-$ sudo apt-get install isc-dhcp-client isc-dhcp-common -y -d ; instalacao dos componentes do DHCP Client
+$ sudo apt-get update && sudo apt-get upgrade
+$ sudo apt-get install isc-dhcp-client isc-dhcp-common -y -d
 
 #
 # CONFIGURACAO
 #
 
-# SERVER
+# SERVER - IP DHCP
 
 # backup de seguranca do arquivo de configuracao.
 $ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.BKP
@@ -101,13 +101,84 @@ $ sudo vi /etc/dhcp/dhcpd.conf
         	option broadcast-address 192.168.0.254;
 	}
 
+# reinicializar o servico
+$ sudo systemctl restart isc-dhcp-server
+
+# verificar quais IPs estao sendo utilizados
+$ sudo cat /var/lib/dhcp/dhcpd.leases
+	lease 192.168.0.100 {
+	  starts 2 2019/06/25 22:39:23;
+	  ends 2 2019/06/25 22:49:23;
+	  cltt 2 2019/06/25 22:39:23;
+	  binding state active;
+	  next binding state free;
+	  rewind binding state free;
+	  hardware ethernet 00:0c:29:fa:9c:1f;
+	  client-hostname "workstation";
+	}
+
+# tcpdump
+$ sudo tcpdump -i ens33 port 67 or port 68 -e -n -vv
+	192.168.0.12.67 > 192.168.0.100.68: [udp sum ok] BOOTP/DHCP, Reply, length 301, xid 0x57ea5065, secs 8, Flags [none] (0x0000)
+
+	Your-IP 192.168.0.100
+	Client-Ethernet-Address 00:0c:29:fa:9c:1f
+	Vendor-rfc1048 Extensions
+	Magic Cookie 0x63825363
+	DHCP-Message Option 53, length 1: ACK
+	Server-ID Option 54, length 4: 192.168.0.12
+	Lease-Time Option 51, length 4: 600
+	Subnet-Mask Option 1, length 4: 255.255.255.0
+	BR Option 28, length 4: 192.168.0.254
+	Default-Gateway Option 3, length 4: 192.168.0.2
+	Domain-Name Option 15, length 15: "particula.local"
+	Domain-Name-Server Option 6, length 8: 192.168.0.6,192.168.0.7
+
+# dump atraves do aplicativo dhcpdump
+$ sudo dhcpdump -i ens33
+
+# SERVER - IP FIXO
+
+# editando o servidor dhcp
+$ sudo vi /etc/dhcp/dhcpd.conf
+	(...)
 	# fixar o ip para uma estacao
 	host workstation {
         	# endereco mac-address.
-        	hardware ethernet 00:0c:29:cb:71:f4;
+        	hardware ethernet 00:0c:29:fa:9c:1f;
         	# fixar o endereco deste host.
-        	fixed-address 192.168.0.171;
+        	fixed-address 192.168.0.42;
 	}
+
+# log do servidor
+$ sudo cat /var/log/syslog
+	dhcp systemd[1]: Started LSB: DHCP server.
+	dhcp dhcpd[936]: DHCPRELEASE of 192.168.0.100 from 00:0c:29:fa:9c:1f (workstation) via ens33 (found)
+	dhcp dhcpd[936]: DHCPDISCOVER from 00:0c:29:fa:9c:1f via ens33
+	dhcp dhcpd[936]: DHCPOFFER on 192.168.0.42 to 00:0c:29:fa:9c:1f via ens33
+	dhcp dhcpd[936]: DHCPREQUEST for 192.168.0.42 (192.168.0.12) from 00:0c:29:fa:9c:1f via ens33
+	dhcp dhcpd[936]: DHCPACK on 192.168.0.42 to 00:0c:29:fa:9c:1f via ens33
+	dhcp dhcpd[936]: DHCPREQUEST for 192.168.0.42 from 00:0c:29:fa:9c:1f via ens33
+	dhcp dhcpd[936]: DHCPACK on 192.168.0.42 to 00:0c:29:fa:9c:1f via ens33
+
+# tcpdump
+$ sudo tcpdump -i ens33 port 67 or port 68 -e -n -vv
+	192.168.0.12.67 > 192.168.0.42.68: [udp sum ok] BOOTP/DHCP, Reply, length 301, xid 0xfe759b18, secs 6, Flags [none] (0x0000)
+	Your-IP 192.168.0.42
+	Client-Ethernet-Address 00:0c:29:fa:9c:1f
+	Vendor-rfc1048 Extensions
+	Magic Cookie 0x63825363
+	DHCP-Message Option 53, length 1: ACK
+	Server-ID Option 54, length 4: 192.168.0.12
+	Lease-Time Option 51, length 4: 600
+	Subnet-Mask Option 1, length 4: 255.255.255.0
+	BR Option 28, length 4: 192.168.0.254
+	Default-Gateway Option 3, length 4: 192.168.0.2
+	Domain-Name Option 15, length 15: "particula.local"
+	Domain-Name-Server Option 6, length 8: 8.8.8.8,8.8.4.4
+
+# dump atraves do aplicativo dhcpdump
+$ sudo dhcpdump -i ens33
 
 # CLIENT
 
@@ -118,3 +189,6 @@ $ sudo vi /etc/network/interfaces
 	(...)
 	allow-hotplug ens33
 	iface ens33 inet dhcp
+
+# release do endereco 
+$ sudo dhclient -r
