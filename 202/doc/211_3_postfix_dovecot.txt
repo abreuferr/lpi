@@ -36,10 +36,12 @@ $ sudo apt-get install dovecot-core dovecot-imapd dovecot-pop3d -y -d
 
 # configurando o Postfix para trabalhar com o Dovecot.
 $ sudo vi /etc/postfix/main.cf
+	(...)
 	smtpd_sasl_type = dovecot
 	smtpd_sasl_path = private/auth
 	smtpd_sasl_auth_enable = yes
 	broken_sasl_auth_clients = yes
+	(...)
 
 # configuracao a conexao do Dovecot.
 $ sudo vi /etc/dovecot/dovecot.conf
@@ -51,6 +53,7 @@ $ sudo vi /etc/dovecot/dovecot.conf
 # Dovecot.
 $ sudo vi /etc/dovecot/conf.d/10-auth.conf
 	auth_mechanisms = plain login
+	disable_plaintext_auth = no
 
 # configurando o Maildir no Dovecot.
 $ sudo vi /etc/dovecot/conf.d/10-mail.conf
@@ -60,12 +63,27 @@ $ sudo vi /etc/dovecot/conf.d/10-mail.conf
 # configurando o Dovecot para trabalhar com o
 # Postfix.
 $ sudo vi /etc/dovecot/conf.d/10-master.conf
+	# imap
+	service imap-login {
+		inet_listener imap {
+			port = 143
+		}
+	}
+
+	# pop3
+	service imap-login {
+		inet_listener imap {
+			port = 110
+		}
+	}
+
+	# autenticacao
 	service auth {
-	  unix_listener /var/spool/postfix/private/auth {
-	    mode = 0660
-  	    user = postfix
-	    group = postfix
- 	  }
+		unix_listener /var/spool/postfix/private/auth {
+			mode = 0660
+			user = postfix
+			group = postfix
+		}
 	}
 
 # reinicializando o Postfix e o Dovecot
@@ -73,22 +91,8 @@ $ sudo systemctl restart postfix.service
 $ sudo systemctl restart dovecot.service
 
 #
-# TESTE - POSTFIX/DOVECOT
+# TESTE - DOVECOT
 #
-
-# teste do postfix.
-$ echo "Corpo do e-mail" | mail -s "Subject do e-mail" cosmo@particula.local
-
-# teste smtp
-$ telnet localhost 25
-	ehlo localhost
-	mail from: cosmo
-	rcpt to: cosmo
-	data
-	subject: teste dovecot
-	Mail body
-	.
-	quit
 
 # teste dovecot imap
 $ telnet localhost 143
@@ -112,40 +116,19 @@ $ telnet localhost 143
 # instalacao do mutt
 $ sudo apt-get install mutt -y -d
 
-# criando pastas para armazenar o 
-# certificado
-$ mkdir -p .mutt/cache/headers
-$ mkdir -p .mutt/cache/bodies
-$ mkdir -p .mutt/certificates
-
 # configuracao do mutt
 $ vi .muttrc
 	set imap_user = "cosmo"
 	set imap_pass = "[SENHA]"
 
-	# sem conexao segura
 	set smtp_url = "smtp://cosmo@email.particula.local:25/"
-	# com conexao segura
-	set smtp_url = "smtp://cosmo@email.particula.local:465/"
 	set smtp_pass = "[SENHA]"
-
-	set ssl_starttls = yes
-	set ssl_force_tls = yes
 
 	set from = "cosmo@particula.local"
 	set realname = "caio ferreira"
 
 	# sem conexao segura
-	set folder = "imaps://email.particula.local:143"
-	# com conexao segura
-	set folder = "imaps://email.particula.local:993"
+	set folder = "imap://email.particula.local:143"
 
 	set spoolfile = "+INBOX"
 	set postponed="+Drafts"
-
-	# certificado digital
-	set header_cache=~/.mutt/cache/headers
-	set message_cachedir=~/.mutt/cache/bodies
-	set certificate_file=~/.mutt/certificates
-	set ssl_force_tls = yes
-	set ssl_starttls = yes
