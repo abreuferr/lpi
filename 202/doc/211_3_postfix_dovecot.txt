@@ -17,7 +17,7 @@ Terms and Utilities:
 - doveadm
 
 #
-# INSTALCAO
+# SERVIDOR - INSTALCAO
 #
 
 # atualizacao do gnu/linux debian
@@ -31,7 +31,7 @@ $ sudo apt-get install postfix mailutils telnet -y -d
 $ sudo apt-get install dovecot-core dovecot-imapd dovecot-pop3d -y -d
 
 #
-# CONFIGURACAO
+# SERVIDOR - CONFIGURACAO
 #
 
 # configurando o Postfix para trabalhar com o Dovecot.
@@ -49,8 +49,7 @@ $ sudo vi /etc/dovecot/dovecot.conf
 	# deve permitir conexao.
 	listen = *, ::
 
-# configurando o processo de autenticacao no
-# Dovecot.
+# configurando o processo de autenticacao no Dovecot.
 $ sudo vi /etc/dovecot/conf.d/10-auth.conf
 	auth_mechanisms = plain login
 	disable_plaintext_auth = no
@@ -60,8 +59,7 @@ $ sudo vi /etc/dovecot/conf.d/10-mail.conf
 	# indica a localizacao do mailbox do ususario.
 	mail_location = maildir:~/Maildir
 
-# configurando o Dovecot para trabalhar com o
-# Postfix.
+# configurando o Dovecot para trabalhar com o Postfix.
 $ sudo vi /etc/dovecot/conf.d/10-master.conf
 	# imap
 	service imap-login {
@@ -96,14 +94,14 @@ $ sudo systemctl restart dovecot.service
 
 # teste dovecot imap
 $ telnet localhost 143
-	x1 LOGIN cosmo cosmo_password
+	x1 LOGIN [USUARIO] [SENHA]
 	x2 LIST "" "*"
 	x3 SELECT Inbox
 	x4 LOGOUT
 
-# teste de login no devecot
+# teste do dovecot imap
 $ telnet localhost 143
-	a login "[USERNAME]" "[PASSWORD]"
+	a login "[USUARIO]" "[SENHA]"
 	b select inbox
 	c list "" *
 	d lsub "" *
@@ -132,3 +130,16 @@ $ vi .muttrc
 
 	set spoolfile = "+INBOX"
 	set postponed="+Drafts"
+
+#
+# SERVIDOR - DOVEADM
+#
+
+# exibe toda as variaveis de configuracao.
+$ sudo doveadm config
+
+# quais conexoes estao ativas no dovecot.
+$ sudo doveadm who
+
+# informacoes sobre usuario
+$ sudo doveadm user [USUARIO]
