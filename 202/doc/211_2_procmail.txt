@@ -1,0 +1,60 @@
+#: Title : Managing E-Mail Delivery
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Managing E-Mail Delivery
+#: Options : Weight: 2
+
+Description: Candidates should be able to implement client 
+e-mail management software to filter, sort and monitor incoming 
+user e-mail.
+
+Key Knowledge Areas:
+
+Understanding of Sieve functionality, syntax and operators
+Use Sieve to filter and sort mail with respect to sender, recipient(s), headers and size
+Awareness of procmail
+Terms and Utilities:
+
+Conditions and comparison operators
+keep, fileinto, redirect, reject, discard, stop
+Dovecot vacation extension
+
+#
+# INSTALACAO
+#
+
+# atualizacao do debian.
+$ sudo apt-get update && sudo apt-get upgrade -y -d
+
+# instalacao na estacao e no servidor de e-mail.
+$ sudo apt-get install procmail -y -d
+$ sudo apt-get autoremove --purge exim4-base exim4-config exim4-daemon-light -y
+
+#
+# CONFIGURACAO
+#
+
+# habilitar o procmail no postfix
+$ sudo vi /etc/postfix/main.cf
+	(...)
+	mailbox_command = /usr/bin/procmail -a "$EXTENSION" DEFAULT=$HOME/Maildir/ MAILDIR=$HOME/Maildir
+	(...)
+
+# promailrc
+$ sudo vi /etc/procmailrc
+	# variaveis de ambiente.
+	PATH=/bin:/usr/bin:/usr/local/bin:$HOME/bin:/usr/sbin
+	MAILDIR=$HOME/Mail
+
+	# copiar toda as mensagens para o arquivo "archive"
+	:0c:
+	archive
+
+	# spam
+	:0
+	* ^Subject:.*last chance|\
+	^Subject:.*viagra|\
+	^Subject:.*??
+	spam
+
+
+
