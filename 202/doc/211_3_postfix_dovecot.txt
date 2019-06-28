@@ -122,7 +122,6 @@ $ vi .muttrc
 	set from = "cosmo@particula.local"
 	set realname = "caio ferreira"
 
-	# sem conexao segura
 	set folder = "imap://email.particula.local:143"
 
 	set spoolfile = "+INBOX"
