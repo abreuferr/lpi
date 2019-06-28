@@ -39,7 +39,7 @@ $ sudo vi /etc/postfix/main.cf
 	mailbox_command = /usr/bin/procmail -a "$EXTENSION" DEFAULT=$HOME/Maildir/ MAILDIR=$HOME/Maildir
 	(...)
 
-# promailrc
+# procmailrc
 $ sudo vi /etc/procmailrc
 	# variaveis de ambiente.
 	PATH=/bin:/usr/bin:/usr/local/bin:$HOME/bin:/usr/sbin
@@ -55,6 +55,3 @@ $ sudo vi /etc/procmailrc
 	^Subject:.*viagra|\
 	^Subject:.*??
 	spam
-
-
-
