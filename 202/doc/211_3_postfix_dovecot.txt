@@ -24,9 +24,6 @@ Terms and Utilities:
 $ sudo apt-get update
 $ sudo apt-get upgrade -y -d
 
-# instalacao do postfix
-$ sudo apt-get install postfix mailutils telnet -y -d
-
 # instalacao do dovecot
 $ sudo apt-get install dovecot-core dovecot-imapd dovecot-pop3d -y -d
 
