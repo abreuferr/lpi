@@ -37,6 +37,9 @@ $ sudo apt-get install postfix mailutils telnet -y -d
 # CONFIGURACAO
 #
 
+# backup
+$ cp /etc/postfix/main.cf{,.origin}
+
 # reconfigurando o postfix
 $ sudo dpkg-reconfigure postfix
 	General type of mail configuration? - internet site
@@ -52,6 +55,7 @@ $ sudo dpkg-reconfigure postfix
 # opcao - home_mailbox
 #
 $ sudo postconf -e 'home_mailbox = Maildir/'
+$ sudo postconf -e "mailbox_command = "
 
 # opcao - virtual_alias_maps
 #
@@ -117,6 +121,7 @@ $ sudo cat /etc/postfix/main.cf
 	
 	# tipo de mailbox
 	home_mailbox = Maildir/
+	mailbox_command = 
 	
 	# endereco da interface de rede que recebe email.
 	inet_interfaces = all

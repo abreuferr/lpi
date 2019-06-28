@@ -31,6 +31,9 @@ $ sudo apt-get install dovecot-core dovecot-imapd dovecot-pop3d -y -d
 # SERVIDOR - CONFIGURACAO
 #
 
+# copia de seguranca
+$ sudo cp /etc/postfix/main.cf{,.origin}
+
 # configurando o Postfix para trabalhar com o Dovecot.
 $ sudo vi /etc/postfix/main.cf
 	(...)
@@ -41,22 +44,27 @@ $ sudo vi /etc/postfix/main.cf
 	(...)
 
 # configuracao a conexao do Dovecot.
+$ sudo cp /etc/dovecot/dovecot.conf{,.backup}
 $ sudo vi /etc/dovecot/dovecot.conf
 	# lista de enderecos dos hosts que o dovecot
 	# deve permitir conexao.
 	listen = *, ::
 
 # configurando o processo de autenticacao no Dovecot.
+$ sudo cp /etc/dovecot/conf.d/10-auth.conf{,.backup}
+$ sudo vi /etc/dovecot/dovecot.conf
 $ sudo vi /etc/dovecot/conf.d/10-auth.conf
 	auth_mechanisms = plain login
 	disable_plaintext_auth = no
 
 # configurando o Maildir no Dovecot.
+$ sudo cp /etc/dovecot/conf.d/10-mail.conf{,.backup}
 $ sudo vi /etc/dovecot/conf.d/10-mail.conf
 	# indica a localizacao do mailbox do ususario.
 	mail_location = maildir:~/Maildir
 
 # configurando o Dovecot para trabalhar com o Postfix.
+$ sudo cp /etc/dovecot/conf.d/10-master.conf{,.backup}
 $ sudo vi /etc/dovecot/conf.d/10-master.conf
 	# imap
 	service imap-login {

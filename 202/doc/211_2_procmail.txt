@@ -25,33 +25,48 @@ Dovecot vacation extension
 # atualizacao do debian.
 $ sudo apt-get update && sudo apt-get upgrade -y -d
 
-# instalacao na estacao e no servidor de e-mail.
-$ sudo apt-get install procmail -y -d
+# instalacao so procmail e fetchmail
+$ sudo apt-get install procmail fetchmail -y -d
 $ sudo apt-get autoremove --purge exim4-base exim4-config exim4-daemon-light -y
 
 #
-# CONFIGURACAO
+# CONFIGURACAO - ESTACAO
 #
 
-# habilitar o procmail no postfix
-$ sudo vi /etc/postfix/main.cf
-	(...)
-	mailbox_command = /usr/bin/procmail -a "$EXTENSION" DEFAULT=$HOME/Maildir/ MAILDIR=$HOME/Maildir
-	(...)
+# fetchmailrc
+$ sudo vi /etc/procmailrc
+	MAILDIR=$HOME/Maildir
+	DEFAULT=$MAILDIR/
+
+$ vi /home/[USUARIO]/.fetchmailrc
+	set logfile /home/[USUARIO]/fetchmail.log
+
+	poll email.particula.local protocol imap
+	username "[USUARIO]" password "[SENHA]"
+
+	mda "/usr/bin/procmail -d %T";
 
 # procmailrc
-$ sudo vi /etc/procmailrc
+$ sudo vi /home/[USUARIO]/.procmailrc
 	# variaveis de ambiente.
-	PATH=/bin:/usr/bin:/usr/local/bin:$HOME/bin:/usr/sbin
-	MAILDIR=$HOME/Mail
+	SHELL = /bin/zsh
+	PATH = /usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 
-	# copiar toda as mensagens para o arquivo "archive"
-	:0c:
-	archive
+	MAILDIR = $HOME/Maildir/
+	DEFAULT = $MAILDIR/
+	LOGFILE = $HOME/procmail.log
 
-	# spam
+	VERBOSE = "yes"
+
 	:0
-	* ^Subject:.*last chance|\
-	^Subject:.*viagra|\
-	^Subject:.*??
-	spam
+	* ^Subject.*SPAM
+	$MAILDIR/spam/
+
+	:0
+	* ^(To|Cc).*cosmo@particula
+	$MAILDIR/inbox/
+
+# fetchmail
+$ mkdir /home/[USUARIO]/Maildir
+
+$ fetchmail -vk
