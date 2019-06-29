@@ -24,47 +24,41 @@ Terms and Utilities:
 - PermitRootLogin, PubKeyAuthentication, AllowUsers, PasswordAuthentication, Protocol
 
 #
-# SERVER - INSTALACAO
+# INSTALACAO
 #
 
-# atualizacao do gnu/linux debian
+# SERVIDOR
 $ sudo apt-get update && sudo apt-get upgrade
+$ sudo apt-get install openssh-server -y -d
 
-# instalacao do openssh
-$ sudo apt-get install openssh-server openss-client -y -d
+# CLIENTE
+$ sudo apt-get update && sudo apt-get upgrade
+$ sudo apt-get install openssh-client -y -d
 
 #
-# SERVER - CONFIGURACAO - GERAL
+# SSH - BASICO
 #
 
-# backup do arquivo de configuracao do ssh server
-$ sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.BKP
-
-# configuracao
+# SERVIDOR
+$ sudo cp /etc/ssh/sshd_config{,.origin}
 $ sudo vi /etc/ssh/sshd_config
-	# porta de trabalho do servidor ssh
-	Port 22
+	# porta de trabalho do servidor ssh.
+	Port 2222
 
-	# limitar o acesso a determinados usuarios
+	# limitar o acesso a determinados usuarios.
 	AllowUsers <USER>
 
-	# limitar o acesso a determinado grupo de usuario
+	# limitar o acesso a determinado grupo de usuario.
 	AllowGroups <GROUP>
 
-	# negar o acesso a determinados usuarios
+	# negar o acesso a determinados usuarios.
 	DenyUsers <USER>
 
-	# negar o acesso a um determinado grupo de usuarios
+	# negar o acesso a um determinado grupo de usuarios.
 	DenyGroups <GROUP>
 
-	# PermitRootLogin=without-password/prohibit-password 
-	# Eh banido qualquer tipo de autenticacao de forma interativa, 
-	# permitindo agora somente a forma de autenticacao atraves
-	# de chave publica e autenticacao GSSAPI.
-	#
-	# ou
-	# PermitRootLogin <YES>/<NO>
-	PermitRootLogin prohibit-password
+	# permite ou nao o login do usuario root no servidor.
+	PermitRootLogin <YES>/<NO>
 
 	# especifica qual o protocolo de seguranca a ser utilizado
 	Protocol 2
@@ -101,14 +95,52 @@ $ sudo vi /etc/ssh/sshd_config
 	# Numero maximo de tentativas.
 	ClientAliveCountMax 3
 
+# CLIENTE
+# ssh [OPCAP] [USUARIO]@[SERVIDOR]
+#	-p [PORTA] - especificar a porta que o servidor trabalha.
+#	-l [USUARIO] - especifica o usuario de logon.
+#	-i [CHAVE_PUBLICA] - especifica o arquivo com a chave publica.
 #
-# SERVER - CONFIGURACAO - AUTENTICACAO VIA PAR DE CHAVES
+$ ssh -p 2222 cosmo@192.168.0.15
+$ ssh -p 2222 -l cosmo 192.168.0.15
+
+#
+# TCPWRAPPER
 #
 
-# configuracao
+# SERVIDOR
+$ sudo vi /etc/hosts.allow
+	sshd : 192.168.0.42
+$ sudo vi /etc/hosts.deny
+	sshd : ALL
+
+#
+# AUTENTICACAO VIA PAR DE CHAVES
+#
+
+# CLIENTE
+# criando as chaves de autenticacao
+$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local"
+
+# criando as chaves de autenticacao
+# chaves geradas
+$ .ssh/
+|-- id_rsa - chave privada
+`-- id_rsa.pub - chave publica
+
+# criando a chave de autorizacao
+$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+
+# copiando a chave publica para o servidor de forma segura.
+$ ssh-copy-id <USERNAME@SERVER>
+
+# SERVIDOR
 $ sudo vi /etc/ssh/sshd_config
 	# desabilita a autenticacao via senha.
 	PasswordAuthentication no
+
+	# autenticacao atraves de chave publica.
+	PubkeyAuthentication yes
 
 	# desabilita o processo de challenge-response
 	# no processo de autenticacao.	
@@ -122,40 +154,10 @@ $ sudo vi /etc/ssh/sshd_config
 $ sudo systemctl restart sshd.service
 
 #
-# CLIENT - CHAVE DE AUTENTICACAO
+# SSO (Single Sign On)
 #
 
-# instalacao do client na estacao
-$ sudo apt-get install openssh-client
-
-# criando as chaves de autenticacao
-$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local"
-
-# chaves geradas
-$ ls -l /home/cosmo/.ssh
-	# chave privada
-	-rw------- 1 cosmo cosmo 1766 Jan 11 13:36 id_rsa
-	# chave publica
-	-rw-r--r-- 1 cosmo cosmo  403 Jan 11 13:36 id_rsa.pub
-
-# criando a chave de autorizacao
-$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
-
-# copiando a chave publica para o servidor de forma segura.
-$ ssh-copy-id <USERNAME@SERVER>
-
-#
-# CLIENT - SSH
-#
-$ ssh [OPCAP] [USUARIO]@[SERVIDOR]
-	-p [PORTA] - especificar a porta que o servidor trabalha.
-	-l [USUARIO] - especifica o usuario de logon.
-	-i [CHAVE_PUBLICA] - especifica o arquivo com a chave publica.
-
-#
-# CLIENT - SSO (Single Sign On)
-#
-
+# CLIENTE
 # inicializar o ssh-agent.
 $ eval `ssh-agent`
 
@@ -173,19 +175,48 @@ $ ssh <USER>@<SERVIDOR_SSH>
 $ eval `ssh-agent -k`
 
 #
-# CLIENT - SCP
+# X11
 #
-# aplicativo utilizado para copiar arquivos de forma segura.
 
+# SERVIDOR
+$ sudo vi /etc/ssh/sshd_config
+	X11Forwarding yes
+	
+# CLIENTE
+$ ssh -X USUARIO@SERVIDOR_SSH
+
+#
+# LOCAL FORWARDING
+#
+
+# SERVIDOR
+$ sudo vi /etc/ssh/sshd_config
+	AllowTcpForwarding yes
+$ sudo systemctl restart sshd.service
+
+# CLIENTE
+# ssh -L [local_port]:[remote_address]:[remote_port] [username@remote_address]
+$ ssh -L 8080:192.168.0.8:80 cosmo@192.168.0.8
+$ w3m http://127.0.0.1:8080
+
+#
+# REMOTE FORWARDING
+#
+
+# SERVIDOR
+# ssh -R [remote_port]:[local_address]:[local_port] [username@remote_address]
+
+#
+# SCP - COPIAR ARQUIVO
+#
+
+# CLIENTE
 # local para remoto.
 $ scp [OPCAO] /DIR/ARQUIVO [USUARIO]@[HOST_DESTINO:]/DIR_DESTINO
-
 # remoto para remoto
 $ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO [USUARIO]@[HOST_DESTINO:]/DIR_DESTINO
-
 # remoto para local
 $ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO /DIR_DESTINO
-
 	-P [PORTA] - especifica a porta do servidor ssh remoto.
 	-p - preserva a data e propriedades do arquivo.
 	-q - opcao utilizada para suprimir a barra de progresso e mensagem de erro.
