@@ -196,8 +196,6 @@ $ sudo systemctl restart sshd.service
 
 # CLIENTE
 # ssh -L [local_port]:[remote_address]:[remote_port] [username@remote_address]
-$ ssh -L 8080:192.168.0.8:80 cosmo@192.168.0.8
-$ w3m http://127.0.0.1:8080
 
 #
 # REMOTE FORWARDING
