@@ -192,6 +192,7 @@ $ ssh -X USUARIO@SERVIDOR_SSH
 # SERVIDOR
 $ sudo vi /etc/ssh/sshd_config
 	AllowTcpForwarding yes
+	GatewayPorts yes
 $ sudo systemctl restart sshd.service
 
 # CLIENTE
