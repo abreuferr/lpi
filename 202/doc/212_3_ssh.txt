@@ -43,37 +43,41 @@ $ sudo apt-get install openssh-client -y -d
 $ sudo cp /etc/ssh/sshd_config{,.origin}
 $ sudo vi /etc/ssh/sshd_config
 	# porta de trabalho do servidor ssh.
-	Port 2222
+	Port [NUM]
 
 	# limitar o acesso a determinados usuarios.
-	AllowUsers <USER>
+	AllowUsers [USER]
 
 	# limitar o acesso a determinado grupo de usuario.
-	AllowGroups <GROUP>
+	AllowGroups [GROUP]
 
 	# negar o acesso a determinados usuarios.
-	DenyUsers <USER>
+	DenyUsers [USER]
 
 	# negar o acesso a um determinado grupo de usuarios.
-	DenyGroups <GROUP>
+	DenyGroups [GROUP]
 
 	# permite ou nao o login do usuario root no servidor.
-	PermitRootLogin <YES>/<NO>
+	PermitRootLogin [YES/NO]
 
 	# especifica qual o protocolo de seguranca a ser utilizado
-	Protocol 2
+	Protocol [NUM]
 
 	# permitir ou nao a utilizacao de senhas em branco
-	PermitEmptyPasswords <YES/NO>
+	PermitEmptyPasswords [YES/NO]
 
 	# depois de X segundos sem nenhuma atividade, o usuario eh deslogado
-	ClientAliveInterval <NUM>
+	ClientAliveInterval [NUM]
 
 	# quantidade de mensagens enviadas pelo cliente
-	ClientAliveCountMax <NUM>
+	ClientAliveCountMax [NUM]
 
 	# permitir ou nao o redirecionamento do X11 para o cliente
-	X11Forwarding <YES/NO>
+	X11Forwarding [YES/NO]
+
+	# habilita a opcao de forward de portas entre o cliente e o
+	# servidor ssh.
+	AllowTcpForwarding [YES/NO]
 
 	# Periodo maximo em que o usuario pode ficar sem fazer nada
 	# na estacao.
@@ -83,17 +87,17 @@ $ sudo vi /etc/ssh/sshd_config
 	ClientAliveMaxCount [NUM]
 
 	# log
-	SyslogFacility AUTH
-	LogLevel INFO
+	SyslogFacility [AUTH]
+	LogLevel [INFO]
 
 	# o processo de autenticacao deve ocorrer em 20 segundos.
-	LoginGraceTime 20
+	LoginGraceTime [20]
 
 	# Definir o intervalo entre uma tentativa de autenticacao.
-	ClientAliveInterval 40
+	ClientAliveInterval [40]
 
 	# Numero maximo de tentativas.
-	ClientAliveCountMax 3
+	ClientAliveCountMax [3]
 
 # CLIENTE
 # ssh [OPCAP] [USUARIO]@[SERVIDOR]
@@ -120,7 +124,7 @@ $ sudo vi /etc/hosts.deny
 
 # CLIENTE
 # criando as chaves de autenticacao
-$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local"
+$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" -f ~/.ssh/id_rsa
 
 # criando as chaves de autenticacao
 # chaves geradas
