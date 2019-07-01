@@ -34,7 +34,7 @@ $ sudo apt-get install vsftpd -y -d
 #
 
 # copia de seguranca.
-$ sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.origin
+$ sudo cp /etc/vsftpd.conf{,.origin}
 
 # editando o arquivo de configuracao.
 $ sudo vi /etc/vsftpd.conf
@@ -87,7 +87,7 @@ $ sudo vi /etc/vsftpd.conf
 
 	# ativando ou nao a opcao de chroot.
 	chroot_local_user=YES/NO
-	# lista de usuarios que farao ou nao chroot.
+	# lista de usuarios que farao chroot.
 	chroot_list_file=/etc/vsftpd.chroot_list
 	# permite que usuario com chroot possa fazer upload
 	# de arquivos.
