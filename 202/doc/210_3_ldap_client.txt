@@ -34,7 +34,7 @@ $ sudo apt-get install libnss-ldap libpam-ldapnscd ldap-utils ldapscripts -y -d
 #
 
 # backup do arquivo de configuracao
-$ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
+$ sudo cp /etc/ldap/ldap.conf{,.origin}
 
 # configuracao inicial do cliente ldap.
 $ sudo vi /etc/ldap/ldap.conf
@@ -53,54 +53,35 @@ $ ldapsearch -D "cn=admin,dc=particula,dc=local" -W '(objectclass=*)'
 #
 
 # adicionando OU (Organizational Unit)
-$ cat ou.ldif
+$ cat base_ou.ldif
 	# user
-	dn: ou=user,dc=particula,dc=local
-	ou: user
-	objectClass: top
+	dn: ou=users,dc=particula,dc=local
 	objectClass: organizationalUnit
+	ou: users
 
 	# group
-	dn: ou=group,dc=particula,dc=local
-	ou: group
-	objectClass: top
+	dn: ou=groups,dc=particula,dc=local
 	objectClass: organizationalUnit
-$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base.ldif
+	ou: groups
+$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base_ou.ldif
 
 # adicionando USUARIO
 $ sudo slappasswd
 	{SSHA}RZHmkGBwC2JotUhVIES6QVVwfjmkG6cr
 $ cat user.ldif
 	dn: uid=cosmo,ou=user,dc=particula,dc=local
-	objectClass: top
-	objectClass: person
-	objectClass: organizationalPerson
+	cn: Caio
+	sn: Ferreira
 	objectClass: inetOrgPerson
-	objectClass: posixAccount
-	objectClass: shadowAccount
-	uid: cosmo
-	cn: Cosmo Comics
-	sn: Cosmo
-	givenName: Comics
-	title: Big Boss
-	telephoneNumber: +0 000 000 0000
-	mobile: +0 000 000 0000
-	postalAddress: avenida paulista 2001
-	userPassword: {SSHA}RZHmkGBwC2JotUhVIES6QVVwfjmkG6cr
-	labeledURI: https://www.particula.org/
-	loginShell: /bin/bash
-	uidNumber: 1000
-	gidNumber: 1000
-	homeDirectory: /home/cosmo/
-	description: cosmo comics - big boss
+	uid: caio
 $ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f user.ldif
 
 # adicinando grupo
 $ cat group.ldif
-	dn: cn=ti, ou=user, dc=particula, dc=local
+	dn: cn=ti, ou=users, dc=particula, dc=local
 	cn: ti
 	objectClass: groupOfNames
-	member: cn=cosmo, ou=user, dc=particula, dc=local
+	member: cn=cosmo, ou=users, dc=particula, dc=local
 $ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f group.ldif
 
 #
@@ -183,7 +164,3 @@ $ cat delete_atributo_cosmo.ldif
 	changetype: modify
 	delete: facsimileTelephoneNumber
 $ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_atributo_cosmo.ldif
-
-#
-# LOG
-#
