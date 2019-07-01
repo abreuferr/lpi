@@ -1,0 +1,178 @@
+#: Title : openldap server configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : openldap server configuration
+#: Options : Weight: 4
+
+Description: Candidates should be able to configure a 
+basic OpenLDAP server including knowledge of LDIF format 
+and essential access controls.
+
+Key Knowledge Areas:
+- OpenLDAP
+- Directory based configuration
+- Access Control
+- Distinguished Names
+- Changetype Operations
+- Schemas and Whitepages
+- Directories
+- Object IDs, Attributes and Classes
+
+Terms and Utilities:
+- slapd
+- slapd-config
+- LDIF
+- slapadd
+- slapcat
+- slapindex
+- /var/lib/ldap/
+- loglevel
+
+#
+# TEORIA
+#
+dc=particula,dc=local
+
+ou=users,dc=particula,dc=local
+uid=cosmo,ou=users,dc=particula,dc=local
+
+ou=groups,dc=particula,dc=local
+cn=department,ou=groups,dc=particula,dc=local
+
+cn=admin,dc=particula,dc=local
+
+#
+# INSTALACAO
+#
+
+# atualizacao do debian
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do servidor openldap
+$ sudo apt-get install slapd ldap-utils ldapscripts db-util -y -d
+
+#
+# CONFIGURACAO INICIAL
+#
+
+# visualizacao da estrutura inicial do openldap.
+$ sudo slapcat
+
+# reconfigurando o pacote slapd
+$ sudo dpkg-reconfigure slapd
+	Omit OpenLDAP server configuration? <NO>
+	DNS Domain Name: particula.local
+	Organization name: particula
+	Administrator password: <SENHA>
+	Confirm password: <SENHA>
+	Database backend to use: HDB
+	Do you want the database to be removed when slapd is purged? <NO>
+	Move old database? <YES>
+
+# backup do arquivo de configuracao
+$ sudo cp /etc/ldap/ldap.conf{,.origin}
+
+# configuracao do arquivo ldap.conf
+$ sudo vi /etc/ldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
+
+# arquivo de configuracao.
+$ sudo cp /usr/share/slapd/slapd.conf /etc/ldap/
+
+# gerando o hash da senha do usuario admin/rootpw
+$ sudo slappasswd -h {SSHA}
+
+# estrutura inicial
+$ sudo cat /etc/ldap/slapd.d/cn=config/olcDatabase={1}hdb.ldif
+
+# arquivo ldif.
+$ vi modify_config_1.ldif
+	dn: olcDatabase={1}hdb,cn=config
+	changeType: modify
+	replace: olcSuffix
+	olcSuffix: dc=particula,dc=local
+	-
+	replace: olcRootDN
+	olcRootDN: cn=admin,dc=particula,dc=local
+
+# executando a alteracao.
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f modify_config_1.ldif
+
+# verificar o resultado da alteracao.
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDat
+
+# gerando o hash da senha do usuario admin/rootpw
+$ sudo slappasswd -h {SSHA}
+
+# arquivo ldif.
+$ vi modify_config_2.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changeType: modify
+	add: olcRootPW
+	olcRootPW: {SSHA}Ftvq59j9XWVHRnfEplQvMiRBfthieUMU
+
+# verificar o resultado da alteracao.
+ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDat
+
+# executando a alteracao.
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f modify_config_1.ldif
+
+# reinicializando servidor ldap.
+$ sudo systemctl restart slapd.service
+
+#
+# LOG
+#
+
+$ sudo vi /etc/rsyslog.cong
+	# Log OpenLDAP messages
+	local4.*                  /var/log/ldap.log
+
+$ sudo systemctl restart rsyslog
+$ sudo systemctl restart slapd
+
+#
+# BACKUP DB
+#
+$ sudo mkdir -p /var/lib/ldap/bdb_backup
+$ sudo db_hotbackup -h /var/lib/ldap -b /var/lib/ldap/bdb_backup
+$ sudo slapcat -b "dc=particula,dc=local" | sudo tee -a /var/lib/ldap/bdb_backup/particula_local.ldif
+
+# verificando integridade.
+$ sudo db_verify -h /var/lib/ldap /var/lib/ldap/*.bdb
+
+# restaurando o backup
+$ sudo db_recover -v -h /var/lib/ldap/
+
+#
+# COMANDO SLDAPADD
+#
+
+# inserir dados atraves de um arquivo ldif
+$ sudo sldapadd -f /etc/ldap/slapd.conf -l OU/CN/UID.ldif
+
+#
+# COMANDO SLAPCAT
+#
+
+# comando utilizado para extrair/dump da base de dados do servidor ldap
+# para um arquivo ldif;
+$ sudo slapcat -v -l backup_ldap.ldif
+
+#
+# GERENCIAMENTO GRAFICO - LDAP Account Manager (LAM)
+#
+
+# instalacao
+$ sudo apt-get install ldap-account-manager -y
+
+# restringir/liberar o acesso
+$ sudo vi /etc/apache2/conf-enabled/ldap-account-manager.conf
+	# Require all granted
+	Require ip 192.168.0.0/24
+
+# reinicializar o apache2
+$ sudo systemctl restart apache2
+
+# acessar o aplicativo
+http://LDAP_SERVER_IP/lam
