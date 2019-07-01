@@ -83,29 +83,35 @@ log - registra o pacote e passa para o proximo chain.
 # script de firewall
 #
 $ /etc/init.d/firewall.sh
-    #!/bin/bash
-    IPTABLES=/sbin/iptables
+	#!/bin/bash
+	IPTABLES=/sbin/iptables
 
-    # ativar ip masquerading
-    $IPTABLES -t nat -A POSTROUTING -o ens32 -j MASQUERADE
-    echo 1 > /proc/sys/net/ipv4/ip_forward
+	# ativar ip masquerading
+	$IPTABLES -t nat -A POSTROUTING -o ens32 -j MASQUERADE
+	echo 1 > /proc/sys/net/ipv4/ip_forward
 
-    # remove todas as regras
-    iptables -F INPUT
-    iptables -F FORWARD
-    iptables -F OUTPUT
+	# remove todas as regras
+	iptables -F INPUT
+	iptables -F FORWARD
+	iptables -F OUTPUT
 
-    # por padrao, DROP dos pacotes
-    iptables -P INPUT DROP
-    iptables -P FORWARD DROP
-    iptables -P OUTPUT DROP
+	# por padrao, DROP dos pacotes
+	iptables -P INPUT DROP
+	iptables -P FORWARD DROP
+	iptables -P OUTPUT DROP
 
-    # Let traffic on the loopback interface pass
-    iptables -A OUTPUT -d 127.0.0.1 -o lo -j ACCEPT
-    iptables -A INPUT -s 127.0.0.1 -i lo -j ACCEPT
+	# Let traffic on the loopback interface pass
+	iptables -A OUTPUT -d 127.0.0.1 -o lo -j ACCEPT
+	iptables -A INPUT -s 127.0.0.1 -i lo -j ACCEPT
 
-    # Let DNS traffic pass
-    iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-    iptables -A INPUT -p udp --sport 53 -j ACCEPT
+	# Let DNS traffic pass
+	iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+	iptables -A INPUT -p udp --sport 53 -j ACCEPT
 
+	# Let clients TCP traffic pass
+	iptables -A OUTPUT -p tcp --sport 1024:65535 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+	iptables -A INPUT -p tcp --dport 1024:65535 -m state --state ESTABLISHED,RELATED -j ACCEPT
 
+	# Let local connections to local SSH server pass
+	iptables -A OUTPUT -p tcp --sport 22 -d 192.168.0.0/24 -m state --state ESTABLISHED,RELATED -j ACCEPT
+	iptables -A INPUT -p tcp --dport 22 -s 192.168.0.0/24 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
