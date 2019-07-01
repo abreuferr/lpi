@@ -19,6 +19,34 @@ Terms and Utilities:
 - important Pure-FTPd command line options
 
 #
+# TEORIA
+#
+
+# MODO PASSIVO
+#
+# capturar os trafego.
+$ sudo tcpdump -n -v port ftp or ftp-data -w vsftp_passive.pcap
+# exibir co conteudo do arquivo.
+$ sudo tcpdump -n port ftp or ftp-data -r vsftp_passive.pcap
+16:18:40.626098 IP 192.168.0.42.56436 > 192.168.0.15.21: Flags [S], seq 2262183040, win 29200, options [mss 1460,sackOK,TS val 5651487 ecr 0,nop,wscale 5],length 0
+16:18:40.626639 IP 192.168.0.15.21 > 192.168.0.42.56436: Flags [S.], seq 470770339, ack 2262183041, win 28960, options [mss 1460,sackOK,TS val 2451325 ecr 5651487,nop,wscale 5], length 0
+
+16:18:46.266078 IP 192.168.0.15.20 > 192.168.0.42.57131: Flags [S], seq 864089219, win 29200, options [mss 1460,sackOK,TS val 2452735 ecr 0,nop,wscale 5], length 0
+16:18:46.266405 IP 192.168.0.42.57131 > 192.168.0.15.20: Flags [S.], seq 3674612245, ack 864089220, win 28960, options [mss 1460,sackOK,TS val 5652896 ecr 2452735,nop,wscale 5], length 0
+
+# MODO ATIVO
+#
+# capturar os trafego.
+$ sudo tcpdump -n -v port ftp or ftp-data -w vsftp_active.pcap
+# exibir co conteudo do arquivo.
+$ sudo tcpdump -n port ftp or ftp-data -r vsftp_active.pcap
+16:45:05.860206 IP 192.168.0.42.56438 > 192.168.0.15.21: Flags [S], seq 2968348529, win 29200, options [mss 1460,sackOK,TS val 6047517 ecr 0,nop,wscale 5], length 0
+16:45:05.860976 IP 192.168.0.15.21 > 192.168.0.42.56438: Flags [S.], seq 4108758822, ack 2968348530, win 28960, options [mss 1460,sackOK,TS val 2847634 ecr 6047517,nop,wscale 5], length 0
+
+16:45:13.089995 IP 192.168.0.42.56438 > 192.168.0.15.21: Flags [P.], seq 61:67, ack 148, win 913, options [nop,nop,TS val 6049323 ecr 2849441], length 6: FTP: LIST
+16:45:13.091464 IP 192.168.0.15.20 > 192.168.0.42.42921: Flags [S], seq 4046149813, win 29200, options [mss 1460,sackOK,TS val 2849442 ecr 0,nop,wscale 5], length 0
+
+#
 # VSFTPD - INSTALACAO
 #
 
@@ -33,6 +61,10 @@ $ sudo apt-get install vsftpd -y -d
 # CONFIGURACAO
 #
 
+# diretorio de trabalho
+$ sudo mkdir -p /home/ftp
+$ sudo chown noboy:nogroup /home/ftp
+
 # copia de seguranca.
 $ sudo cp /etc/vsftpd.conf{,.origin}
 
@@ -44,6 +76,8 @@ $ sudo vi /etc/vsftpd.conf
 
 	# ativando ou nao o usuario anonymous.
 	anonymous_enable=NO/YES
+	# definir diretorio de trabalho.
+	anon_root=/home/ftp
 	# permite ou nao que usuario anonymous possa
 	# fazer o upload de arquivos.
 	anon_upload_enable=YES/NO
@@ -91,7 +125,7 @@ $ sudo vi /etc/vsftpd.conf
 	chroot_list_file=/etc/vsftpd.chroot_list
 	# permite que usuario com chroot possa fazer upload
 	# de arquivos.
-	allow_writeable_chroot=YES
+	allow_writeable_chroot=YES/NO
 
 	#
 	# TLS
@@ -114,6 +148,18 @@ $ sudo vi /etc/vsftpd.conf
 
 	# localizacao do certificado tls.
 	rsa_cert_file=/etc/ssl/private/vsftpd.pem
+
+	#
+	# MODO ATIVO
+	#
+	pasv_enable=no
+
+	#
+	# MODO PASSIVO
+	#
+	pasv_enable=yes
+	pasv_max_port=10100
+	pasv_min_port=10090
 
 # criando certificado SSL
 $ sudo sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem
