@@ -46,16 +46,16 @@ $ sudo vi /etc/ssh/sshd_config
 	Port [NUM]
 
 	# limitar o acesso a determinados usuarios.
-	AllowUsers [USER]
+	AllowUsers [USER1] [USER2]
 
 	# limitar o acesso a determinado grupo de usuario.
-	AllowGroups [GROUP]
+	AllowGroups [GROUP1] [GROUP2]
 
 	# negar o acesso a determinados usuarios.
-	DenyUsers [USER]
+	DenyUsers [USER1] [USER2]
 
 	# negar o acesso a um determinado grupo de usuarios.
-	DenyGroups [GROUP]
+	DenyGroups [GROUP1] [GROUP2]
 
 	# permite ou nao o login do usuario root no servidor.
 	PermitRootLogin [YES/NO]
@@ -124,6 +124,7 @@ $ sudo vi /etc/hosts.deny
 
 # CLIENTE
 # criando as chaves de autenticacao
+# ssh-keygen -t [key_type] -b [bits] -C "[comment]" -f [file]
 $ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" -f ~/.ssh/id_rsa
 
 # criando as chaves de autenticacao
@@ -146,13 +147,16 @@ $ sudo vi /etc/ssh/sshd_config
 	# autenticacao atraves de chave publica.
 	PubkeyAuthentication yes
 
+	# metodo de autenticacao.
+	AuthenticationMethods publickey
+
 	# desabilita o processo de challenge-response
 	# no processo de autenticacao.	
 	ChallengeResponseAuthentication no
 
 	# utiliza a tecnologia PAM para executar o processo
 	# de autenticacao.	
-	UsePAM yes
+	UsePAM no
 
 # reinicializar o servidor ssh
 $ sudo systemctl restart sshd.service
