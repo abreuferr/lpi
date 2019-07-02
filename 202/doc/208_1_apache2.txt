@@ -119,23 +119,18 @@ Terms and Utilities:
 #
 
 # instalacao do apache 
-#
 $ sudo apt-get install apache2
 
 # instalacao do modulo para controlar requisicao do apache2
-#
 $ sudo apt-get install libapache2-mpm-itk -y -d
 
 # fastcgi
-#
 $ sudo apt-get install libapache2-mod-fcgid -y -d
 
 # instalacao do modulo PHP no Apache2
-#
 $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
 
 # instalacao do modulo Perl no Apache2
-#
 $ sudo apt-get install libapache2-mod-perl2 -y -d
 
 
@@ -144,16 +139,14 @@ $ sudo apt-get install libapache2-mod-perl2 -y -d
 #
 
 # arquivo de log referente aos acesso
-#
 $ sudo cat /var/log/apache2/access.log
 
 # arquivo de log referente aos erros
-#
 $ sudo cat /var/log/apache2/error.log
 
 # parametros definidos no arquivo
 # /etc/apache2/apache2.conf
-	LogFormat "%h %l %u %t \"%r\" %>s %b"
+	LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\""
 
 	%h endereco IP do cliente que acesso a pagina
 	%l a identidade do cliente determinada pelo identd na maquina do cliente.
