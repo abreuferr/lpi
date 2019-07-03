@@ -1,0 +1,7 @@
+dn: cn=<Group Name>,ou=Group,dc=your,dc=domain
+changetype: modify
+add: memberUid
+memberUid: <UID1>
+memberUid: <UID2>
+...
+memberUid: <UIDX>
