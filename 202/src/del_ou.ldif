@@ -1,0 +1,2 @@
+dn: ou=<Group Name>,dc=your,dc=domain
+changetype: delete
