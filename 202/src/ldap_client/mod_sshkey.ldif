@@ -1,0 +1,4 @@
+dn: uid=<User UID>,ou=People,dc=your,dc=domain
+changetype: modify
+replace: sshPublicKey
+sshPublicKey: <User OpenSSH Public Key>

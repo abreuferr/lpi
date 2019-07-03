@@ -1,0 +1,3 @@
+dn: uid=<User UID>,ou=users,dc=particula,dc=local
+changetype: modify
+delete: pwdAccountLockedTime
