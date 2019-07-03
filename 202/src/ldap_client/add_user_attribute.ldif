@@ -1,0 +1,4 @@
+dn: uid=<username>,ou=<group>,dc=particula,dc=local
+changetype: modify
+add: <attribute>
+facsimileTelephoneNumber: <attribute value>
