@@ -20,6 +20,19 @@ ldapadd
 ldapdelete
 
 #
+# TEORIA
+#
+
+dc=particula,dc=local
+cn=admin,dc=particula,dc=local
+
+ou=users,dc=particula,dc=local
+uid=cosmo,ou=users,dc=particula,dc=local
+
+ou=groups,dc=particula,dc=local
+cn=department,ou=groups,dc=particula,dc=local
+
+#
 # INSTALACAO
 #
 
@@ -41,60 +54,54 @@ $ sudo vi /etc/ldap/ldap.conf
 	BASE    dc=particula,dc=local
 	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
 
-# .ldaprc local
-$ cat /etc/hosts
-	127.0.0.1       localhost 			localhost
-	192.168.0.13	openldap.particula.local	openldap
-
-$ vi ~/.ldaprc
-	BASE    dc=particula,dc=local
-	URI     ldap://openldap.particula.local
-	BINDDN  cn=admin,dc=particula,dc=local
+# todos os arquivos ldif estao presentes na url 
+# https://github.com/abreuferr/lpi/tree/master/202/src
 
 #
-# LDAPSEARCH
+# OU
 #
 
-# busca de registros dentro da base de dados do openldap.
-$ ldapsearch -x -W '(objectclass=*)'
+# adicionar
+$ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_ou.ldif
+# renomear
+$ ???
+# apagar
+$ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_ou.ldif
 
 #
-# LDAPADD
+# GRUPO
 #
 
-# adicionando OU (Organizational Unit)
-$ cat base_ou.ldif
-	# user
-	dn: ou=users,dc=particula,dc=local
-	objectClass: organizationalUnit
-	ou: users
-
-	# group
-	dn: ou=groups,dc=particula,dc=local
-	objectClass: organizationalUnit
-	ou: groups
-$ ldapadd -x -W -f base_ou.ldif
-
-# adicionando USUARIO
-$ sudo slappasswd
-	{SSHA}RZHmkGBwC2JotUhVIES6QVVwfjmkG6cr
-$ cat user.ldif
-	dn: uid=cosmo,ou=user,dc=particula,dc=local
-	cn: Caio
-	sn: Ferreira
-	objectClass: inetOrgPerson
-	uid: caio
-$ ldapadd -x -W -f user.ldif
-
-# adicinando grupo
-$ cat group.ldif
-	dn: cn=ti, ou=users, dc=particula, dc=local
-	cn: ti
-	objectClass: groupOfNames
-	member: cn=cosmo, ou=users, dc=particula, dc=local
-$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f group.ldif
+# adicionar
+$ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_group.ldif
+# renomear
+$ ???
+# apagar
+$ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_group.ldif
 
 #
+# USUARIO
+#
+
+# adicionar
+$ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_user.ldif
+# renomear
+$ ???
+# apagar
+$ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_user.ldif
+
+#
+# USUARIO + GRUPO
+#
+
+# adicionar
+$ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_user_to_group.ldif
+# renomear
+$ ???
+# apagar
+$ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_user_to_group.ldif
+
+
 # LDAPSEARCH
 #
 
@@ -107,70 +114,3 @@ $ sudo ldapsearch -x -W "(uid=cosmo)"
 
 # alterar a senha do usuario.
 $ ldappasswd -x -W -S uid=cosmo,ou=people,dc=particula,dc=local
-
-#
-# LDAPDELETE
-#
-
-# apagando registro na base de dados do servidor ldap.
-$ ldapdelete -x -W uid=cosmo,ou=people,dc=particula,dc=local
-
-#
-# LDAPMODIFY
-#
-
-# adicionando um registro.
-$ cat add_cosmo.ldif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
-	changetype: add
-	objectClass: top
-	objectClass: person
-	objectClass: organizationalPerson
-	objectClass: inetOrgPerson
-	objectClass: posixAccount
-	objectClass: shadowAccount
-	uid: cosmo
-	cn: Cosmo Comics
-	sn: Cosmo
-	givenName: Comics
-	title: Big Boss
-	telephoneNumber: +0 000 000 0000
-	mobile: +0 000 000 0000
-	postalAddress: avenida paulista 2001
-	userPassword: {CRYPT}$6$RsOxHWv/$8ELKsp8BuTx1GzXWWMfXgvA.RJcdFpKHY3tEfes1gV/wtIu2.Wumh592bZlrEq/hdDCr5aAJvXXYWCiydH3s.1:17968
-	labeledURI: https://www.particula.org/
-	loginShell: /bin/bash
-	uidNumber: 1000
-	gidNumber: 1000
-	homeDirectory: /home/cosmo/
-	description: cosmo comics - big boss
-$ ldapmodify -x -W -f add_cosmo.ldif
-
-# apagando um registro.
-$ cat delete_cosmo.ldaif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
-	changetype: delete
-$ ldapmodify -x -W -f delete_cosmo.ldif
-
-# adicionando um atributo em um registro.
-$ cat add_atributo_cosmo.ldaif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
-	changetype: modify
-	add: facsimileTelephoneNumber
-	facsimileTelephoneNumber: +55 51 1234 4321
-$ ldapmodify -x -W -f add_atributo_cosmo.ldif
-
-# modificando um atributo em um registro.
-$ cat modify_atributo_cosmo.ldaif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
-	changetype: modify
-	replace: uidNumber
-	uidNumber: 1001
-$ ldapmodify -x -W -f modify_atributo_cosmo.ldif 
-
-# apagando um atributo em um registro.
-$ cat delete_atributo_cosmo.ldif
-	dn: uid=cosmo,ou=people,dc=particula,dc=local
-	changetype: modify
-	delete: facsimileTelephoneNumber
-$ ldapmodify -x -W -f delete_atributo_cosmo.ldif
