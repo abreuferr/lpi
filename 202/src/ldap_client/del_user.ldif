@@ -1,0 +1,5 @@
+dn: cn=<User UID>,ou=group,dc=particula,dc=local
+changeType: delete
+
+dn: uid=<User UID>,ou=users,dc=particula,dc=local
+changeType: delete

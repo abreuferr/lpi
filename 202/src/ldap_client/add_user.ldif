@@ -1,0 +1,29 @@
+dn: cn=<username>,ou=groups,dc=particula,dc=local
+objectClass: posixGroup
+objectClass: top
+cn: <username>
+gidNumber: <Unique GID Number>
+description: "<Group Description>"
+
+dn: uid=<username>,ou=users,dc=particula,dc=local
+uid: <username>
+cn: <username>
+givenName: <First Name>
+sn: <Last Name>
+mail: <e-mail address>
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: top
+objectClass: shadowAccount
+objectClass: ldapPublicKey
+shadowMax: 180
+shadowMin: 1
+shadowWarning: 7
+shadowLastChange: 10701
+sshPublicKey: <some SSH public key>
+loginShell: /bin/bash
+uidNumber: <some UID number above 1000>
+gidNumber: <GID number from above>
+homeDirectory: /home/<username>
+userPassword: <slappasswd generated SSHA hash>
+pwdReset: TRUE

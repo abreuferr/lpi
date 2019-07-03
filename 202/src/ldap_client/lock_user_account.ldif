@@ -1,0 +1,9 @@
+dn: uid=<username>,ou=users,dc=particula,dc=local
+changetype: modify
+replace: pwdAccountLockedTime
+pwdAccountLockedTime: 000001010000Z
+-
+delete: sshPublicKey
+-
+replace: userPassword
+userPassword: !!

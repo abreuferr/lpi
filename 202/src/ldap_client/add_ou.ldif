@@ -1,0 +1,4 @@
+dn: ou=<ou_name>,dc=particula,dc=local
+ou: <ou_name>
+objectClass: top
+objectClass: organizationalUnit

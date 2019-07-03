@@ -1,0 +1,7 @@
+dn: cn=<Group Name>,ou=group,dc=particula,dc=local
+changetype: modify
+delete: memberUid
+memberUid: <UID1>
+memberUid: <UID2>
+...
+memberUid: <UIDX>

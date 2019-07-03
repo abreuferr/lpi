@@ -1,3 +1,0 @@
-dn: uid=cosmo,ou=people,dc=particula,dc=local
-changetype: modify
-delete: facsimileTelephoneNumber

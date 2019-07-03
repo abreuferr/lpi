@@ -1,4 +1,0 @@
-dn: uid=cosmo,ou=people,dc=particula,dc=local
-changetype: modify
-replace: gidNumber
-gidNumber: 1001
