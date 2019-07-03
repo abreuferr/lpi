@@ -41,12 +41,22 @@ $ sudo vi /etc/ldap/ldap.conf
 	BASE    dc=particula,dc=local
 	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
 
+# .ldaprc local
+$ cat /etc/hosts
+	127.0.0.1       localhost 			localhost
+	192.168.0.13	openldap.particula.local	openldap
+
+$ vi ~/.ldaprc
+	BASE    dc=particula,dc=local
+	URI     ldap://openldap.particula.local
+	BINDDN  cn=admin,dc=particula,dc=local
+
 #
 # LDAPSEARCH
 #
 
 # busca de registros dentro da base de dados do openldap.
-$ ldapsearch -D "cn=admin,dc=particula,dc=local" -W '(objectclass=*)'
+$ ldapsearch -x -W '(objectclass=*)'
 
 #
 # LDAPADD
@@ -63,7 +73,7 @@ $ cat base_ou.ldif
 	dn: ou=groups,dc=particula,dc=local
 	objectClass: organizationalUnit
 	ou: groups
-$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f base_ou.ldif
+$ ldapadd -x -W -f base_ou.ldif
 
 # adicionando USUARIO
 $ sudo slappasswd
@@ -74,7 +84,7 @@ $ cat user.ldif
 	sn: Ferreira
 	objectClass: inetOrgPerson
 	uid: caio
-$ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f user.ldif
+$ ldapadd -x -W -f user.ldif
 
 # adicinando grupo
 $ cat group.ldif
@@ -89,21 +99,21 @@ $ ldapadd -D "cn=admin,dc=particula,dc=local" -W -f group.ldif
 #
 
 # busca por um UID
-$ sudo ldapsearch -x -b "dc=particula,dc=local" "(uid=cosmo)"
+$ sudo ldapsearch -x -W "(uid=cosmo)"
 
 #
 # LDAPPASSWD
 #
 
 # alterar a senha do usuario.
-$ ldappasswd -D cn=admin,dc=particula,dc=local -W -S uid=cosmo,ou=people,dc=particula,dc=local
+$ ldappasswd -x -W -S uid=cosmo,ou=people,dc=particula,dc=local
 
 #
 # LDAPDELETE
 #
 
 # apagando registro na base de dados do servidor ldap.
-$ ldapdelete -D cn=admin,dc=particula,dc=local -W uid=cosmo,ou=people,dc=particula,dc=local
+$ ldapdelete -x -W uid=cosmo,ou=people,dc=particula,dc=local
 
 #
 # LDAPMODIFY
@@ -134,13 +144,13 @@ $ cat add_cosmo.ldif
 	gidNumber: 1000
 	homeDirectory: /home/cosmo/
 	description: cosmo comics - big boss
-$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f add_cosmo.ldif
+$ ldapmodify -x -W -f add_cosmo.ldif
 
 # apagando um registro.
 $ cat delete_cosmo.ldaif
 	dn: uid=cosmo,ou=people,dc=particula,dc=local
 	changetype: delete
-$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_cosmo.ldif
+$ ldapmodify -x -W -f delete_cosmo.ldif
 
 # adicionando um atributo em um registro.
 $ cat add_atributo_cosmo.ldaif
@@ -148,7 +158,7 @@ $ cat add_atributo_cosmo.ldaif
 	changetype: modify
 	add: facsimileTelephoneNumber
 	facsimileTelephoneNumber: +55 51 1234 4321
-$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f add_atributo_cosmo.ldif
+$ ldapmodify -x -W -f add_atributo_cosmo.ldif
 
 # modificando um atributo em um registro.
 $ cat modify_atributo_cosmo.ldaif
@@ -156,11 +166,11 @@ $ cat modify_atributo_cosmo.ldaif
 	changetype: modify
 	replace: uidNumber
 	uidNumber: 1001
-$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f modify_atributo_cosmo.ldif 
+$ ldapmodify -x -W -f modify_atributo_cosmo.ldif 
 
 # apagando um atributo em um registro.
 $ cat delete_atributo_cosmo.ldif
 	dn: uid=cosmo,ou=people,dc=particula,dc=local
 	changetype: modify
 	delete: facsimileTelephoneNumber
-$ ldapmodify -D cn=admin,dc=particula,dc=local -W -f delete_atributo_cosmo.ldif
+$ ldapmodify -x -W -f delete_atributo_cosmo.ldif
