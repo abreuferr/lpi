@@ -1,0 +1,100 @@
+#: Title : LDAP client usage
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : LDAP client usage - CentoOS
+#: Options : Weight: 2
+
+Description: Candidates should be able to perform queries 
+and updates to an LDAP server. Also included is importing 
+and adding items, as well as adding and managing users.
+
+Key Knowledge Areas:
+
+LDAP utilities for data management and queries
+Change user passwords
+Querying the LDAP directory
+Terms and Utilities:
+
+ldapsearch
+ldappasswd
+ldapadd
+ldapdelete
+
+#
+# TEORIA
+#
+
+dc=particula,dc=local
+cn=admin,dc=particula,dc=local
+
+ou=users,dc=particula,dc=local
+uid=cosmo,ou=users,dc=particula,dc=local
+
+ou=groups,dc=particula,dc=local
+cn=department,ou=groups,dc=particula,dc=local
+
+#
+# INSTALACAO
+#
+
+# atualizacao do debian
+$ sudo yum update
+
+# instalacao cliente ldap
+$ sudo yum install openldap-clients pam_ldap nss-pam-ldapd authconfig
+
+#
+# CONFIGURACAO
+#
+
+# SERVIDOR
+# copiar o diretorio "/etc/openldap/cacerts" para a estacao
+# que ira autenticar no servidor openldap
+#
+# cp -r /etc/openldap/cacerts /etc/openldap/cacerts
+
+# ESTACAO
+
+# configuracao
+$ sudo authconfig-tui
+	User Information > [*] Use LDAP
+	Authentication > [*] Use LDAP Authentication
+	[*] Use TLS
+	Server - ldap://192.168.10.13
+	Base DN: dc=particula,dc=local
+$ sudo vi /etc/openldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://192.168.10.13
+	TLS_CACERTDIR /etc/openldap/cacerts
+
+# habilitar a autenticacao atraves de linha de comando.
+$ sudo authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbasedn="dc=particula,dc=local" --enableldaptls --update
+
+# usuario para teste - marcos
+$ cat marcos.ldif
+	dn: uid=marcos,ou=users,dc=particula,dc=local
+	uid: marcos
+	cn: marcos
+	objectClass: shadowAccount
+	objectClass: top
+	objectClass: person
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	userPassword: {SSHA}NkIkNTIA+vhCZlIGKe+L6mwKZlNFjF4Z
+	shadowLastChange: 17016
+	shadowMin: 0
+	shadowMax: 99999
+	shadowWarning: 7
+	loginShell: /bin/bash
+	uidNumber: 1003
+	gidNumber: 1003
+	homeDirectory: /home/marcos
+	sn: marcos
+	mail: marcos@particula.local
+
+$ cat marcos_add_users.ldif
+	dn: cn=marcos,ou=users,dc=particula,dc=local
+	objectClass: posixGroup
+	objectClass: top
+	cn: marcos
+	userPassword: {crypt}x
+	gidNumber: 1003
