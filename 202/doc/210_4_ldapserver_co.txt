@@ -1,0 +1,224 @@
+#: Title : openldap server configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : openldap server configuration no centos
+#: Options : Weight: 4
+
+Description: Candidates should be able to configure a 
+basic OpenLDAP server including knowledge of LDIF format 
+and essential access controls.
+
+Key Knowledge Areas:
+- OpenLDAP
+- Directory based configuration
+- Access Control
+- Distinguished Names
+- Changetype Operations
+- Schemas and Whitepages
+- Directories
+- Object IDs, Attributes and Classes
+
+Terms and Utilities:
+- slapd
+- slapd-config
+- LDIF
+- slapadd
+- slapcat
+- slapindex
+- /var/lib/ldap/
+- loglevel
+
+#
+# INSTALACAO
+#
+
+# atualizacao
+$ sudo yum update && sudo yum upgrade
+
+# instalacao do servidor openldap
+$ sudo yum install openldap-servers openldap-clients
+
+# ativando servico slapd
+$ sudo systemctl status slapd
+$ sudo systemctl start slapd
+$ sudo systemctl enable slapd
+
+#
+# CONFIGURACAO
+#
+
+# gerando a senha do usuario de administracao
+$ sudo slappasswd
+	New password:
+	Re-enter new password:
+	{SSHA}Kt+7hSVP/D6maUUivBbZ5yuAofuJnXkN
+
+# obter o nome do olcDatabase
+$ ls /etc/openldap/s-lapd.d/cn=config/olcDatabase*
+	olcDatabase={2}hdb.ldif
+
+# modificar os atributos olcSuffix e olcRootDN
+$ cat config1.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcSuffix
+	olcSuffix: dc=particula,dc=local
+
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcRootDN
+	olcRootDN: cn=admin,dc=particula,dc=local
+
+# aplicando a modificacao
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config1_redhat.ldif
+
+# adicionando o atributo olcRootPW
+$ cat config2_redhat.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changeType: modify
+	add: olcRootPW
+	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
+
+# aplicando a modificacao
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config2_redhat.ldif
+
+# alterar o atributo olcAccess
+$ cat config3_redhat.ldif
+	dn: olcDatabase={1}monitor,cn=config
+	changetype: modify
+	replace: olcAccess
+	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
+
+# aplicando a modificacao
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config3_redhat.ldif
+
+# validar os atributos
+$ ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
+
+# outra forma de testar a configuracao
+$ sudo slaptest -u
+
+# criacao do objeto particula.local
+$ cat config4_redhat.ldif
+	dn: dc=particula,dc=local
+	objectClass: dcObject
+	objectClass: organization
+	dc: particula
+	o: particula
+
+# adicionar o objeto.
+$ sudo ldapadd -f config4_redhat.ldif -D cn=admin,dc=particula,dc=local -W
+
+# validar os atributos
+$ sudo ldapsearch -x -b dc=particula,dc=local
+
+# adicionando schema
+$ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/cosine.ldif
+$ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/inetorgperson.ldif
+
+#
+# ESTRUTURA
+#
+
+# adicionando OU
+$ cat ou.ldif
+	dn: ou=users,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: users
+$ sudo ldapadd -f config4_redhat.ldif -D cn=admin,dc=particula,dc=local -W
+
+# adicionando USUARIO
+$ sudo slappasswd
+$ cat add_user.ldif
+	dn: cn=caio,ou=users,dc=particula,dc=local
+	cn: caio
+	sn: ferreia
+	objectClass: inetOrgPerson
+	userPassword: {SSHA}kY7jaquZ7qJovxxGfOrQT6bQy9ZP75bS
+	uid: caio
+$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f add_user.ldif
+
+# adicionando GRUPO
+$ cat add_group.ldif
+	dn: cn=ti,ou=users,dc=particula,dc=local
+	cn: ti
+	objectClass: groupOfNames
+	member: cn=caio,ou=users,dc=particula,dc=local
+$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f add_group.ldif
+
+# apagando OBJETO
+$ sudo ldapdelete -W "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local
+
+#
+# OPENLDAP + TLS
+#
+
+# pre
+$ sudo su
+$ cd /etc/pki/CA/
+$ echo 0001 > serial
+$ touch index.txt
+
+# criacao da chave
+$ openssl genrsa -aes256 -out /etc/pki/CA/private/ca.key.pem
+
+# criacao do certificado
+$ openssl req -new -x509 -days 3650 -key /etc/pki/CA/private/ca.key.pem -extensions v3_ca -out /etc/pki/CA/certs/ca.cert.pem
+
+# criacao da chave para o servidor
+$ openssl genrsa -out private/openldap.particula.local.key
+
+# criacao do certificado para o servidor
+$ openssl req -new -key private/openldap.particula.local.key -out certs/openldap.particula.local.csr
+
+# assinando o certificado
+$ openssl ca -keyfile private/ca.key.pem -cert certs/ca.cert.pem -in certs/openldap.particula.local.csr -out certs/openldap.particula.local.crt
+	(...)
+	Sign the certificate? [y/n]:y
+	1 out of 1 certificate requests certified, commit? [y/n]y
+
+# verificando o certificado
+$ openssl verify -CAfile certs/ca.cert.pem certs/openldap.particula.local.crt
+
+# copiando os certificados.
+$ cp -v certs/* /etc/openldap/certs/
+$ cp -v private/openldap.particula.local.key /etc/openldap/certs/
+$ mkdir -p /etc/openldap/cacerts/
+$ cp -v certs/ca.cert.pem /etc/openldap/cacerts/
+
+# adicionar o ldif no openldap.
+$ cat tls_1.ldif
+	dn: cn=config
+	changetype: modify
+	replace: olcTLSCertificateFile
+	olcTLSCertificateFile: /etc/openldap/certs/openldap.particula.local.crt
+	-
+	replace: olcTLSCertificateKeyFile
+	olcTLSCertificateKeyFile: /etc/openldap/certs/openldap.particula.local.key
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:// -f tls_1.ldif
+
+# permissao
+$ sudo chown -R ldap:ldap /etc/openldap/certs
+$ sudo chown -R ldap:ldap /etc/openldap/cacerts
+
+# importando o certificado.
+$ cat vi tls_2.ldif
+	dn: cn=config
+	changetype: modify
+	add: olcTLSCACertificateFile
+	olcTLSCACertificateFile: /etc/openldap/cacerts/ca.cert.pem
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:// -f tls_2.ldif
+
+# ldaps:///
+$ sudo vi /etc/sysconfig/slapd
+	SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
+	
+$ sudo vi /etc/openldap/ldap.conf
+	#TLS_CACERTDIR /etc/openldap/certs
+	TLS_REQCERT never
+
+# reinicializando o servico
+$ sudo systemctl restart slapd
+
+# firewall
+$ sudo firewall-cmd --add-service=ldap
+$ sudo firewall-cmd --add-service=ldaps
