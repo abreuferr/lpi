@@ -28,19 +28,6 @@ Terms and Utilities:
 - loglevel
 
 #
-# TEORIA
-#
-dc=particula,dc=local
-
-ou=users,dc=particula,dc=local
-uid=cosmo,ou=users,dc=particula,dc=local
-
-ou=groups,dc=particula,dc=local
-cn=department,ou=groups,dc=particula,dc=local
-
-cn=admin,dc=particula,dc=local
-
-#
 # INSTALACAO
 #
 
@@ -51,7 +38,73 @@ $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install slapd ldap-utils ldapscripts db-util -y -d
 
 #
-# CONFIGURACAO INICIAL
+# CONFIGURACAO - REDHAT/CENTOS
+#
+
+# gerando a senha do usuario de administracao
+$ sudo slappasswd
+	New password:
+	Re-enter new password:
+	{SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
+
+# obter o nome do olcDatabase
+$ ls /etc/openldap/s-lapd.d/cn=config/olcDatabase*
+	olcDatabase={2}hdb.ldif
+
+# modificar os atributos olcSuffix e olcRootDN
+$ cat config1_redhat.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcSuffix
+	olcSuffix: dc=particula,dc=local
+
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcRootDN
+	olcRootDN: cn=admin,dc=particula,dc=local
+
+# aplicando a modificacao
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config1_redhat.ldif
+
+# adicionando o atributo olcRootPW
+$ cat config2_redhat.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changeType: modify
+	add: olcRootPW
+	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
+
+# aplicando a modificacao
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config2_redhat.ldif
+
+# alterar o atributo olcAccess
+$ cat config3_redhat.ldif
+	dn: olcDatabase={1}monitor,cn=config
+	changetype: modify
+	replace: olcAccess
+	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
+
+# aplicando a modificacao
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config3_redhat.ldif
+
+# validar os atributos
+$ ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
+
+# criacao do objeto particula.local
+$ cat config4_redhat.ldif
+	dn: dc=particula,dc=local
+	objectClass: dcObject
+	objectClass: organization
+	dc: particula
+	o: particula
+
+# adicionar o objeto.
+$ sudo ldapadd -f config4_redhat.ldif -D cn=admin,dc=particula,dc=local -W
+
+# validar os atributos
+$ sudo ldapsearch -x -b dc=particula,dc=local
+
+#
+# CONFIGURACAO - DEBIAN
 #
 
 # visualizacao da estrutura inicial do openldap.

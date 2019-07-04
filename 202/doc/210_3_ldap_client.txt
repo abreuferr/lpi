@@ -54,18 +54,25 @@ $ sudo vi /etc/ldap/ldap.conf
 	BASE    dc=particula,dc=local
 	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
 
-# todos os arquivos ldif estao presentes na url 
-# https://github.com/abreuferr/lpi/tree/master/202/src
-
 #
 # OU
 #
 
 # adicionar
+$ add_ou.ldif
+	dn: ou=<ou_name>,dc=particula,dc=local
+	ou: <ou_name>
+	objectClass: top
+	objectClass: organizationalUnit
 $ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_ou.ldif
+
 # renomear
 $ ???
+
 # apagar
+$ cat del_ou.ldif
+	dn: ou=<Group Name>,dc=particula,dc=local
+	changetype: delete
 $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_ou.ldif
 
 #
@@ -73,10 +80,22 @@ $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_ou.ldif
 #
 
 # adicionar
+$ cat add_group.ldif
+	dn: cn=<groupname>,ou=group,dc=particula,dc=local
+	objectClass: posixGroup
+	objectClass: top
+	cn: <groupname>
+	gidNumber: <Unique GID number>
+	description: "<Some useful group description>"
 $ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_group.ldif
+
 # renomear
 $ ???
+
 # apagar
+$ cat del_group.ldif
+	dn: cn=<Group Name>,ou=groups,dc=particula,dc=local
+	changetype: delete
 $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_group.ldif
 
 #
@@ -84,10 +103,48 @@ $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_group.ldif
 #
 
 # adicionar
+$ cat add_user.ldif
+	dn: cn=<username>,ou=groups,dc=particula,dc=local
+	objectClass: posixGroup
+	objectClass: top
+	cn: <username>
+	gidNumber: <Unique GID Number>
+	description: "<Group Description>"
+
+	dn: uid=<username>,ou=users,dc=particula,dc=local
+	uid: <username>
+	cn: <username>
+	givenName: <First Name>
+	sn: <Last Name>
+	mail: <e-mail address>
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: top
+	objectClass: shadowAccount
+	objectClass: ldapPublicKey
+	shadowMax: 180
+	shadowMin: 1
+	shadowWarning: 7
+	shadowLastChange: 10701
+	sshPublicKey: <some SSH public key>
+	loginShell: /bin/bash
+	uidNumber: <some UID number above 1000>
+	gidNumber: <GID number from above>
+	homeDirectory: /home/<username>
+	userPassword: <slappasswd generated SSHA hash>
+	pwdReset: TRUE
 $ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_user.ldif
+
 # renomear
 $ ???
+
 # apagar
+$ cat del_user.ldif
+	dn: cn=<User UID>,ou=group,dc=particula,dc=local
+	changeType: delete
+
+	dn: uid=<User UID>,ou=users,dc=particula,dc=local
+	changeType: delete
 $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_user.ldif
 
 #
@@ -95,10 +152,28 @@ $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_user.ldif
 #
 
 # adicionar
+$ cat add_user_to_group.ldif
+	dn: cn=<Group Name>,ou=group,dc=particula,dc=local
+	changetype: modify
+	add: memberUid
+	memberUid: <UID1>
+	memberUid: <UID2>
+	...
+	memberUid: <UIDX>
 $ sudo ldapadd -x -W -D "cn=admin,dc=particula,dc=local" -f add_user_to_group.ldif
+
 # renomear
 $ ???
+
 # apagar
+$ cat del_user_to_group.ldif
+	dn: cn=<Group Name>,ou=group,dc=particula,dc=local
+	changetype: modify
+	delete: memberUid
+	memberUid: <UID1>
+	memberUid: <UID2>
+	...
+	memberUid: <UIDX>
 $ sudo ldapmodify  -x -W -D "cn=admin,dc=particula,dc=local" -f del_user_to_group.ldif
 
 
@@ -113,4 +188,4 @@ $ sudo ldapsearch -x -W "(uid=cosmo)"
 #
 
 # alterar a senha do usuario.
-$ ldappasswd -x -W -S uid=cosmo,ou=people,dc=particula,dc=local
+$ ldappasswd -x -W -S uid=cosmo,ou=users,dc=particula,dc=local
