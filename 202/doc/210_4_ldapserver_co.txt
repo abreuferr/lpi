@@ -46,6 +46,11 @@ $ sudo systemctl enable slapd
 # CONFIGURACAO
 #
 
+# configurando o banco de dados.
+$ sudo cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+$ sudo chown ldap:ldap /var/lib/ldap/DB_CONFIG
+$ sudo systemctl restart ldap
+
 # gerando a senha do usuario de administracao
 $ sudo slappasswd
 	New password:
@@ -69,27 +74,27 @@ $ cat config1.ldif
 	olcRootDN: cn=admin,dc=particula,dc=local
 
 # aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config1_redhat.ldif
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config1.ldif
 
 # adicionando o atributo olcRootPW
-$ cat config2_redhat.ldif
+$ cat config2.ldif
 	dn: olcDatabase={2}hdb,cn=config
 	changeType: modify
 	add: olcRootPW
 	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
 
 # aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config2_redhat.ldif
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config2.ldif
 
 # alterar o atributo olcAccess
-$ cat config3_redhat.ldif
+$ cat config3.ldif
 	dn: olcDatabase={1}monitor,cn=config
 	changetype: modify
 	replace: olcAccess
 	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
 
 # aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config3_redhat.ldif
+$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config3.ldif
 
 # validar os atributos
 $ ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
@@ -98,7 +103,7 @@ $ ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
 $ sudo slaptest -u
 
 # criacao do objeto particula.local
-$ cat config4_redhat.ldif
+$ cat config4.ldif
 	dn: dc=particula,dc=local
 	objectClass: dcObject
 	objectClass: organization
@@ -106,13 +111,14 @@ $ cat config4_redhat.ldif
 	o: particula
 
 # adicionar o objeto.
-$ sudo ldapadd -f config4_redhat.ldif -D cn=admin,dc=particula,dc=local -W
+$ sudo ldapadd -f config4.ldif -D cn=admin,dc=particula,dc=local -W
 
 # validar os atributos
 $ sudo ldapsearch -x -b dc=particula,dc=local
 
 # adicionando schema
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/cosine.ldif
+$ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/nis.ldif
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/inetorgperson.ldif
 
 #
@@ -152,7 +158,7 @@ $ sudo ldapdelete -W "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=par
 # OPENLDAP + TLS
 #
 
-# pre
+# criacao de arquivos auxiliares.
 $ sudo su
 $ cd /etc/pki/CA/
 $ echo 0001 > serial
@@ -222,3 +228,5 @@ $ sudo systemctl restart slapd
 # firewall
 $ sudo firewall-cmd --add-service=ldap
 $ sudo firewall-cmd --add-service=ldaps
+$ sudo firewall-cmd --permanent --zone=public --add-service=ldap
+$ sudo firewall-cmd --permanent --zone=public --add-service=ldaps
