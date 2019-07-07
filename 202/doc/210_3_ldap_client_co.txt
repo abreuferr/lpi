@@ -20,19 +20,6 @@ ldapadd
 ldapdelete
 
 #
-# TEORIA
-#
-
-dc=particula,dc=local
-cn=admin,dc=particula,dc=local
-
-ou=users,dc=particula,dc=local
-uid=cosmo,ou=users,dc=particula,dc=local
-
-ou=groups,dc=particula,dc=local
-cn=department,ou=groups,dc=particula,dc=local
-
-#
 # INSTALACAO
 #
 
@@ -40,7 +27,7 @@ cn=department,ou=groups,dc=particula,dc=local
 $ sudo yum update
 
 # instalacao cliente ldap
-$ sudo yum install openldap-clients pam_ldap nss-pam-ldapd authconfig
+$ sudo yum install openldap-clients pam_ldap nss-pam-ldapd authconfig sssd
 
 #
 # CONFIGURACAO
@@ -61,15 +48,17 @@ $ sudo authconfig-tui
 	[*] Use TLS
 	Server - ldap://192.168.10.13
 	Base DN: dc=particula,dc=local
+
 $ sudo vi /etc/openldap/ldap.conf
 	BASE    dc=particula,dc=local
 	URI     ldap://192.168.10.13
 	TLS_CACERTDIR /etc/openldap/cacerts
+	TLS_REQCERT never
 
 # habilitar a autenticacao atraves de linha de comando.
-$ sudo authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbasedn="dc=particula,dc=local" --enableldaptls --update
+$ sudo authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbasedn="dc=particula,dc=local" --enableldaptls --enablemkhomedir --update
 
-# usuario para teste - marcos
+# criando ususario para teste, usuario MARCOS.
 $ cat marcos.ldif
 	dn: uid=marcos,ou=users,dc=particula,dc=local
 	uid: marcos
@@ -90,7 +79,9 @@ $ cat marcos.ldif
 	homeDirectory: /home/marcos
 	sn: marcos
 	mail: marcos@particula.local
+$ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f marcos.ldif
 
+# adicionar o usuario MARCOS ao grupo USERS
 $ cat marcos_add_users.ldif
 	dn: cn=marcos,ou=users,dc=particula,dc=local
 	objectClass: posixGroup
@@ -98,3 +89,11 @@ $ cat marcos_add_users.ldif
 	cn: marcos
 	userPassword: {crypt}x
 	gidNumber: 1003
+$ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f marcos_add_users.ldif
+
+# SSSD
+$ sudo systemctl restart nslcd
+$ sudo systemctl restart nscd
+
+# USUARIO
+

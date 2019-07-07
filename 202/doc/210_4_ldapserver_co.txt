@@ -170,6 +170,8 @@ $ openssl genrsa -aes256 -out /etc/pki/CA/private/ca.key.pem
 # criacao do certificado
 $ openssl req -new -x509 -days 3650 -key /etc/pki/CA/private/ca.key.pem -extensions v3_ca -out /etc/pki/CA/certs/ca.cert.pem
 
+$ cd /etc/pki/CA/
+
 # criacao da chave para o servidor
 $ openssl genrsa -out private/openldap.particula.local.key
 
@@ -191,7 +193,15 @@ $ cp -v private/openldap.particula.local.key /etc/openldap/certs/
 $ mkdir -p /etc/openldap/cacerts/
 $ cp -v certs/ca.cert.pem /etc/openldap/cacerts/
 
-# adicionar o ldif no openldap.
+# saido do usuario root
+$ exit
+
+# visualizando diretivas de certificado.
+$ sudo slapcat -b "cn=config" | egrep "olcTLSCertificateFile|olcTLSCertificateKeyFile"
+	olcTLSCertificateFile: "OpenLDAP Server"
+	olcTLSCertificateKeyFile: /etc/openldap/certs/password
+
+# adicionando as diretivas de certificado no openldap via ldif.
 $ cat tls_1.ldif
 	dn: cn=config
 	changetype: modify
@@ -202,7 +212,7 @@ $ cat tls_1.ldif
 	olcTLSCertificateKeyFile: /etc/openldap/certs/openldap.particula.local.key
 $ sudo ldapmodify -Y EXTERNAL -H ldapi:// -f tls_1.ldif
 
-# permissao
+# alterando permissao.
 $ sudo chown -R ldap:ldap /etc/openldap/certs
 $ sudo chown -R ldap:ldap /etc/openldap/cacerts
 
@@ -213,6 +223,12 @@ $ cat vi tls_2.ldif
 	add: olcTLSCACertificateFile
 	olcTLSCACertificateFile: /etc/openldap/cacerts/ca.cert.pem
 $ sudo ldapmodify -Y EXTERNAL -H ldapi:// -f tls_2.ldif
+
+# resultado da alteracao.
+$ sudo slapcat -b "cn=config" | egrep "olcTLSCertificateFile|olcTLSCertificateKeyFile|olcTLSCACertificateFile"
+	olcTLSCertificateFile: /etc/openldap/certs/openldap.particula.local.crt
+	olcTLSCertificateKeyFile: /etc/openldap/certs/openldap.particula.local.key
+	olcTLSCACertificateFile: /etc/openldap/cacerts/ca.cert.pem
 
 # ldaps:///
 $ sudo vi /etc/sysconfig/slapd
