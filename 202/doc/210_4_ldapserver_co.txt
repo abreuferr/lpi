@@ -28,220 +28,132 @@ Terms and Utilities:
 - loglevel
 
 #
-# INSTALACAO
+# Instalacao
 #
 
-# atualizacao
-$ sudo yum update && sudo yum upgrade
+$ sudo yum install openldap-clients openldap-servers -y
 
-# instalacao do servidor openldap
-$ sudo yum -y install openldap-clients openldap-servers
-
-# ativando servico slapd
+# habilitar o servico slapd.
 $ sudo systemctl start slapd
 $ sudo systemctl enable slapd
 $ sudo systemctl status slapd
 
 #
-# CONFIGURACAO
+# Modificando Objetos
 #
 
-# configurando o banco de dados.
-$ sudo cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
-$ sudo chown ldap:ldap /var/lib/ldap/DB_CONFIG
-$ sudo systemctl restart slapd
+# modificando os atributos "olcSuffix" e "olcRootDN".
+$ vi config_1.ldif
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: dc=particula,dc=local
 
-# gerando a senha do usuario de administracao
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=admin,dc=particula,dc=local
+
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config_1.ldif
+
+# adicionando o atributo "olcRootPW".
 $ sudo slappasswd
-	New password:
-	Re-enter new password:
-	{SSHA}Kt+7hSVP/D6maUUivBbZ5yuAofuJnXkN
 
-# obter o nome do olcDatabase
-$ ls /etc/openldap/s-lapd.d/cn=config/olcDatabase*
-	olcDatabase={2}hdb.ldif
+$ vi config_2.ldif
+dn: olcDatabase={2}hdb,cn=config
+changeType: modify
+add: olcRootPW
+olcRootPW: {SSHA}6zHtA20qkTmdLrJSfxo+VV3QLGS7m0CZ
 
-# modificar os atributos olcSuffix e olcRootDN
-$ cat config1.ldif
-	dn: olcDatabase={2}hdb,cn=config
-	changetype: modify
-	replace: olcSuffix
-	olcSuffix: dc=particula,dc=local
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2.ldif
 
-	dn: olcDatabase={2}hdb,cn=config
-	changetype: modify
-	replace: olcRootDN
-	olcRootDN: cn=admin,dc=particula,dc=local
+# Substituir o atributo "olcAccess".
 
-# aplicando a modificacao
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config1.ldif
+$ vi config_3.ldif
+dn: olcDatabase={1}monitor,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
 
-# adicionando o atributo olcRootPW
-$ cat config2.ldif
-	dn: olcDatabase={2}hdb,cn=config
-	changeType: modify
-	add: olcRootPW
-	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3.ldif
 
-# aplicando a modificacao
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config2.ldif
+#
+# Adicionar Objetos
+#
 
-# alterar o atributo olcAccess
-$ cat config3.ldif
-	dn: olcDatabase={1}monitor,cn=config
-	changetype: modify
-	replace: olcAccess
-	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
-
-# aplicando a modificacao
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config3.ldif
-
-# validar os atributos
+# Validadando os valores dos novos atributos.
 $ sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
 
-# outra forma de testar a configuracao
+# testar o arquivo de configuracao.
 $ sudo slaptest -u
 
-# criacao do objeto particula.local
-$ cat config4.ldif
-	dn: dc=particula,dc=local
-	objectClass: dcObject
-	objectClass: organization
-	dc: particula
-	o: particula
+$ vi particula.ldif
+dn: dc=particula,dc=local
+objectClass: dcObject
+objectClass: organization
+dc: particula
+o: particula
 
-# adicionar o objeto.
-$ sudo ldapadd -f config4.ldif -D cn=admin,dc=particula,dc=local -W
+$ sudo ldapadd -f particula.ldif -D cn=admin,dc=particula,dc=local -W
 
-# validar os atributos
+# Validadando os valores dos novos atributos.
 $ sudo ldapsearch -x -b dc=particula,dc=local
 
-# adicionando schema
+#
+# Adicionando uma Organizational Unit
+#
+
+$ sudo vi users.ldif
+dn: ou=users,dc=particula,dc=local
+objectClass: organizationalUnit
+ou: users
+
+$ sudo ldapadd -f users.ldif -D cn=admin,dc=particula,dc=local -W
+
+#
+# Adicionando Schema
+#
+
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/cosine.ldif
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/nis.ldif
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/inetorgperson.ldif
 
 #
-# ESTRUTURA
+# Adicionando um Usuario
 #
 
-# adicionando OU
-$ cat ou.ldif
-	dn: ou=users,dc=particula,dc=local
-	objectClass: organizationalUnit
-	ou: users
-$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f ou.ldif
+$ sudo ldappasswd
 
-# adicionando USUARIO
-$ sudo slappasswd
-$ cat add_user.ldif
-	dn: cn=caio,ou=users,dc=particula,dc=local
-	cn: caio
-	sn: ferreia
-	objectClass: inetOrgPerson
-	userPassword: {SSHA}kY7jaquZ7qJovxxGfOrQT6bQy9ZP75bS
-	uid: caio
-$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f add_user.ldif
+$ vi caio.ldif
+dn: cn=caio,ou=users,dc=particula,dc=local
+cn: caio
+sn: caio
+objectClass: inetOrgPerson
+userPassword: {SSHA}6zHtA20qkTmdLrJSfxo+VV3QLGS7m0CZ
+uid: arch
 
-# adicionando GRUPO
-$ cat add_group.ldif
-	dn: cn=ti,ou=users,dc=particula,dc=local
-	cn: ti
-	objectClass: groupOfNames
-	member: cn=caio,ou=users,dc=particula,dc=local
-$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f add_group.ldif
-
-# apagando OBJETO
-$ sudo ldapdelete -W "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local
+$ sudo ldapadd -f caio.ldif -x -D cn=admin,dc=particula,dc=local -W
 
 #
-# OPENLDAP + TLS
+# Adicionando um Grupo
 #
 
-# criacao de arquivos auxiliares.
-$ sudo su
-$ cd /etc/pki/CA/
-$ echo 0001 > serial
-$ touch index.txt
+$ vi group.ldif
+dn: cn=it,ou=users,dc=particula,dc=local
+cn: it
+objectClass: groupOfNames
+member: cn=caio,ou=users,dc=particula,dc=local
 
-# criacao da chave
-$ openssl genrsa -aes256 -out /etc/pki/CA/private/ca.key.pem
+$ sudo ldapadd -f group.ldif -x -D cn=admin,dc=particula,dc=local -W
 
-# criacao do certificado
-$ openssl req -new -x509 -days 3650 -key /etc/pki/CA/private/ca.key.pem -extensions v3_ca -out /etc/pki/CA/certs/ca.cert.pem
+# Validadando os valores dos novos atributos.
+$ sudo ldapsearch -x -b "dc=particula,dc=local" "(cn=caio)"
 
-$ cd /etc/pki/CA/
+#
+# Apagando um Usuario
+#
 
-# criacao da chave para o servidor
-$ openssl genrsa -out private/openldap.particula.local.key
-
-# criacao do certificado para o servidor
-$ openssl req -new -key private/openldap.particula.local.key -out certs/openldap.particula.local.csr
-
-# assinando o certificado
-$ openssl ca -keyfile private/ca.key.pem -cert certs/ca.cert.pem -in certs/openldap.particula.local.csr -out certs/openldap.particula.local.crt
-	(...)
-	Sign the certificate? [y/n]:y
-	1 out of 1 certificate requests certified, commit? [y/n]y
-
- verificando o certificado
-$ openssl verify -CAfile certs/ca.cert.pem certs/openldap.particula.local.crt
-
-# copiando os certificados.
-$ cp -v certs/* /etc/openldap/certs/
-$ cp -v private/openldap.particula.local.key /etc/openldap/certs/
-$ mkdir -p /etc/openldap/cacerts/
-$ cp -v certs/ca.cert.pem /etc/openldap/cacerts/
-$ cp -v /etc/pki/CA/private/ca.key.pem /etc/openldap/cacerts/
-$ scp /etc/pki/CA/private/ca.key.pem [USER]@[WORKSTATION]:/home/[USER]
-
-# saido do usuario root
-$ exit
-
-# visualizando diretivas de certificado.
-$ sudo slapcat -b "cn=config" | egrep "olcTLSCertificateFile|olcTLSCertificateKeyFile"
-	olcTLSCertificateFile: "OpenLDAP Server"
-	olcTLSCertificateKeyFile: /etc/openldap/certs/password
-
-# adicionando as diretivas de certificado no openldap via ldif.
-$ cat tls_1.ldif
-	dn: cn=config
-	changetype: modify
-	replace: olcTLSCertificateFile
-	olcTLSCertificateFile: /etc/openldap/certs/openldap.particula.local.crt
-	-
-	replace: olcTLSCertificateKeyFile
-	olcTLSCertificateKeyFile: /etc/openldap/certs/openldap.particula.local.key
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:// -f tls_1.ldif
-
-# alterando permissao.
-$ sudo chown -R ldap:ldap /etc/openldap/certs
-$ sudo chown -R ldap:ldap /etc/openldap/cacerts
-
-# importando o certificado.
-$ cat vi tls_2.ldif
-	dn: cn=config
-	changetype: modify
-	add: olcTLSCACertificateFile
-	olcTLSCACertificateFile: /etc/openldap/cacerts/ca.cert.pem
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:// -f tls_2.ldif
-
-# resultado da alteracao.
-$ sudo slapcat -b "cn=config" | egrep "olcTLSCertificateFile|olcTLSCertificateKeyFile|olcTLSCACertificateFile"
-	olcTLSCertificateFile: /etc/openldap/certs/openldap.particula.local.crt
-	olcTLSCertificateKeyFile: /etc/openldap/certs/openldap.particula.local.key
-	olcTLSCACertificateFile: /etc/openldap/cacerts/ca.cert.pem
-
-# ldaps:///
-$ sudo vi /etc/sysconfig/slapd
-	SLAPD_URLS="ldapi:/// ldap:/// ldaps:///"
-	
-$ sudo vi /etc/openldap/ldap.conf
-	#TLS_CACERTDIR /etc/openldap/certs
-	TLS_REQCERT never
-
-# reinicializando o servico
-$ sudo systemctl restart slapd
+$ sudo ldapdelete "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local -W
 
 # firewall
 $ sudo firewall-cmd --add-service=ldap
