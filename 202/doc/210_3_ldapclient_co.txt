@@ -34,12 +34,14 @@ $ sudo yum install openldap-clients pam_ldap nss-pam-ldapd authconfig sssd
 #
 
 # SERVIDOR
-# copiar o diretorio "/etc/openldap/cacerts" para a estacao
-# que ira autenticar no servidor openldap
 #
-# cp -r /etc/openldap/cacerts /etc/openldap/cacerts
+# cp /etc/pki/CA/private/ca.key.pem /etc/openldap/cacerts/
+# scp /etc/pki/CA/private/ca.key.pem [USER_ADMIN]@[WORKSTATION]:/home/[USER_ADMIN]
 
 # ESTACAO
+
+# copia do certificado
+$ sudo mv /home/[USER_ADMIN]/ca.key.pem /etc/openldap/cacerts/
 
 # configuracao
 $ sudo authconfig-tui
@@ -51,12 +53,15 @@ $ sudo authconfig-tui
 
 $ sudo vi /etc/openldap/ldap.conf
 	BASE    dc=particula,dc=local
-	URI     ldap://192.168.10.13
+	URI     ldap://openldap.particula.local
 	TLS_CACERTDIR /etc/openldap/cacerts
 	TLS_REQCERT never
 
+$ sudo vi /etc/nslcd.conf
+	uri ldap://openldap.particula.local/
+
 # habilitar a autenticacao atraves de linha de comando.
-$ sudo authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbasedn="dc=particula,dc=local" --enableldaptls --enablemkhomedir --update
+$ sudo authconfig --enableldap --enableldapauth --ldapserver=openldap.particula.local --ldapbasedn="dc=particula,dc=local" --enableldaptls --enablemkhomedir --update
 
 # criando ususario para teste, usuario MARCOS.
 $ cat marcos.ldif
@@ -96,4 +101,4 @@ $ sudo systemctl restart nslcd
 $ sudo systemctl restart nscd
 
 # USUARIO
-
+$ su - marcos

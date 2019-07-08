@@ -184,7 +184,7 @@ $ openssl ca -keyfile private/ca.key.pem -cert certs/ca.cert.pem -in certs/openl
 	Sign the certificate? [y/n]:y
 	1 out of 1 certificate requests certified, commit? [y/n]y
 
-# verificando o certificado
+ verificando o certificado
 $ openssl verify -CAfile certs/ca.cert.pem certs/openldap.particula.local.crt
 
 # copiando os certificados.
@@ -192,6 +192,8 @@ $ cp -v certs/* /etc/openldap/certs/
 $ cp -v private/openldap.particula.local.key /etc/openldap/certs/
 $ mkdir -p /etc/openldap/cacerts/
 $ cp -v certs/ca.cert.pem /etc/openldap/cacerts/
+$ cp -v /etc/pki/CA/private/ca.key.pem /etc/openldap/cacerts/
+$ scp /etc/pki/CA/private/ca.key.pem [USER]@[WORKSTATION]:/home/[USER]
 
 # saido do usuario root
 $ exit
