@@ -35,12 +35,12 @@ Terms and Utilities:
 $ sudo yum update && sudo yum upgrade
 
 # instalacao do servidor openldap
-$ sudo yum install openldap-servers openldap-clients
+$ sudo yum -y install openldap-clients openldap-servers
 
 # ativando servico slapd
-$ sudo systemctl status slapd
 $ sudo systemctl start slapd
 $ sudo systemctl enable slapd
+$ sudo systemctl status slapd
 
 #
 # CONFIGURACAO
