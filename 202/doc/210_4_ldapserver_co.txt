@@ -49,7 +49,7 @@ $ sudo systemctl enable slapd
 # configurando o banco de dados.
 $ sudo cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
 $ sudo chown ldap:ldap /var/lib/ldap/DB_CONFIG
-$ sudo systemctl restart ldap
+$ sudo systemctl restart slapd
 
 # gerando a senha do usuario de administracao
 $ sudo slappasswd
@@ -74,7 +74,7 @@ $ cat config1.ldif
 	olcRootDN: cn=admin,dc=particula,dc=local
 
 # aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config1.ldif
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config1.ldif
 
 # adicionando o atributo olcRootPW
 $ cat config2.ldif
@@ -84,7 +84,7 @@ $ cat config2.ldif
 	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
 
 # aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config2.ldif
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config2.ldif
 
 # alterar o atributo olcAccess
 $ cat config3.ldif
@@ -94,10 +94,10 @@ $ cat config3.ldif
 	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
 
 # aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config3.ldif
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config3.ldif
 
 # validar os atributos
-$ ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
+$ sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
 
 # outra forma de testar a configuracao
 $ sudo slaptest -u
@@ -130,7 +130,7 @@ $ cat ou.ldif
 	dn: ou=users,dc=particula,dc=local
 	objectClass: organizationalUnit
 	ou: users
-$ sudo ldapadd -f config4_redhat.ldif -D cn=admin,dc=particula,dc=local -W
+$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f ou.ldif
 
 # adicionando USUARIO
 $ sudo slappasswd
