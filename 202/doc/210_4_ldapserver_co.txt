@@ -31,129 +31,104 @@ Terms and Utilities:
 # Instalacao
 #
 
-$ sudo yum install openldap-clients openldap-servers -y
+# atualizacao
+$ sudo yum update && sudo yum upgrade
 
-# habilitar o servico slapd.
+# instalacao do servidor openldap
+$ sudo yum -y install openldap-clients openldap-servers
+
+# ativando, habilitando e verificando o status do servico slapd
 $ sudo systemctl start slapd
 $ sudo systemctl enable slapd
 $ sudo systemctl status slapd
 
 #
-# Modificando Objetos
+# Configuracao
 #
 
-# modificando os atributos "olcSuffix" e "olcRootDN".
-$ vi config_1.ldif
-dn: olcDatabase={2}hdb,cn=config
-changetype: modify
-replace: olcSuffix
-olcSuffix: dc=particula,dc=local
+# configurando o banco de dados.
+$ sudo cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+$ sudo chown ldap:ldap /var/lib/ldap/DB_CONFIG
+$ sudo systemctl restart slapd
 
-dn: olcDatabase={2}hdb,cn=config
-changetype: modify
-replace: olcRootDN
-olcRootDN: cn=admin,dc=particula,dc=local
-
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config_1.ldif
-
-# adicionando o atributo "olcRootPW".
+# gerando a senha do usuario de administracao
 $ sudo slappasswd
+	New password:
+	Re-enter new password:
+	{SSHA}Kt+7hSVP/D6maUUivBbZ5yuAofuJnXkN
 
-$ vi config_2.ldif
-dn: olcDatabase={2}hdb,cn=config
-changeType: modify
-add: olcRootPW
-olcRootPW: {SSHA}6zHtA20qkTmdLrJSfxo+VV3QLGS7m0CZ
+# modificar os atributos "olcSuffix" e "olcRootDN"
+$ cat config1.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcSuffix
+	olcSuffix: dc=particula,dc=local
 
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config_2.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcRootDN
+	olcRootDN: cn=admin,dc=particula,dc=local
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config1.ldif
 
-# Substituir o atributo "olcAccess".
+# adicionando o atributo "olcRootPW"
+$ cat config2.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changeType: modify
+	add: olcRootPW
+	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config2.ldif
 
-$ vi config_3.ldif
-dn: olcDatabase={1}monitor,cn=config
-changetype: modify
-replace: olcAccess
-olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
-
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config_3.ldif
-
-#
-# Adicionar Objetos
-#
-
-# Validadando os valores dos novos atributos.
+# alterar o atributo "olcAccess"
+$ cat config3.ldif
+	dn: olcDatabase={1}monitor,cn=config
+	changetype: modify
+	replace: olcAccess
+	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
+$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f config3.ldif
 $ sudo ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
 
-# testar o arquivo de configuracao.
-$ sudo slaptest -u
-
-$ vi particula.ldif
-dn: dc=particula,dc=local
-objectClass: dcObject
-objectClass: organization
-dc: particula
-o: particula
-
-$ sudo ldapadd -f particula.ldif -D cn=admin,dc=particula,dc=local -W
-
-# Validadando os valores dos novos atributos.
+# Adicionado o objeto "particula.local"
+$ cat config4.ldif
+	dn: dc=particula,dc=local
+	objectClass: dcObject
+	objectClass: organization
+	dc: particula
+	o: particula
+$ sudo ldapadd -f config4.ldif -D cn=admin,dc=particula,dc=local -W
 $ sudo ldapsearch -x -b dc=particula,dc=local
 
-#
-# Adicionando uma Organizational Unit
-#
+# Adicionando a Organizational Unit "users"
+$ cat users.ldif
+	dn: ou=users,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: users
 
-$ sudo vi users.ldif
-dn: ou=users,dc=particula,dc=local
-objectClass: organizationalUnit
-ou: users
-
-$ sudo ldapadd -f users.ldif -D cn=admin,dc=particula,dc=local -W
-
-#
 # Adicionando Schema
-#
-
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/cosine.ldif
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/nis.ldif
 $ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/inetorgperson.ldif
 
-#
-# Adicionando um Usuario
-#
+# Adicionando Usuario
+$ sudo slappasswd
+$ cat add_user.ldif
+	dn: cn=caio,ou=users,dc=particula,dc=local
+	cn: caio
+	sn: ferreia
+	objectClass: inetOrgPerson
+	userPassword: {SSHA}kY7jaquZ7qJovxxGfOrQT6bQy9ZP75bS
+	uid: caio
+$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f add_user.ldif
 
-$ sudo ldappasswd
+# adicionando Grupo
+$ cat add_group.ldif
+	dn: cn=ti,ou=users,dc=particula,dc=local
+	cn: ti
+	objectClass: groupOfNames
+	member: cn=caio,ou=users,dc=particula,dc=local
+$ sudo ldapadd -W -D cn=admin,dc=particula,dc=local -f add_group.ldif
 
-$ vi caio.ldif
-dn: cn=caio,ou=users,dc=particula,dc=local
-cn: caio
-sn: caio
-objectClass: inetOrgPerson
-userPassword: {SSHA}6zHtA20qkTmdLrJSfxo+VV3QLGS7m0CZ
-uid: arch
-
-$ sudo ldapadd -f caio.ldif -x -D cn=admin,dc=particula,dc=local -W
-
-#
-# Adicionando um Grupo
-#
-
-$ vi group.ldif
-dn: cn=it,ou=users,dc=particula,dc=local
-cn: it
-objectClass: groupOfNames
-member: cn=caio,ou=users,dc=particula,dc=local
-
-$ sudo ldapadd -f group.ldif -x -D cn=admin,dc=particula,dc=local -W
-
-# Validadando os valores dos novos atributos.
-$ sudo ldapsearch -x -b "dc=particula,dc=local" "(cn=caio)"
-
-#
-# Apagando um Usuario
-#
-
-$ sudo ldapdelete "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local -W
+# apagando Usuario
+$ sudo ldapdelete -W "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local
 
 # firewall
 $ sudo firewall-cmd --add-service=ldap

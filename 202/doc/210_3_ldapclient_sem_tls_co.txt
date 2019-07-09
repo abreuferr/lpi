@@ -1,0 +1,90 @@
+#: Title : LDAP client usage
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : LDAP client usage - CentOS
+#: Options : Weight: 2
+
+Description: Candidates should be able to perform queries 
+and updates to an LDAP server. Also included is importing 
+and adding items, as well as adding and managing users.
+
+Key Knowledge Areas:
+
+LDAP utilities for data management and queries
+Change user passwords
+Querying the LDAP directory
+Terms and Utilities:
+
+ldapsearch
+ldappasswd
+ldapadd
+ldapdelete
+
+#
+# Instalacao
+#
+
+# atualizacao do debian
+$ sudo yum update
+
+# instalacao cliente ldap
+$ sudo yum install openldap-clients pam_ldap nss-pam-ldapd authconfig sssd
+
+#
+# Configuracao
+#
+
+# Configurando o LDAP Client para autenticar com o LDAP Server utilizando o TUI
+$ sudo authconfig-tui
+	User Information > [*] Use LDAP
+	Authentication > [*] Use LDAP Authentication
+	[ ] Use TLS
+	Server - ldap://192.168.10.13
+	Base DN: dc=particula,dc=local
+
+# Configurando o LDAP Client para autenticar com o LDAP Server utilizando o CLI
+$ sudo authconfig --enableldap --enableldapauth --enablemkhomedir --enablesysnetauth --enablelocauthorize --ldapserver=ldap://192.168.10.13 --ldapbasedn="dc=particula,dc=local" --update
+
+# Criando um usuario LDAP
+$ cat marcos.ldif
+	dn: uid=marcos,ou=users,dc=particula,dc=local
+	uid: marcos
+	cn: marcos
+	objectClass: shadowAccount
+	objectClass: top
+	objectClass: person
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	userPassword: {SSHA}NkIkNTIA+vhCZlIGKe+L6mwKZlNFjF4Z
+	shadowLastChange: 17016
+	shadowMin: 0
+	shadowMax: 99999
+	shadowWarning: 7
+	loginShell: /bin/bash
+	uidNumber: 1003
+	gidNumber: 1003
+	homeDirectory: /home/marcos
+	sn: marcos
+	mail: marcos@particula.local
+$ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f marcos.ldif
+
+# Criando um grupo LDAP
+$ vi groups.ldif
+	dn: cn=marcos,ou=users,dc=particula,dc=local
+	objectClass: posixGroup
+	objectClass: top
+	cn: marcos
+	userPassword: {crypt}x
+	gidNumber: 1003
+$ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f groups.ldif
+
+# Validando o novo usuario e novo grupo.
+$ sudo ldapsearch -x -D cn=admin,dc=particula,dc=local -b dc=particula,dc=local -W
+
+# Habilitando as mudancas.
+$ sudo systemctl restart nslcd
+$ sudo systemctl restart nscd
+
+$ sudo getent passwd
+
+# USUARIO
+$ su - marcos
