@@ -20,31 +20,39 @@ ldapadd
 ldapdelete
 
 #
+# Pre
+#
+
+$ sudo su
+
+#
 # Instalacao
 #
 
-# atualizacao do debian
-$ sudo yum update
-
-# instalacao cliente ldap
-$ sudo yum install openldap-clients pam_ldap nss-pam-ldapd authconfig sssd
+$ yum update
+$ yum install openldap-clients pam_ldap nss-pam-ldapd authconfig
 
 #
-# Configuracao
-#
-
 # Configurando o LDAP Client para autenticar com o LDAP Server utilizando o TUI
-$ sudo authconfig-tui
+#
+
+$ authconfig-tui
 	User Information > [*] Use LDAP
 	Authentication > [*] Use LDAP Authentication
 	[ ] Use TLS
 	Server - ldap://192.168.10.13
 	Base DN: dc=particula,dc=local
 
+#
 # Configurando o LDAP Client para autenticar com o LDAP Server utilizando o CLI
-$ sudo authconfig --enableldap --enableldapauth --enablemkhomedir --enablesysnetauth --enablelocauthorize --ldapserver=ldap://192.168.10.13 --ldapbasedn="dc=particula,dc=local" --update
+#
 
+$ authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbasedn="dc=particula,dc=local" --enablemkhomedir --update
+
+#
 # Criando um usuario LDAP
+#
+
 $ cat marcos.ldif
 	dn: uid=marcos,ou=users,dc=particula,dc=local
 	uid: marcos
@@ -65,9 +73,13 @@ $ cat marcos.ldif
 	homeDirectory: /home/marcos
 	sn: marcos
 	mail: marcos@particula.local
+
 $ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f marcos.ldif
 
-# Criando um grupo LDAP
+#
+# Criando o grupo LDAP do usuario Marcos
+#
+
 $ vi groups.ldif
 	dn: cn=marcos,ou=users,dc=particula,dc=local
 	objectClass: posixGroup
@@ -75,16 +87,27 @@ $ vi groups.ldif
 	cn: marcos
 	userPassword: {crypt}x
 	gidNumber: 1003
+
 $ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f groups.ldif
 
+#
 # Validando o novo usuario e novo grupo.
-$ sudo ldapsearch -x -D cn=admin,dc=particula,dc=local -b dc=particula,dc=local -W
 
-# Habilitando as mudancas.
-$ sudo systemctl restart nslcd
-$ sudo systemctl restart nscd
+$ ldapsearch -x -D cn=admin,dc=particula,dc=local -b dc=particula,dc=local -W
 
-$ sudo getent passwd
+#
+# Instalacao o SSSD
+#
 
-# USUARIO
+$ yum -y install sssd
+
+$ systemctl restart nslcd
+$ systemctl restart nscd
+
+#
+# Testando o Usuario
+#
+
+$ getent passwd
+
 $ su - marcos
