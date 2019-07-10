@@ -30,6 +30,7 @@ Terms and Utilities:
 #
 # Pre
 #
+
 $ sudo su
 
 #
@@ -40,6 +41,14 @@ $ yum -y install openldap-clients openldap-servers
 $ systemctl start slapd
 $ systemctl enable slapd
 $ systemctl status slapd
+
+#
+# Otimizando o banco de dados do LDAP
+#
+
+$ cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+
+$ systemctl restart slapd
 
 #
 # Substituicao dos atributos "olcSuffix" e " olcRootDN"
