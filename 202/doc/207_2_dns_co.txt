@@ -1,0 +1,204 @@
+#: Title : dns howto
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : create and maintain dns zones - CentOS
+#: Options : Weight: 3
+
+Key Knowledge Areas:
+- BIND 9 configuration files, terms and utilities
+- Utilities to request information from the DNS server
+- Layout, content and file location of the BIND zone files
+- Various methods to add a new host in the zone files, including reverse zones
+
+Terms and Utilities:
+- /var/named/ or /etc/bind/
+- zone file syntax
+- resource record formats
+- named-checkzone
+- named-compilezone
+- masterfile-format
+- dig
+- nslookup
+- host
+
+#
+# OBS
+#
+
+# /var/named/ - arquivos de funcionamento do bind
+# /etc/named/ - arquivos de configuracao da zona
+
+#
+# Instalacao - ns1 e ns2
+#
+
+# atualizacao
+$ sudo yum update && sudo yum upgrade
+
+# instalacao 
+$ sudo yum install bind bind-utils
+$ sudo systemctl start named
+$ sudo systemctl enable named
+$ sudo systemctl status named
+
+# Firewall e seLinux
+$ sudo firewall-cmd --permanent --add-port=53/tcp
+$ sudo firewall-cmd --permanent --add-port=53/udp
+
+$ sudo vi /etc/sysconfig/selinux
+	SELINUX=disabled
+
+$ sudo reboot
+
+#
+# Configuracao do DNS Server Primario - ns1
+#
+
+$ sudo cp /etc/named.conf{,.origin}
+$ sudo vi /etc/named.conf
+	acl rede {
+	        192.168.10.0/24;
+	};
+
+	options {
+		(...)
+        	listen-on port 53 { localhost; 192.168.10.6; };
+       		allow-query     { localhost; rede; };
+		allow-query-cache     { localhost; rede; };
+		
+		recursion yes;
+	};
+
+	include "/etc/named/named.conf.local";
+
+# testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/named.conf
+
+# configuracao da zona.
+$ sudo vi /etc/named/named.conf.local
+	zone "particula.local" {
+	        type master;
+	        file "/etc/named/db.particula.local";
+	        allow-transfer { 192.168.10.7; };
+		also-notify { 192.168.10.7; };
+    		notify yes;
+	};
+
+	zone "10.168.192.in-addr.arpa" {
+	        type master;
+	        file "/etc/named/db.10.168.192.in-addr.arpa";
+	    	allow-transfer { 192.168.10.7; };
+		also-notify { 192.168.10.7; };
+    		notify yes;
+	};
+
+# testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/named/named.conf.local
+
+# arquivo de configuracao da zona
+$ sudo vi /etc/named/db.particula.local
+	$TTL 604800
+	@ IN SOA ns1.particula.local. root.particula.local. (
+		2010101301;	Serial
+		28800;		Refresh
+		3600;		Retry
+		604800;		Expire
+		3600 );		Negative Cache TTL
+
+	; registro dos Name Server (NS).
+	@	IN NS ns1.particula.local.
+	@	IN NS ns2.particula.local.
+
+	; registro do Mail Exchange (MX).
+		IN MX 10 srv.particula.local.
+
+	; registro de associacao Hostname e IP Address (A)
+		IN A 192.168.10.6
+		IN A 192.168.10.7
+	ns1	IN A 192.168.10.6
+	ns2	IN A 192.168.10.7
+	srv	IN A 192.168.10.8
+
+	; registro do apelido, Canonical Name (CNAME)
+	www	IN CNAME srv
+
+# checando o arquivo de configuracao da zona.
+$ sudo named-checkzone particula.local /etc/named/db.particula.local
+
+# arquivo de configuracao do dns reverso
+$ sudo vi /etc/named/db.10.168.192.in-addr.arpa (master)
+	$TTL 604800
+	@ IN SOA ns1.particula.local. root.particula.local. (
+		2010101301;	Serial
+		28800;		Refresh
+		3600;		Retry
+		604800;		Expire
+                3600 );         Negative Cache TTL
+
+	; registro com os servidores Name Servers.
+		IN NS ns1.particula.local.
+		IN NS ns2.particula.local.
+
+	; registro com as associacoes reversas, IP to Hostname.
+	5       IN PTR    ns1.particula.local.
+	6       IN PTR    ns2.particula.local.
+	7       IN PTR    srv.particula.local.
+
+# reler os arquivos de configuracao do Bind.
+$ sudo rndc reload
+
+# conteudo do arquivo resolv.conf
+$ sudo cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.10.6
+	nameserver 192.168.10.7
+
+#
+# Configuracao do DNS Server Secundario - ns2
+#
+
+# arquivos de configuracao do bind
+$ sudo cp /etc/named.conf{,.origin}
+$ sudo vi /etc/named.conf
+	acl rede {
+	        192.168.10.0/24;
+	};
+
+	options {
+		(...)
+        	listen-on port 53 { localhost; 192.168.10.7; };
+       		allow-query     { localhost; rede; };
+		allow-query-cache     { localhost; rede; };
+		
+		recursion yes;
+	};
+
+	include "/etc/named/named.conf.local";
+
+$ sudo vi /etc/named/named.conf.local
+	zone "particula.local" {
+		type slave;
+		file "/etc/named/db.particula.local";
+		masters { 192.168.10.7; };
+		allow-notify { 192.168.10.7; };
+	};
+
+	zone "0.168.192.in-addr.arpa" {
+		type slave;
+		file "/etc/named/db.10.168.192.in-addr.arpa";
+		masters { 192.168.10.7; };
+		allow-notify { 192.168.10.7; };
+	};
+
+# testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/named/named.conf.local
+
+# reinicializar o bind.
+$ sudo systemctl restart named
+
+# conteudo do arquivo resolv.conf
+$ sudo cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.10.6
+	nameserver 192.168.10.7
