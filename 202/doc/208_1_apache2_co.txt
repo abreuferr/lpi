@@ -111,7 +111,7 @@ $ vi /var/www/particula.local/cgi-bin/index.cgi
 $ lynx http://www.particula.local/cgi-bin/index.cgi
 
 #
-# AUTENTICACAO DE ACESSO ATRAVES DE USUARIO/GRUPO E SENHA
+# Autenticacao atraves de usuario/grupo e senha
 #
 
 # arquivos com as diretivas de autenticacao.
@@ -129,21 +129,17 @@ $ sudo vi /etc/httpd/conf.d/particula.local.conf
 		# a diretiva "AccessFileName" so eh necessaria
 		# se por acaso o nome do arquivo .htaccess for
 		# outro.
-		AccessFileName .htaccess
 		<Directory /var/www/particula.local/html>
-			Options Indexes FollowSymLinks MultiViews
 			AllowOverride All
-			Order allow,deny
-			Allow from all
 		</Directory>
 		(...)
-		</VirtualHost>
+	</VirtualHost>
 
 # checagem da configuracao do apache2
 $ sudo apachectl configtest
 
 # reinicializar o apache2
-$ sudo systemctl restart apache2
+$ sudo systemctl restart httpd
 
 # criar o arquivo webpass a onde sera armazenado o usuario
 # e a senha dele.
