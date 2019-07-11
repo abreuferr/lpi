@@ -1,0 +1,84 @@
+#: Title : fail2ban
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : instalacao e configuracao do aplicativo fail2ban no CentOS
+#: Options : Weight 3
+
+Description: Candidates should be able to receive security alerts 
+from various sources, install, configure and run intrusion detection 
+systems and apply security patches and bugfixes.
+
+Key Knowledge Areas:
+- Tools and utilities to scan and test ports on a server
+- Locations and organizations that report security alerts as Bugtraq, 
+  CERT or other sources.
+- Tools and utilities to implement an intrusion detection system (IDS)
+- Awareness of OpenVAS and Snort
+
+Terms and Utilities:
+- telnet
+- nmap
+- fail2ban
+- nc
+- iptables
+
+#
+# Teoria
+#
+
+# fail2ban eh um framework desenvolvido em Python que monitora os logs, 
+# verificando a tentativas de conexao sem sucesso, bloqueando o IP suspeito 
+# depois de um determinado numero de tentativas. Ele pode ser configurado 
+# para monitorar os serviços ssh, pam, xinetd, apache, vsftpd, proftpd, 
+# wuftpd, postfix, couriersmtp, entre outros servicos, podendo adicionar 
+# uma regra no firewall para bloquear um possivel ataque, o que eh muito 
+# util em situacoes onde o administrador de sistemas tem que lidar com 
+# milhares de conexoes.
+#
+# no texto abaixo, o software fail2ban sera instalado no gateway da rede.
+
+#
+# Instalacao
+#
+
+# adicionado o repositorio EPEL
+$ sudo yum install epel-release
+
+# instalacao
+$ sudo yum install fail2ban rsyslog -y
+
+#
+# Configuracao
+#
+
+# regra do ssh
+$ sudo vi /etc/fail2ban/jail.d/sshd.local
+	[DEFAULT]
+	bantime = 172800
+	maxretry = 5
+
+	[sshd]
+	enabled = true
+	filter = sshd
+	action = iptables[name=SSH, port=ssh, protocol=tcp]
+	maxretry = 5
+
+$ sudo systemctl start fail2ban
+$ sudo systemctl enable fail2ban
+$ sudo systemctl status fail2ban
+
+#
+# Teste
+#
+
+# servidor
+$ sudo iptables -L
+
+# cliente
+$ ssh root@IP_SERVIDOR
+
+# servidor
+$ sudo iptables -L f2b-SSH
+	Chain f2b-SSH (1 references)
+	target     prot opt source               destination
+	REJECT     all  --  192.168.10.1         anywhere             reject-with icmp-port-unreachable
+	RETURN     all  --  anywhere             anywhere
