@@ -1,0 +1,228 @@
+#: Title : ssh
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : configuracao do servidor ssh e politicas de seguranca
+#: Options : Weight 4
+
+Description: Candidates should be able to configure and secure an SSH daemon. 
+This objective includes managing keys and configuring SSH for users. Candidates 
+should also be able to forward an application protocol over SSH and manage the 
+SSH login.
+
+Key Knowledge Areas:
+- OpenSSH configuration files, tools and utilities
+- Login restrictions for the superuser and the normal users
+- Managing and using server and client keys to login with and without password
+- Usage of multiple connections from multiple hosts to guard against loss of 
+  connection to remote host following configuration changes.
+
+Terms and Utilities:
+- ssh
+- sshd
+- /etc/ssh/sshd_config
+- /etc/ssh/
+- Private and public key files
+- PermitRootLogin, PubKeyAuthentication, AllowUsers, PasswordAuthentication, Protocol
+
+#
+# Instalacao
+#
+
+# Servdor/Cliente
+$ sudo yum install openssh-server openssh-client
+
+#
+# SSH - BASICO
+#
+
+# SERVIDOR
+$ sudo cp /etc/ssh/sshd_config{,.origin}
+$ sudo vi /etc/ssh/sshd_config
+	# porta de trabalho do servidor ssh.
+	Port [NUM]
+
+	# limitar o acesso a determinados usuarios.
+	AllowUsers [USER1] [USER2]
+
+	# limitar o acesso a determinado grupo de usuario.
+	AllowGroups [GROUP1] [GROUP2]
+
+	# negar o acesso a determinados usuarios.
+	DenyUsers [USER1] [USER2]
+
+	# negar o acesso a um determinado grupo de usuarios.
+	DenyGroups [GROUP1] [GROUP2]
+
+	# permite ou nao o login do usuario root no servidor.
+	PermitRootLogin [YES/NO]
+
+	# especifica qual o protocolo de seguranca a ser utilizado
+	Protocol [NUM]
+
+	# permitir ou nao a utilizacao de senhas em branco
+	PermitEmptyPasswords [YES/NO]
+
+	# depois de X segundos sem nenhuma atividade, o usuario eh deslogado
+	ClientAliveInterval [NUM]
+
+	# quantidade de mensagens enviadas pelo cliente
+	ClientAliveCountMax [NUM]
+
+	# permitir ou nao o redirecionamento do X11 para o cliente
+	X11Forwarding [YES/NO]
+
+	# habilita a opcao de forward de portas entre o cliente e o
+	# servidor ssh.
+	AllowTcpForwarding [YES/NO]
+
+	# Periodo maximo em que o usuario pode ficar sem fazer nada
+	# na estacao.
+	ClientAliveInterval [NUM]
+
+	# Numero maximo de tentativa de conexao.
+	ClientAliveMaxCount [NUM]
+
+	# log
+	SyslogFacility [AUTH]
+	LogLevel [INFO]
+
+	# o processo de autenticacao deve ocorrer em 20 segundos.
+	LoginGraceTime [20]
+
+	# Definir o intervalo entre uma tentativa de autenticacao.
+	ClientAliveInterval [40]
+
+	# Numero maximo de tentativas.
+	ClientAliveCountMax [3]
+
+# CLIENTE
+# ssh [OPCAP] [USUARIO]@[SERVIDOR]
+#	-p [PORTA] - especificar a porta que o servidor trabalha.
+#	-l [USUARIO] - especifica o usuario de logon.
+#	-i [CHAVE_PUBLICA] - especifica o arquivo com a chave publica.
+#
+$ ssh -p 2222 cosmo@192.168.0.15
+$ ssh -p 2222 -l cosmo 192.168.0.15
+
+#
+# TCPWRAPPER
+#
+
+# SERVIDOR
+$ sudo vi /etc/hosts.allow
+	sshd : 192.168.0.42
+$ sudo vi /etc/hosts.deny
+	sshd : ALL
+
+#
+# AUTENTICACAO VIA PAR DE CHAVES
+#
+
+# CLIENTE
+# criando as chaves de autenticacao
+# ssh-keygen -t [key_type] -b [bits] -C "[comment]" -f [file]
+$ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" -f ~/.ssh/id_rsa
+
+# criando as chaves de autenticacao
+# chaves geradas
+$ .ssh/
+|-- id_rsa - chave privada
+`-- id_rsa.pub - chave publica
+
+# criando a chave de autorizacao
+$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
+
+# copiando a chave publica para o servidor de forma segura.
+$ ssh-copy-id <USERNAME@SERVER>
+
+# SERVIDOR
+$ sudo vi /etc/ssh/sshd_config
+	# desabilita a autenticacao via senha.
+	PasswordAuthentication no
+
+	# autenticacao atraves de chave publica.
+	PubkeyAuthentication yes
+
+	# metodo de autenticacao.
+	AuthenticationMethods publickey
+
+	# desabilita o processo de challenge-response
+	# no processo de autenticacao.	
+	ChallengeResponseAuthentication no
+
+	# utiliza a tecnologia PAM para executar o processo
+	# de autenticacao.	
+	UsePAM no
+
+# reinicializar o servidor ssh
+$ sudo systemctl restart sshd.service
+
+#
+# SSO (Single Sign On)
+#
+
+# CLIENTE
+# inicializar o ssh-agent.
+$ eval `ssh-agent`
+
+# adicionar a identificacao.
+$ ssh-add
+
+# confirmar a adicao da identificacao.
+$ ssh-add -l
+
+# acessar o servidor ssh sem a necessidade de inserir
+# a passphrase
+$ ssh <USER>@<SERVIDOR_SSH>
+
+# desativaro ssh-agent
+$ eval `ssh-agent -k`
+
+#
+# X11
+#
+
+# SERVIDOR
+$ sudo vi /etc/ssh/sshd_config
+	X11Forwarding yes
+	
+# CLIENTE
+$ ssh -X USUARIO@SERVIDOR_SSH
+
+#
+# LOCAL FORWARDING
+#
+
+# Servidor
+$ sudo yum install telnet-server telnet
+$ sudo firewall-cmd --add-service=telnet --zone=public --permanent
+$ sudo systemctl start telnet.socket
+$ sudo systemctl enable telnet.socket
+$ sudo systemctl status telnet.socket
+
+# Cliente
+# ssh -L [local_port]:[remote_address]:[remote_port] [username@remote_address]
+$ sudo ssh -L 23:127.0.0.1:23 cosmo@192.168.10.15
+
+#
+# REMOTE FORWARDING
+#
+
+# SERVIDOR
+# ssh -R [remote_port]:[local_address]:[local_port] [username@remote_address]
+
+#
+# SCP - COPIAR ARQUIVO
+#
+
+# CLIENTE
+# local para remoto.
+$ scp [OPCAO] /DIR/ARQUIVO [USUARIO]@[HOST_DESTINO:]/DIR_DESTINO
+# remoto para remoto
+$ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO [USUARIO]@[HOST_DESTINO:]/DIR_DESTINO
+# remoto para local
+$ scp [OPCAO] [USUARIO]@[HOST_ORIGEM]:/DIR_ORIGEM/ARQUIVO /DIR_DESTINO
+	-P [PORTA] - especifica a porta do servidor ssh remoto.
+	-p - preserva a data e propriedades do arquivo.
+	-q - opcao utilizada para suprimir a barra de progresso e mensagem de erro.
+	-C - forca a utilizacao de compressao dos dados durante a copia.
+	-r - recursividade
