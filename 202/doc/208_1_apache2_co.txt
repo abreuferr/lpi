@@ -1,0 +1,224 @@
+#: Title : apache2
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Implementing a web server - CentOS
+#: Options : Weight: 4
+
+Description: Candidates should be able to install and configure a 
+web server. This objective includes monitoring the servers load 
+and performance, restricting client user access, configuring support 
+for scripting languages as modules and setting up client user 
+authentication. Also included is configuring server options to restrict 
+usage of resources. Candidates should be able to configure a web server 
+to use virtual hosts and customize file access.
+
+Key Knowledge Areas:
+- Apache 2.4 configuration files, terms and utilities
+- Apache log files configuration and content
+- Access restriction methods and files
+- mod_perl and PHP configuration
+- Client user authentication files and utilities
+- Configuration of maximum requests, minimum and maximum servers and clients
+- Apache 2.4 virtual host implementation (with and without dedicated IP addresses)
+- Using redirect statements in Apaches configuration files to customize file access
+
+Terms and Utilities:
+- access logs and error logs
+- .htaccess
+- httpd.conf
+- mod_auth_basic, mod_authz_host and mod_access_compat
+- htpasswd
+- AuthUserFile, AuthGroupFile
+- apachectl, apache2ctl
+- httpd, apache2
+
+#
+# Instalacao
+#
+
+$ sudo yum clean all
+$ sudo yum update
+$ sudo yum install httpd
+
+$ sudo systemctl start httpd
+$ sudo systemctl enable httpd
+$ sudo systemctl status httpd
+
+#
+# Firewall
+#
+
+$ sudo firewall-cmd --permanent --add-port=80/tcp
+$ sudo firewall-cmd --permanent --add-port=443/tcp
+$ sudo firewall-cmd --reload
+
+#
+# Virtual Host
+#
+
+# diretorio a onde sera armazenado os arquivos do site
+# particula.com.br/www.particula.local
+#
+$ sudo mkdir -p /var/www/particula.local/{html,logs}
+
+# arquivo indice do site
+#
+$ sudo vi /var/www/particula.local/html/index.html
+	apache.particula.local
+
+# arquivo de configuracao do dominio particula.local
+#
+$ sudo vi /etc/httpd/conf.d/particula.local.conf
+	<VirtualHost *:80>
+		ServerAdmin webmaster@particula.local
+		ServerName particula.local
+		ServerAlias www.particula.local
+		DocumentRoot /var/www/particula.local/html/
+		ErrorLog /var/www/particula.local/logs/error.log
+		CustomLog /var/www/particula.local/logs/access.log combined
+	</VirtualHost>
+
+# checagem da configuracao do apache
+#
+$ sudo apachectl configtest
+
+# reler as configuracoes do apache
+#
+$ sudo apachectl graceful
+
+#
+# MODULO PERL
+#
+
+#
+# AUTENTICACAO DE ACESSO ATRAVES DE USUARIO/GRUPO E SENHA
+#
+
+# arquivos com as diretivas de autenticacao.
+$ sudo vi /var/www/particula.local/.htaccess
+	AuthType Basic
+	AuthName "processo de autenticacao de acesso"
+	AuthUserFile /var/www/particula.local/webpass.user
+	Require valid-user
+	AuthGroupFile /var/www/particula.local/webpass.group
+	Require group particula
+
+$ sudo /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+		(...)
+		# a diretiva "AccessFileName" so eh necessaria
+		# se por acaso o nome do arquivo .htaccess for
+		# outro.
+		AccessFileName .htaccess
+		<Directory /var/www/particula.local/html>
+			Options Indexes FollowSymLinks MultiViews
+			AllowOverride All
+			Order allow,deny
+			Allow from all
+		</Directory>
+		(...)
+		</VirtualHost>
+
+# checagem da configuracao do apache2
+#
+$ sudo apachectl configtest
+
+# reinicializar o apache2
+#
+$ sudo systemctl restart apache2
+
+# criar o arquivo webpass a onde sera armazenado o usuario
+# e a senha dele.
+#
+$ sudo htpasswd -c /var/www/particula.local/webpass.user [USUARIO]
+
+# adicionar novos usuario ao arquivo webpass.user
+#
+$ sudo htpasswd /var/www/particula.local/webpass.user [USUARIO]
+
+# grupo de usuarios.
+#
+$ sudo vi /var/www/particula.local/webpass.group
+	particula: cosmo caio
+
+# alterando as permissoes do arquivo
+#
+$ sudo chown www-data /var/www/particula.local/webpass.*
+$ sudo chmod 640 /var/www/particula.local/webpass.*
+
+#
+# RESTRICAO DE ACESSO A ARQUIVO
+#
+
+# utilizacao da diretiva <FILES> para controlar o acesso a
+# determinado arquivo.
+#
+# a diretiva <FILES> trabalha com arquivo, desta forma, nao
+# importa a onde o arquivo esteja localizado, o acesso sempre
+# sera bloqueado, mesmo que esteja dentro de um subdiretorio.
+#
+# esse bloquei é devido a diretiva "Deny all", negando todo o
+# acesso.
+
+$ sudo vi /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+	(...)
+	<Directory /var/www/particula.local/html>
+		(...)
+		<Files private.html>
+			Order allow,deny
+			Deny from all
+		</Files>
+	</Directory>
+
+# testes
+$ w3m http://IP_WEBSERVER/private.html
+	You don't have permission to access /private.html on this server.
+
+$ w3m http://IP_WEBSERVER/subdir/private.html
+	You don't have permission to access /private.html on this server.
+
+#
+# EXPORTAR O DIRETORIO DO USUARIO
+#
+
+# habilitar o modulo
+$ sudo a2enmod userdir
+$ sudo ln -s /etc/apache2/mods-available/userdir.conf /etc/apache2/mods-enabled/
+
+# permissao
+$ sudo chmod 711 /home/caio/
+$ sudo chown caio:caio /home/caio/public_html/
+$ sudo chmod 755 /home/caio/public_html/
+
+# index.html
+$ vi /home/caio/public_html/index.html
+
+# configurar o modulo
+$ sudo cp /etc/apache2/mods-available/userdir.conf /etc/apache2/mods-available/userdir.conf.origin
+$ sudo vi /etc/apache2/mods-available/userdir.conf
+	<IfModule mod_userdir.c>
+        	UserDir enabled caio
+        	UserDir public_html
+	</IfModule>
+
+	<Directory /home/*/public_html>
+        	AllowOverride FileInfo AuthConfig Limit Indexes
+        	Options MultiViews Indexes SymLinksIfOwnerMatch IncludesNoExec
+        	Require method GET POST OPTIONS
+	</Directory>
+
+# teste
+$ w3m http://IP_APACHE_SERVER/~caio/
+
+#
+# Security Apache
+#
+
+# neste caso, a configuracao abaixo sera refletida em todos
+# os dominios virtuais, visto que os parametros foram
+# acrescentados no arquivo de configuracao geral do apache.
+#
+$ sudo vi /etc/apache2/apache2.conf
+	# nao exibe a versao do apache
+	ServerSignature Off
+	ServerTokens Prod
