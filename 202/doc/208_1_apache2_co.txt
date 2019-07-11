@@ -81,8 +81,34 @@ $ sudo apachectl configtest
 $ sudo apachectl graceful
 
 #
-# MODULO PERL
+# Modulo Perl
 #
+
+# instalando os componentes necessarios.
+$ sudo yum install perl perl-CGI
+
+# configuracao do apache.
+$ sudo vi /etc/httpd/conf.d/particula.local.conf
+	<VirtualHost *:80>
+		(...)
+		#DocumentRoot /var/www/particula.local/html/
+		DocumentRoot /var/www/particula.local/
+		ScriptAlias /cgi-bin/ /var/www/particula.local/cgi-bin/
+		<Directory /var/www/particula.local/cgi-bin>
+			Options +ExecCGI
+			AddHandler cgi-script .cgi .pl
+		</Directory>
+	</VirtualHost>
+
+# diretorio e arquivo de trabalho.
+$ mkdir /var/www/particula.local/cgi-bin
+$ vi /var/www/particula.local/cgi-bin/index.cgi
+	#!/usr/bin/perl
+	print "Content-type: text/html\n\n";
+	print "Hello, World.";
+
+# teste
+$ lynx http://www.particula.local/cgi-bin/index.cgi
 
 #
 # AUTENTICACAO DE ACESSO ATRAVES DE USUARIO/GRUPO E SENHA
