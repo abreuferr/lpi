@@ -1,0 +1,350 @@
+#: Title : SAMBA Server Configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : samba server configuration
+#: Options : Weight 5
+
+Description: Candidates should be able to set up a Samba server 
+for various clients. This objective includes setting up Samba 
+as a standalone server as well as integrating Samba as a member 
+in an Active Directory. Furthermore, the configuration of simple 
+CIFS and printer shares is covered. Also covered is a configuring 
+a Linux client to use a Samba server. Troubleshooting installations 
+is also tested.
+
+Key Knowledge Areas:
+- Samba 4 documentation
+- Samba 4 configuration files
+- Samba 4 tools and utilities and daemons
+- Mounting CIFS shares on Linux
+- Mapping Windows user names to Linux user names
+- User-Level, Share-Level and AD security
+
+Terms and Utilities:
+- smbd, nmbd, winbindd
+- smbcontrol, smbstatus, testparm, smbpasswd, nmblookup
+- samba-tool
+- net
+- smbclient
+- mount.cifs
+- /etc/samba/
+- /var/log/samba/
+
+#
+# OBS
+#
+
+# Esse texto se refere a configuracao do Samba para
+# o compartilhamento de diretorios, sejam eles publicos
+# ou de acesso restrito.
+
+#
+# Pre
+#
+
+# adicionar o seguinte parametro no final do arquivo.
+$ sudo vi /etc/security/limits.conf
+	* - nofile 16384
+
+# reinicializar o computador.
+$ sudo reboot
+
+#
+# Instalacao
+#
+
+# atualizacao
+$ sudo yum update && sudo yum upgrade
+
+# instalacao
+$ sudo yum -y install samba samba-client
+
+# servicos do samba
+$ sudo systemctl start smb nmb
+$ sudo systemctl enable smb nmb
+$ sudo systemctl status smb nmb
+
+# firewall
+$ sudo firewall-cmd --permanent --add-service=samba
+$ sudo firewall-cmd --reload
+
+#
+# Grupo
+#
+$ sudo groupadd sambashare
+
+#
+# Usuario
+#
+# em uma primeira etapa, serao criados alguns usuarios 
+# para os mesmos possam acessar os arquivos compartilhados.
+# configuracao mais simples do samba, compartilhar arquivo.
+#
+# eh interessante colocar a pasta de compartilhamento dentro
+# de uma particao que esteja sendo gerenciada pelo LVM. Desta
+# forma, eh possivel redimensionar o tamanho da pasta de acordo
+# com as necessidades do sysadmin.
+
+# criar usuario
+$ sudo mkdir -p /home/samba/caio
+$ sudo adduser --homei-dir /home/samba/caio --no-create-home --shell /usr/sbin/nologin --groups sambashare caio
+$ sudo pdbedit -a caio
+$ sudo chown caio:sambashare /home/samba/caio/
+$ sudo chmod 2770 /home/samba/caio
+
+# cadastrar a senha o usuario adicionado
+# no comando anterior.
+$ sudo smbpasswd -h
+# sudo smbpasswd -a [USER]
+# sudo smbpasswd -e [USER]
+$ sudo smbpasswd -a caio
+$ sudo smbpasswd -e caio
+
+# alterar a senha do ususario de forma remota
+$ sudo smbpasswd -r [IP_SAMBA_SERVER] -U [USUARIO]
+
+#
+# Pasta Compartilhada
+#
+# pastas que serao utilizadas para compartilhar
+# diretorios no servidor samba.
+
+# o diretorio SAMBASHARE sera acessado somente por
+# usuarios membros do grupo SAMBASHARE.
+$ sudo mkdir -p /home/samba/sambashare
+$ sudo chown -R root:sambashare /home/samba/sambashare
+$ sudo chmod -R 0770 /home/samba/sambashare
+
+# o diretorio GUEST sera acessado por QUALQUER
+# usuario da rede.
+$ sudo mkdir -p /home/samba/guest
+$ sudo chown -R nobody:nogroup /home/samba/guest
+$ sudo chmod -R 0775 /home/samba/guest
+
+#
+# File Share - Servidor
+#
+
+# copia de seguranca do arquivo de configuracao
+$ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.origin
+
+# editando o arquivo de configuracao do samba
+$ sudo vi /etc/samba/smb.conf
+	[global]
+	# o servidor samba ira pertencer a um determinado grupo.
+	workgroup = WORKGROUP
+
+	# identificador do servidor.
+	server string = Samba Server Version %v
+
+	# descricao do servidor para os hosts da rede.
+	server string = Samba Server %v
+	netbios name = sambasrv
+
+	# definir a interface de rede do computador.
+	interfaces = ens33
+	
+	# utilizando a diretiva de seguranca "User Level Security".
+	# a diretiva USER indica que as informacoes de usuario e senha
+	# serao armazenadas em um arquivos de texto. A senha eh salva
+	# de forma segura dentro do arquivo.
+	security = user
+
+	# a senha armazenada sera criptografada.
+	encrypt passwords = true
+
+	# tipo de banco de dados que sera utilizado para armazenar
+	# as senhas. base de dados local.
+	passdb backend = tdbsam
+
+	# sincronismo da senha do samba com a senha do unix.
+	unix password sync = yes
+	# aplicativo utilizado para sincronizar a senha
+	# do samba com a senha do unix.
+	passwd program = /usr/bin/passwd %u
+
+	# definindo quais hosts de uma determinada rede podem
+	# acessar o servidor samba.
+	hosts allow = 127.0.0.0/8 192.168.0.0/24
+
+	# arquivos de log que sera gerado.
+	log file = /var/log/samba/log.%m
+	# tamanho maximo do arquivo de log.
+	max log size = 1000
+
+	# para permitir que o Samba trabalhe com a
+	# opcao "guest = yes"
+	map to guest = bad user
+
+	# nome do compartilhamento [//server/sambashare].
+	# nesse compartilhamento, somente os membros
+	# do grupo SAMBASHARE terao o acesso a pasta
+	# compartilhada. Sera necessario inserir 
+	# usuario e senha.
+	[sambashare]
+
+	# comentario
+	comment = All Users
+
+	# especificar o diretorio que sera compartilhado.
+	path = /home/samba/sambashare
+
+	# especificar os usuarios e grupos de usuairos que 
+	# poderao o compartilhamento [sambashare].
+	valid users = @sambashare
+	force group = sambashare
+
+	# nao sera permitido usuario convidado.
+	guest ok = no
+
+	# permissoes atribuidas aos arquivos e pastas
+	# que forem criados.
+	create mask = 0660
+	force create mode = 0660
+	directory mask = 0744
+
+	# sera permitido a escrita no diretorio.
+	writable = yes
+
+	# sera visivel ou nao o compartilhamento.
+	browsable = yes
+
+	# nesse compartilhamento, o acesso a pasta
+	# pode ser acessado por qualquer usuario
+	# que estao na rede.
+	[guest]
+	
+	# definindo o diretorio que sera compartilhado.
+	path = /home/samba/guest
+	force user = nobody
+
+	# permissoes atribuidas aos arquivos e pastas
+	# que forem criados.
+	create mask = 0660
+	force create mode = 0660
+	directory mask = 0744
+
+	# sera visivel ou nao co compartilhamento.
+	browsable = yes
+
+	# qualquer um pode escrever neste diretorio.
+	# permite escrita.
+	writable = yes
+
+	# nao sera somente leitura.
+	read only = no
+
+	# eh permitido convidado.
+	guest ok = yes
+
+	# formatacao
+	unix charset = UTF-8
+	dos charset = CP932
+
+	# foi criado uma pasta para que o usuario possa
+	# utiliza-la como repositorio de dados.
+	[caio]
+        path = /home/samba/caio
+        browseable = no
+        read only = no
+        force create mode = 0660
+        force directory mode = 2770
+        valid users = caio
+	guest ok = no
+
+	[printers] 
+	comment = All Printers 
+	path = /var/spool/samba
+	browseable = No 
+	guest ok = no
+	writable = no
+	printable = Yes                                                                                                                           
+	printing = cups
+                                                                                                                          
+	[print$]                                                                                                                                
+	comment = Printer Drivers                                                                                                                  
+	create mask = 0664                                                                                                                         
+	directory mask = 0775                                                                                                                      
+	force group = @printadmin                                                                                                                  
+	path = /var/lib/samba/drivers 
+	write list = @printadmin root 
+	writable = yes
+	public = yes
+
+# aplicativo utilizado para testar os parametros e verificar se 
+# existe algum problema na sintaxe do arquivo de configuracao
+$ sudo testparm
+
+# reinicializar os servicos do samba
+$ sudo systemctl restart nmb smb
+
+#
+# File Share - Cliente
+#
+
+# instalacao do cliente samba
+$ sudo yum install samba-client cifs-utils -y
+
+# compartilhamento
+# de forma interativa
+$ smbclient //[IP_SERVER]/[USER_FOLDER] -U [USER]
+# acesso de forma "permanente"
+$ sudo mount -t cifs -o username=[USER] //[IP_SERVER]/[USER_FOLDER] /[DIR]/[USER]
+
+#
+# Informacao
+#
+
+# Servidor
+
+# aplicativo utilizado para exibir informacoes sobre 
+# as conexoes entre as estacoes e o servidor samba
+$ sudo smbstatus
+
+# verificar se os servicos do samba esta ativos.
+$ sudo smbcontrol smbd ping
+# sudo smbcontrol nmbd ping
+# sudo smbcontrol winbindd ping
+
+# status das conexoes
+$ sudo smbstatus
+
+# Cliente
+
+# exibir informacoes das conexoes ativas
+$ sudo smbclient -L [IP_SERVER] -N
+
+#
+# Backup - Servidor
+#
+
+# backup da base de dados.
+$ sudo ls /var/lib/samba/private
+	msg.sock  passdb.tdb  secrets.tdb
+$ sudo tdbbackup -l /var/lib/samba/private/*.tdb
+$ sudo ls /var/lib/samba/private
+	msg.sock  passdb.tdb  passdb.tdb.bak  secrets.tdb.bak secrets.tdb
+$ sudo mkdir -p /home/samba/backup_tdb
+$ sudo mv /var/lib/samba/private/*.bak /home/samba/backup_tdb/
+
+#
+# Restore - Server
+#
+
+$ sudo tdbdump passdb.tdb.bak > passdb.dumpfile
+$ sudo tdbrestore passdb.tdb < passdb.dumpfile
+
+#
+# Log
+#
+
+# configuracao do rsyslog
+$ sudo vi /etc/rsyslog.conf
+	(...)
+	# Log SAMBA audit information
+	local3.*			/var/log/samba/samba_audit.log
+
+# reinicializar os servicos
+$ sudo systemctl restart smbd nmbd rsyslog
+
+# visualizacao do log gerado pelo rsyslog
+$ sudo cat /var/log/samba/samba_audit.log
