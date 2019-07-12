@@ -1,0 +1,68 @@
+#: Title : E-Mail Services
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Using e-mail servers CentOS
+#: Options : Weight: 4
+
+Description: Candidates should be able to manage an e-mail 
+server, including the configuration of e-mail aliases, e-mail 
+quotas and virtual e-mail domains. This objective includes 
+configuring internal e-mail relays and monitoring e-mail servers.
+
+Key Knowledge Areas:
+- Configuration files for postfix
+- Basic TLS configuration for postfix
+- Basic knowledge of the SMTP protocol
+- Awareness of sendmail and exim
+
+Terms and Utilities:
+- Configuration files and commands for postfix
+- /etc/postfix/
+- /var/spool/postfix/
+- sendmail emulation layer commands
+- /etc/aliases
+- mail-related logs in /var/log/
+
+#
+# Instalacao
+#
+
+# atualizacao do gnu/linux debian
+$ sudo yum pudate
+
+# instalacao do postfix
+$ sudo yum install postfix mailx telnet -y -d
+
+#
+# Configuracao
+#
+
+# backup
+$ sudo cp /etc/postfix/main.cf{,.origin}
+
+# configuracao
+$ sudo vi /etc/postfix/main.cf{,.origin}
+	myhostname = email.particula.local
+	mydomain = particula.local
+	myorigin = $mydomain
+	inet_interfaces = all
+	mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+	mynetworks = 127.0.0.0/8, 192.168.10.0/24
+	home_mailbox = Maildir/
+	smtpd_banner = $myhostname ESMTP
+	message_size_limit = 10485760
+	mailbox_size_limit = 1073741824
+	smtpd_sasl_type = dovecot
+	smtpd_sasl_path = private/auth
+	smtpd_sasl_auth_enable = yes
+	smtpd_sasl_security_options = noanonymous
+	smtpd_sasl_local_domain = $myhostname
+	smtpd_recipient_restrictions = permit_mynetworks, permit_auth_destination, permit_sasl_authenticated, reject
+
+$ sudo systemctl restart postfix 
+$ sudo  systemctl enable postfix 
+
+#
+# Firewall
+#
+$ sudo firewall-cmd --add-service=smtp --permanent
+$ sudo firewall-cmd --reload
