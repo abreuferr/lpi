@@ -1,0 +1,98 @@
+#: Title : E-Mail Services
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Using e-mail servers
+#: Options : Weight: 4
+
+Description: Candidates should be able to manage an e-mail
+server, including the configuration of e-mail aliases, e-mail
+quotas and virtual e-mail domains. This objective includes
+configuring internal e-mail relays and monitoring e-mail servers.
+
+Key Knowledge Areas:
+- Configuration files for postfix
+- Basic TLS configuration for postfix
+- Basic knowledge of the SMTP protocol
+- Awareness of sendmail and exim
+
+Terms and Utilities:
+- Configuration files and commands for postfix
+- /etc/postfix/
+- /var/spool/postfix/
+- sendmail emulation layer commands
+- /etc/aliases
+- mail-related logs in /var/log/
+
+#
+# Configuracao Postfix/Dovecot
+#
+
+# criacao do usuario de administracao do virtual mailboxes
+$ sudo useradd -u 20000 -s /sbin/nologin vmail
+
+# configuracao do postfix
+$ sudo vi /etc/postfix/main.cf
+# line 164: comment out
+	(...)
+	# mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+	(...)
+	virtual_mailbox_domains = particula.local
+	virtual_mailbox_base = /home/vmail
+	virtual_mailbox_maps = hash:/etc/postfix/virtual-mailbox
+	virtual_uid_maps = static:20000
+	virtual_gid_maps = static:20000
+
+# configuracao do dovecot
+$ sudo vi /etc/dovecot/conf.d/10-auth.conf
+	auth_mechanisms = cram-md5 plain login
+	!include auth-passwdfile.conf.ext
+	!include auth-static.conf.ext
+
+$ sudo vi /etc/dovecot/conf.d/auth-passwdfile.conf.ext
+	passdb {
+		driver = passwd-file
+		args = scheme=CRAM-MD5 username_format=%u /etc/dovecot/users
+
+	userdb {
+		driver = passwd-file
+		args = scheme=CRAM-MD5 username_format=%u /etc/dovecot/users
+
+$ sudo vi /etc/dovecot/conf.d/auth-static.conf.ext
+
+	userdb {
+		driver = static
+		args = uid=vmail gid=vmail home=/home/vmail/%d/%n
+	}
+
+$ sudo vi /etc/dovecot/conf.d/10-mail.conf
+	mail_location = maildir:/home/vmail/%d/%n/Maildir
+
+# reinicializar os servicos
+$ sudo systemctl restart postfix dovecot
+
+#
+# Virtual Email
+#
+
+$  vi /etc/postfix/virtual-mailbox
+	# [user account] [mailbox]
+	cent@particula.local     particula.local/cent/Maildir/
+	ubuntu@particula.local   particula.local/ubuntu/Maildir/
+	debian@particula.local   particula.local/ubuntu/Maildir/
+	redhat@particula.local   particula.local/redhat/Maildir/
+
+$ sudo postmap /etc/postfix/virtual-mailbox
+
+# gerando as senha.
+$ sudo doveadm pw 
+	Enter new password:
+	Retype new password:
+	{CRAM-MD5}XYZ
+
+$ sudo vi /etc/dovecot/users
+	# [user account] [password]
+	cent@particula.local:{CRAM-MD5}XYZ
+	ubuntu@particula.local:{CRAM-MD5}ABC
+	redhat@particula.local:{CRAM-MD5}123
+
+# permissao
+$ sudo chmod +x /home/vmail 
