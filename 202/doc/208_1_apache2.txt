@@ -32,7 +32,7 @@ Terms and Utilities:
 - httpd, apache2
 
 #
-# TEORIA
+# Teoria
 #
 
 #       /etc/apache2/
@@ -115,7 +115,7 @@ Terms and Utilities:
 # /etc/apache2/sites-enable/
 
 #
-# INSTALACAO
+# Instalacao
 #
 
 # instalacao do apache 
@@ -134,7 +134,7 @@ $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
 $ sudo apt-get install libapache2-mod-perl2 -y -d
 
 #
-# LOG
+# Log
 #
 
 # arquivo de log referente aos acesso
@@ -156,7 +156,7 @@ $ sudo cat /var/log/apache2/error.log
 	%b o tamanho do objeto requisitado
 
 #
-# MAXIMUM REQUESTS
+# Controle de requisicao
 #
 
 # configuracao do modulo MPM, modulo instalado por padrao.
@@ -186,7 +186,7 @@ $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 	</IfModule>
 
 #
-# VIRTUAL HOST
+# Virtual Host
 #
 
 # diretorio a onde sera armazenado os arquivos do site
@@ -253,7 +253,7 @@ $ sudo apache2ctl configtest
 $ sudo apache2ctl graceful
 
 #
-# MODULO PERL
+# Modulo Perl
 #
 
 # alterando o arquivo de configuracao do dominio para permitir que o mesmo
@@ -293,7 +293,7 @@ $ sudo perl -Tw /var/www/particula.local/cgi-bin/perltest.pl
 $ w3m http://www.particula.local/perltest.pl
 
 #
-# AUTENTICACAO DE ACESSO ATRAVES DE USUARIO/GRUPO E SENHA
+# Autenticacao de acesso via usuario/grupo e senha
 #
 
 # ativar o modulo "authz_groupfile" para que a opcao
@@ -380,7 +380,7 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 $ sudo systemctl restart apache2
 
 #
-# RESTRICAO DE ACESSO A ARQUIVO
+# Restricao de acesso a arquivo
 #
 
 # utilizacao da diretiva <FILES> para controlar o acesso a
@@ -412,7 +412,7 @@ $ w3m http://IP_WEBSERVER/subdir/private.html
 	You don't have permission to access /private.html on this server.
 
 #
-# EXPORTAR O DIRETORIO DO USUARIO
+# Exportar o diretorio do usuario
 #
 
 # habilitar o modulo
