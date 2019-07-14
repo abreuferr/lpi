@@ -28,7 +28,7 @@ Terms and Utilities:
 - loglevel
 
 #
-# INSTALACAO
+# Instalacao
 #
 
 # atualizacao do debian
@@ -38,77 +38,8 @@ $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install slapd ldap-utils ldapscripts db-util -y -d
 
 #
-# CONFIGURACAO - REDHAT/CENTOS
+# Configuracao
 #
-
-# gerando a senha do usuario de administracao
-$ sudo slappasswd
-	New password:
-	Re-enter new password:
-	{SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
-
-# obter o nome do olcDatabase
-$ ls /etc/openldap/s-lapd.d/cn=config/olcDatabase*
-	olcDatabase={2}hdb.ldif
-
-# modificar os atributos olcSuffix e olcRootDN
-$ cat config1_redhat.ldif
-	dn: olcDatabase={2}hdb,cn=config
-	changetype: modify
-	replace: olcSuffix
-	olcSuffix: dc=particula,dc=local
-
-	dn: olcDatabase={2}hdb,cn=config
-	changetype: modify
-	replace: olcRootDN
-	olcRootDN: cn=admin,dc=particula,dc=local
-
-# aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config1_redhat.ldif
-
-# adicionando o atributo olcRootPW
-$ cat config2_redhat.ldif
-	dn: olcDatabase={2}hdb,cn=config
-	changeType: modify
-	add: olcRootPW
-	olcRootPW: {SSHA}isEghQzPvWcsfehGuXlLUeRydqeypZ3h
-
-# aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config2_redhat.ldif
-
-# alterar o atributo olcAccess
-$ cat config3_redhat.ldif
-	dn: olcDatabase={1}monitor,cn=config
-	changetype: modify
-	replace: olcAccess
-	olcAccess: {0}to * by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external, cn=auth" read by dn.base="cn=admin,dc=particula,dc=local" read by * none
-
-# aplicando a modificacao
-$ ldapmodify -Y EXTERNAL -H ldapi:/// -f config3_redhat.ldif
-
-# validar os atributos
-$ ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*
-
-# criacao do objeto particula.local
-$ cat config4_redhat.ldif
-	dn: dc=particula,dc=local
-	objectClass: dcObject
-	objectClass: organization
-	dc: particula
-	o: particula
-
-# adicionar o objeto.
-$ sudo ldapadd -f config4_redhat.ldif -D cn=admin,dc=particula,dc=local -W
-
-# validar os atributos
-$ sudo ldapsearch -x -b dc=particula,dc=local
-
-#
-# CONFIGURACAO - DEBIAN
-#
-
-# visualizacao da estrutura inicial do openldap.
-$ sudo slapcat
 
 # reconfigurando o pacote slapd
 $ sudo dpkg-reconfigure slapd
@@ -121,91 +52,72 @@ $ sudo dpkg-reconfigure slapd
 	Do you want the database to be removed when slapd is purged? <NO>
 	Move old database? <YES>
 
+# visualizacao da estrutura inicial do openldap.
+$ sudo slapcat
+
 # backup do arquivo de configuracao
-$ sudo cp /etc/ldap/ldap.conf{,.origin}
+$ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
 
 # configuracao do arquivo ldap.conf
 $ sudo vi /etc/ldap/ldap.conf
 	BASE    dc=particula,dc=local
 	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
 
-# arquivo de configuracao.
-$ sudo cp /usr/share/slapd/slapd.conf /etc/ldap/
+#
+# Adicionando uma Organizational Unit
+#
+
+$ cat vi users.ldif
+	dn: ou=users,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: users
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f users.ldif
+
+#
+# Adicionando um Usuario
+#
 
 # gerando o hash da senha do usuario admin/rootpw
 $ sudo slappasswd -h {SSHA}
 
-# estrutura inicial
-$ sudo cat /etc/ldap/slapd.d/cn=config/olcDatabase={1}hdb.ldif
-
-# arquivo ldif.
-$ vi modify_config_1.ldif
-	dn: olcDatabase={1}hdb,cn=config
-	changeType: modify
-	replace: olcSuffix
-	olcSuffix: dc=particula,dc=local
-	-
-	replace: olcRootDN
-	olcRootDN: cn=admin,dc=particula,dc=local
-
-# executando a alteracao.
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f modify_config_1.ldif
-
-# verificar o resultado da alteracao.
-ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDat
-
-# gerando o hash da senha do usuario admin/rootpw
-$ sudo slappasswd -h {SSHA}
-
-# arquivo ldif.
-$ vi modify_config_2.ldif
-	dn: olcDatabase={2}hdb,cn=config
-	changeType: modify
-	add: olcRootPW
-	olcRootPW: {SSHA}Ftvq59j9XWVHRnfEplQvMiRBfthieUMU
-
-# verificar o resultado da alteracao.
-ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDat
-
-# executando a alteracao.
-$ sudo ldapmodify -Y EXTERNAL -H ldapi:/// -f modify_config_1.ldif
-
-# reinicializando servidor ldap.
-$ sudo systemctl restart slapd.service
+$ cat caio.ldif
+	dn: cn=caio,ou=users,dc=particula,dc=local
+	cn: caio
+	sn: ferreira
+	objectClass: inetOrgPerson
+	userPassword: {SSHA}y6l1JNYj9g8Yy/kP5shePMtkKEt8U5H9
+	uid: caio
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f caio.ldif
 
 #
-# LOG
+# Adicionando um Grupo
 #
 
-$ sudo vi /etc/rsyslog.cong
+$ cat group.ldif
+	dn: cn=it,ou=users,dc=particula,dc=local
+	cn: it
+	objectClass: groupOfNames
+	member: cn=caio,ou=users,dc=particula,dc=local
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f group.ldif
+
+#
+# Apagando Objeto
+#
+
+$ sudo ldapdelete "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local -W
+
+#
+# Log
+#
+
+$ sudo vi /etc/rsyslog.conf
 	# Log OpenLDAP messages
 	local4.*                  /var/log/ldap.log
 
-$ sudo systemctl restart rsyslog
-$ sudo systemctl restart slapd
+$ sudo systemctl restart rsyslog slapd
 
 #
-# BACKUP DB
-#
-$ sudo mkdir -p /var/lib/ldap/bdb_backup
-$ sudo db_hotbackup -h /var/lib/ldap -b /var/lib/ldap/bdb_backup
-$ sudo slapcat -b "dc=particula,dc=local" | sudo tee -a /var/lib/ldap/bdb_backup/particula_local.ldif
-
-# verificando integridade.
-$ sudo db_verify -h /var/lib/ldap /var/lib/ldap/*.bdb
-
-# restaurando o backup
-$ sudo db_recover -v -h /var/lib/ldap/
-
-#
-# COMANDO SLDAPADD
-#
-
-# inserir dados atraves de um arquivo ldif
-$ sudo sldapadd -f /etc/ldap/slapd.conf -l OU/CN/UID.ldif
-
-#
-# COMANDO SLAPCAT
+# Backup
 #
 
 # comando utilizado para extrair/dump da base de dados do servidor ldap
