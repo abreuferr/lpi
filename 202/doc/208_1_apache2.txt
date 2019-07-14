@@ -133,7 +133,6 @@ $ sudo apt-get install php7.0 libapache2-mod-php7.0 -y -d
 # instalacao do modulo Perl no Apache2
 $ sudo apt-get install libapache2-mod-perl2 -y -d
 
-
 #
 # LOG
 #
@@ -192,21 +191,17 @@ $ sudo vi /etc/apache2/mods-available/mpm_event.conf
 
 # diretorio a onde sera armazenado os arquivos do site
 # particula.com.br/www.particula.local
-#
 $ sudo mkdir -p /var/www/particula.local/html
 
 # arquivo indice do site
-#
 $ sudo vi /var/www/particula.local/html/index.html
 	apache.particula.local
 
 # alterando a permissao do diretorio a onde esta armazenado
 # os arquivos referentes ao dominio particula.local
-#
 $ sudo chown -R www-data: /var/www/particula.local
 
 # arquivo de configuracao do dominio particula.local
-#
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	# criacao do virtual host
 	# qualquer ip * e porta 80
@@ -249,15 +244,12 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 # ativar as diretivas de configuracao - forma automatica
 $ sudo a2ensite particula.local
 # ativar as diretivas de configuracao - forma manual
-#
 $ sudo ln -s /etc/apache2/sites-available/particula.local.conf /etc/apache2/sites-enabled/
 
 # checagem da configuracao do apache2
-#
 $ sudo apache2ctl configtest
 
 # reler as configuracoes do apache
-#
 $ sudo apache2ctl graceful
 
 #
@@ -266,7 +258,6 @@ $ sudo apache2ctl graceful
 
 # alterando o arquivo de configuracao do dominio para permitir que o mesmo
 # possa trabalhar com a liguagem de programacao Perl.
-#
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 	(...)
@@ -284,11 +275,9 @@ $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	(...)
 
 # testando o arquivo de configuracao
-#
 $ sudo apache2ctl configtest
 
 # reinicializar o apache2
-#
 $ sudo apache2ctr restart
 
 # arquivo para teste.
@@ -347,31 +336,48 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 		</VirtualHost>
 
 # checagem da configuracao do apache2
-#
 $ sudo apachectl configtest
 
 # reinicializar o apache2
-#
 $ sudo systemctl restart apache2
 
 # criar o arquivo webpass a onde sera armazenado o usuario
 # e a senha dele.
-#
 $ sudo htpasswd -c /var/www/particula.local/webpass.user [USUARIO]
 
 # adicionar novos usuario ao arquivo webpass.user
-#
 $ sudo htpasswd /var/www/particula.local/webpass.user [USUARIO]
 
 # grupo de usuarios.
-#
 $ sudo vi /var/www/particula.local/webpass.group
 	particula: cosmo caio
 
 # alterando as permissoes do arquivo
-#
 $ sudo chown www-data /var/www/particula.local/webpass.*
 $ sudo chmod 640 /var/www/particula.local/webpass.*
+
+#
+# Autenticacao via LDAP
+#
+
+# ativando modulo
+$ sudo a2enmod authnz_ldap
+
+# apache2
+$ sudo vi /etc/apache2/sites-available/particula.local.conf
+	<VirtualHost *:80>
+		(...)
+		Directory /var/www/particula.local/html>
+			AuthName "LDAP Authentication"
+			AuthType Basic
+			AuthBasicProvider ldap
+			AuthLDAPURL ldap://192.168.10.13/dc=particula,dc=local?uid?sub?(objectClass=*)
+			Require ldap-filter objectClass=posixAccount
+		</Directory>
+	</VirtualHost>
+
+# reinicializando o apache.
+$ sudo systemctl restart apache2
 
 #
 # RESTRICAO DE ACESSO A ARQUIVO
