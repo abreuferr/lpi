@@ -367,12 +367,19 @@ $ sudo a2enmod authnz_ldap
 $ sudo vi /etc/apache2/sites-available/particula.local.conf
 	<VirtualHost *:80>
 		(...)
-		Directory /var/www/particula.local/html>
-			AuthName "LDAP Authentication"
+		<Directory /var/www/particula.local/html>
+			Options Indexes FollowSymLinks MultiViews
+			AllowOverride None
+			Order deny,allow
+			Deny from All
+
 			AuthType Basic
 			AuthBasicProvider ldap
-			AuthLDAPURL ldap://192.168.10.13/dc=particula,dc=local?uid?sub?(objectClass=*)
-			Require ldap-filter objectClass=posixAccount
+			AuthzLDAPAuthoritative off
+			AuthName "Test OPenLDAP login"
+			AuthLDAPURL "ldap://192.168.0.13/ou=users,dc=particula,dc=local?uid?sub?(objectClass=*)"
+			Require valid-user
+			Satisfy any
 		</Directory>
 	</VirtualHost>
 
