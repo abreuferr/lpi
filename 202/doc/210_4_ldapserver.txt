@@ -1,0 +1,223 @@
+#: Title : openldap server configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : openldap server configuration
+#: Options : Weight: 4
+
+Description: Candidates should be able to configure a 
+basic OpenLDAP server including knowledge of LDIF format 
+and essential access controls.
+
+Key Knowledge Areas:
+- OpenLDAP
+- Directory based configuration
+- Access Control
+- Distinguished Names
+- Changetype Operations
+- Schemas and Whitepages
+- Directories
+- Object IDs, Attributes and Classes
+
+Terms and Utilities:
+- slapd
+- slapd-config
+- LDIF
+- slapadd
+- slapcat
+- slapindex
+- /var/lib/ldap/
+- loglevel
+
+#
+# Instalacao
+#
+
+# atualizacao do debian
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do servidor openldap
+$ sudo apt-get install slapd ldap-utils ldapscripts db-util -y -d
+
+#
+# Configuracao
+#
+
+# reconfigurando o pacote slapd
+$ sudo dpkg-reconfigure slapd
+	Omit OpenLDAP server configuration? <NO>
+	DNS Domain Name: particula.local
+	Organization name: particula
+	Administrator password: <SENHA>
+	Confirm password: <SENHA>
+	Database backend to use: HDB
+	Do you want the database to be removed when slapd is purged? <NO>
+	Move old database? <YES>
+
+# visualizacao da estrutura inicial do openldap.
+$ sudo slapcat
+
+# backup do arquivo de configuracao
+$ sudo cp /etc/ldap/ldap.conf /etc/ldap/ldap.conf.BKP
+
+# configuracao do arquivo ldap.conf
+$ sudo vi /etc/ldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://openldap.particula.local ldap://openldap.particula.local:666
+
+#
+# Adicionando uma Organizational Unit
+#
+
+$ cat vi users.ldif
+	dn: ou=users,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: users
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f users.ldif
+
+#
+# Adicionando um Usuario
+#
+
+# gerando o hash da senha do usuario admin/rootpw
+$ sudo slappasswd -h {SSHA}
+
+$ cat caio.ldif
+	dn: cn=caio,ou=users,dc=particula,dc=local
+	cn: caio
+	sn: ferreira
+	objectClass: inetOrgPerson
+	userPassword: {SSHA}y6l1JNYj9g8Yy/kP5shePMtkKEt8U5H9
+	uid: caio
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f caio.ldif
+
+#
+# Adicionando um Grupo
+#
+
+$ cat group.ldif
+	dn: cn=it,ou=users,dc=particula,dc=local
+	cn: it
+	objectClass: groupOfNames
+	member: cn=caio,ou=users,dc=particula,dc=local
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f group.ldif
+
+#
+# Apagando Objeto
+#
+
+$ sudo ldapdelete "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local -W
+
+#
+# Log
+#
+
+$ sudo vi /etc/rsyslog.conf
+	# Log OpenLDAP messages
+	local4.*                  /var/log/ldap.log
+
+$ sudo systemctl restart rsyslog slapd
+
+#
+# Backup
+#
+
+# comando utilizado para extrair/dump da base de dados do servidor ldap
+# para um arquivo ldif;
+$ sudo slapcat -v -l backup_ldap.ldif
+
+#
+# Samba ( Samba com o LDAP)
+#
+
+# Instalacao (SAmba Server)
+$ sudo apt-get install libnss-ldap smblap-tools -y -d
+
+# schema - ldap server
+$ sudo scp /usr/share/doc/samba/examples/LDAP/samba.ldif.gz USER@IP_LDAP:/tmp
+$ sudo zcat /tmp/samba.schema.gz | sudo ldapadd -Q -Y EXTERNAL -H ldapi:///
+$ sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config 'cn=*samba*'
+
+# indice - ldap server
+$ cat samba_indices.ldif
+	dn: olcDatabase={1}hdb,cn=config
+	changetype: modify
+	replace: olcDbIndex
+	olcDbIndex: objectClass eq
+	olcDbIndex: uidNumber,gidNumber eq
+	olcDbIndex: loginShell eq
+	olcDbIndex: uid,cn eq,sub
+	olcDbIndex: memberUid eq,sub
+	olcDbIndex: member,uniqueMember eq
+	olcDbIndex: sambaSID eq
+	olcDbIndex: sambaPrimaryGroupSID eq
+	olcDbIndex: sambaGroupType eq
+	olcDbIndex: sambaSIDList eq
+	olcDbIndex: sambaDomainName eq
+	olcDbIndex: default sub,eq
+$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
+$ sudo systemctl restart slapd
+
+# adicionando OU - ldap server
+$ cat computers.ldif
+	dn: ou=computers,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: computers
+$ cat groups.ldif
+	dn: ou=groups,dc=particula,dc=local
+	objectClass: organizationalUnit
+	ou: groups
+$ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f computers.ldif
+$ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f groups.ldif
+
+# configuracao smb.conf - samba server
+	#passdb backend = tdbsam
+	passdb backend = ldapsam:ldap://192.168.0.13
+
+	# ldap
+	passdb backend = ldapsam:ldap://192.168.0.13
+	obey pam restrictions = no
+	ldap admin dn = cn=admin,dc=particula,dc=local
+	ldap delete dn = no
+	ldap suffix = dc=particula,dc=local
+	ldap machine suffix = ou=computers
+	ldap user suffix = ou=users
+	ldap idmap suffix = ou=users
+	ldap group suffix = ou=groups
+	ldap passwd sync = yes
+
+	ldap passwd sync = Yes
+	passwd program = /usr/sbin/smbldap-passwd %u
+	passwd chat = *New*password* %n\n *Retype*new*password* %n\n *all*authentication*tokens*updated*
+	add user script = /usr/sbin/smbldap-useradd -m "%u"
+	ldap delete dn = Yes
+	delete user script = /usr/sbin/smbldap-userdel "%u"
+	add machine script = /usr/sbin/smbldap-useradd -w "%u"
+	add group script = /usr/sbin/smbldap-groupadd -p "%g"
+	delete group script = /usr/sbin/smbldap-groupdel "%g"
+	add user to group script = /usr/sbin/smbldap-groupmod -m "%u" "%g"
+	delete user from group script = /usr/sbin/smbldap-groupmod -x "%u" "%g"
+	set primary group script = /usr/sbin/smbldap-usermod -g "%g" "%u"
+
+# informar a senha do usuario rootDN
+$ sudo smbpasswd -W
+
+# Configuracao do smbldap-tools
+$ sudo zcat /usr/share/doc/smbldap-tools/examples/smbldap.conf.gz > /etc/smbldap-tools/smbldap.conf
+$ sudo cp /usr/share/doc/smbldap-tools/examples/smbldap_bind.conf /etc/smbldap-tools/smbldap_bind.conf
+
+$ sudo vi /etc/smbldap-tools/smbldap.conf
+$ sudo net getlocalsid
+$ sudo vi /etc/smbldap-tools/smbldap_bind.conf
+
+$ sudo chmod 0644 /etc/smbldap-tools/smbldap.conf
+$ sudo chmod 0600 /etc/smbldap-tools/smbldap_bind.conf
+
+# adicionar dados baseado no arquivo "group" e "passwd/shadow"
+$ sudo smbldap-populate
+
+# trabalhar com o smbladp-tools
+$ sudo smbldap-useradd -a -P -m username ; adicionar usuario com home
+$ sudo smbldap-userdel username ; remover um usuario de um grupo
+$ sudo smbldap-groupadd -a groupname ; adicionar um grupo
+$ sudo smbldap-groupmod -m username groupname ; adicionar um usuario no grupo
+$ sudo smbldap-groupmod -x username groupname ; remover um usuario do grupo
+$ sudo smbldap-useradd -t 0 -w username ; adicionar computador no samb
