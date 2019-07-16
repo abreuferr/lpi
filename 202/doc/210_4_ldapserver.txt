@@ -133,7 +133,7 @@ $ sudo apt-get install libnss-ldap smblap-tools -y -d
 
 # schema - ldap server
 $ sudo scp /usr/share/doc/samba/examples/LDAP/samba.ldif.gz USER@IP_LDAP:/tmp
-$ sudo zcat /tmp/samba.schema.gz | sudo ldapadd -Q -Y EXTERNAL -H ldapi:///
+$ zcat /tmp/samba.schema.gz | sudo ldapadd -Q -Y EXTERNAL -H ldapi:///
 $ sudo ldapsearch -Q -LLL -Y EXTERNAL -H ldapi:/// -b cn=schema,cn=config 'cn=*samba*'
 
 # indice - ldap server
@@ -169,8 +169,8 @@ $ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f computers.ldif
 $ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f groups.ldif
 
 # configuracao smb.conf - samba server
+	[global]
 	#passdb backend = tdbsam
-	passdb backend = ldapsam:ldap://192.168.0.13
 
 	# ldap
 	passdb backend = ldapsam:ldap://192.168.0.13
@@ -183,8 +183,8 @@ $ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f groups.ldif
 	ldap idmap suffix = ou=users
 	ldap group suffix = ou=groups
 	ldap passwd sync = yes
+	ldap ssl = no
 
-	ldap passwd sync = Yes
 	passwd program = /usr/sbin/smbldap-passwd %u
 	passwd chat = *New*password* %n\n *Retype*new*password* %n\n *all*authentication*tokens*updated*
 	add user script = /usr/sbin/smbldap-useradd -m "%u"
@@ -204,8 +204,8 @@ $ sudo smbpasswd -W
 $ sudo zcat /usr/share/doc/smbldap-tools/examples/smbldap.conf.gz > /etc/smbldap-tools/smbldap.conf
 $ sudo cp /usr/share/doc/smbldap-tools/examples/smbldap_bind.conf /etc/smbldap-tools/smbldap_bind.conf
 
-$ sudo vi /etc/smbldap-tools/smbldap.conf
 $ sudo net getlocalsid
+$ sudo vi /etc/smbldap-tools/smbldap.conf
 $ sudo vi /etc/smbldap-tools/smbldap_bind.conf
 
 $ sudo chmod 0644 /etc/smbldap-tools/smbldap.conf
