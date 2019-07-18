@@ -16,7 +16,7 @@ Terms and Utilities:
 - nginx
 
 #
-# INSTALCAO
+# Instalacao
 #
 
 # atualizacao do gnu/linux debian
@@ -46,8 +46,9 @@ $ sudo systemctl start nginx
 $ sudo systemctl enable nginx
 
 #
-# CONFIGURACAO
+# Configuracao
 #
+
 # o arquivo /etc/ngix/nginx.conf corresponde ao arquivo de
 # configuracao geral do nginx. qualquer tipo de alteracao
 # nesse arquivo ira afetar todo o nginx.
@@ -99,7 +100,7 @@ $ sudo vi /etc/nginx/nginx.conf
 $ sudo nginx -t
 
 #
-# VIRTUAL HOST
+# Virtual Host
 #
 
 # diretorio a onde sera armazenado o codigo do virtual host.
@@ -135,7 +136,7 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 $ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled/
 
 #
-# AUTENTICACAO BASICA
+# Autenticacao Basica
 #
 
 # insttalacao do pacote apache2-utils
@@ -154,22 +155,55 @@ $ sudo vi /etc/nginx/site-available/particula.local.conf
 			auth_basic_user_file /var/www/particula.local/webpass;
 		}
 	}
-
 #
-# APLICATIVO NGINX
+# Autenticacao LDAP
 #
 
-# testar os arquivos de configuracao.
-$ sudo nginx -t
+# componentes do ldap
+$ sudo apt-get install libnss-ldap ldap-utils ldapscripts -y -d
 
-# reler os arquivos de configuracao do nginx.
-$ sudo nginx -s reload
+# ldap
+$ sudo vi /etc/ldap/ldap.conf
+	BASE	dc=particula,dc=local
+	URI	ldap://192.168.0.13 ldap://192.168.0.13:666
+	# TLS_CACERT	/etc/ssl/certs/ca-certificates.crt
 
-# para o servico do nginx de forma rapida.
-$ sudo nginx -s stop
+# configuracao do nginx
+$ sudo vi /etc/nginx/nginx.conf
+	http{
+		##
+		# LDAP
+		##
+		auth_ldap_cache_enabled on;
+		auth_ldap_cache_expiration_time 10000;
+		auth_ldap_cache_size 1000;
+	}
 
-# para o servico do nginx sem desconectar as conexoes ativas.
-$ sudo nginx -s quit
+# servidor ldap
+$ sudo vi /etc/nginx/conf.d/1st_ldap.conf
+	ldap_server ldapsrv {
+		url "ldap://192.168.0.13/dc=particula,dc=local?uid?sub?";
+       		binddn "cn=admin,dc=particula,dc=local";
+       		binddn_passwd "SENHA";
+       		require valid_user;
+		satisfy any;
+	}
+
+# dominio virtual
+$ sudo vi /etc/nginx/sites-available/particula.local
+	server {
+        	listen 80;
+	        server_name www.particula.local;
+
+       		access_log /var/log/nginx/particula.local_access.log;
+	        error_log /var/log/nginx/particula.local_error.lg;
+
+       		root /var/www/particula.local/html;
+	        index index.html;
+
+		auth_ldap "Login with LDAP account";
+		auth_ldap_servers ldapsrv;
+	}
 
 #
 # SSL
