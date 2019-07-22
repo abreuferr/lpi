@@ -139,25 +139,52 @@ $ ldapadd -Y EXTERNAL -H ldapi:// -f /etc/openldap/schema/inetorgperson.ldif
 
 $ slappasswd
 
-$ vi caio.ldif
-dn: cn=caio,ou=users,dc=particula,dc=local
-cn: caio
-sn: ferreira
-objectClass: inetOrgPerson
-userPassword: eureka
-uid: caio
+$ vi user_caio.ldif
+	# usuario de nome caio
+	dn: uid=caio,ou=users,dc=particula,dc=local
+	uid: caio
+	cn: caio
+	sn: caio
+	mail: caio@particula.local
+	objectClass: person
+	objectClass: organizationalPerson
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: top
+	objectClass: shadowAccount
+	userPassword: {crypt}$6$FUY4ssYceRCaL17z$B2zuajwy/dxOtoE6cKzycWxvxGw/zoUYQJOpljl3qaW19BkyqQUWGAtSlWkAlQbkBMssoHs3r73xwlZtULnLv.
+	shadowMin: 0
+	shadowMax: 99999
+	shadowWarning: 7
+	loginShell: /usr/bin/zsh
+	uidNumber: 1000
+	gidNumber: 1000
+	homeDirectory: /home/caio
+	gecos: caio
 
-$ ldapadd -f caio.ldif -x -D cn=admin,dc=particula,dc=local -W
+	# grupo de nome caio
+	dn: cn=caio,ou=groups,dc=particula,dc=local
+	objectClass: posixGroup
+	objectClass: top
+	cn: caio
+	userPassword: {crypt}x
+	gidNumber: 1000
+
+$ ldapadd -f user_caio.ldif -x -D cn=admin,dc=particula,dc=local -W
 
 #
 # Adicionando Grupo
 #
 
-$ vi group.ldif
-dn: cn=it,ou=users,dc=particula,dc=local
-cn: it
-objectClass: groupOfNames
-member: cn=caio,ou=users,dc=particula,dc=local
+$ vi group_caio.ldif
+	# grupos em que o caio eh membro
+	dn: cn=it,ou=groups,dc=particula,dc=local
+	objectClass: posixGroup
+	objectClass: top
+	cn: it
+	userPassword: {crypt}x
+	gidNumber: 10
+	memberUid: uid=caio,ou=users,dc=particula,dc=local
 
 $ ldapadd -f group.ldif -x -D cn=admin,dc=particula,dc=local -W
 
