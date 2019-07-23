@@ -1,0 +1,240 @@
+#: Title : NFS Server Configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : NFS Server Configuration - CentOS
+#: Options : Weight: 3
+
+Description: Candidates should be able to export filesystems using 
+NFS. This objective includes access restrictions, mounting an NFS 
+filesystem on a client and securing NFS.
+
+Key Knowledge Areas:
+- NFS version 3 configuration files
+- NFS tools and utilities
+- Access restrictions to certain hosts and/or subnets
+- Mount options on server and client
+- TCP Wrappers
+- Awareness of NFSv4
+
+Terms and Utilities:
+- /etc/exports
+- exportfs
+- showmount
+- nfsstat
+- /proc/mounts
+- /etc/fstab
+- rpcinfo
+- mountd
+- portmapper
+
+#
+# Instalacao (servidor)
+#
+
+# atualizar o do sistema operacional
+$ sudo yum update
+
+# instalacao dos componentes do NFS Server
+$ sudo yum install nfs-utils
+
+# servico
+$ sudo systemctl enable nfs-server
+$ sudo systemctl enable rpcbind
+$ sudo systemctl enable nfs-lock
+$ sudo systemctl enable nfs-idmap
+
+$ sudo systemctl start rpcbind
+$ sudo systemctl start nfs-server
+$ sudo systemctl start nfs-lock
+$ sudo systemctl start nfs-idmap
+
+# firewall
+$ sudo firewall-cmd --add-service=nfs --zone=internal --permanent
+$ sudo firewall-cmd --add-service=mountd --zone=internal --permanent
+$ sudo firewall-cmd --add-service=rpc-bind --zone=internal --permanent
+$ sudo firewall-cmd --reload
+
+#
+# Configuracao (servidor)
+#
+
+# diretorio que sera exportado
+$ sudo mkdir -p /home/nfs/[USUARIO]
+
+# permissao do diretorio que sera exportado
+$ sudo chown [USUARIO]:[USUARIO] -R /home/nfs/[USUARIO]
+$ sudo chmod 755 -R /home/nfs/[USUARIO]
+
+# editar o arquivos /etc/export para exportar os
+# diretorios.
+$ sudo vi /etc/exports ; configuracao do nfs server
+	# rw - permite a leitura e escrita no diretorio
+	# ro - permite somente a opcao de leitura, opcao de escrita fica desabilidatea
+	# sync - escreve e le os dados de forma sincronizada
+	# async - escreve e le os dados de forma asincrona. Aumenta a velocidade mas pode causar a corrupcao dos dados
+	# subtree_check - faz a checagem de toda a árvore de subdiretório que foi exportada e não somente do diretório principal.
+	# root_squash - o usuario root do cliente NAO possui os mesmo privilegios do servidor nfs (cliente>root ; server>nobody)
+	# no_root_squash - o usuario root do cliente possui os mesmo privilegios do servidor nfs (cliente>root ; server>root).
+	# lock - trava de acesso a arquivo, impedindo assim que dois ou mais clientes ao acessar o mesmo arquivo ao mesmo tempo.
+	# wdelay - atraso no processo de escrita se por acaso outro processo estiver escrevendo no disco rigido
+	#
+	# exemplo
+	# directory hostname(options)
+        # /home/nfs/[USUARIO]  192.168.10.0/24(rw,sync,no_root_squash,no_subtree_check)
+
+# exportar todos os diretorios listados no arquivo 
+# /etc/exports.
+$ sudo exportfs -av
+	# [none] - exibi quais sao os diretorios que estao exportados (ativos).
+	# -v - exibe a lista dos arquivos e diretorios que sao exportados.
+	# -a - exporta todos os diretorios listados no diretorio /etc/exports.
+	# -u - UnExport um ou mais diretorios.
+	# -r - ReExporta todos os diretorios depois de ter modificado o arquivo /etc/exports.
+
+#
+# Instalacao (cliente)
+#
+
+# atualizar o do sistema operacional
+$ sudo yum update
+
+# instalacao dos componentes do NFS Server
+$ sudo yum install nfs-utils
+
+#
+# Configuracao (cliente)
+#
+
+# diretorio que sera exportado
+$ mkdir -p /home/[USUARIO]/nfs
+
+# permissao do diretorio que sera exportado
+$ chown [USUARIO]:[USUARIO] -R /home/[USUARIO]/nfs
+$ chmod 755 -R /home/[USUARIO]/nfs
+
+# informacao sobre o diretorio que esta sendo
+# exportado pelo servidor nfs.
+$ sudo showmount -e 192.168.10.11
+
+# montando o diretorio exportado pelo servidor NFS
+# de forma manual.
+$ sudo mount -t nfs4 -vv 192.168.10.11:/home/nfs/[USUARIO] /home/[USUARIO]/nfs
+
+# para verificar se realmente o diretorio exportado
+# no servidor foi montado na estacao, basta executar
+# o comando.
+$ sudo df -h
+
+# caso o computador seja reinicializado, o diretorio
+# exportado pelo servidor nfs sera montador de forma
+# automatica.
+$ cat /etc/fstab
+	192.168.0.11:/mnt/nfs /mnt/nfs nfs auto,nofail,noatime,nolock,intr,tcp,actimeo=1800 0 0
+
+#
+# Informacao
+#
+
+# Servidor
+# obter informacao dos diretorios que estao montados.
+$ sudo cat /proc/fs/nfs/exports
+$ sudo exportfs -vv
+
+# Cliente
+$ sudo showmount [opcao]
+	# -e [IP_SERVER]- exibe uma lista dos diretorios expostados
+	# -a - exibe o nome ou ip das estacoes que importaram os direorios
+	# -d - lista os diretorios montados nos clientes
+	# -e - exibe uma lista dos diretorios expostados
+
+# Servidor/Cliente
+# exibir estatistica
+$ sudo nfsstat [OPCAO]
+	-m - exibir informacao do lado do cliente
+	-c - exibir informacao do lado do cliente
+	-s - exibir informacao do lado do servidor
+	-r - exibir informacao do lado do servidor/cliente
+
+# Cliente
+$ sudo cat /proc/mounts
+
+# Cliente
+# obter informacoes atraves do aplicativo rpcinfo.
+$ sudo rpcinfo [OPCAO]
+	-p - exibe as portas que estao sendo mapeadas.
+	-s - exibe informacoes, como por exemplo, versao e servico.
+	-m - exibir dados estatisticos.
+
+#
+# Teste NFS v4
+#
+
+# Servidor
+#
+$ sudo mkdir -p /home/nfs/share/ti
+$ sudo mkdir -p /home/nfs/share/rh
+$ sudo mkdir -p /home/nfs/share/contabilidade
+
+$ tree --charset=ascii /home/nfs/share
+	/home/nfs/share
+	|-- contabilidade
+	|   `-- teste_contabilidade.txt
+	|-- rh
+	|   `-- teste_rh.txt
+	`-- ti
+	    `-- teste_ti.txt
+
+$ sudo chmod -R 775 /home/nfs/share
+$ sudo chown -R root:users /home/nfs/share
+$ sudo cat /etc/exports
+	/home/nfs/share/ti	192.168.0.0/24(rw,sync,no_root_squash,no_subtree_check)
+	/home/nfs/share/rh	192.168.0.0/24(rw,sync,no_root_squash,no_subtree_check)
+	/home/nfs/share/contabilidade	192.168.0.0/24(rw,sync,no_root_squash,no_subtree_check)
+$ sudo exportfs -rv
+$ sudo showmount -e 192.168.0.11
+	Export list for 192.168.0.11:
+	/home/nfs/share/contabilidade 192.168.0.0/24
+	/home/nfs/share/rh            192.168.0.0/24
+	/home/nfs/share/ti            192.168.0.0/24
+
+# Cliente
+#
+$ mkdir /home/[USUARIO]/nfs_share
+$ sudo mount -t nfs4 192.168.0.11:/home/nfs/share /home/[USUARIO]/nfs_share
+
+#
+# Teste ACL - Cliente
+#
+$ sudo yum install nfs4-acl-tools
+$ sudo nfs4_getfacl /home/cosmo/nfs_share
+	A::OWNER@:rwaDxtTcCy
+	A::GROUP@:rwaDxtcy
+	A::EVERYONE@:rxtcy
+
+# r: Read data (files) / list directory (directories).
+# w: Write data (files) / create files (directories).
+# a: Append data (files) / create subdirectories (directories).
+# x: Execute (files) / change directory (directories).
+# d: Delete file/directory.
+# D: Remove files or subdirectories from a directory.
+# t: Read attributes from the file/directory.
+# T: Write attributes to the file/directory.
+# n: Read named attributes from the file/directory.
+# N: Write named attributes to the file/directory.
+# c: Read the NFSv4 ACL from the file/directory.
+# C: Write the NFSv4 ACL to the file/directory.
+# o: Change ownership of the file/directory.
+# y: Allows clients to use synchronous I/O with the server.
+
+# obter o UID/GID do usuario
+$ sudo getent passwd [USUARIO]
+
+# alterar permissao
+$ sudo nfs4_setfacl -a A::1000:rw /home/cosmo/nfs_share/ti/*
+$ sudo nfs4_setfacl -a D::1000:w /home/cosmo/nfs_share/contabilidade/*
+$ sudo nfs4_setfacl -a D::1000:w /home/cosmo/nfs_share/rh/*
+
+# teste de permissao
+$ echo "teste_rh" > /home/cosmo/nfs_share/rh/teste_rh.txt
+	zsh: permission denied: /home/cosmo/nfs_share/rh/teste_rh.txt
+$ cat /home/cosmo/nfs_share/rh/teste_rh.txt
+	teste_rh
