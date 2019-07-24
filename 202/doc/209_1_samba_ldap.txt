@@ -1,0 +1,132 @@
+#: Title : SAMBA Server Configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : samba server configuration - ldap and centos
+#: Options : Weight 5
+
+Description: Candidates should be able to set up a Samba server 
+for various clients. This objective includes setting up Samba 
+as a standalone server as well as integrating Samba as a member 
+in an Active Directory. Furthermore, the configuration of simple 
+CIFS and printer shares is covered. Also covered is a configuring 
+a Linux client to use a Samba server. Troubleshooting installations 
+is also tested.
+
+Key Knowledge Areas:
+- Samba 4 documentation
+- Samba 4 configuration files
+- Samba 4 tools and utilities and daemons
+- Mounting CIFS shares on Linux
+- Mapping Windows user names to Linux user names
+- User-Level, Share-Level and AD security
+
+Terms and Utilities:
+- smbd, nmbd, winbindd
+- smbcontrol, smbstatus, testparm, smbpasswd, nmblookup
+- samba-tool
+- net
+- smbclient
+- mount.cifs
+- /etc/samba/
+- /var/log/samba/
+
+#
+# Observacao
+#
+
+# O servidor LDAP já foi previamente instalado e
+# configurado em outro texto. Ele esta sendo utilizado
+# junto com o Squid, Apache e Nginx. Desta forma, nao
+# sera descrito neste texto, como fazer a instalacao e
+# configuracao inicial do LDAP.
+
+#
+# LDAP (servidor)
+#
+
+# o arquivo samba.ldif foi copiado do servidor
+# Samba para o servidor LDAP.
+# /usr/share/doc/samba-4.8.3/LDAP/samba.ldif
+#
+# importando o arquivo samba.ldif
+$ sudo ldapadd -Y EXTERNAL -H ldapi:// -f samba.ldif
+
+# indice
+$ cat samba_indices.ldif
+	dn: olcDatabase={2}hdb,cn=config
+	changetype: modify
+	replace: olcDbIndex
+	olcDbIndex: objectClass eq
+	olcDbIndex: uidNumber,gidNumber eq
+	olcDbIndex: loginShell eq
+	olcDbIndex: uid,cn eq,sub
+	olcDbIndex: memberUid eq,sub
+	olcDbIndex: member,uniqueMember eq
+	olcDbIndex: sambaSID eq
+	olcDbIndex: sambaPrimaryGroupSID eq
+	olcDbIndex: sambaGroupType eq
+	olcDbIndex: sambaSIDList eq
+	olcDbIndex: sambaDomainName eq
+	olcDbIndex: default sub,eq
+$ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
+$ sudo ldapi:/// -b cn=config olcDatabase={2}hdb olcDbIndex
+
+#
+# Samba (servidor)
+#
+
+# atualizacao
+$ sudo yum update && sudo yum upgrade
+
+# instalacao do samba
+$ sudo yum -y install samba 
+
+# instalacao do smbldap-tools
+$ sudo yum --enablerepo=extras install epel-release && sudo yum install smbldap-tools
+
+# servicos do samba
+$ sudo systemctl start smb nmb
+$ sudo systemctl enable smb nmb
+$ sudo systemctl status smb nmb
+
+# firewall
+$ sudo firewall-cmd --permanent --add-service=samba
+$ sudo firewall-cmd --reload
+
+#
+# LDAP (servidor)
+#
+
+# copiar o arquivo samba.schema do servidor
+# Samba para o servidor LDAP.
+$ scp /usr/share/doc/samba-4.8.3/LDAP/samba.schema caio@192.168.10.13:/tmp
+$ sudo mv /tmp/samba.schema /etc/openldap/schema
+$ sudo chmod 644 /etc/openldap/schema/samba.schema
+
+# ldap.conf
+$ sudo vi /etc/openldap/ldap.conf
+	host 192.168.10.13
+
+	uri ldap://192.168.10.13/
+	base dc=particula,dc=local
+
+	binddn cn=admin,dc=particula,dc=local
+	bindpw {SSHA}lgd+e5HItd10ognOeEm6QDgRDKEwv8MJ
+
+	nss_base_passwd     ou=users,dc=particula,dc=local?one
+	nss_base_passwd     ou=computers,dc=particula,dc=local?one
+	nss_base_shadow     ou=users,dc=particula,dc=local?one
+	nss_base_group      ou=groups,dc=particula,dc=local?one
+
+	ssl no
+	pam_password md5
+
+#
+# Samba (servidor)
+#
+
+$ sudo cat /etc/nsswitch.conf
+	passwd: ldap files
+	group: ldap files
+	shadow: ldap files
+
+
