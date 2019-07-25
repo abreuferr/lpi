@@ -100,6 +100,14 @@ $ sudo vi /etc/bind/named.conf.options
 		// servidor nao conseguirao resolver dominios.
 		recuriosn yes;
 
+		// indica quais hosts ou redes podem requisitar
+		// a recursividade.
+		alow-recursion { localhost; clients; };
+
+		// especifica o hostname que sera negado a
+		// requisicao de recursividade.
+		blackhole { HOSTNAME; };
+
 		// o bind vai ficar escutando a porta 53.
 		listen-on port 53 { localhost; clients; };
 
@@ -109,13 +117,15 @@ $ sudo vi /etc/bind/named.conf.options
 		allow-query { localhost; clients; };
 
 		// especifica quais hosts podem ter o acesso ao cache 
-		// do bind.
+		// do dns-cache.
 		allow-query-cache { localhost; clients };
 	};
 
 # o aplicativo named-checkconf checa a sintaxe do 
-# arquivo de configuracao do bind, named.conf.
+# arquivo de configuracao do bind.
 $ sudo named-checkconf /etc/bind/named.conf
+$ sudo named-checkconf /etc/bind/named.conf.options
+$ sudo named-checkconf /etc/bind/named.conf.local
 
 # resolv.conf do servidor dns-cache.
 $ cat /etc/resolv.conf
@@ -137,7 +147,8 @@ $ cat /etc/resolv.conf
 # sem interromper o servico.
 $ sudo rndc reload
 
-# reler o arquivo de configuracao named.conf.
+# reler o arquivo de configuracao do Bind
+# sem que o servico seja interrompido.
 $ sudo rndc reconfig
 
 # obter informacoes do servidor bind.
@@ -160,47 +171,11 @@ $ host www.debian.org
 
 # primeiro teste do cache.
 $ dig -t MX kernel.org | grep time
-	; <<>> DiG 9.10.3-P4-Debian <<>> -t MX debian.org
-	;; global options: +cmd
-	;; Got answer:
-	;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 27452
-	;; flags: qr rd ra ad; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
-
-	;; OPT PSEUDOSECTION:
-	; EDNS: version: 0, flags:; udp: 4096
-	;; QUESTION SECTION:
-	;debian.org.			IN	MX
-
-	;; ANSWER SECTION:
-	debian.org.		28800	IN	MX	0 mailly.debian.org.
-	debian.org.		28800	IN	MX	0 muffat.debian.org.
-
 	;; Query time: 79 msec
-	;; SERVER: 192.168.0.4#53(192.168.0.4)
-	;; WHEN: Mon Jun 10 14:01:38 -03 2019
-	;; MSG SIZE  rcvd: 85
 
 # segundo teste do cache.
 $ dig -t MX debian.org
-	; <<>> DiG 9.10.3-P4-Debian <<>> -t MX debian.org
-	;; global options: +cmd
-	;; Got answer:
-	;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 42504
-	;; flags: qr rd ra ad; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
-
-	;; OPT PSEUDOSECTION:
-	; EDNS: version: 0, flags:; udp: 4096
-	;; QUESTION SECTION:
-	;debian.org.			IN	MX
-
-	;; ANSWER SECTION:
-	debian.org.		28600	IN	MX	0 muffat.debian.org.
-	debian.org.		28600	IN	MX	0 mailly.debian.org.
-
 	;; Query time: 0 msec
-	;; SERVER: 192.168.0.4#53(192.168.0.4)
-	;; WHEN: Mon Jun 10 14:04:58 -03 2019
-	;; MSG SIZE  rcvd: 85
 
 # como eh possivel constatar, o valor do campo "Query time" do primeiro teste
 # para o segundo teste caiu do valor 79 mseg. para o valor 00 mseg. Isso indica 
@@ -288,6 +263,15 @@ $ ping slashdot.org
 	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=1 ttl=127 time=185 ms
 	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=2 ttl=127 time=192 ms
 
+# quando a recursividade do dns-cache foi desabilidatea, opcao NO, 
+# o servidor dns-cache fez a requisicao de resolucao de noma para
+# outros servidores. Desta forma, o comando ping nao funcionou.
+#
+# quando a recursividade do dns-cache foi habilitada, opcao YES,
+# o servidor de dns-cache pode fazer a requisicao de resolucao
+# de dominio para outros servidores. desta forma, o comando ping
+# funcionou de forma correta.
+
 #
 # BLACKHOLE
 #
@@ -296,6 +280,15 @@ $ ping slashdot.org
 # a onde eh possivel especificar quais hosts ou rede
 # nao serao atendidas pelas requisicoes de resolucao
 # de nome.
+#
+# diferente da opcao RECURSION a onde eh possivel
+# habilitar/desabilitar a recursividade, a opcao
+# BLACKHOLE permite habilitar/desabilitar a 
+# recursividade para um determinado grupo de hosts
+# ou rede, trabalhando de forma granular. Desta 
+# forma, um numero menor de hosts ira requisitar
+# a resolucao de nomes, diminuindo o trafego na
+# rede e a solicitacao de resolucao ao servidor.
 
 $ cat /etc/bind/named.conf.options
 	options {
