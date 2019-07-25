@@ -38,6 +38,15 @@ $ sudo chown -R bind:bind /etc/bind
 # CONFIGURACAO DO DNS PRIMARIO (NS1)
 #
 
+# a opcao INCLUSE permite a subdivisao do arquivo
+# de configuracao do Bind em varios arquivos. Desta
+# forma, é possivel segmentar a configuracao em varios
+# arquivos.
+$ cat /etc/bind/named.conf
+        include "/etc/bind/named.conf.options";
+        include "/etc/bind/named.conf.local";
+        include "/etc/bind/named.conf.default-zones";
+
 # ajustes no arquivo named.conf.options
 $ sudo vi /etc/bind/named.conf.options
 	// acl para controle de quem podera fazer requisicao 
@@ -53,12 +62,22 @@ $ sudo vi /etc/bind/named.conf.options
 		// configuracao da zona particula.local
         	directory "/etc/bind";
 
+		// por motivos de seguranca, ocultar a
+		// versao do Bind.
+		version none;
+
+                // o bind ficara escutando a porta 53 e ira
+                // responder a requisicoes vindas do 127.0.0.1
+                // e de estacoes provenientes de "clients".
+                listen-on port 53 { 127.0.0.1; clients; };
+
         	// quais os hosts ou rede que podem fazer requisicao
 		// de resolucao de um nome
         	allow-query { clients; };
 	};
 
 # testando o arquivo de configuracao.
+$ sudo named-checkconf /etc/bind/named.conf
 $ sudo named-checkconf /etc/bind/named.conf.options
 
 # arquivo que contem as entradas das zonas que
@@ -107,7 +126,7 @@ $ sudo vi /etc/bind/named.conf.local
 	};
 
 # testando o arquivo de configuracao.
-$ sudo named-checkconf /etc/bind/named.conf.options
+$ sudo named-checkconf /etc/bind/named.conf.local
 
 // arquivo de configuracao da zona particula.local.
 // Hostname > IP.
@@ -158,6 +177,8 @@ $ sudo vi /etc/bind/db.particula.local
 
 # testando o arquivo de configuracao da zona.
 $ sudo named-checkzone particula.local /etc/bind/db.particula.local
+	zone particula.local/IN: loaded serial 2019062204
+	OK
 
 # arquivo de configuracao do dns reverso (IP > Hostname)
 $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
@@ -190,16 +211,19 @@ $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 
 # testando o arquivo de configuracao da zona reversa.
 $ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192.in-addr.arpa
+	zone 0.168.192.in-addr.arpa/IN: loaded serial 2019062204
+	OK
 
 # reler os arquivos de configuracao do Bind.
 $ sudo rndc reload
+	server reload successful
 
 # conteudo do arquivo resolv.conf
 $ sudo cat /etc/resolv.conf
 	domain particula.local
 	search particula.local
+	nameserver 192.168.0.5
 	nameserver 192.168.0.6
-	nameserver 192.168.0.7
 
 #
 # CONFIGURACAO DO DNS SECUNDARIO (NS2)
@@ -281,7 +305,7 @@ $ sudo cat /etc/resolv.conf
 $ nslookup particula.local ; "A" record do dominio
 $ nslookup 192.168.0.5 ; dominio reverso
 $ nslookup web1.particula.local ; informacao sobre um determinado host
-$ nslookup -query=ns www.particula.local ; NS record
+$ nslookup -query=ns particula.local ; NS record
 $ nslookup -debug particula.local ; Debug
 
 #
