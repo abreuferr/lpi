@@ -40,19 +40,38 @@ Terms and Utilities:
 # configuracao inicial do LDAP.
 
 #
+# Samba (servidor)
+#
+
+# configurando o LDAP Authentication
+$ sudo apt-get install libnss-ldap
+	ldap://192.168.0.13
+	dc=particula,dc=local
+	3
+	Yes
+	No
+	cn=admin,dc=particula,dc=local
+	[SENHA]
+
+# Configuracao do LDAP profile
+$ sudo pam-auth-update --force
+	marcar todas as opcoes
+
+#
 # LDAP (servidor)
 #
 
 # o arquivo samba.ldif foi copiado do servidor
 # Samba para o servidor LDAP.
-# /usr/share/doc/samba-4.8.3/LDAP/samba.ldif
-#
+$ scp /usr/share/doc/samba/examples/LDAP/samba.ldif.gz cosmo@192.168.0.13:/etc/ldap/schema
+
 # importando o arquivo samba.ldif
-$ sudo ldapadd -Y EXTERNAL -H ldapi:// -f samba.ldif
+$ sudo gzip -d /etc/ldap/schema/samba.ldif.gz
+$ sudo ldapadd -Y EXTERNAL -H ldapi:// -f /etc/ldap/schema/samba.ldif.gz
 
 # indice
 $ cat samba_indices.ldif
-	dn: olcDatabase={2}hdb,cn=config
+	dn: olcDatabase={1}hdb,cn=config
 	changetype: modify
 	replace: olcDbIndex
 	olcDbIndex: objectClass eq
@@ -66,67 +85,157 @@ $ cat samba_indices.ldif
 	olcDbIndex: sambaGroupType eq
 	olcDbIndex: sambaSIDList eq
 	olcDbIndex: sambaDomainName eq
-	olcDbIndex: default sub,eq
+olcDbIndex: default sub,eq
 $ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
-$ sudo ldapi:/// -b cn=config olcDatabase={2}hdb olcDbIndex
+$ sudo ldapi:/// -b cn=config olcDatabase={1}hdb olcDbIndex
+
+# slapd.conf
+$ sudo vi /etc/ldap/slapd.conf
+	include     /etc/openldap/schema/core.schema
+	include     /etc/openldap/schema/cosine.schema
+	include     /etc/openldap/schema/inetorgperson.schema
+	include     /etc/openldap/schema/nis.schema
+	include     /etc/openldap/schema/samba.schema
+ 
+	loglevel    -1
+	pidfile     /var/run/slapd.pid
+	argsfile    /var/run/slapd.args
+ 
+	database    hdb
+
+	suffix      "dc=particula,dc=local"
+	rootdn      "cn=admin,dc=particula,dc=local"
+ 
+	rootpw      {SSHA}kCuJt72QLJ2O06nFUvdre97sHT0AxlH/
+ 
+	index objectClass           eq
+	index cn                    pres,sub,eq
+	index sn                    pres,sub,eq
+	index uid                   pres,sub,eq
+	index displayName           pres,sub,eq
+	index uidNumber             eq
+	index gidNumber             eq
+	index memberUID             eq
+	index sambaSID              eq
+	index sambaPrimaryGroupSID  eq
+	index sambaDomainName       eq
+	index default               sub
+ 
+	sambaNTPassword,sambaLMPassword,sambaPwdLastSet,sambaPwdMustChange
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by self write
+	      by anonymous auth
+	      by * none
+	access to attrs=objectClass,entry,gecos,homeDirectory,uid,uidNumber,gidNumber,cn,
+	memberUid
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by * read
+	access to attrs=description,telephoneNumber
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by self write
+	      by * read
+	some unix commands to work) access to attrs=cn,sambaLMPassword,sambaNTPassword,
+	sambaPwdLastSet,sambaLogonTime,sambaLogoffTime,sambaKickoffTime,sambaPwdCanChange,
+	sambaPwdMustChange,sambaAcctFlags,displayName,sambaHomePath,sambaHomeDrive,
+	sambaLogonScript,sambaProfilePath,description,sambaUserWorkstations,sambaPrimaryGroupSID,
+	sambaDomainName,sambaSID,sambaGroupType,sambaNextRid,sambaNextGroupRid,sambaNextUserRid,
+	sambaAlgorithmicRidBase,sambaLogonScript,loginShell
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by self read
+	      by * none
+	access to dn.base="dc=particula,dc=local"
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by * none
+	access to dn="ou=Users,dc=particula,dc=local"
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by * none
+	access to dn="ou=Groups,dc=particula,dc=local"
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by * none
+	access to dn="ou=Computers,dc=particula,dc=local"
+	      by dn="uid=samba,ou=users,dc=particula,dc=local" write
+	      by * none
+	access to *
+	      by self read
+	      by * none
+
 
 #
 # Samba (servidor)
 #
 
 # atualizacao
-$ sudo yum update && sudo yum upgrade
+$ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do samba
-$ sudo yum -y install samba 
+$ sudo yum -y install samba smbldap-tools
 
-# instalacao do smbldap-tools
-$ sudo yum --enablerepo=extras install epel-release && sudo yum install smbldap-tools
+# configurando o smbldap-tools
+$ sudo cp /usr/share/doc/smbldap-tools/examples/smbldap.conf.gz /etc/smbldap-tools/
+$ sudo cp /usr/share/doc/smbldap-tools/examples/smbldap_bind.conf /etc/smbldap-tools/
+$ sudo gzip -d /etc/smbldap-tools/smbldap.conf.gz
 
-# servicos do samba
-$ sudo systemctl start smb nmb
-$ sudo systemctl enable smb nmb
-$ sudo systemctl status smb nmb
+# obtendo o SID do dominio
+$ sudo net getlocalsid
+	SID for domain SAMBA is: S-1-5-21-3442726937-1468842005-207868225
 
-# firewall
-$ sudo firewall-cmd --permanent --add-service=samba
-$ sudo firewall-cmd --reload
+# configurar o smbldap-tools
+$ sudo vi /etc/smbldap-tools/smbldap.conf
+	(ALTERAR AS OPCOES NECESSARIAS)
+$ sudo vi /etc/smbldap-tools/smbldap_bind.conf
+	(ALTERAR AS OPCOES NECESSARIAS)
 
-#
-# LDAP (servidor)
-#
+# popular os dados na base de dados do LDAP.
+$ sudo smbldap-populate
 
-# copiar o arquivo samba.schema do servidor
-# Samba para o servidor LDAP.
-$ scp /usr/share/doc/samba-4.8.3/LDAP/samba.schema caio@192.168.10.13:/tmp
-$ sudo mv /tmp/samba.schema /etc/openldap/schema
-$ sudo chmod 644 /etc/openldap/schema/samba.schema
+# configuracao do ldap no cliente
+$ sudo apt-get install libnss-ldap libpam-ldap nscd
+$ sudo vi /etc/ldap/ldap.conf
+	BASE    dc=particula,dc=local
+	URI     ldap://192.168.0.13
+$ sudo vi /etc/nsswitch.conf
+	passwd:         compat ldap
+	group:          compat ldap
+	shadow:         compat ldap
+$ sudo systemctl restart nscd
+$ sudo vi /etc/pam.d/common-auth
+	auth    [success=2 default=ignore]      pam_unix.so nullok_secure try_first_pass
+	auth    [success=1 default=ignore]      pam_ldap.so use_first_pass
+	[...]
+	auth    requisite                       pam_deny.so
+	[...]
+	auth    required                        pam_permit.so
+$ sudo vi /etc/pam.d/common-account
+	[...]
+	account [success=2 new_authtok_reqd=done default=ignore]        pam_unix.so
+	account [success=1 default=ignore]      pam_ldap.so
+	[...]
+	account requisite                       pam_deny.so
+	[...]
+	account required                        pam_permit.so
+	[...]
+$ sudo vi /etc/pam.d/common-password
+	[...]
+	password        [success=2 default=ignore]      pam_unix.so obscure sha512
+	password        [success=1 user_unknown=ignore default=die]     pam_ldap.so use_authtok try_first_pass
+	[...]
+	password        requisite                       pam_deny.so
+	[...]
+	password        required                        pam_permit.so
+	[...]
+$ sudo vi /etc/pam.d/common-session
+	session  required	pam_mkhomedir.so
+$ sudo vi /etc/pam.d/common-session-noninteractive
+	[...]
+	session [default=1]    pam_permit.so
+	[...]
+	session requisite      pam_deny.so
+	[...]
+	session required       pam_permit.so
+	[...]
+	session required       pam_unix.so
+	session optional       pam_ldap.so
+$ sudo systemctl restart nscd
 
-# ldap.conf
-$ sudo vi /etc/openldap/ldap.conf
-	host 192.168.10.13
-
-	uri ldap://192.168.10.13/
-	base dc=particula,dc=local
-
-	binddn cn=admin,dc=particula,dc=local
-	bindpw {SSHA}lgd+e5HItd10ognOeEm6QDgRDKEwv8MJ
-
-	nss_base_passwd     ou=users,dc=particula,dc=local?one
-	nss_base_passwd     ou=computers,dc=particula,dc=local?one
-	nss_base_shadow     ou=users,dc=particula,dc=local?one
-	nss_base_group      ou=groups,dc=particula,dc=local?one
-
-	ssl no
-	pam_password md5
-
-#
-# Samba (servidor)
-#
-
-$ sudo cat /etc/nsswitch.conf
-	passwd: ldap files
-	group: ldap files
-	shadow: ldap files
-
+$ sudo getent group
 
