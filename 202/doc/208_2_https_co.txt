@@ -1,0 +1,149 @@
+#: Title : Apache2 e HTTPS
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Apache configuration for HTTPS - CentOS
+#: Options : Weight: 3
+
+Description: Candidates should be able to configure a web server to provide HTTPS.
+
+Key Knowledge Areas:
+- SSL configuration files, tools and utilities
+- Generate a server private key and CSR for a commercial CA
+- Generate a self-signed Certificate
+- Install the key and certificate, including intermediate CAs
+- Configure Virtual Hosting using SNI
+- Awareness of the issues with Virtual Hosting and use of SSL
+- Security issues in SSL use, disable insecure protocols and ciphers
+
+Terms and Utilities:
+- Apache2 configuration files
+- /etc/ssl/, /etc/pki/
+- openssl, CA.pl
+- SSLEngine, SSLCertificateKeyFile, SSLCertificateFile
+- SSLCACertificateFile, SSLCACertificatePath
+- SSLProtocol, SSLCipherSuite, ServerTokens, ServerSignature, TraceEnable
+
+#
+# Instalacao
+#
+
+# atualizacao
+$ sudo yum update
+
+# instalacao do modulo ssl
+$ sudo yum install mod_ssl
+
+# modulo ssl
+$ sudo apachectl -M
+	ssl_module (shared)
+
+#
+# Firewall
+#
+
+$ sudo firewall-cmd --add-service=http
+$ sudo firewall-cmd --add-service=https
+$ sudo firewall-cmd --runtime-to-permanent
+
+#
+# Configuracao
+#
+
+# criar o diretorio a onde sera armazenado o certificado
+$ sudo mkdir /etc/ssl/private
+
+# criacao da chave e do certificado digital
+$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/particula.local-selfsigned.key -out /etc/ssl/particula.local-selfsigned.crt
+$ sudo mv /etc/ssl/particula.local-selfsigned.crt /etc/ssl/certs
+$ sudo mv /etc/ssl/particula.local-selfsigned.key /etc/ssl/private
+
+# arquivo de configurca
+$ sudo vi /etc/apache2/sites-enabled/particula.local.conf
+	# inicio da configuracao do virtualhost, HTTP
+	<VirtualHost *:80>
+		# dominio do dominio virtual
+	        ServerName particula.local
+
+		# alias do dominio virtual
+	        ServerAlias www.particula.local
+
+		# diretorio a onde fica armazenado o arquivos do site
+	        DocumentRoot /var/www/particula.local/html
+	
+		# redirecionamento do HTTP para o HTTPS
+	        Redirect permanent / https://www.particula.local/
+
+	</VirtualHost>
+
+	# inicio da configuracao do virtualhost, HTTPS
+	<VirtualHost *:443>
+		# nome do dominio virtual
+	        ServerName particula.local
+
+		# alias do dominio virtual
+	        ServerAlias www.particula.local
+
+		# e-mail do administrador do dominio virtual
+	        ServerAdmin webmaster@particula.local
+
+		# diretorio a onde fica armazenado os arquivos do site
+	        DocumentRoot /var/www/particula.local/html
+
+	        <Directory /var/www/particula.local/html>
+	                Options Indexes Includes FollowSymLinks MultiViews
+	                AllowOverride All
+	                Require all granted
+	                LimitRequestBody 512000
+	        </Directory>
+
+		# ativando a engine SSL
+	        SSLEngine on
+
+		# certificado
+	        SSLCertificateFile /etc/ssl/certs/particula.local-selfsigned.crt
+
+		# chave privada
+	        SSLCertificateKeyFile /etc/ssl/private/particula.local-selfsigned.key
+
+		# arquivo de log
+	        ErrorLog ${APACHE_LOG_DIR}/particula.local-error.log
+	        CustomLog ${APACHE_LOG_DIR}/particual.local-access.log combined
+	</VirtualHost>
+
+# testando o arquivo de configuracao.
+$ sudo apache2ctl configtest
+
+# reinicializado o site para aplicar as configuracoes feitas.
+$ sudo systemctl restart apache2
+
+#
+# TESTE
+#
+
+# o comando abaixo deve ser executado no servidor https.
+$ sudo openssl s_client -connect www.particula.local:443 -status -servername www.particula.local
+
+#
+# SNI
+#
+
+# arquivo de configurca
+$ sudo vi /etc/apache2/sites-enabled/particula.local.conf
+	NameVirtualHost *:443
+
+	<VirtualHost *:443>
+		ServerName www.particula1.local
+		DocumentRoot /var/www/particula1.local/html
+		SSLEngine on
+	        SSLCertificateFile /etc/apache2/ssl/particula1.crt
+		SSLCertificateKeyFile /etc/apache2/ssl/particula1.key
+		SSLCertificateChainFile /path/to/DigiCertCA.crt
+	</VirtualHost>
+
+	<VirtualHost *:443>
+		ServerName www.particula2.local
+		DocumentRoot /var/www/particula2.local/html
+		SSLEngine on
+	        SSLCertificateFile /etc/apache2/ssl/particula2.crt
+		SSLCertificateKeyFile /etc/apache2/ssl/particula2.key
+		SSLCertificateChainFile /path/to/DigiCertCA.crt
+	</VirtualHost>
