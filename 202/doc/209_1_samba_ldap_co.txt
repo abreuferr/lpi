@@ -40,6 +40,28 @@ Terms and Utilities:
 # configuracao inicial do LDAP.
 
 #
+# Samba (servidor)
+#
+
+# atualizacao
+$ sudo yum update && sudo yum upgrade
+
+# instalacao do samba
+$ sudo yum install samba 
+
+# instalacao do smbldap-tools
+$ sudo yum --enablerepo=extras install epel-release && sudo yum install smbldap-tools
+
+# servicos do samba
+$ sudo systemctl start smb nmb
+$ sudo systemctl enable smb nmb
+$ sudo systemctl status smb nmb
+
+# firewall
+$ sudo firewall-cmd --permanent --add-service=samba
+$ sudo firewall-cmd --reload
+
+#
 # LDAP (servidor)
 #
 
@@ -70,32 +92,6 @@ $ cat samba_indices.ldif
 $ sudo ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f samba_indices.ldif
 $ sudo ldapi:/// -b cn=config olcDatabase={2}hdb olcDbIndex
 
-#
-# Samba (servidor)
-#
-
-# atualizacao
-$ sudo yum update && sudo yum upgrade
-
-# instalacao do samba
-$ sudo yum -y install samba 
-
-# instalacao do smbldap-tools
-$ sudo yum --enablerepo=extras install epel-release && sudo yum install smbldap-tools
-
-# servicos do samba
-$ sudo systemctl start smb nmb
-$ sudo systemctl enable smb nmb
-$ sudo systemctl status smb nmb
-
-# firewall
-$ sudo firewall-cmd --permanent --add-service=samba
-$ sudo firewall-cmd --reload
-
-#
-# LDAP (servidor)
-#
-
 # copiar o arquivo samba.schema do servidor
 # Samba para o servidor LDAP.
 $ scp /usr/share/doc/samba-4.8.3/LDAP/samba.schema caio@192.168.10.13:/tmp
@@ -119,10 +115,6 @@ $ sudo vi /etc/openldap/ldap.conf
 
 	ssl no
 	pam_password md5
-
-#
-# Samba (servidor)
-#
 
 $ sudo cat /etc/nsswitch.conf
 	passwd: ldap files

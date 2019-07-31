@@ -112,16 +112,20 @@ objectClass: organization
 dc: particula
 o: particula
 
-$ ldapadd -f particula.ldif -D cn=admin,dc=particula,dc=local -W
+$ ldapadd -D cn=admin,dc=particula,dc=local -W -f particula.ldif
 
 #
 # Adicionando uma Organizational Unit (ou)
 #
 
-$ vi users.ldif
-dn: ou=users,dc=particula,dc=local
+$ vi ou.ldif
+dn: ou=People,dc=particula,dc=local
 objectClass: organizationalUnit
-ou: users
+ou: People
+
+dn: ou=Group,dc=particula,dc=local
+objectClass: organizationalUnit
+ou: Group
 
 $ ldapadd -f users.ldif -D cn=admin,dc=particula,dc=local -W
 
@@ -141,7 +145,7 @@ $ slappasswd
 
 $ vi user_caio.ldif
 	# usuario de nome caio
-	dn: uid=caio,ou=users,dc=particula,dc=local
+	dn: uid=caio,ou=People,dc=particula,dc=local
 	uid: caio
 	cn: caio
 	sn: caio
@@ -163,7 +167,7 @@ $ vi user_caio.ldif
 	gecos: caio
 
 	# grupo de nome caio
-	dn: cn=caio,ou=groups,dc=particula,dc=local
+	dn: cn=caio,ou=Groups,dc=particula,dc=local
 	objectClass: posixGroup
 	objectClass: top
 	cn: caio
