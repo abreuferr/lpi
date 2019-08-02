@@ -89,7 +89,10 @@ $ sudo mkdir -p /home/samba/caio
 $ sudo adduser --homei-dir /home/samba/caio --no-create-home --shell /usr/sbin/nologin --groups sambashare caio
 $ sudo pdbedit -a caio
 $ sudo chown caio:sambashare /home/samba/caio/
-$ sudo chmod 2770 /home/samba/caio
+$ sudo chmod 2750 /home/samba/caio
+
+# adicionar um usuario ao grupo SAMBASHARE
+$ sudo usermod -aG sambashare [USUARIO]
 
 # cadastrar a senha o usuario adicionado
 # no comando anterior.
@@ -117,7 +120,7 @@ $ sudo chmod -R 0770 /home/samba/sambashare
 # o diretorio GUEST sera acessado por QUALQUER
 # usuario da rede.
 $ sudo mkdir -p /home/samba/guest
-$ sudo chown -R nobody:nogroup /home/samba/guest
+$ sudo chown -R nobody:nobody /home/samba/guest
 $ sudo chmod -R 0775 /home/samba/guest
 
 #
@@ -125,7 +128,7 @@ $ sudo chmod -R 0775 /home/samba/guest
 #
 
 # copia de seguranca do arquivo de configuracao
-$ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.origin
+$ sudo mv /etc/samba/smb.conf{,.origin}
 
 # editando o arquivo de configuracao do samba
 $ sudo vi /etc/samba/smb.conf
@@ -288,7 +291,7 @@ $ sudo yum install samba-client cifs-utils -y
 # de forma interativa
 $ smbclient //[IP_SERVER]/[USER_FOLDER] -U [USER]
 # acesso de forma "permanente"
-$ sudo mount -t cifs -o username=[USER] //[IP_SERVER]/[USER_FOLDER] /[DIR]/[USER]
+$ sudo mount -t cifs -o username=[USER],uid=$(id -u),gid=$(id -g) //[IP_SERVER]/[USER_FOLDER] /[DIR]/[USER]
 
 #
 # Informacao
@@ -307,11 +310,41 @@ $ sudo smbcontrol smbd ping
 
 # status das conexoes
 $ sudo smbstatus
+	Samba version 4.8.3
+	PID     Username     Group        Machine                                   Protocol Version  Encryption           Signing
+	----------------------------------------------------------------------------------------------------------------------------------------
+	1400    cosmo        cosmo        192.168.10.52 (ipv4:192.168.10.52:49680)  SMB3_11           -                    partial(AES-128-CMAC)
+	1417    cosmo        cosmo        192.168.10.45 (ipv4:192.168.10.45:50012)  SMB3_02           -                    partial(AES-128-CMAC)
+
+	Service      pid     Machine       Connected at                     Encryption   Signing
+	---------------------------------------------------------------------------------------------
+	share        1400    192.168.10.52 Thu Aug  1 06:24:14 PM 2019 -03  -            -
+	cosmo        1417    192.168.10.45 Thu Aug  1 06:29:19 PM 2019 -03  -            -
+	IPC$         1417    192.168.10.45 Thu Aug  1 06:29:19 PM 2019 -03  -            -
+
+	Locked files:
+	Pid          Uid        DenyMode   Access      R/W        Oplock           SharePath   Name   Time
+	--------------------------------------------------------------------------------------------------
+	1400         1000       DENY_NONE  0x100081    RDONLY     NONE             /home/samba/share   .   Thu Aug  1 18:24:14 2019
+	1400         1000       DENY_NONE  0x100081    RDONLY     NONE             /home/samba/share   .   Thu Aug  1 18:24:14 2019
 
 # Cliente
 
 # exibir informacoes das conexoes ativas
 $ sudo smbclient -L [IP_SERVER] -N
+		Sharename       Type      Comment
+		---------       ----      -------
+		share           Disk      all users
+		guest           Disk
+		IPC$            IPC       IPC Service (smba server)
+	Reconnecting with SMB1 for workgroup listing.
+
+		Server               Comment
+		---------            -------
+
+		Workgroup            Master
+		---------            -------
+		PARTICULA            SAMBASRV
 
 #
 # Backup - Servidor
