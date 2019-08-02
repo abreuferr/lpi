@@ -1,0 +1,118 @@
+#: Title : Samba Active Directory Domain Controller
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Samba Active Directory Domain Controller - CentOS
+#: Options : Weight 5
+
+Description: Candidates should be able to set up a Samba server 
+for various clients. This objective includes setting up Samba 
+as a standalone server as well as integrating Samba as a member 
+in an Active Directory. Furthermore, the configuration of simple 
+CIFS and printer shares is covered. Also covered is a configuring 
+a Linux client to use a Samba server. Troubleshooting installations 
+is also tested.
+
+Key Knowledge Areas:
+- Samba 4 documentation
+- Samba 4 configuration files
+- Samba 4 tools and utilities and daemons
+- Mounting CIFS shares on Linux
+- Mapping Windows user names to Linux user names
+- User-Level, Share-Level and AD security
+
+Terms and Utilities:
+- smbd, nmbd, winbindd
+- smbcontrol, smbstatus, testparm, smbpasswd, nmblookup
+- samba-tool
+- net
+- smbclient
+- mount.cifs
+- /etc/samba/
+- /var/log/samba/
+
+#
+# Instalacao
+#
+
+# atualizacao
+$ sudo yum update
+$ sudo yum -y install epel-release
+$ sudo yum update
+
+# pre-instalacao
+$ sudo yum -y install git gcc make wget libacl-devel libblkid-devel gnutls-devel readline-devel python-devel pam-devel gdb openldap-devel bind-utils libacl-devel libblkid-devel gnutls-devel readline-devel python-devel gdb pkgconfig krb5-workstation zlib-devel setroubleshoot-server setroubleshoot-plugins policycoreutils-python libsemanage-python setools-libs-python setools-libs popt-devel libpcap-devel sqlite-devel libidn-devel libxml2-devel libacl-devel libsepol-devel libattr-devel keyutils-libs-devel cyrus-sasl-devel cups-devel
+
+# instalacao
+$ wget https://download.samba.org/pub/samba/stable/samba-4.10.6.tar.gz
+$ tar xzvf samba-4.10.6.tar.gz
+$ sudo ./configure --prefix=/usr --localstatedir=/var --with-configdir=/etc/samba --libdir=/usr/lib64 --with-modulesdir=/usr/lib64/samba --with-pammodulesdir=/lib64/security --with-lockdir=/var/lib/samba --with-logfilebase=/var/log/samba --with-piddir=/run/samba --with-privatedir=/etc/samba --enable-cups --with-acl-support --with-ads --with-automount --enable-fhs --with-pam --with-quotas --with-shared-modules=idmap_rid,idmap_ad,idmap_hash,idmap_adex --with-syslog --with-utmp --with-dnsupdate --enable-debug --enable-selftest
+$ sudo make
+$ sudo make install
+
+# servico samba
+$ sudo vi /usr/lib/systemd/system/samba.service
+	[Unit]
+	Description=Samba AD Daemon
+	Wants=network-online.target
+	After=network.target network-online.target rsyslog.service
+
+	[Service]
+	Type=forking
+	PIDFile=/run/samba/samba.pid
+	LimitNOFILE=16384
+	ExecStart=/usr/sbin/samba --daemon
+	ExecReload=/bin/kill -HUP $MAINPID
+
+	[Install]
+	WantedBy=multi-user.target
+
+$ sudo systemctl enable samba
+$ sudo systemctl status samba
+
+# firewall
+$ sudo firewall-cmd --add-service={dns,kerberos,kpasswd,ldap,ldaps,samba} --permanent
+$ sudo firewall-cmd --add-port={135/tcp,137-138/udp,139/tcp,3268-3269/tcp,49152-65535/tcp} --permanent
+$ sudo firewall-cmd --reload
+
+#
+# Configuracao
+#
+
+# samba
+# dominio
+$ sudo /usr/bin/samba-tool domain provision --use-rfc2307 --interactive
+$ sudo /usr/bin/samba-tool domain level show
+
+# usuario
+$ sudo /usr/bin/samba-tool user create [USUARIO]
+$ sudo /usr/bin/samba-tool user delete [USUARIO]
+$ sudo /usr/bin/samba-tool user disable [USUARIO]
+$ sudo /usr/bin/samba-tool user enable [USUARIO]
+$ sudo /usr/bin/samba-tool user setpassword [USUARIO]
+$ sudo /usr/bin/samba-tool user list
+
+# grupo
+$ sudo /usr/bin/samba-tool group list
+$ sudo /usr/bin/samba-tool group listmembers "Domain Users"
+$ sudo /usr/bin/samba-tool group add particula
+$ sudo /usr/bin/samba-tool group delete particula
+
+$ sudo /usr/bin/samba-tool group addmembers particula cosmo
+$ sudo /usr/bin/samba-tool group removemembers particula cosmo
+
+$ sudo systemctl start samba
+$ sudo systemctl status samba
+
+# kerberos
+$ sudo yum install krb5-server-ldap krb5-server
+$ sudo mv /etc/krb5.conf{,.origin}
+$ sudo vi /etc/krb5.conf
+	[libdefaults]
+	default_realm = PARTICULA.LOCAL
+	dns_lookup_realm = false
+	dns_lookup_kdc = true
+
+#
+# MS-Windows
+#
+
+# adicionar a estacao atraves do usuario Administrator.
