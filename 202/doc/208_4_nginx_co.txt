@@ -19,10 +19,10 @@ Terms and Utilities:
 # Instalacao
 #
 
-# atualizacao do gnu/linux debian
+# atualizacao
 $ sudo yum update
 
-# adicionando o repositorio do nginx ao apt
+# adicionando o repositorio do nginx
 $ sudo vi /etc/yum.repos.d/nginx.repo
 	[nginx]
 	name=nginx repo
@@ -30,7 +30,7 @@ $ sudo vi /etc/yum.repos.d/nginx.repo
 	gpgcheck=0
 	enabled=1
 
-# atualizacao do debian
+# atualizacao
 $ sudo yum update
 
 # instalacao do nginx
@@ -52,43 +52,44 @@ $ sudo firewall-cmd --reload
 # copia de seguranca do arquivo de configuracao do nginx
 $ sudo cp /etc/nginx/nginx.conf{,.origin}
 
-# arquivo de configuracao do nginx.
+# arquivo de configuracao geral do nginx.
 $ sudo vi /etc/nginx/nginx.conf
 	# usuario dono do nginx.
 	user nginx;
 
 	# numero de processos em execucao.
 	worker_processes auto;
+	worker_processes [NUM];
+
+	# arquivos de log da execucao do nginx.
+	access_log /var/log/nginx/access.log;
+       	error_log /var/log/nginx/error.log;
 
 	# local do arquivo de pid.
 	pid /run/nginx.pid;
 
-	# arquivos de configuracao dos dominios virtuais.
-	include /etc/nginx/modules-enabled/*.conf;
+	# eventos
+	events {
+		worker_connections 1024; 
+	}
 
 	http{
 		(...)
+		# arquivos de log da execucao do nginx.
+		access_log /var/log/nginx/access.log;
+	
 		# nao exibe a versao do software nginx
 		server_tokens off;
 
-		# arquivos de log da execucao do nginx.
-		access_log /var/log/nginx/access.log;
-        	error_log /var/log/nginx/error.log;
-
-		server {
-			# seguranca
-			add_header X-Frame-Options "SAMEORIGIN" always;
-			add_header X-XSS-Protection "1; mode=block" always;
-			add_header X-Content-Type-Options "nosniff" always;
-			add_header Referrer-Policy "no-referrer-when-downgrade" always;
-			add_header Content-Security-Policy "default-src * data: 'unsafe-eval' 'unsafe-inline'" always;
-			add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-		}
-		(...)
+		# arquivos de configuracao auxiliar.
+		# arquivos de configuracao dos dominios virtuais.
+		include /etc/nginx/conf.d/*.conf;
 	}
 
 # testar os arquivos de configuracao.
 $ sudo nginx -t
+	nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+	nginx: configuration file /etc/nginx/nginx.conf test is successful
 
 #
 # Virtual Host
@@ -182,7 +183,7 @@ $ sudo vi /etc/nginx/nginx.conf
 	}
 
 # configuracao do nginx para trabalhar com certificado ssl
-$ sudo vi /etc/nginx/sites-available/particula.local
+$ sudo vi /etc/nginx/conf.d/particula.local
 	server {
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
 	        listen 80;
@@ -251,14 +252,13 @@ $ sudo chmod 770 /var/cache/nginx
 $ sudo find /var/cache/nginx -type f -delete
 
 # copia de seguranca
-$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.origin
+$ sudo cp /etc/nginx/nginx.conf{,.origin}
 
 # configuracao do cache
 $ sudo vi /etc/nginx/nginx.conf
 	(...)
 	http {
 		include /etc/nginx/conf.d/*.conf;
-		include /etc/nginx/sites-enabled/*;
 
 		proxy_cache my_cache;
 		proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_cache:10m max_size=9000g inactive=1d;
@@ -290,7 +290,7 @@ $ sudo vi /etc/nginx/nginx.conf
 
 # configuracao do dominio virtual particula.local
 # para trabalhar com proxy reverso
-$ sudo vi /etc/nginx/sites-available/particula.local
+$ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server {
 		# geral
         	listen 80;
@@ -309,9 +309,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	        }
 	}
 
-# ativando o arquivo de configuracao do dominio virtual particula.local.
-$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
-
 # testando os arquivos de configuracao do nginx.
 $ sudo nginx -t
 
@@ -324,7 +321,7 @@ $ sudo nginx -s reload
 #
 
 # arquivo de configuracao do dominio virtual particula.local.
-$ sudo vi /etc/nginx/sites-available/particula.local
+$ sudo vi /etc/nginx/conf.d/particula.local.conf
 	# http
 	server {
 		# o nginx fica escutando a porta 80, ipv4/6
@@ -371,9 +368,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 			proxy_ssl_protocols TLSv1.2;
 	        }
 	}
-
-# ativando o arquivo de configuracao do dominio virtual particula.local.
-$ sudo ln -s /etc/nginx/sites-available/particula.local /etc/nginx/sites-enabled
 
 # comando utilizado para testar o arquivo de configuracao do ngin
 $ sudo nginx -t
