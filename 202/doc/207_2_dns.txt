@@ -159,8 +159,8 @@ $ sudo vi /etc/bind/db.particula.local
 		3600 );		Negative Cache TTL
 
 	; registro dos Name Server (NS).
-	@	IN NS ns1.particula.local.
-	@	IN NS ns2.particula.local.
+		IN NS ns1.particula.local.
+		IN NS ns2.particula.local.
 
 	; registro do Mail Exchange (MX).
 		IN MX 10 srv.particula.local.
@@ -205,9 +205,9 @@ $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 		IN NS ns2.particula.local.
 
 	; registro com as associacoes reversas, IP to Hostname.
-	5       IN PTR    ns1.particula.local.
-	6       IN PTR    ns2.particula.local.
-	7       IN PTR    srv.particula.local.
+	5.10	IN PTR    ns1.particula.local.
+	6.10	IN PTR    ns2.particula.local.
+	7.10	IN PTR    srv.particula.local.
 
 # testando o arquivo de configuracao da zona reversa.
 $ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192.in-addr.arpa
@@ -231,10 +231,21 @@ $ sudo cat /etc/resolv.conf
 
 # arquivos de configuracao do bind
 $ sudo vi /etc/bind/named.conf.options
+	// acl para controle de quem podera fazer requisicao 
+	// de resolucao.
+	acl clients {
+		// rede que podera fazer reqisicao de resolucao
+		// de nome.
+        	192.168.0.0/24;
+	};
+
 	options {
 		// diretorio a onde estao localizados os arquivos
 		// da zona particula.local
 		directory "/etc/bind";
+
+		// recursividade.
+		allow-recursion { clients; };
 	};
 
 $ sudo vi /etc/bind/named.conf.local
