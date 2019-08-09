@@ -40,11 +40,29 @@ cn=department,ou=groups,dc=particula,dc=local
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao cliente ldap
-$ sudo apt-get install libnss-ldap libpam-ldapnscd ldap-utils ldapscripts -y -d
+$ sudo apt-get install libnss-ldap libpam-ldapnscd ldap-utils ldapscripts libpam-ldap nscd -y -d
+	ldap1:///192.168.0.13
+	dc=particula,dc=local
+	3
+	cn=admin,dc=particula,dc=local
+	[SENHA]
+	Okay
+	Yes
+	No
+	cn=admin,dc=particula,dc=local
+	[SENHA]
 
 #
 # CONFIGURACAO
 #
+
+# PAM configuration
+$ sudo pam-auth-update
+	[selecionar as tres opcoes]
+$ sudo vim /etc/pam.d/common-session
+	session required pam_mkhomedir.so skel=/etc/skel umask=077
+$ sudo systemctl restart nscd
+$ sudo systemctl enable nscd
 
 # backup do arquivo de configuracao
 $ sudo cp /etc/ldap/ldap.conf{,.origin}
