@@ -207,11 +207,25 @@ $ sudo systemctl restart sshd.service
 # ssh -L [local_port]:[remote_address]:[remote_port] [username@remote_address]
 
 #
-# REMOTE FORWARDING
+# FORWARDING
 #
 
-# SERVIDOR
-# ssh -R [remote_port]:[local_address]:[local_port] [username@remote_address]
+# Local Port Forwarding - redireciona uma conexao e porta do cliente para o servidor ssh.
+#
+# o comando abaixo deve ser executado no cliente.
+$ ssh -L [LOCAL_IP]:[LOCAL_PORT]:DESTINATION_IP:DESTINATION_PORT [USER@]SSH_SERVER
+$ EXAMPLE (banco de dados) - ssh -L 3336:db.host:3306 user@pub.host
+
+# Remote Port Forwarding - redireciona a porta do servidor para uma porta no cliente.
+#
+$ ssh -R [REMOTE_IP:]REMOTE_PORT:DESTINATION:DESTINATION_PORT [USER@]SSH_SERVER
+$ EXAMPLE (acesso web) - ssh -L 8080:127.0.0.1:3000 -N -f user@remote.host
+
+# Dynamic Port Forwarding - a uma SOCKS proxy server o qual permite uma comunicacao 
+# atraves de um range de portas.
+#
+$ ssh -R [LOCAL_IP:]LOCAL_PORT [USER@]SSH_SERVER
+$ EXAMPLE (sock) - ssh -D 9090 -N -f user@remote.host
 
 #
 # SCP - COPIAR ARQUIVO
