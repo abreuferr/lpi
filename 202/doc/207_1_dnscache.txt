@@ -98,7 +98,7 @@ $ sudo vi /etc/bind/named.conf.options
 		// se por acaso essa opcao for definida com a 
 		// opcao NO, as estacoes que irao utilizar esse
 		// servidor nao conseguirao resolver dominios.
-		recuriosn yes;
+		recursion yes;
 
 		// indica quais hosts ou redes podem requisitar
 		// a recursividade.
