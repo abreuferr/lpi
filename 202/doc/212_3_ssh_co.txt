@@ -40,17 +40,17 @@ $ sudo vi /etc/ssh/sshd_config
 	# porta de trabalho do servidor ssh.
 	Port [NUM]
 
-	# limitar o acesso a determinados usuarios.
-	AllowUsers [USER1] [USER2]
+        # limitar o acesso a determinados usuarios.
+        AllowUsers [USER1] [USER2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
-	# limitar o acesso a determinado grupo de usuario.
-	AllowGroups [GROUP1] [GROUP2]
+        # limitar o acesso a determinado grupo de usuario.
+        AllowGroups [GROUP1] [GROUP2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
-	# negar o acesso a determinados usuarios.
-	DenyUsers [USER1] [USER2]
+        # negar o acesso a determinados usuarios.
+        DenyUsers [USER1] [USER2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
-	# negar o acesso a um determinado grupo de usuarios.
-	DenyGroups [GROUP1] [GROUP2]
+        # negar o acesso a um determinado grupo de usuarios.
+        DenyGroups [GROUP1] [GROUP2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
 	# permite ou nao o login do usuario root no servidor.
 	PermitRootLogin [YES/NO]

@@ -46,19 +46,19 @@ $ sudo vi /etc/ssh/sshd_config
 	Port [NUM]
 
 	# limitar o acesso a determinados usuarios.
-	AllowUsers [USER1] [USER2]
+	AllowUsers [USER1] [USER2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
 	# limitar o acesso a determinado grupo de usuario.
-	AllowGroups [GROUP1] [GROUP2]
+	AllowGroups [GROUP1] [GROUP2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
 	# negar o acesso a determinados usuarios.
-	DenyUsers [USER1] [USER2]
+	DenyUsers [USER1] [USER2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
 	# negar o acesso a um determinado grupo de usuarios.
-	DenyGroups [GROUP1] [GROUP2]
+	DenyGroups [GROUP1] [GROUP2] [*@HOST.DOMINIO] [*@*.DOMINIO]
 
 	# permite ou nao o login do usuario root no servidor.
-	PermitRootLogin [YES/NO]
+	PermitRootLogin [YES/NO/prohibit-password/forced-commands-only]
 
 	# especifica qual o protocolo de seguranca a ser utilizado
 	Protocol [NUM]
