@@ -24,22 +24,22 @@ Terms and Utilities:
 - PermitRootLogin, PubKeyAuthentication, AllowUsers, PasswordAuthentication, Protocol
 
 #
-# INSTALACAO
+# Instalacao
 #
 
-# SERVIDOR
+# Servidor
 $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install openssh-server -y -d
 
-# CLIENTE
+# Cliente
 $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install openssh-client -y -d
 
 #
-# SSH - BASICO
+# SSH - Basico
 #
 
-# SERVIDOR
+# servidor
 $ sudo cp /etc/ssh/sshd_config{,.origin}
 $ sudo vi /etc/ssh/sshd_config
 	# porta de trabalho do servidor ssh.
@@ -99,7 +99,7 @@ $ sudo vi /etc/ssh/sshd_config
 	# Numero maximo de tentativas.
 	ClientAliveCountMax [3]
 
-# CLIENTE
+# cliente
 # ssh [OPCAP] [USUARIO]@[SERVIDOR]
 #	-p [PORTA] - especificar a porta que o servidor trabalha.
 #	-l [USUARIO] - especifica o usuario de logon.
@@ -109,22 +109,26 @@ $ ssh -p 2222 cosmo@192.168.0.15
 $ ssh -p 2222 -l cosmo 192.168.0.15
 
 #
-# TCPWRAPPER
+# tcpwrapper
 #
 
-# SERVIDOR
+# servidor
 $ sudo vi /etc/hosts.allow
 	sshd : 192.168.0.42
 $ sudo vi /etc/hosts.deny
 	sshd : ALL
 
 #
-# AUTENTICACAO VIA PAR DE CHAVES
+# autenticacao via chave ssh
 #
 
-# CLIENTE
+# cliente
 # criando as chaves de autenticacao
 # ssh-keygen -t [key_type] -b [bits] -C "[comment]" -f [file]
+# -t - rsa1/dsa/ecdsa/ed25519/rsa
+# -b - tamanho, em bits, da chave
+# -C - comentario
+# -f - especifica o nome do arquivo da chave
 $ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" -f ~/.ssh/id_rsa
 
 # criando as chaves de autenticacao
@@ -138,6 +142,8 @@ $ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
 
 # copiando a chave publica para o servidor de forma segura.
 $ ssh-copy-id <USERNAME@SERVER>
+$ ssh-copy-id -i $HOME/.ssh/id_rsa.pub user@server.particula.local
+$ scp $HOME/.ssh/id_rsa.pub user@server.particula.local:~/.ssh/authorized_keys
 
 # SERVIDOR
 $ sudo vi /etc/ssh/sshd_config
