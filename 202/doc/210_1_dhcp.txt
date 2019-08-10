@@ -23,32 +23,32 @@ Terms and Utilities:
 - radvd.conf
 
 #
-# TEORIA
+# Teoria
 #
 
 # server - 192.168.0.13
 # client - 192.168.0.0/24
 
 #
-# INSTALACAO
+# Instalacao
 #
 
-# SERVER
+# servidor
 $ sudo apt-get update && sudo apt-get upgrade 
 $ sudo apt-get install isc-dhcp-server dhcpdump isc-dhcp-common -y -d
 
-# CLIENT
+# cliente
 $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install isc-dhcp-client isc-dhcp-common -y -d
 
 #
-# CONFIGURACAO
+# Configuracao
 #
 
-# SERVER - IP DHCP
+# Servidor - IP DHCP
 
 # backup de seguranca do arquivo de configuracao.
-$ sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.BKP
+$ sudo cp /etc/dhcp/dhcpd.conf{,.origin}
 
 # definir qual interface de rede do servidor sera monitorada
 # pelo servidor dhcp.
@@ -57,6 +57,9 @@ $ sudo vi /etc/default/isc-dhcp-server
 
 # editando o servidor dhcp
 $ sudo vi /etc/dhcp/dhcpd.conf
+	# servidor autoritativo
+	authoritative;
+
 	# periodo em que um determinado IP fica reservado
 	# para um determinado host.
 	default-lease-time 600;
@@ -103,6 +106,7 @@ $ sudo vi /etc/dhcp/dhcpd.conf
 
 # reinicializar o servico
 $ sudo systemctl restart isc-dhcp-server
+$ sudo systemctl status isc-dhcp-server
 
 # verificar quais IPs estao sendo utilizados
 $ sudo cat /var/lib/dhcp/dhcpd.leases
@@ -137,7 +141,7 @@ $ sudo tcpdump -i ens33 port 67 or port 68 -e -n -vv
 # dump atraves do aplicativo dhcpdump
 $ sudo dhcpdump -i ens33
 
-# SERVER - IP FIXO
+# Servidor - IP fixo
 
 # editando o servidor dhcp
 $ sudo vi /etc/dhcp/dhcpd.conf
