@@ -22,20 +22,17 @@ ldapdelete
 #
 # Pre
 #
-
 $ sudo su
 
 #
 # Instalacao
 #
-
 $ yum update
 $ yum install openldap-clients pam_ldap nss-pam-ldapd authconfig
 
 #
 # Configurando o LDAP Client para autenticar com o LDAP Server utilizando o TUI
 #
-
 $ authconfig-tui
 	User Information > [*] Use LDAP
 	Authentication > [*] Use LDAP Authentication
@@ -46,13 +43,11 @@ $ authconfig-tui
 #
 # Configurando o LDAP Client para autenticar com o LDAP Server utilizando o CLI
 #
-
 $ authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbasedn="dc=particula,dc=local" --enablemkhomedir --update
 
 #
 # Criando um usuario LDAP
 #
-
 $ cat marcos.ldif
 	dn: uid=marcos,ou=users,dc=particula,dc=local
 	uid: marcos
@@ -73,13 +68,11 @@ $ cat marcos.ldif
 	homeDirectory: /home/marcos
 	sn: marcos
 	mail: marcos@particula.local
-
 $ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f marcos.ldif
 
 #
 # Criando o grupo LDAP do usuario Marcos
 #
-
 $ vi groups.ldif
 	dn: cn=marcos,ou=users,dc=particula,dc=local
 	objectClass: posixGroup
@@ -87,27 +80,23 @@ $ vi groups.ldif
 	cn: marcos
 	userPassword: {crypt}x
 	gidNumber: 1003
-
 $ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f groups.ldif
 
 #
 # Validando o novo usuario e novo grupo.
-
+#
 $ ldapsearch -x -D cn=admin,dc=particula,dc=local -b dc=particula,dc=local -W
 
 #
 # Instalacao o SSSD
 #
-
 $ yum -y install sssd
-
 $ systemctl restart nslcd
 $ systemctl restart nscd
 
 #
 # Testando o Usuario
 #
-
 $ getent passwd
 
 $ su - marcos
