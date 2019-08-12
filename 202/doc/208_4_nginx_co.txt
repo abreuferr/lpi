@@ -241,8 +241,9 @@ $ sudo nginx -s reload
 
 #
 # PROXY REVERSO (COM CACHE e SEM SSL)
-# (servidor nginx - 192.168.0.9)
 #
+
+# (servidor nginx - 192.168.0.9)
 
 # diretorio a onde sera armazenado o cache
 $ sudo mkdir -p /var/cache/nginx
@@ -254,7 +255,7 @@ $ sudo find /var/cache/nginx -type f -delete
 # copia de seguranca
 $ sudo cp /etc/nginx/nginx.conf{,.origin}
 
-# configuracao do cache
+# configuracao geral do cache.
 $ sudo vi /etc/nginx/nginx.conf
 	(...)
 	http {
@@ -288,7 +289,7 @@ $ sudo vi /etc/nginx/nginx.conf
 	}
 	(...)
 
-# configuracao do dominio virtual particula.local
+# configuracao referente ao dominio virtual particula.local
 # para trabalhar com proxy reverso
 $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server {
@@ -317,8 +318,9 @@ $ sudo nginx -s reload
 
 #
 # PROXY REVERSO (COM SSL)
-# (servidor nginx - 192.168.0.9)
 #
+
+# (servidor nginx - 192.168.0.9)
 
 # arquivo de configuracao do dominio virtual particula.local.
 $ sudo vi /etc/nginx/conf.d/particula.local.conf
