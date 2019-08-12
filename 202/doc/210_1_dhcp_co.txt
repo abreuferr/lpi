@@ -1,6 +1,6 @@
 #: Title : DHCP Server Configuration
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : DHCP configuration
+#: Description : DHCP configuration - CentOS
 #: Options : Weight: 2
 
 Description: Candidates should be able to configure a DHCP server. This 
@@ -26,20 +26,27 @@ Terms and Utilities:
 # Teoria
 #
 
-# server - 192.168.0.13
-# client - 192.168.0.0/24
+# server - 192.168.10.13
+# client - 192.168.10.0/24
 
 #
 # Instalacao
 #
 
 # servidor
-$ sudo apt-get update && sudo apt-get upgrade 
-$ sudo apt-get install isc-dhcp-server dhcpdump isc-dhcp-common -y -d
+$ sudo yum upgrade
+$ sudo yum install dhcp
 
 # cliente
-$ sudo apt-get update && sudo apt-get upgrade
-$ sudo apt-get install isc-dhcp-client isc-dhcp-common -y -d
+$ sudo yum update
+$ sudo yum install dhclient
+
+#
+# Firewall
+#
+
+$ sudo firewall-cmd --add-service=dhcp --permanent 
+$ sudo firewall-cmd --reload
 
 #
 # Configuracao
@@ -47,13 +54,8 @@ $ sudo apt-get install isc-dhcp-client isc-dhcp-common -y -d
 
 # Servidor - IP DHCP
 
-# backup de seguranca do arquivo de configuracao.
-$ sudo cp /etc/dhcp/dhcpd.conf{,.origin}
-
-# definir qual interface de rede do servidor sera monitorada
-# pelo servidor dhcp.
-$ sudo vi /etc/default/isc-dhcp-server
-	INTERFACESv4=i"ens33"
+# criando arquivo de configuracao.
+$ sudo cp /usr/share/doc/dhcp*/dhcpd.conf.example /etc/dhcp/dhcpd.conf
 
 # editando o servidor dhcp
 $ sudo vi /etc/dhcp/dhcpd.conf
@@ -102,8 +104,8 @@ $ sudo vi /etc/dhcp/dhcpd.conf
 	}
 
 # reinicializar o servico
-$ sudo systemctl restart isc-dhcp-server
-$ sudo systemctl status isc-dhcp-server
+$ sudo systemctl start dhcpd
+$ sudo systemctl status dhcpd
 
 # verificar quais IPs estao sendo utilizados
 $ sudo cat /var/lib/dhcp/dhcpd.leases
@@ -184,12 +186,24 @@ $ sudo dhcpdump -i ens33
 # CLIENT
 
 # configurar a placa de rede do host para trabalhar
-# com o dhcp. O exemplo a baixo eh referente a
-# distribuicao GNU/Linux Debian.
-$ sudo vi /etc/network/interfaces
-	(...)
-	allow-hotplug ens33
-	iface ens33 inet dhcp
+# com o dhcp.
+$ sudo vi /etc/sysconfig/network-scripts/ifcfg-ens33
+	TYPE="Ethernet"
+	PROXY_METHOD="none"
+	BROWSER_ONLY="no"
+	BOOTPROTO="dhcp"
+	DEFROUTE="yes"
+	IPV4_FAILURE_FATAL="no"
+	IPV6INIT="yes"
+	IPV6_AUTOCONF="yes"
+	IPV6_DEFROUTE="yes"
+	IPV6_FAILURE_FATAL="no"
+	IPV6_ADDR_GEN_MODE="stable-privacy"
+	NAME="ens33"
+	UUID="e955c704-2d15-4eeb-8c29-c0d86ae9b1c2"
+	DEVICE="ens33"
+	ONBOOT="yes"
+	ZONE=public
 
 # release do endereco 
 $ sudo dhclient -r
