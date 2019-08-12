@@ -1,0 +1,286 @@
+#: Title : dns cache
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : basic dns cache configuration - CentOS
+#: Options : Weight: 3
+
+Description: Candidates should be able to configure BIND to function as a 
+caching-only DNS server. This objective includes the ability to manage a 
+running server and configuring logging.
+
+Key Knowledge Areas:
+- BIND 9.x configuration files, terms and utilities
+- Defining the location of the BIND zone files in BIND configuration files
+- Reloading modified configuration and zone files
+- Awareness of dnsmasq, djbdns and PowerDNS as alternate name servers
+
+The following is a partial list of the used files, terms and utilities:
+- /etc/named.conf
+- /var/named/
+- /usr/sbin/rndc
+- kill
+- host
+- dig
+
+#
+# Teoria
+#
+
+# o servidor de dns do tipo caching eh a mais simples implementacao
+# de um servidor de dns.
+#
+# o servidor do tipo dns caching-only resolve nomes, o qual a resposta
+# eh enviada para o cliente e armazenada localmente para futuras requisicoes.
+#
+# o dns caching-only nao gerencia nenhuma zona, desta forma, nao existe
+# nenhuma diretiva dentro do arquivo named.conf.local referente a uma
+# zona.
+#
+# o servidor dns caching-only eh utilizado para diminuir a latencia na
+# resolucao de um nome de dominio visto que as resolucoes anteriores foram 
+# armazenadas localmente em cache.
+#
+# o caching-only tambem diminui o trafego na rede interna.
+
+#
+# Instalacao
+#
+
+# atualizar
+$ sudo yum upgrade
+
+# instalacao
+$ sudo yum install bind.x86_64 bind-utils.x86_64
+
+#
+# Firewall
+#
+
+$ sudo firewall-cmd --add-port=53/udp
+$ sudo firewall-cmd --add-port=53/udp --permanent
+
+#
+# Configuracao
+#
+
+# configuracao geral do bind
+$ sudo vi /etc/named.conf
+        // foi criada a acl de nome "clients" com o objetivo
+        // de definir quais hosts pertencem a ACL. Neste caso,
+        // os hosts presentes na rede 192.168.10.0/24 pertence
+        // a acl CLIENTS.
+        acl "clients" {
+                192.168.10.0/24;
+        };
+
+	// a diretiva OPTIONS tem por objetivo a de definir opcoes
+	// de configuracao do bind.
+	options {
+		// indicando o diretorio de trabalho do bind.
+		// diretorio a onde sao armazenados os arquivos
+		// de configuracao da zona.
+		directory "/var/named";
+
+		// omite informacoes referente a versao do bind
+		// por motivos de seguranca.
+		version none;
+
+		// habilitar a recursao.
+		// se por acaso essa opcao for definida com a 
+		// opcao NO, as estacoes que irao utilizar esse
+		// servidor nao conseguirao resolver dominios.
+		recursion yes;
+
+		// indica quais hosts ou redes podem requisitar
+		// a recursividade.
+		allow-recursion { localhost; clients; };
+
+		// especifica o hostname que sera negado a
+		// requisicao de recursividade.
+		blackhole { HOSTNAME; };
+
+		// o bind vai ficar escutando a porta 53.
+		listen-on port 53 { localhost; clients; };
+
+		// especifica quais hosts que podem fazer requisicoes
+		// de resolucao de nome, neste caso, somente o proprio
+		// servidor cache.
+		allow-query { localhost; clients; };
+
+		// especifica quais hosts podem ter o acesso ao cache 
+		// do dns-cache.
+		allow-query-cache { localhost; clients };
+	};
+
+# o aplicativo named-checkconf checa a sintaxe do 
+# arquivo de configuracao do bind.
+$ sudo named-checkconf /etc/named.conf
+
+# resolv.conf do servidor dns-cache.
+$ cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 127.0.0.1
+
+# resolv.conf das estacoes da rede.
+$ cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.10.4
+
+#
+# RNDC
+#
+
+# reler os arquivos de configuracao do bind
+# sem interromper o servico.
+$ sudo rndc reload
+
+# reler o arquivo de configuracao do Bind
+# sem que o servico seja interrompido.
+$ sudo rndc reconfig
+
+# obter informacoes do servidor bind.
+$ sudo rndc status
+
+# limpar o cache do servidor bind.
+$ sudo rndc flush
+
+#
+# TESTE
+#
+
+# teste utilizando o comando host.
+# o comando host eh utilizado para obter o endereco IP de 
+# um determinado dominio ou host. No exemplo abaixo, do dominio
+# www.debian.org possui dois enderecos, um IPv4 e um IPv6.
+$ host www.debian.org
+	www.debian.org has address 200.17.202.197
+	www.debian.org has IPv6 address 2801:82:80ff:8009:e61f:13ff:fe63:8e88
+
+# primeiro teste do cache.
+$ dig -t MX kernel.org | grep time
+	;; Query time: 79 msec
+
+# segundo teste do cache.
+$ dig -t MX debian.org
+	;; Query time: 0 msec
+
+# como eh possivel constatar, o valor do campo "Query time" do primeiro teste
+# para o segundo teste caiu do valor 79 mseg. para o valor 00 mseg. Isso indica 
+# que a segunda consulta nao foi feita diretamente na internet, mas foi feita 
+# no servidor local, servidor dns-cache.
+
+#
+# TCPDUMP
+#
+
+# testes executado no servidor de dns-cache.
+# dns-cache - dnscache.particula.local - 192.168.0.4
+# workstation - workstation.particula.local - 192.168.0.42
+
+# comando utilizado para capturar as informacoes do tcpdump e salvar
+# o tesultado em um arquivo, cache.pcap.
+$ sudo tcpdump -i ens33 udp port 53 -w cache.pcap
+
+# comando utilizado para ler o conteudo do arquivo cache.pcap.
+$ sudo tcpdump -t -r cache.pcap port 53
+	# o host 192.168.0.42 consulta o servidor de dns-cache 192.168.0.4.
+	IP 192.168.0.42.52623 > 192.168.0.4.53: 65525+ [1au] A? redhat.com. (39)
+
+	# o servidor de dns-cache 192.168.0.4, consulta a internet para responder a requisicao
+	# de informacoes sobre o dominio redhat.com.
+	IP 192.168.0.4.35859 > 199.7.83.42.53: 59868 [1au] A? redhat.com. (39)
+	IP 192.168.0.4.40889 > 199.7.83.42.53: 39800 [1au] NS? . (28)
+	IP 192.168.0.4.52386 > 199.7.83.42.53: 46372% [1au] AAAA? E.ROOT-SERVERS.NET. (47)
+	IP 192.168.0.4.39127 > 199.7.83.42.53: 7838% [1au] AAAA? G.ROOT-SERVERS.NET. (47)
+	IP 199.7.83.42.53 > 192.168.0.4.35859: 59868-| 0/14/1 (311)
+	IP 199.7.83.42.53 > 192.168.0.4.40889: 39800*-| 13/0/1 NS a.root-servers.net., NS b.root-servers.net., NS c.root-servers.net., NS d.root-servers.net., NS e.root-servers.net., NS f.root-servers.net., NS g.root-servers.net., NS h.root-servers.net., NS i.root-servers.net., NS j.root-servers.net., NS k.root-servers.net., NS l.root-servers.net., NS m.root-servers.net. (431)
+	IP 199.7.83.42.53 > 192.168.0.4.52386: 46372*- 1/0/1 AAAA 2001:500:a8::e (75)
+	IP 199.7.83.42.53 > 192.168.0.4.39127: 7838*- 1/0/1 AAAA 2001:500:12::d0d (75)
+	IP 192.168.0.4.60785 > 192.48.79.30.53: 38995 [1au] A? redhat.com. (39)
+	IP 192.168.0.4.47662 > 192.228.79.201.53: 14099 [1au] DNSKEY? . (28)
+	IP 192.228.79.201.53 > 192.168.0.4.47662: 14099*-| 0/0/1 (28)
+	IP 192.48.79.30.53 > 192.168.0.4.60785: 38995-| 0/7/5 (497)
+	IP 192.168.0.4.41823 > 209.132.183.2.53: 10250 [1au] A? redhat.com. (39)
+	IP 209.132.183.2.53 > 192.168.0.4.41823: 10250*- 1/0/1 A 209.132.183.105 (55)
+	IP 192.168.0.4.56224 > 202.12.27.33.53: 45040 [1au] NS? . (28)
+	IP 192.168.0.4.51062 > 202.12.27.33.53: 21334 [1au] DS? com. (32)
+	IP 192.168.0.4.37395 > 192.58.128.30.53: 34121 [1au] NS? . (28)
+	IP 192.168.0.4.51354 > 192.58.128.30.53: 61527 [1au] DS? com. (32)
+	IP 202.12.27.33.53 > 192.168.0.4.56224: 45040*-| 0/0/1 (28)
+	IP 202.12.27.33.53 > 192.168.0.4.51062: 21334*- 2/0/1 DS, RRSIG (367)
+	IP 192.58.128.30.53 > 192.168.0.4.37395: 34121*-| 0/0/1 (28)
+	IP 192.58.128.30.53 > 192.168.0.4.51354: 61527*- 2/0/1 DS, RRSIG (367)
+	IP 192.168.0.4.42722 > 192.42.93.30.53: 37087 [1au] DS? redhat.com. (39)
+	IP 192.42.93.30.53 > 192.168.0.4.42722: 37087*-| 0/4/1 (434)
+	IP 192.168.0.4.47132 > 192.33.14.30.53: 36070 [1au] DNSKEY? com. (32)
+	IP 192.33.14.30.53 > 192.168.0.4.47132: 36070*-| 2/0/1 DNSKEY, DNSKEY (452)
+
+	# o dns-cache 192.168.0.4 obtem a resposta e repassa para o host 192.168.0.42
+	IP 192.168.0.4.53 > 192.168.0.42.52623: 65525 1/4/5 A 209.132.183.105 (191)
+
+	# em um segundo teste com o dig, o dns-cache 192.168.0.4 nao consulta a internet
+	#  para obter as informacoes do dominio redhat.com, ele já possui a informacao em
+	# cache e repassa para o host 192.168.0.42.
+	IP 192.168.0.42.33395 > 192.168.0.4.53: 48535+ [1au] A? redhat.com. (39)
+	IP 192.168.0.4.53 > 192.168.0.42.33395: 48535 1/4/5 A 209.132.183.105 (191)
+
+#
+# RECURION YES/NO
+#
+#
+# nao se esquecer de executar o comando "rndc flush"
+# para limpar o cache do servidor para nao atrapalhar 
+# os testes.
+
+# configuracao
+$ cat /etc/bind/named.conf.options
+	options {
+		(...)
+		recursion yes/no;
+		(...)
+	};
+
+# recurion NO
+$ ping slashdot.org
+	ping: slashdot.org: Temporary failure in name resolution
+
+# recursion YES
+# ping slashdot.org
+	PING slashdot.org (216.105.38.15) 56(84) bytes of data.
+	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=1 ttl=127 time=185 ms
+	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=2 ttl=127 time=192 ms
+
+# quando a recursividade do dns-cache foi desabilidatea, opcao NO, 
+# o servidor dns-cache fez a requisicao de resolucao de noma para
+# outros servidores. Desta forma, o comando ping nao funcionou.
+#
+# quando a recursividade do dns-cache foi habilitada, opcao YES,
+# o servidor de dns-cache pode fazer a requisicao de resolucao
+# de dominio para outros servidores. desta forma, o comando ping
+# funcionou de forma correta.
+
+#
+# BLACKHOLE
+#
+
+# outra diretiva de seguranca eh a diretiva BLACKHOLE
+# a onde eh possivel especificar quais hosts ou rede
+# nao serao atendidas pelas requisicoes de resolucao
+# de nome.
+#
+# diferente da opcao RECURSION a onde eh possivel
+# habilitar/desabilitar a recursividade, a opcao
+# BLACKHOLE permite habilitar/desabilitar a 
+# recursividade para um determinado grupo de hosts
+# ou rede, trabalhando de forma granular. Desta 
+# forma, um numero menor de hosts ira requisitar
+# a resolucao de nomes, diminuindo o trafego na
+# rede e a solicitacao de resolucao ao servidor.
+
+$ cat /etc/bind/named.conf.options
+	options {
+		(...)
+		blackhole { HOST_REDE_BLOQUEADO; };
+		(...)
+	};
