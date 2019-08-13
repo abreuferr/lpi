@@ -1,0 +1,84 @@
+#: Title : PAM authentication
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : PAM authentication - Debian
+#: Options : Weight 3
+
+Description: The candidate should be able to configure PAM 
+to support authentication using various available methods. 
+This includes basic SSSD functionality.
+
+Key Knowledge Areas:
+
+PAM configuration files, terms and utilities
+passwd and shadow passwords
+Use sssd for LDAP authentication
+Terms and Utilities:
+
+/etc/pam.d/
+pam.conf
+nsswitch.conf
+pam_unix, pam_cracklib, pam_limits, pam_listfile, pam_sss
+sssd.conf
+
+#
+# EXEMPLO 01
+#
+
+# limitar a somente [N] conexoes ssh em um
+# determinado host. No exemplo abaixo, no
+# maximo 1 conexao ssh no servidor.
+
+# servidor ssh
+$ sudo vi /etc/pam.d/sshd
+	session required pam_limits.so
+
+$ sudo vi /etc/security/limits.conf
+	[USERNAME] - maxlogins [NUM]
+	cosmo - maxlogins 1
+
+# estacao
+# o usuario COSMO ja logou na estacao, quando o
+# segundo COSMO for tentar logar na estacao, a 
+# mesma ira apresentar uma mensagem de erro.
+$ ssh cosmo@192.168.0.42
+	Too many logins for 'cosmo'
+
+#
+# EXEMPLO 02
+#
+
+# limitar quais usuarios podem logar no
+# servidor ssh.
+
+# servidor ssh
+$ sudo vi /etc/pam.d/sshd
+	auth required pam_listfile.so item=user sense=deny file=/etc/ssh/sshd.deny onerr=succeed
+
+$ sudo vi /etc/ssh/sshd.deny
+	[USERNAME_1]
+	[USERNAME_2]
+
+# estacao
+	$ ssh [USERNAME_1/2]@[HOSTNAME_IP]
+	[USERNAME_1/2]@[HOSTNAME_IP]'s password:
+	Permission denied, please try again.
+
+#
+# EXEMPLO 03
+#
+
+# definir as caracteristicas da senha do usuario.
+
+# instalacao do pacote.
+$ sudo apt-get install libpam-cracklib
+
+# configuracao
+$ sudo vi /etc/pam.d/common-password
+	# retry=3 : numero de tentativas.
+	# minlen=16 : tamanho minimo.
+	# difok=3 : no minimo 3 caracteres de diferente da senha anterior.
+	# ucredit=-1 : no minimo 1 caractere maiusculo.
+	# lcredit=-2 : no minimo 2 caracteres minusculo.
+	# dcredit=-2 : no minimo 2 digitos.
+	# ocredit=-2 : no minimo 2 simbolos.
+	password        requisite                       pam_cracklib.so retry=3 minlen=16 difok=3 ucredit=-1 lcredit=-2 dcredit=-2 ocredit=-2
