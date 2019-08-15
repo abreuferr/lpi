@@ -43,10 +43,12 @@ $ sudo yum upgrade
 # instalacao
 $ sudo yum install bind.x86_64 bind-utils.x86_64 
 
-#
-# Firewall
-#
+# systemd
+$ sudo systemctl start named
+$ sudo systemctl enable named
+$ sudo systemctl status named
 
+# firewall
 $ sudo firewall-cmd --permanent --add-port=53/tcp
 $ sudo firewall-cmd --permanent --add-port=53/udp
 $ sudo firewall-cmd --reload
@@ -54,6 +56,9 @@ $ sudo firewall-cmd --reload
 #
 # Configuracao
 #
+
+# backup
+$ sudo cp /etc/named.conf{,.origin}
 
 # configuracao do bind para ser um servidor dns forward.
 $ sudo vi /etc/named.conf
@@ -147,6 +152,9 @@ $ sudo vi /etc/resolv.conf
 #
 # TESTE - DIG
 #
+
+# limpando o dns-cache
+$ sudo rndc flush
 
 $ dig kernel.org | grep time
 	;; Query time: 355 msec
