@@ -71,6 +71,9 @@ $ sudo firewall-cmd --reload
 # Configuracao
 #
 
+# backup
+$ sudo cp /etc/named.conf{,.origin}
+
 # configuracao geral do bind
 $ sudo vi /etc/named.conf
         // foi criada a acl de nome "clients" com o objetivo
