@@ -52,11 +52,20 @@ $ sudo yum upgrade
 $ sudo yum install bind.x86_64 bind-utils.x86_64
 
 #
+# Systemd
+#
+
+$ sudo systemctl start named
+$ sudo systemctl enable named
+$ sudo systemctl status named
+
+#
 # Firewall
 #
 
-$ sudo firewall-cmd --add-port=53/udp
+$ sudo firewall-cmd --add-port=53/tcp --permanent
 $ sudo firewall-cmd --add-port=53/udp --permanent
+$ sudo firewall-cmd --reload
 
 #
 # Configuracao
