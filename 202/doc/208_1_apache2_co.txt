@@ -47,9 +47,10 @@ $ sudo systemctl status httpd
 # Firewall
 #
 
-$ sudo firewall-cmd --permanent --add-port=80/tcp
-$ sudo firewall-cmd --permanent --add-port=443/tcp
+$ sudo firewall-cmd --zone=public --permanent --add-service=http
+$ sudo firewall-cmd --zone=public --permanent --add-service=https
 $ sudo firewall-cmd --reload
+
 
 #
 # Virtual Host
@@ -63,6 +64,13 @@ $ sudo mkdir -p /var/www/particula.local/html
 $ sudo vi /var/www/particula.local/html/index.html
 	apache.particula.local
 
+# Arquivo de configuracao principal do Apache.
+# /etc/httpd/conf/httpd.conf
+# Supplemental configuration
+# Load config files in the "/etc/httpd/conf.d" 
+# directory, if any.
+# IncludeOptional conf.d/*.conf
+#
 # arquivo de configuracao do dominio particula.local
 $ sudo vi /etc/httpd/conf.d/particula.local.conf
 	<VirtualHost *:80>
@@ -76,7 +84,7 @@ $ sudo vi /etc/httpd/conf.d/particula.local.conf
 		ServerAlias www.particula.local
 
 		# diretorio a onde sera armazenado os arquivos do dominio.
-		DocumentRoot /var/www/particula.local/html/
+		DocumentRoot /var/www/particula.local
 
 		# Diretorio e nome do arquivo a onde sera armazenado
 		# o log de erro do dominio.
@@ -89,6 +97,15 @@ $ sudo vi /etc/httpd/conf.d/particula.local.conf
 
 # checagem da configuracao do apache
 $ sudo apachectl configtest
+	Syntax OK
+
+# reinicializando o apache utilizando o
+# aplicativo "apachectl".
+# apachectl -k [start/restart/graceful/graceful-stop/stop]
+$ sudo apachectl -k graceful
+
+# teste - estacao
+$ w3m http://www.particula.local/html
 
 #
 # Modulo Perl
@@ -97,20 +114,22 @@ $ sudo apachectl configtest
 # instalando os componentes necessarios.
 $ sudo yum install perl perl-CGI
 
-# arquivo de configuracao do modulo perl do Apache.
-$ /etc/httpd/conf.modules.d/01-cgi.conf
+# reinicializando o apache.
+# nesse caso, é necessario reinicializar 
+$ sudo systemctl restart httpd
 
 # configuracao do apache.
 $ sudo vi /etc/httpd/conf.d/particula.local.conf
 	<VirtualHost *:80>
-		(...)
-		DocumentRoot /var/www/particula.local/
 		ScriptAlias /cgi-bin/ /var/www/particula.local/cgi-bin/
 		<Directory /var/www/particula.local/cgi-bin>
 			Options +ExecCGI
 			AddHandler cgi-script .cgi .pl
 		</Directory>
 	</VirtualHost>
+
+# testando configuracao
+$ sud apachectl configtest
 
 # diretorio e arquivo de trabalho.
 $ mkdir -p /var/www/particula.local/cgi-bin
@@ -119,6 +138,9 @@ $ vi /var/www/particula.local/cgi-bin/index.cgi
 	print "Content-type: text/html\n\n";
 	print "Hello, World.";
 
+# permissao - adicionando permissao de execucao.
+$ sudo chmod +x -R /var/www/particula.local/cgi-bin
+
 # teste
 $ lynx http://www.particula.local/cgi-bin/index.cgi
 
@@ -126,32 +148,36 @@ $ lynx http://www.particula.local/cgi-bin/index.cgi
 # Autenticacao atraves de usuario/grupo e senha
 #
 
+# diretorio de trabalho
+$ sudo mkdir -p /var/www/particula.local/auth-basic
+
+# index.html
+$ sudo vi /var/www/particula.local/auth-basic/index.html
+	Test Page for Basic Auth
+
 # arquivos com as diretivas de autenticacao.
-$ sudo vi /var/www/particula.local/.htaccess
+$ sudo vi /var/www/particula.local/auth-access/.htaccess
 	AuthType Basic
 	AuthName "processo de autenticacao de acesso"
+	# usuario
 	AuthUserFile /var/www/particula.local/webpass.user
 	Require valid-user
+	# grupo
 	AuthGroupFile /var/www/particula.local/webpass.group
 	Require group particula
 
 $ sudo vi /etc/httpd/conf.d/particula.local.conf
 	<VirtualHost *:80>
-		(...)
 		# a diretiva "AccessFileName" so eh necessaria
 		# se por acaso o nome do arquivo .htaccess for
 		# outro.
-		<Directory /var/www/particula.local/html>
+		<Directory /var/www/particula.local/auth-basic>
 			AllowOverride All
 		</Directory>
-		(...)
 	</VirtualHost>
 
-# checagem da configuracao do apache2
+# testando configuracao
 $ sudo apachectl configtest
-
-# reinicializar o apache2
-$ sudo systemctl restart httpd
 
 # criar o arquivo webpass a onde sera armazenado o usuario
 # e a senha dele.
@@ -164,6 +190,12 @@ $ sudo htpasswd /var/www/particula.local/webpass.user [USUARIO]
 $ sudo vi /var/www/particula.local/webpass.group
 	particula: cosmo caio
 
+# reinicializar o apache2
+$ sudo systemctl restart httpd
+
+# teste
+$ w3m http://www.particula.local/auth-basic/
+
 #
 # Autenticacao atraves de servidor LDAP
 #
@@ -171,16 +203,14 @@ $ sudo vi /var/www/particula.local/webpass.group
 # instalacao do modulo 
 $ sudo yum install mod_ldap
 
+# diretorio de trabalho
+$ sudo mkdir -p /var/www/particula.local/ldap
+$ sudo vi /var/www/particula.local/ldap/index.html
+
 # configuracao do apache
 $ sudo vi /etc/httpd/conf.d/particula.local.conf
 	<VirtualHost *:80>
-	        ServerAdmin webmaster@particula.local
-	        ServerName particula.local
-	        ServerAlias www.particula.local
-	        DocumentRoot /var/www/particula.local/html/
-	        ErrorLog /var/www/particula.local/logs/error.log
-	        CustomLog /var/www/particula.local/logs/access.log combined
-	        <Directory /var/www/particula.local/html>
+	        <Directory /var/www/particula.local/ldap>
 	                AuthName "LDAP Authentication"
 	                AuthType Basic
 	                AuthBasicProvider ldap
