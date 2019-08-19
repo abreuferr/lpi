@@ -92,7 +92,7 @@ $ sudo vi /etc/squid/squid.conf
 
 	# o diretorio a onde esta armazenado o cache do proxy
 	# estara responsavel pelo usuario PROXY.
-	cache_effective_user proxy
+	cache_effective_user squid
 
 	# caracteristicas do cache
 	# interessante armazenar os dados do cache em um disco
