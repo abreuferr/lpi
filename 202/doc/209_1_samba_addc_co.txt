@@ -39,11 +39,12 @@ $ sudo yum -y install epel-release
 $ sudo yum update
 
 # pre-instalacao
-$ sudo yum -y install git gcc make wget libacl-devel libblkid-devel gnutls-devel readline-devel python-devel pam-devel gdb openldap-devel bind-utils libacl-devel libblkid-devel gnutls-devel readline-devel python-devel gdb pkgconfig krb5-workstation zlib-devel setroubleshoot-server setroubleshoot-plugins policycoreutils-python libsemanage-python setools-libs-python setools-libs popt-devel libpcap-devel sqlite-devel libidn-devel libxml2-devel libacl-devel libsepol-devel libattr-devel keyutils-libs-devel cyrus-sasl-devel cups-devel
+$ sudo yum -y install git gcc make wget libacl-devel libblkid-devel gnutls-devel readline-devel python-devel pam-devel gdb openldap-devel bind-utils libacl-devel libblkid-devel gnutls-devel readline-devel python-devel gdb pkgconfig krb5-workstation zlib-devel setroubleshoot-server setroubleshoot-plugins policycoreutils-python libsemanage-python setools-libs popt-devel libpcap-devel sqlite-devel libidn-devel libxml2-devel libacl-devel libsepol-devel libattr-devel keyutils-libs-devel cyrus-sasl-devel cups-devel python36-devel lmdb-devel gpgme-devel jansson-devel libarchive-devel
 
 # instalacao
 $ wget https://download.samba.org/pub/samba/stable/samba-4.10.6.tar.gz
-$ tar xzvf samba-4.10.6.tar.gz
+$ cd /usr/local/src
+$ sudo tar xzvf samba-4.10.6.tar.gz
 $ sudo ./configure --prefix=/usr --localstatedir=/var --with-configdir=/etc/samba --libdir=/usr/lib64 --with-modulesdir=/usr/lib64/samba --with-pammodulesdir=/lib64/security --with-lockdir=/var/lib/samba --with-logfilebase=/var/log/samba --with-piddir=/run/samba --with-privatedir=/etc/samba --enable-cups --with-acl-support --with-ads --with-automount --enable-fhs --with-pam --with-quotas --with-shared-modules=idmap_rid,idmap_ad,idmap_hash,idmap_adex --with-syslog --with-utmp --with-dnsupdate --enable-debug --enable-selftest
 $ sudo make
 $ sudo make install

@@ -53,7 +53,7 @@ $ sudo reboot
 #
 
 # atualizacao
-$ sudo yum update && sudo yum upgrade
+$ sudo yum update
 
 # instalacao
 $ sudo yum -y install samba samba-client
@@ -97,10 +97,8 @@ $ sudo usermod -aG sambashare [USUARIO]
 # cadastrar a senha o usuario adicionado
 # no comando anterior.
 $ sudo smbpasswd -h
-# sudo smbpasswd -a [USER]
-# sudo smbpasswd -e [USER]
-$ sudo smbpasswd -a caio
-$ sudo smbpasswd -e caio
+# sudo smbpasswd -a [USER] ; adicionar
+# sudo smbpasswd -e [USER] ; ativar
 
 # alterar a senha do ususario de forma remota
 $ sudo smbpasswd -r [IP_SAMBA_SERVER] -U [USUARIO]
@@ -227,7 +225,7 @@ $ sudo vi /etc/samba/smb.conf
 	directory mask = 0744
 
 	# sera visivel ou nao co compartilhamento.
-	browsable = yes
+	browseable = yes
 
 	# qualquer um pode escrever neste diretorio.
 	# permite escrita.
@@ -238,10 +236,6 @@ $ sudo vi /etc/samba/smb.conf
 
 	# eh permitido convidado.
 	guest ok = yes
-
-	# formatacao
-	unix charset = UTF-8
-	dos charset = CP932
 
 	# foi criado uma pasta para que o usuario possa
 	# utiliza-la como repositorio de dados.
@@ -286,6 +280,7 @@ $ sudo systemctl restart nmb smb
 
 # instalacao do cliente samba
 $ sudo yum install samba-client cifs-utils -y
+$ sudo apt install cifs-utils
 
 # compartilhamento
 # de forma interativa
@@ -302,10 +297,26 @@ $ sudo mount -t cifs -o username=[USER],uid=$(id -u),gid=$(id -g) //[IP_SERVER]/
 # aplicativo utilizado para exibir informacoes sobre 
 # as conexoes entre as estacoes e o servidor samba
 $ sudo smbstatus
+	Samba version 4.8.3
+	PID     Username     Group        Machine                                   Protocol Version  Encryption           Signing
+	----------------------------------------------------------------------------------------------------------------------------------------
+	11871   caio         caio         192.168.10.45 (ipv4:192.168.10.45:55158)  SMB3_02           -                    partial(AES-128-CMAC)
+
+	Service      pid     Machine       Connected at                     Encryption   Signing
+	---------------------------------------------------------------------------------------------
+	caio         11871   192.168.10.45 Tue Aug 20 01:55:12 PM 2019 -03  -            -
+	IPC$         11871   192.168.10.45 Tue Aug 20 01:55:12 PM 2019 -03  -            -
+
+	Locked files:
+	Pid          Uid        DenyMode   Access      R/W        Oplock           SharePath   Name   Time
+	--------------------------------------------------------------------------------------------------
+	11871        1001       DENY_NONE  0x80        RDONLY     NONE             /home/samba/caio   .   Tue Aug 20 13:55:11 2019
 
 # verificar se os servicos do samba esta ativos.
 $ sudo smbcontrol smbd ping
+	PONG from pid 11802
 # sudo smbcontrol nmbd ping
+	PONG from pid 11801
 # sudo smbcontrol winbindd ping
 
 # status das conexoes
@@ -341,7 +352,6 @@ $ sudo smbclient -L [IP_SERVER] -N
 
 		Server               Comment
 		---------            -------
-
 		Workgroup            Master
 		---------            -------
 		PARTICULA            SAMBASRV
@@ -377,7 +387,7 @@ $ sudo vi /etc/rsyslog.conf
 	local3.*			/var/log/samba/samba_audit.log
 
 # reinicializar os servicos
-$ sudo systemctl restart smbd nmbd rsyslog
+$ sudo systemctl restart smb nmb rsyslog
 
 # visualizacao do log gerado pelo rsyslog
 $ sudo cat /var/log/samba/samba_audit.log
