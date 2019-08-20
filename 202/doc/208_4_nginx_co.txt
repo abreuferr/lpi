@@ -23,14 +23,24 @@ Terms and Utilities:
 $ sudo yum update
 
 # adicionando o repositorio do nginx
+$ sudo yum install yum-utils
 $ sudo vi /etc/yum.repos.d/nginx.repo
-	[nginx]
-	name=nginx repo
-	baseurl=http://nginx.org/packages/mainline/centos/7/$basearch/
-	gpgcheck=0
+	[nginx-stable]
+	name=nginx stable repo
+	baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+	gpgcheck=1
 	enabled=1
+	gpgkey=https://nginx.org/keys/nginx_signing.key
+
+	[nginx-mainline]
+	name=nginx mainline repo
+	baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+	gpgcheck=1
+	enabled=0
+	gpgkey=https://nginx.org/keys/nginx_signing.key
 
 # atualizacao
+$ sudo yum-config-manager --enable nginx-mainline
 $ sudo yum update
 
 # instalacao do nginx
@@ -43,6 +53,7 @@ $ sudo systemctl status nginx
 
 # firewall
 $ sudo firewall-cmd --add-service=http --permanent
+$ sudo firewall-cmd --add-service=https --permanent
 $ sudo firewall-cmd --reload
 
 #
@@ -62,7 +73,6 @@ $ sudo vi /etc/nginx/nginx.conf
 	worker_processes [NUM];
 
 	# arquivos de log da execucao do nginx.
-	access_log /var/log/nginx/access.log;
        	error_log /var/log/nginx/error.log;
 
 	# local do arquivo de pid.
@@ -90,6 +100,12 @@ $ sudo vi /etc/nginx/nginx.conf
 $ sudo nginx -t
 	nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
 	nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+# reler os arquivos de configuracao do nginx
+$ sudo nginx -s reload
+
+# teste
+$ w3m http://www.particula.local
 
 #
 # Virtual Host
@@ -125,6 +141,14 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 		}
 	}
 
+# testar os arquivos de configuracao
+$ sudo nginx -t
+
+# reler os arquivos de configuracao do nginx
+$ sudo nginx -s reload
+
+# teste
+$ w3m http://www.particula.local
 
 #
 # Autenticacao Basica
@@ -137,49 +161,50 @@ $ sudo htpasswd /usr/share/nginx/particula.local/webpass <USUARIO>
 # configuracao do VirtualHost particula.local
 $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server{
-		(...)
 		location / {
 			auth_basic "Restricted Content";
 			auth_basic_user_file /usr/share/nginx/particula.local/webpass;
 		}
 	}
 
+# testar os arquivos de configuracao
+$ sudo nginx -t
+
+# reler os arquivos de configuracao do nginx
+$ sudo nginx -s reload
+
+# teste
+$ w3m http://www.particula.local
+
 #
 # SSL
 #
 
+# diretorio de trabalho e permissao
+$ sudo mkdir /etc/nginx/ssl
+$ sudo chown -R root:root /etc/nginx/ssl
+$ sudo chmod -R 600 /etc/nginx/ssl
+
 # criando chave de criptografia
-$ sudo openssl genrsa -out /etc/ssl/private/ca.key 2048
+$ sudo openssl genrsa -out /etc/nginx/ssl/ca.key 2048
 
 # gerando o arquivo CSR
-$ sudo openssl req -new -key /etc/ssl/private/ca.key -out /etc/ssl/private/ca.csr
+$ sudo openssl req -new -key /etc/nginx/ssl/ca.key -out /etc/nginx/ssl/ca.csr
 
 # assinar o certificado
-$ sudo openssl x509 -req -days 365 -in /etc/ssl/private/ca.csr -signkey /etc/ssl/private/ca.key -out /etc/ssl/private/ca.crt
-
-# HTTPS: criacao das chaves Diffie-Hellman
-$ sudo openssl dhparam -dsaparam -out /etc/ssl/private/dhparam.pem 2048
+$ sudo openssl x509 -req -days 365 -in /etc/nginx/ssl/ca.csr -signkey /etc/nginx/ssl/ca.key -out /etc/nginx/ssl/ca.crt
 
 # alterando as permissoes dos arquivos de certificacao por motivos de seguranca
-$ sudo chmod 0400 /etc/ssl/private/ca.*
+$ sudo chmod 0400 /etc/nginx/ssl/ca.*
 
 # arquivo de configuracao do nginx.
 $ sudo vi /etc/nginx/nginx.conf
 	http{ 
-		(.......)
 		# SSL 
-		ssl_session_timeout 1d; 
-		ssl_session_cache shared:SSL:50m; 
-		ssl_session_tickets off; 
-
-		# Diffie-Hellman parameter for DHE ciphersuites 
-		ssl_dhparam /etc/ssl/private/dhparam.pem; 
-
-		# configuracao do tls
-		ssl_protocols TLSv1.2; 
-		ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256; 
-		ssl_prefer_server_ciphers on;
-		(.......)
+		ssl_ciphers         EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH;
+		ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+		ssl_session_cache   shared:SSL:10m;
+		ssl_session_timeout 10m;
 	}
 
 # configuracao do nginx para trabalhar com certificado ssl
@@ -187,7 +212,6 @@ $ sudo vi /etc/nginx/conf.d/particula.local
 	server {
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
 	        listen 80;
-	        listen [::]:80;
 
 		# nome do dominio
 		server_name *.particula.local;
@@ -200,34 +224,18 @@ $ sudo vi /etc/nginx/conf.d/particula.local
 	}
 
 	server {
+		# geral
+		access_log /var/log/nginx/particula.local.access.log;
+		error_log /var/log/nginx/particula.local.error.log;
+		root /usr/share/nginx/particula.local/html;
+
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
 		# e o protocolo HTTPS/SSL
-	        listen 443 ssl http2;
-	        listen [::]:443 
-		ssl http2;
-
-	        # diretorio de trabalho
-	        root /var/www/particula.local/html;
-
-	        # nome do arquivo indice
-	        index index.html;
-
-	        # nome do dominio
-	        server_name www.particula.local particula.local;
-
-	        # log files do dominio particula.local.
-	        access_log  /var/log/nginx/particula.local_access.log;
-	        error_log   /var/log/nginx/particula.local_error.lg;
+	        listen 443 ssl default_server;
 
 	        # ssl
-	        ssl on;
-		ssl_protocols TLSv1.2;
-		ssl_ciphers HIGH:!aNULL:!MD5;
-	        ssl_certificate /etc/ssl/private/ca.crt;
-	        ssl_certificate_key /etc/ssl/private/ca.key;
-		ssl_trusted_certificate /etc/ssl/private/ca.pem;
-		ssl_session_cache shared:SSL:10m; 
-		ssl_session_timeout 10m;
+		ssl_certificate     /etc/nginx/ssl/ca.crt;
+		ssl_certificate_key /etc/nginx/ssl/ca.key;
 
 	        # gzip
 	        gzip off;
@@ -239,11 +247,12 @@ $ sudo nginx -t
 # reler os arquivos de configuracao do nginx
 $ sudo nginx -s reload
 
+# teste
+$ w3m https://www.particula.local
+
 #
 # PROXY REVERSO (COM CACHE e SEM SSL)
 #
-
-# (servidor nginx - 192.168.0.9)
 
 # diretorio a onde sera armazenado o cache
 $ sudo mkdir -p /var/cache/nginx
@@ -257,7 +266,6 @@ $ sudo cp /etc/nginx/nginx.conf{,.origin}
 
 # configuracao geral do cache.
 $ sudo vi /etc/nginx/nginx.conf
-	(...)
 	http {
 		include /etc/nginx/conf.d/*.conf;
 
@@ -287,7 +295,6 @@ $ sudo vi /etc/nginx/nginx.conf
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection 'upgrade';
 	}
-	(...)
 
 # configuracao referente ao dominio virtual particula.local
 # para trabalhar com proxy reverso
@@ -295,7 +302,6 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server {
 		# geral
         	listen 80;
-		listen [::]:80;
 	        server_name *.particula.local;
 
 	        # log files
@@ -306,7 +312,8 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	        location / {
 			# principal diretiva de configuracao do nginx para 
 			# trabalhar como proxy reverso.
-	                proxy_pass http://192.168.0.9;
+			# servidor web - 192.168.10.8
+	                proxy_pass http://192.168.10.8;
 	        }
 	}
 
@@ -316,11 +323,12 @@ $ sudo nginx -t
 # reler os arquivos de configuracao do nginx
 $ sudo nginx -s reload
 
+# teste
+$ w3m http://www.particula.local
+
 #
 # PROXY REVERSO (COM SSL)
 #
-
-# (servidor nginx - 192.168.0.9)
 
 # arquivo de configuracao do dominio virtual particula.local.
 $ sudo vi /etc/nginx/conf.d/particula.local.conf
@@ -328,7 +336,6 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server {
 		# o nginx fica escutando a porta 80, ipv4/6
 		listen 80;
-		listen [::]:80;
 
 		# redirecionamento do http para o https
 		return 301 https://$host$request_uri;
@@ -339,7 +346,6 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server {
 		# geral ssl
 	        listen 443 ssl http2;
-		listen [::]:443 ssl http2;
 
 		# nome do dominio virtual.
 	        server_name particula.local www.particula.local;
@@ -349,9 +355,9 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
         	error_log   /var/log/nginx/particula.local_error.lg;
 
 		# trabalhando com o SSL
-		ssl on;
 		ssl_certificate /etc/ssl/private/ca.crt;
 		ssl_certificate_key /etc/ssl/private/ca.key;
+
 		ssl_session_cache builtin:1000 shared:SSL:10m;
 		ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 		ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
@@ -361,13 +367,15 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 
 		# proxy reverso
 	        location / {
-			# webserver nginx
-	                proxy_pass http://192.168.0.9;
+			# header
+			proxy_set_header Host $host;
+			proxy_set_header X-Real-IP $remote_addr;
+			proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+			proxy_set_header X-Forwarded-Proto $scheme;
 
-			# ssl
-			proxy_ssl_verify on; 
-			proxy_ssl_verify_depth 2; 
-			proxy_ssl_protocols TLSv1.2;
+			# webserver nginx
+			# servidor web - 192.168.10.8
+	                proxy_pass http://192.168.10.8;
 	        }
 	}
 
@@ -376,3 +384,6 @@ $ sudo nginx -t
 
 # reler os arquivos de configuracao do nginx
 $ sudo nginx -s reload
+
+# teste
+$ w3m https://www.particula.local
