@@ -37,15 +37,8 @@ $ sudo yum update
 $ sudo yum install nfs-utils
 
 # servico
-$ sudo systemctl enable nfs-server
-$ sudo systemctl enable rpcbind
-$ sudo systemctl enable nfs-lock
-$ sudo systemctl enable nfs-idmap
-
-$ sudo systemctl start rpcbind
-$ sudo systemctl start nfs-server
-$ sudo systemctl start nfs-lock
-$ sudo systemctl start nfs-idmap
+$ sudo systemctl enable nfs-server rpcbind nfs-lock nfs-idmap
+$ sudo systemctl start rpcbind nfs-server nfs-lock nfs-idmap
 
 # firewall
 $ sudo firewall-cmd --add-service=nfs --zone=internal --permanent
@@ -97,7 +90,7 @@ $ sudo exportfs -av
 # atualizar o do sistema operacional
 $ sudo yum update
 
-# instalacao dos componentes do NFS Server
+# instalacao do componente do NFS
 $ sudo yum install nfs-utils
 
 #
@@ -114,6 +107,8 @@ $ chmod 755 -R /home/[USUARIO]/nfs
 # informacao sobre o diretorio que esta sendo
 # exportado pelo servidor nfs.
 $ sudo showmount -e 192.168.10.11
+	Export list for 192.168.10.11:
+	/home/nfs/cosmo 192.168.10.0/24
 
 # montando o diretorio exportado pelo servidor NFS
 # de forma manual.
@@ -138,13 +133,15 @@ $ cat /etc/fstab
 # obter informacao dos diretorios que estao montados.
 $ sudo cat /proc/fs/nfs/exports
 $ sudo exportfs -vv
+/home/nfs/cosmo
+192.168.10.0/24(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,no_root_squash,no_all_squash)
 
 # Cliente
 $ sudo showmount [opcao]
-	# -e [IP_SERVER]- exibe uma lista dos diretorios expostados
-	# -a - exibe o nome ou ip das estacoes que importaram os direorios
-	# -d - lista os diretorios montados nos clientes
-	# -e - exibe uma lista dos diretorios expostados
+	-e [IP_SERVER]- exibe uma lista dos diretorios expostados
+	-a - exibe o nome ou ip das estacoes que importaram os direorios
+	-d - lista os diretorios montados nos clientes
+	-e - exibe uma lista dos diretorios expostados
 
 # Servidor/Cliente
 # exibir estatistica
