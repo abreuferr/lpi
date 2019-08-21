@@ -26,12 +26,31 @@ $ sudo yum update
 # instalacao do dovecot
 $ sudo yum install dovecot
 
+# systemctl
+$ sudo systemctl enable dovecot.service
+
+# firewall
+$ sudo firewall-cmd --add-service={pop3,imap} --permanent
+$ sudo firewall-cmd --reload
+
 #
 # Configuracao
 #
 
+# postfix
+$ sudo vi /etc/postfix/main.cf
+	(...)
+	# SMTP-Auth
+	smtpd_sasl_type = dovecot
+	smtpd_sasl_path = private/auth
+	smtpd_sasl_auth_enable = yes
+	smtpd_sasl_security_options = noanonymous
+	smtpd_sasl_local_domain = $myhostname
+	smtpd_recipient_restrictions = permit_mynetworks, permit_auth_destination, permit_sasl_authenticated, reject
+
 $ sudo cp /etc/dovecot/dovecot.conf{,.backup}
 $ sudo vi /etc/dovecot/dovecot.conf
+	# protocolos a serem utilizados.
 	protocols = imap pop3 lmtp
 	listen = *
 
@@ -71,14 +90,64 @@ $ sudo vi /etc/dovecot/conf.d/10-master.conf
 
 $ sudo cp /etc/dovecot/conf.d/10-ssl.conf{,.backup}
 $ sudo vi /etc/dovecot/conf.d/10-ssl.conf
+	# nao sera utilizado o protocolo de seguranca
+	# para realizar a autenticacao.
 	ssl = no
 
 # reinicializando o Postfix e o Dovecot
-$ sudo systemctl restart dovecot.service
-$ sudo systemctl enable dovecot.service
+$ sudo systemctl restart postfix dovecot
 
 #
-# Firewall
+# Teste - dovecot
 #
-$ sudo firewall-cmd --add-service={pop3,imap} --permanent
-$ sudo firewall-cmd --reload
+
+# teste dovecot imap
+$ telnet localhost 143
+	x1 LOGIN [USUARIO] [SENHA]
+	x2 LIST "" "*"
+	x3 SELECT Inbox
+	x4 LOGOUT
+
+# teste do dovecot pop
+$ telnet localhost 110
+	a login "[USUARIO]" "[SENHA]"
+	b select inbox
+	c list "" *
+	d lsub "" *
+	e logout
+
+#
+# Estacao
+#
+
+# instalacao do mutt
+$ sudo yum install mutt
+
+# configuracao do mutt
+$ vi .muttrc
+	set imap_user = "cosmo"
+	set imap_pass = "[SENHA]"
+
+	set smtp_url = "smtp://cosmo@email.particula.local:25/"
+	set smtp_pass = "[SENHA]"
+
+	set from = "cosmo@particula.local"
+	set realname = "caio ferreira"
+
+	set folder = "imap://email.particula.local:143"
+
+	set spoolfile = "+INBOX"
+	set postponed = "+Drafts"
+
+#
+# SERVIDOR - DOVEADM
+#
+
+# exibe toda as variaveis de configuracao.
+$ sudo doveadm config
+
+# quais conexoes estao ativas no dovecot.
+$ sudo doveadm who
+
+# informacoes sobre usuario
+$ sudo doveadm user [USUARIO]
