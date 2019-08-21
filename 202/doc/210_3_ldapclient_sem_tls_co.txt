@@ -28,7 +28,10 @@ $ sudo su
 # Instalacao
 #
 $ yum update
-$ yum install openldap-clients pam_ldap nss-pam-ldapd authconfig
+$ yum install openldap-clients pam_ldap nss-pam-ldapd authconfig migrationtools sssd
+$ systemctl start nslcd nscd
+$ systemctl enable nslcd nscd
+$ systemctl status nslcd nscd
 
 #
 # Configurando o LDAP Client para autenticar com o LDAP Server utilizando o TUI
@@ -49,7 +52,7 @@ $ authconfig --enableldap --enableldapauth --ldapserver=192.168.10.13 --ldapbase
 # Criando um usuario LDAP
 #
 $ cat marcos.ldif
-	dn: uid=marcos,ou=users,dc=particula,dc=local
+	dn: uid=marcos,ou=People,dc=particula,dc=local
 	uid: marcos
 	cn: marcos
 	objectClass: shadowAccount
@@ -74,7 +77,7 @@ $ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f marcos.ldif
 # Criando o grupo LDAP do usuario Marcos
 #
 $ vi groups.ldif
-	dn: cn=marcos,ou=users,dc=particula,dc=local
+	dn: cn=marcos,ou=Group,dc=particula,dc=local
 	objectClass: posixGroup
 	objectClass: top
 	cn: marcos
@@ -88,11 +91,9 @@ $ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f groups.ldif
 $ ldapsearch -x -D cn=admin,dc=particula,dc=local -b dc=particula,dc=local -W
 
 #
-# Instalacao o SSSD
+# SSSD
 #
-$ yum -y install sssd
-$ systemctl restart nslcd
-$ systemctl restart nscd
+$ systemctl restart nslcd nscd
 
 #
 # Testando o Usuario
@@ -100,3 +101,23 @@ $ systemctl restart nscd
 $ getent passwd
 
 $ su - marcos
+
+#
+# Migration Tools
+#
+$ cp /usr/share/migrationtools/migrate_common.ph{,.origin}
+$ vi /usr/share/migrationtools/migrate_common.ph
+	# Default DNS domain
+	$DEFAULT_MAIL_DOMAIN = "particula.local";
+
+	# Default base
+	$DEFAULT_BASE = "dc=particula,dc=local";
+
+	# turn this on to support more general object clases
+	# such as person.
+	$EXTENDED_SCHEMA = 1;
+
+$ /usr/share/migrationtools/migrate_passwd.pl /etc/passwd /home/cosmo/passwd.ldif
+$ /usr/share/migrationtools/migrate_group.pl /etc/passwd /home/cosmo/group.ldif
+$ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f /home/cosmo/passwd.ldif
+$ ldapadd -x -W -D cn=admin,dc=particula,dc=local -f /home/cosmo/group.ldif
