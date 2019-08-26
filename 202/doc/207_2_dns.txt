@@ -2,6 +2,8 @@
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
 #: Description : create and maintain dns zones
 #: Options : Weight: 3
+#: Options : https://bind9.readthedocs.io/en/latest/introduction.html
+#: Options : http://zytrax.com/books/dns/
 
 Key Knowledge Areas:
 - BIND 9 configuration files, terms and utilities
@@ -21,24 +23,51 @@ Terms and Utilities:
 - host
 
 #
-# INSTALACAO
+# Teoria
 #
+
+# servidores autoritativos - sao os servidores responsaveis
+# por uma zona, em consequencia, pelos dados desta zona. Uma
+# zona sempre deve possuir pelo menos dois servidores autori_
+# tativos, um master e um slave.
+#
+# Cada zona eh obrigada segundo a RFC 1219 a possuir pelo
+# menos dois servidores, um servidor master e um servidor
+# slave. Podem existir n servidores slaves, mas sempre 
+# deve existir um servidor master responsavel pela zona.
+#
+# O servidor master mantem uma copia oficial dos dados da zona em
+# disco. Um servidor slave obtem os seus dados do servidor master
+# atraves de uma operacao chamada "transferencia de zona". 
+#
+# por motivos de disponibilidade e seguranca, o servidor slave
+# deve sempre ficar armazenado em outra rede.
+#
+# servidores de uma zona/dominio
+# - autoritativo - representantes oficiais de uma zona.
+# - primario/master - servidor principal de uma zona.
+# - secundario/slave - servidor com a copia do primario/master.
+
+#
+# Instalacao
+#
+
 # o processo de atualizacao do SO e instalacao deve
 # ser executado tanto no servidor primario, ns1, quanto
 # no secundario, ns2.
 
-# atualizacao do debian.
+# atualizacao
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do bind e alterando permissao.
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d
+$ sudo apt-get install bind9 dnsutils bind9-doc -y -d
 $ sudo chown -R bind:bind /etc/bind
 
 #
-# CONFIGURACAO DO DNS PRIMARIO (NS1)
+# Configuracao do servidor Master (ns1)
 #
 
-# a opcao INCLUSE permite a subdivisao do arquivo
+# a opcao INCLUDE permite a subdivisao do arquivo
 # de configuracao do Bind em varios arquivos. Desta
 # forma, é possivel segmentar a configuracao em varios
 # arquivos.
@@ -48,10 +77,11 @@ $ cat /etc/bind/named.conf
         include "/etc/bind/named.conf.default-zones";
 
 # ajustes no arquivo named.conf.options
+$ sudo cp /etc/bind/named.conf.options{,.origin}
 $ sudo vi /etc/bind/named.conf.options
 	// acl para controle de quem podera fazer requisicao 
 	// de resolucao.
-	acl clients {
+	acl rede {
 		// rede que podera fazer reqisicao de resolucao
 		// de nome.
         	192.168.0.0/24;
@@ -68,16 +98,15 @@ $ sudo vi /etc/bind/named.conf.options
 
                 // o bind ficara escutando a porta 53 e ira
                 // responder a requisicoes vindas do 127.0.0.1
-                // e de estacoes provenientes de "clients".
-                listen-on port 53 { 127.0.0.1; clients; };
+                // e de estacoes provenientes de "rede".
+                listen-on port 53 { localhost; rede; };
 
         	// quais os hosts ou rede que podem fazer requisicao
-		// de resolucao de um nome
-        	allow-query { clients; };
+		// de resolucao de um nome.
+        	allow-query { rede; };
 	};
 
 # testando o arquivo de configuracao.
-$ sudo named-checkconf /etc/bind/named.conf
 $ sudo named-checkconf /etc/bind/named.conf.options
 
 # arquivo que contem as entradas das zonas que
@@ -85,7 +114,7 @@ $ sudo named-checkconf /etc/bind/named.conf.options
 #
 $ sudo vi /etc/bind/named.conf.local
 	// configuracao da zona particula.local
-	zone "particula.local" {
+	zone "particula.local" IN {
 		// servidor do tipo master
 		// existem servidores do tipo MASTER, SLAVE
 		// HINT e FORWARD.
@@ -107,7 +136,7 @@ $ sudo vi /etc/bind/named.conf.local
 	// configuracao reversa da zona particula.local
 	// o arquivo de nome "addr.arpa" indica que eh um
 	// arquivo de dns reverso.
-	zone "0.168.192.in-addr.arpa" {
+	zone "0.168.192.in-addr.arpa" IN {
 		// servidor do tipo master.
 		// existem servidores do tipo MASTER, SLAVE
 		// HINT e FORWARD.
@@ -132,7 +161,7 @@ $ sudo named-checkconf /etc/bind/named.conf.local
 // Hostname > IP.
 $ sudo vi /etc/bind/db.particula.local
 	; Start of Authority (SOA) record
-	$TTL 604800
+	$TTL 3D
 	// nome do servidor master da zona - ns1.particula.local
 	// email do admin. da zona - root@particula.local
 	@ IN SOA ns1.particula.local. root.particula.local. (
@@ -142,32 +171,30 @@ $ sudo vi /etc/bind/db.particula.local
 		// utiliza-se a data de criacao da zona e um serial.
 		// a cada nova alteracao, o serial deve ser alterado
 		// para um valor maior.
-		2010101301;	Serial
+		2010101301	;Serial
 
 		// frequencia com que o servidor slave checa a
 		// procura de alteracao.
-		28800;		Refresh
+		8H		; Refresh
 
 		// em caso de falha, tempo para nova tentativa.
-		3600;		Retry
+		2H		; Retry
 
 		// tempo em que a informacao sobre a zona fica
 		// invalida.
-		604800;		Expire
+		4W		; Expire
 
 		// tempo de vida.
-		3600 );		Negative Cache TTL
+		1D )		; Negative Cache TTL
 
 	; registro dos Name Server (NS).
-		IN NS ns1.particula.local.
-		IN NS ns2.particula.local.
+	@	IN NS ns1.particula.local.
+	@	IN NS ns2.particula.local.
 
 	; registro do Mail Exchange (MX).
-		IN MX 10 srv.particula.local.
+	@	IN MX 10 srv.particula.local.
 
 	; registro de associacao Hostname e IP Address (A)
-		IN A 192.168.0.5
-		IN A 192.168.0.6
 	ns1	IN A 192.168.0.5
 	ns2	IN A 192.168.0.6
 	srv	IN A 192.168.0.7
@@ -183,31 +210,35 @@ $ sudo named-checkzone particula.local /etc/bind/db.particula.local
 # arquivo de configuracao do dns reverso (IP > Hostname)
 $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 	; Start of Authority (SOA) record
-	$TTL 604800
+	$TTL 3D
 	// nome do servidor master da zona - ns1.particula.local
 	// email do admin. da zona - root@particula.local
 	@ IN SOA ns1.particula.local. root.particula.local. (
 		// numero de serie.
-		2010101301;	Serial
+		2010101301	; Serial
+
 		// frequencia com que o servidor slave checa a
 		// procura de alteracao.
-		28800;		Refresh
+		8H		; Refresh
+
 		// em caso de falha, tempo para nova tentativa.
-		3600;		Retry
+		2H		; Retry
+
 		// tempo em que a informacao sobre a zona fica
 		// invalida.
-		604800;		Expire
+		4W		; Expire
+
 		// tempo de vida.
-                3600 );         Negative Cache TTL
+                1D )		; Negative Cache TTL
 
 	; registro com os servidores Name Servers.
-		IN NS ns1.particula.local.
-		IN NS ns2.particula.local.
+	@	IN NS ns1.particula.local.
+	@	IN NS ns2.particula.local.
 
 	; registro com as associacoes reversas, IP to Hostname.
-	5.10	IN PTR    ns1.particula.local.
-	6.10	IN PTR    ns2.particula.local.
-	7.10	IN PTR    srv.particula.local.
+	5.0	IN PTR    ns1.particula.local.
+	6.0	IN PTR    ns2.particula.local.
+	7.0	IN PTR    srv.particula.local.
 
 # testando o arquivo de configuracao da zona reversa.
 $ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192.in-addr.arpa
@@ -226,31 +257,43 @@ $ sudo cat /etc/resolv.conf
 	nameserver 192.168.0.6
 
 #
-# CONFIGURACAO DO DNS SECUNDARIO (NS2)
+# Configuracao do servidor Slave (ns2)
 #
 
 # arquivos de configuracao do bind
+$ sudo cp /etc/bind/named.conf.options{,.origin}
 $ sudo vi /etc/bind/named.conf.options
 	// acl para controle de quem podera fazer requisicao 
 	// de resolucao.
-	acl clients {
+	acl rede {
 		// rede que podera fazer reqisicao de resolucao
 		// de nome.
         	192.168.0.0/24;
 	};
 
 	options {
-		// diretorio a onde estao localizados os arquivos
-		// da zona particula.local
-		directory "/etc/bind";
+        	// diretorio a onde estao os arquivos de 
+		// configuracao da zona particula.local
+        	directory "/etc/bind";
 
-		// recursividade.
-		allow-recursion { clients; };
+		// por motivos de seguranca, ocultar a
+		// versao do Bind.
+		version none;
+
+                // o bind ficara escutando a porta 53 e ira
+                // responder a requisicoes vindas do 127.0.0.1
+                // e de estacoes provenientes de "rede".
+                listen-on port 53 { localhost; rede; };
+
+        	// quais os hosts ou rede que podem fazer requisicao
+		// de resolucao de um nome.
+        	allow-query { rede; };
 	};
 
+$ sudo cp /etc/bind/named.conf.local{,.origin}
 $ sudo vi /etc/bind/named.conf.local
 	// configuracao da zona particula.local
-	zone "particula.local" {
+	zone "particula.local" IN {
 		// servidor do tipo slave
 		type slave;
 
@@ -265,7 +308,7 @@ $ sudo vi /etc/bind/named.conf.local
 	};
 
 	// configuracao reversa da zona particula.local
-	zone "0.168.192.in-addr.arpa" {
+	zone "0.168.192.in-addr.arpa" IN {
 		// servidor do tipo slave
 		type slave;
 
