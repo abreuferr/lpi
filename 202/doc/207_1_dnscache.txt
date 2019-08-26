@@ -112,11 +112,12 @@ $ sudo vi /etc/bind/named.conf.options
 		// por motivos de seguranca.
 		version none;
 
-		// torna o servidor dns em um servidor recursivo.
+		// especifica se o Bind ira consultar outros servidores
+		// de nomes em nome do cliente.
 		recursion yes;
 
 		// indica quais hosts ou redes podem requisitar
-		// a recursividade.
+		// consultas recursivas.
 		allow-recursion { localhost; rede; };
 
 		// especifica o hostname que sera negado a
