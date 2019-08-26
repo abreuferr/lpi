@@ -22,7 +22,7 @@ The following is a partial list of the used files, terms and utilities:
 - dig
 
 #
-# TEORIA
+# Teoria
 #
 
 # um servidor de dns do tipo FORWARD transfere todas as
@@ -34,23 +34,23 @@ The following is a partial list of the used files, terms and utilities:
 # e enviado para o host que fez a requisicao.
 
 #
-# INSTALACAO
+# Instalacao
 #
 
-# atualizacao do debina
+# atualizacao
 $ sudo apt-get update && sudo apt-get upgrade -y -d
 
 # instalacao
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d
+$ sudo apt-get install bind9 dnsutils bind9-doc -y -d
 
 # alterando permissao
 $ sudo chown -R bind:bind /etc/bind
 
 #
-# CONFIGURACAO
+# Configuracao
 #
 
-# a opcao INCLUSE permite a subdivisao do arquivo
+# a opcao INCLUDE permite a subdivisao do arquivo
 # de configuracao do Bind em varios arquivos. Desta
 # forma, é possivel segmentar a configuracao em varios
 # arquivos.
@@ -60,12 +60,13 @@ $ cat /etc/bind/named.conf
 	include "/etc/bind/named.conf.default-zones";
 
 # configuracao do bind para ser um servidor dns forward.
+$ sudo cp /etc/bind/named.conf.options{,.origin}
 $ sudo vi /etc/bind/named.conf.options
-	// foi criada a acl de nome "clients" com o objetivo 
+	// foi criada a acl de nome "rede" com o objetivo 
 	// de definir quais hosts pertencem a ACL. Neste caso,
 	// os hosts presentes na rede 192.168.0.0/24 pertence
-	// a acl CLIENTS.
-	acl "clients" {
+	// a acl REDE.
+	acl "rede" {
 		192.168.0.0/24;
 	};
 
@@ -74,29 +75,16 @@ $ sudo vi /etc/bind/named.conf.options
 		// de configurcao do bind e da zona.
         	directory "/etc/bind";
 
-		// o bind ficara escutando a porta 53 e ira
-		// responder a requisicoes vindas do 127.0.0.1
-		// e de estacoes provenientes de "clients".
-		listen-on port 53 { 127.0.0.1; clients; };
-
-		// se por acaso a resposta estiver no cache, o
-		// servidor ira enviar para o resolver. se por
-		// acaso nao tiver a resposta, ira requisitar
-		// a outro servidor a resposta da requisicao.
-		recursion yes;
-
-		// somente localhost e estacoes que estiverem na 
-		// ACL poderao serao atendidas requisicao de recursao.
-		allow-recursion { 127.0.0.1; clients; };
-
-		// somente estacoes que estiverem na ACL poderao
-		// fazer a requisicao, QUERY, de resolucao de um 
-		// dominio.
-		allow-query { 127.0.0.1; clients; };
-
-		// nao sera feito o processo de transferencia de zona
-		// para nenhum servidor da rede.
-		allow-transfer { none; };
+		// - lista de servidores dns que serao utilizados
+		// para reponder a requisicao por parte dos hosts
+		// presentes na rede definida na ACL.
+		// - primeiro eh consultado no cache local, se por
+		// acaso nao for encontrado a resposta, sera encaminhado
+		// para os encaminhadores.
+		forwarders {
+			8.8.8.8;
+			8.8.4.4;
+		};
 
 		// - o servidor do tipo FORWARDER executa somente o 
 		// processo de consulta, ele nao eh responsavel por
@@ -111,16 +99,30 @@ $ sudo vi /etc/bind/named.conf.options
 		// ceamento de carga.
 		forward only;
 
-		// - lista de servidores dns que serao utilizados
-		// para reponder a requisicao por parte dos hosts
-		// presentes na rede definida na ACL.
-		// - primeiro eh consultado no cache local, se por
-		// acaso nao for encontrado a resposta, sera encaminhado
-		// para os encaminhadores.
-		forwarders {
-			8.8.8.8;
-			8.8.4.4;
-		};
+		// SEGURANCA
+		//
+		// opcoes ativadas por motivos de seguranca
+
+		// o bind ficara escutando a porta 53 e ira
+		// responder a requisicoes vindas do 127.0.0.1
+		// e de estacoes provenientes de "rede".
+		listen-on port 53 { 127.0.0.1; rede; };
+
+		// somente estacoes que estiverem na ACL poderao
+		// fazer a requisicao, QUERY, de resolucao de um 
+		// dominio.
+		allow-query { 127.0.0.1; rede; };
+
+		// somente localhost e estacoes que estiverem na 
+		// ACL poderao serao atendidas requisicao de recursao.
+		allow-recursion { 127.0.0.1; rede; };
+
+		// nao sera feito o processo de transferencia de zona
+		// para nenhum servidor da rede.
+		allow-transfer { none; };
+
+		// Omite a versao do Bind
+		version none;
 
 };
 
@@ -155,7 +157,7 @@ $ sudo vi /etc/resolv.conf
 	nameserver 192.168.0.5
 
 #
-# TESTE - DIG
+# teste - dig
 #
 
 $ dig kernel.org | grep time
@@ -164,7 +166,22 @@ $ dig kernel.org | grep time
 	;; Query time: 1 mse
 
 #
-# TESTE - TCPDUMP
+# teste - nslookup
+#
+$ sudo nslookup www.debian.org
+	Server:		192.168.0.5
+	Address:	192.168.0.5#53
+
+	Non-authoritative answer:
+	Name:	www.debian.org
+	Address: 128.31.0.62
+	Name:	www.debian.org
+	Address: 149.20.4.15
+	Name:	www.debian.org
+	Address: 2801:82:80ff:8009:e61f:13ff:fe63:8e88
+
+#
+# teste - tcpdump
 #
 
 # limpando o dns-cache
@@ -179,10 +196,10 @@ $ sudo tcpdump -n -t -r cache.pcap port 53
 	# referente ao dominio kernel.org.
 	IP 192.168.0.42.55637 > 192.168.0.5.53: 23291+ [1au] A? kernel.org. (39)
 
-	# o dns-forward 192.168.0.5 faz uma consulta ao Google, 8.8.4.4
+	# o dns-forward 192.168.0.5 encaminha a requisicao ao servidor 8.8.4.4
 	IP 192.168.0.5.37668 > 8.8.4.4.53: 18870+ [1au] A? kernel.org. (39)
 
-	# O Google 8.8.4.4 envia a resposta para o dns-forward 192.168.0.5
+	# O servidor 8.8.4.4 envia a resposta para o dns-forward 192.168.0.5
 	IP 8.8.4.4.53 > 192.168.0.5.37668: 18870 1/0/1 A 198.145.29.83 (55)
 
 	# o dns-forward envia a resposta para o host 192.168.0.42
