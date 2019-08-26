@@ -22,7 +22,7 @@ The following is a partial list of the used files, terms and utilities:
 - dig
 
 #
-# TEORIA
+# Teoria
 #
 
 # o servidor de dns do tipo caching eh a mais simples implementacao
@@ -37,32 +37,49 @@ The following is a partial list of the used files, terms and utilities:
 #
 # o servidor dns caching-only eh utilizado para diminuir a latencia na
 # resolucao de um nome de dominio visto que as resolucoes anteriores foram 
-# armazenadas localmente em cache.
+# armazenadas localmente em cache. Desta forma, nao eh necessario uma
+# nova consulta na internet para fazer a resolucao, a consulta sera feita
+# localmente.
+#
+# os dados armazenados corresponde tanto a resposta positivas quanto
+# negativas.
 #
 # o caching-only tambem diminui o trafego na rede interna.
+#
+# Servidor Recursivo.
+#
+# um servidor recursivo atua como intermediario entre um cliente e um
+# servidor de nome. Inicalmente o servidor recursivo recebe uma requisicao
+# de resolucao de um cliente. O servidor recursivo ira responder com dados
+# armazenados em cache, e se por acaso ele nao tiver a resposta, o mesmo
+# ira requisitar as informacoes a servidore de nome raiz, servidor de nome
+# TLD ou a um servidor de nome autoritativo. Depois de receber essa inforacao,
+# o servidor recursivo ira enviar a informacao para o cliente que fez a 
+# solicitacao. Os dados serao armazenados localmente para futuras consultas.
 
 #
-# INSTALACAO
+# Instalacao
 #
 
-# atualizar o debian
+# atualizacao
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao
-$ sudo apt-get install bind9 dnsutils bind9 bind9utils bind9-doc -y -d
+$ sudo apt-get install bind9 dnsutils bind9-doc -y -d
 
 # alterando permissao
 $ sudo chown -R bind:bind /etc/bind
 
 #
-# CONFIGURACAO
+# Configuracao
 #
 
 # a opcao "include" presente no arquivo named.conf permite 
 # que a configuracao do Bind seja dividida em varios 
 # sub-arquivos de configuracao. Desta forma, fica mais facil 
 # a configuracao e manutencao do software.
-# configuracao do bind.
+#
+# primeiro arquivo de configuracao do bind.
 $ sudo vi /etc/bind/named.conf
 	# arquivo responsavel pela configuracao do software
 	# Bind.
@@ -73,12 +90,13 @@ $ sudo vi /etc/bind/named.conf
 	include "/etc/bind/named.conf.local";
 
 # configuracao geral do bind
+$ sudo cp /etc/bind/named.conf.options{,.origin}
 $ sudo vi /etc/bind/named.conf.options
-        // foi criada a acl de nome "clients" com o objetivo
+        // foi criada a acl de nome "rede" com o objetivo
         // de definir quais hosts pertencem a ACL. Neste caso,
-        // os hosts presentes na rede 192.168.0.0/24 pertence
-        // a acl CLIENTS.
-        acl "clients" {
+        // os hosts presentes na rede 192.168.10.0/24 pertence
+        // a acl REDE.
+        acl rede {
                 192.168.0.0/24;
         };
 
@@ -94,31 +112,27 @@ $ sudo vi /etc/bind/named.conf.options
 		// por motivos de seguranca.
 		version none;
 
-		// habilitar a recursao.
-		// se por acaso essa opcao for definida com a 
-		// opcao NO, as estacoes que irao utilizar esse
-		// servidor nao conseguirao resolver dominios.
+		// torna o servidor dns em um servidor recursivo.
 		recursion yes;
 
 		// indica quais hosts ou redes podem requisitar
 		// a recursividade.
-		alow-recursion { localhost; clients; };
+		allow-recursion { localhost; rede; };
 
 		// especifica o hostname que sera negado a
 		// requisicao de recursividade.
 		blackhole { HOSTNAME; };
 
 		// o bind vai ficar escutando a porta 53.
-		listen-on port 53 { localhost; clients; };
+		listen-on port 53 { localhost; rede; };
 
 		// especifica quais hosts que podem fazer requisicoes
-		// de resolucao de nome, neste caso, somente o proprio
-		// servidor cache.
-		allow-query { localhost; clients; };
+		// de resolucao de nome.
+		allow-query { localhost; rede; };
 
 		// especifica quais hosts podem ter o acesso ao cache 
 		// do dns-cache.
-		allow-query-cache { localhost; clients };
+		allow-query-cache { localhost; rede };
 	};
 
 # o aplicativo named-checkconf checa a sintaxe do 
@@ -139,10 +153,6 @@ $ cat /etc/resolv.conf
 	search particula.local
 	nameserver 192.168.0.4
 
-#
-# RNDC
-#
-
 # reler os arquivos de configuracao do bind
 # sem interromper o servico.
 $ sudo rndc reload
@@ -158,8 +168,10 @@ $ sudo rndc status
 $ sudo rndc flush
 
 #
-# TESTE
+# Teste
 #
+
+# Host
 
 # teste utilizando o comando host.
 # o comando host eh utilizado para obter o endereco IP de 
@@ -169,12 +181,14 @@ $ host www.debian.org
 	www.debian.org has address 200.17.202.197
 	www.debian.org has IPv6 address 2801:82:80ff:8009:e61f:13ff:fe63:8e88
 
+# Dig
+
 # primeiro teste do cache.
-$ dig -t MX kernel.org | grep time
+$ dig kernel.org | grep time
 	;; Query time: 79 msec
 
 # segundo teste do cache.
-$ dig -t MX debian.org
+$ dig debian.org | grep time
 	;; Query time: 0 msec
 
 # como eh possivel constatar, o valor do campo "Query time" do primeiro teste
@@ -182,16 +196,14 @@ $ dig -t MX debian.org
 # que a segunda consulta nao foi feita diretamente na internet, mas foi feita 
 # no servidor local, servidor dns-cache.
 
-#
-# TCPDUMP
-#
+# tcpdump
 
 # testes executado no servidor de dns-cache.
 # dns-cache - dnscache.particula.local - 192.168.0.4
 # workstation - workstation.particula.local - 192.168.0.42
-
+#
 # comando utilizado para capturar as informacoes do tcpdump e salvar
-# o tesultado em um arquivo, cache.pcap.
+# o resultado em um arquivo, cache.pcap.
 $ sudo tcpdump -i ens33 udp port 53 -w cache.pcap
 
 # comando utilizado para ler o conteudo do arquivo cache.pcap.
@@ -264,8 +276,9 @@ $ ping slashdot.org
 	64 bytes from 216.105.38.15 (216.105.38.15): icmp_seq=2 ttl=127 time=192 ms
 
 # quando a recursividade do dns-cache foi desabilidatea, opcao NO, 
-# o servidor dns-cache fez a requisicao de resolucao de noma para
-# outros servidores. Desta forma, o comando ping nao funcionou.
+# o servidor dns-cache nao pode fazer a requisicao de resolucao de 
+# nome para outros servidores. Por esse motivo eh que o comando
+# ping nao funcionou.
 #
 # quando a recursividade do dns-cache foi habilitada, opcao YES,
 # o servidor de dns-cache pode fazer a requisicao de resolucao
