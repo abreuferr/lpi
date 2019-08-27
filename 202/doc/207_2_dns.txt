@@ -143,7 +143,7 @@ $ sudo vi /etc/bind/named.conf.local
 	        type master;
 
 		// arquivo de configuracao da zona particula.local
-	        file "db.0.168.192.in-addr.arpa";
+	        file "db.0.168.192";
 
 		// os dados da zona serao transferidos para o servidor
 		// slave.
@@ -195,7 +195,9 @@ $ sudo vi /etc/bind/db.particula.local
 	@	IN MX 10 srv.particula.local.
 
 	; registro de associacao Hostname e IP Address (A)
-	ns1	IN A 192.168.0.5
+		IN A 192.168.0.5
+		IN A 192.168.0.6
+	ns2	IN A 192.168.0.5
 	ns2	IN A 192.168.0.6
 	srv	IN A 192.168.0.7
 
@@ -208,7 +210,7 @@ $ sudo named-checkzone particula.local /etc/bind/db.particula.local
 	OK
 
 # arquivo de configuracao do dns reverso (IP > Hostname)
-$ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
+$ sudo vi /etc/bind/db.0.168.192 (master)
 	; Start of Authority (SOA) record
 	$TTL 3D
 	// nome do servidor master da zona - ns1.particula.local
@@ -241,7 +243,7 @@ $ sudo vi /etc/bind/db.0.168.192.in-addr.arpa (master)
 	7.0	IN PTR    srv.particula.local.
 
 # testando o arquivo de configuracao da zona reversa.
-$ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192.in-addr.arpa
+$ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192
 	zone 0.168.192.in-addr.arpa/IN: loaded serial 2019062204
 	OK
 
@@ -288,6 +290,9 @@ $ sudo vi /etc/bind/named.conf.options
         	// quais os hosts ou rede que podem fazer requisicao
 		// de resolucao de um nome.
         	allow-query { rede; };
+
+		// recursividade.
+		allow-recursion { localhost; rede; };
 	};
 
 $ sudo cp /etc/bind/named.conf.local{,.origin}
@@ -313,7 +318,7 @@ $ sudo vi /etc/bind/named.conf.local
 		type slave;
 
 		// arquivo de configuracao da zona
-		file "db.0.168.192.in-addr.arpa";
+		file "db.0.168.192";
 
 		// endereco ip do servidor master
 		masters { 192.168.0.5; };
