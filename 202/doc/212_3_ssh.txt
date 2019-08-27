@@ -122,30 +122,27 @@ $ sudo vi /etc/hosts.deny
 # autenticacao via chave ssh
 #
 
-# cliente
+# Cliente
+#
 # criando as chaves de autenticacao
 # ssh-keygen -t [key_type] -b [bits] -C "[comment]" -f [file]
-# -t - rsa1/dsa/ecdsa/ed25519/rsa
+# -t - dsa/ecdsa/ed25519/rsa
 # -b - tamanho, em bits, da chave
 # -C - comentario
 # -f - especifica o nome do arquivo da chave
 $ ssh-keygen -b 2048 -t rsa -C "cosmo@particula.local" -f ~/.ssh/id_rsa
 
-# criando as chaves de autenticacao
 # chaves geradas
 $ .ssh/
 |-- id_rsa - chave privada
 `-- id_rsa.pub - chave publica
 
-# criando a chave de autorizacao
-$ cp ~/.ssh/id_rsa.pub ~/.ssh/authorized_keys
-
-# copiando a chave publica para o servidor de forma segura.
-$ ssh-copy-id <USERNAME@SERVER>
+# duas formas de copia a chave publica para o servidor de forma segura.
 $ ssh-copy-id -i $HOME/.ssh/id_rsa.pub user@server.particula.local
 $ scp $HOME/.ssh/id_rsa.pub user@server.particula.local:~/.ssh/authorized_keys
 
-# SERVIDOR
+# Servidor
+#
 $ sudo vi /etc/ssh/sshd_config
 	# desabilita a autenticacao via senha.
 	PasswordAuthentication no
