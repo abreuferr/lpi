@@ -23,6 +23,18 @@ Terms and Utilities:
 - dnssec-signzone
 
 #
+# Teoria
+#
+
+# O DNSSEC atende aos seguintes requisitos de seguranca.
+#
+# - autenticacao - o servidor DNS indica que ele eh realmente o servidor
+# responsavel por aquela zona.
+# - integridade - indica que os dados nao foram corrompidos ou alterados. 
+# - prova de nao-existencia - se por acaso o DNS retorna o status de que o dominio
+# nao existe, eh possivel provar que a resposta veio do servidor autoritativo.
+
+#
 # INSTALACAO
 #
 
