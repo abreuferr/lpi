@@ -71,8 +71,7 @@ $ sudo vi /etc/bind/named.conf.options
 	};
 
 	options {
-        	// diretorio a onde estao armazenados os arquivos 
-		// de configurcao do bind e da zona.
+        	// diretorio de trabalho do servidor dns.
         	directory "/etc/bind";
 
 		// - lista de servidores dns que serao utilizados
@@ -106,15 +105,20 @@ $ sudo vi /etc/bind/named.conf.options
 		// o bind ficara escutando a porta 53 e ira
 		// responder a requisicoes vindas do 127.0.0.1
 		// e de estacoes provenientes de "rede".
-		listen-on port 53 { 127.0.0.1; rede; };
+		listen-on port 53 { localhost; rede; };
 
 		// somente estacoes que estiverem na ACL poderao
 		// fazer a requisicao, QUERY, de resolucao de um 
 		// dominio.
 		allow-query { 127.0.0.1; rede; };
 
+		// especifica quais hosts podem ter o acesso ao
+		// cache.
+		allow-query-cache { localhost; rede; };
+
 		// somente localhost e estacoes que estiverem na 
-		// ACL poderao serao atendidas requisicao de recursao.
+		// ACL poderao serao atendidas requisicao de 
+		// recursividade. 
 		allow-recursion { 127.0.0.1; rede; };
 
 		// nao sera feito o processo de transferencia de zona
