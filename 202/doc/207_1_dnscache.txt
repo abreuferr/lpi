@@ -129,11 +129,17 @@ $ sudo vi /etc/bind/named.conf.options
 
 		// especifica quais hosts que podem fazer requisicoes
 		// de resolucao de nome.
+		// DNS fechado - permitir somente hosts locais de 
+		// fazerem requisicao
+		// DNS aberto - remover essa opcao.
 		allow-query { localhost; rede; };
 
 		// especifica quais hosts podem ter o acesso ao cache 
 		// do dns-cache.
 		allow-query-cache { localhost; rede };
+
+		// desabilita qualquer requisicao de transferencia de zona.
+ 		allow-transfer{"none";};
 	};
 
 # o aplicativo named-checkconf checa a sintaxe do 
