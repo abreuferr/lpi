@@ -54,7 +54,7 @@ $ sudo cat Kparticula_local.+157+11082.private
 	Activate: 20190102190149
 
 $ sudo vi /etc/bind/named.conf.local
-	// chave de criptografia tsig
+	// define a chave utilizada para controlar e autenticar operacoes.
 	key "particula_local" {
         	algorithm hmac-md5;
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
