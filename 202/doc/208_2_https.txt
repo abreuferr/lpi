@@ -58,12 +58,13 @@ $ sudo systemctl restart apache2
 
 # criar o diretorio a onde sera armazenado o certificado
 $ sudo mkdir /etc/apache2/ssl
+$ sudo /etc/apache2/ssl
 
 # Geracao da chave privada (Private Key):
-$ sudo openssl genrsa -out /etc/apache2/ssl/particula.key 2048
+$ sudo openssl genrsa -out particula.key 2048
 
 # Geracao do pedido de certificação (Certificate Signing Request)
-$ sudo openssl req -new -key /etc/apache2/ssl/particula.key -out /etc/apache2/ssl/particula.csr
+$ sudo openssl req -new -key particula.key -out particula.csr
 
 # Criacao de um certificado auto-assinado
 #
@@ -73,7 +74,7 @@ $ sudo openssl req -new -key /etc/apache2/ssl/particula.key -out /etc/apache2/ss
 # certificado auto-assinado (Self-Signed Certificate) valido 
 # por 365 dias:
 #
-$ sudo openssl x509 -req -days 365 -in /etc/apache2/ssl/particula.csr -signkey /etc/apache2/ssl/particula.key -out /etc/apache2/ssl/particula.crt
+$ sudo openssl x509 -req -days 365 -in particula.csr -signkey particula.key -out particula.crt
 
 # alterando permissao
 $ sudo chmod 400 /etc/apache2/ssl/*
@@ -163,7 +164,6 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 		SSLEngine on
 	        SSLCertificateFile /etc/apache2/ssl/particula1.crt
 		SSLCertificateKeyFile /etc/apache2/ssl/particula1.key
-		SSLCertificateChainFile /path/to/DigiCertCA.crt
 	</VirtualHost>
 
 	<VirtualHost *:443>
@@ -172,5 +172,4 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 		SSLEngine on
 	        SSLCertificateFile /etc/apache2/ssl/particula2.crt
 		SSLCertificateKeyFile /etc/apache2/ssl/particula2.key
-		SSLCertificateChainFile /path/to/DigiCertCA.crt
 	</VirtualHost>
