@@ -427,6 +427,24 @@ $ sudo tcpdump -n -t -r ns2.pcap port 53
 # TCPDUMP - TRANSFERENCIA DE ZONA - 192.168.0.6 > 192.168.0.7
 #
 
+# Transferencia completa de uma zona (AXFR) - transferencia dos dados do servidor
+# master para os servidores slave. O intervalo de trnasferencia eh definido pelo
+# valor da variavel SOA presente no arquivo de configuracao do dominio. Nesse tipo
+# de transferencia, todos os dados do servidor master sao transferidos para o servidor
+# slave.
+
+# o processo de transferencia da zona do servidor master para o servidor slave ocorre
+# quando o servidor slave envia uma requisicao/query para o servidor master para saber
+# qual eh o valor SOA. Se por acaso o numero de serie do servidor master for maior que
+# o numero de serie presente no servidor slave, entao os dados sao transferidos para o
+# servidor slave. A requisicao de transferencia de zona eh requerido pelo servidor
+# slave. 
+
+# Transferencia incremental de uma zona (IXFR) - devido a quantidade de dados transferidos
+# do servidor master para o servidor slave, os dados podem ser transferidos de forma 
+# incremental, Incremental Zone Update (IXFR). Desta forma, somente a diferenca entre o 
+# servidor master e o servidor slave sera transferido.
+
 # ns1 - capturando pacotes tcp
 $ sudo tcpdump -i ens33 tcp port 53 -w ns1.pcap
 
