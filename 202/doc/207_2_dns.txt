@@ -104,6 +104,12 @@ $ sudo vi /etc/bind/named.conf.options
         	// quais os hosts ou rede que podem fazer requisicao
 		// de resolucao de um nome.
         	allow-query { rede; };
+
+		// permitir a requisicao de recursao somente para
+		// hosts presentes na rede local. Se por acaso for
+		// um servidor de dns aberto, nao habilitar essa
+		// opcao.
+		allow-recursion { rede; };
 	};
 
 # o programa named-checonf verifica a o arquivo de configuracao
@@ -200,7 +206,7 @@ $ sudo vi /etc/bind/db.particula.local
 	; registro de associacao Hostname e IP Address (A)
 		IN A 192.168.0.5
 		IN A 192.168.0.6
-	ns2	IN A 192.168.0.5
+	ns1	IN A 192.168.0.5
 	ns2	IN A 192.168.0.6
 	srv	IN A 192.168.0.7
 
@@ -291,11 +297,19 @@ $ sudo vi /etc/bind/named.conf.options
                 // e de estacoes provenientes de "rede".
                 listen-on port 53 { localhost; rede; };
 
+		// desabilita qualquer requisicao de transferencia
+		// de zona.
+		allow-transfer{"none"};
+
         	// quais os hosts ou rede que podem fazer requisicao
 		// de resolucao de um nome.
         	allow-query { rede; };
 
 		// recursividade.
+		// dns fechado - permite que somente hosts locais possam
+		// requisitar recursividade.
+		// dns aberto - remover essa opcao para suportar todos os
+		// hosts.
 		allow-recursion { localhost; rede; };
 	};
 
