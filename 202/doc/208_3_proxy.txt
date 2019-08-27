@@ -98,13 +98,19 @@ $ sudo vi /etc/squid/squid.conf
 	#
 	# ufs - formato de armazenamento do squid.
 	# /var/cache/squid - diretorio de armazenamento.
-	# 2000 - tamanho, em MB, do diretorio de cache.
+	# 2048 - tamanho, em MB, do diretorio de cache.
 	# 16 - quantidade de subdiretorios, 1 nivel, dentro do /var/cache/squid.
 	# 256 - quantidade de subdiretorios, 2 nivel, dentro do /var/cache/squid.
-	cache_dir ufs /var/cache/squid 2000 16 256
+	cache_dir ufs /var/cache/squid 2048 16 256
+
+	# definir o tamanho maximo de um objeto a ser guardado em cache.
+	maximum_object_size 16 MB
+
+# testar o arquivo de configuracao do squid.
+$ sudo squid -k parse
 
 # reinicializar o proxy squid
-$ sudo systemctl restart squid.service
+$ sudo systemctl restart squid
 
 # redirecionamento via iptable da porta 80 para a porta 3128 na
 # interface interna do gateway.
