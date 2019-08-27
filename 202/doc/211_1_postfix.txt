@@ -53,6 +53,8 @@ $ sudo dpkg-reconfigure postfix
 	Internet protocols to use - all
 
 # opcao - home_mailbox
+# ativar a caixa de amramzenamento dos e-mails
+# do tipo Maildir
 #
 $ sudo postconf -e 'home_mailbox = Maildir/'
 $ sudo postconf -e "mailbox_command = "
@@ -89,11 +91,16 @@ $ cat /ROOT/Maildir/new/1561573139.Vfe00I209c2M643368.email
 	To: <cosmo@particula.local>
 	From: root@particula.local (root)
 
-# opcao - aliases
-#
+# opcao -  aliases
+# redirecionamento do e-mail de um usuario local
+# para um usuario com e-mail.
 $ sudo cat /etc/aliases
 	postmaster:    cosmo
 	admin:	cosmo
+	root: cosmo
+
+# atualizar a base de dados atraves do comando
+# newaliases.
 $ sudo newaliases
 
 # arquivo de configuracao do Postfix.
@@ -112,8 +119,8 @@ $ sudo cat /etc/postfix/main.cf
 	# tomara como destino final.
 	mydestination = $myhostname, $mydomain, localhost.particula.local, , localhost
 
-	# utilizado para especificar quais servidores podem utilizar o
-	# Postfix como relay.	
+	# utilizado para especificar quais hosts podem utilizar o
+	# Postfix como relay para enviar e-mail para outro servidor.
 	mynetworks = 192.168.0.0/24, 127.0.0.0/8
 
 	# utilizado para especificar o endereco ip do servidor de email (relay)
