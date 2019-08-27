@@ -65,6 +65,9 @@ $ sudo apt-get install vsftpd -y -d
 $ sudo mkdir -p /home/ftp
 $ sudo chown noboy:nogroup /home/ftp
 
+# certificado
+$ sudo openssl req -x509 -nodes -newkey rsa:2048 -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem -days 365
+
 # copia de seguranca.
 $ sudo cp /etc/vsftpd.conf{,.origin}
 
@@ -148,6 +151,7 @@ $ sudo vi /etc/vsftpd.conf
 
 	# localizacao do certificado tls.
 	rsa_cert_file=/etc/ssl/private/vsftpd.pem
+	rsa_private_key_file=/etc/ssl/private/vsftpd.pem
 
 	#
 	# MODO ATIVO
