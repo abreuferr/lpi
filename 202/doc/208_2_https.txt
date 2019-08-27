@@ -33,7 +33,7 @@ $ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install apache2 openssl
 
 #
-# CONFIGURACAO
+# ativacao dos modulos
 #
 
 # ativar o modulo SSL do apache
@@ -48,14 +48,41 @@ $ sudo a2enmod rewrite
 # reinicializar o apache2
 $ sudo systemctl restart apache2
 
+#
+# certificado
+#
+#
+# particula.key	- A chave privada
+# particula.csr	- O pedido de assinatura do certificação
+# particula.crt	- O certificado auto-assinado
+
 # criar o diretorio a onde sera armazenado o certificado
 $ sudo mkdir /etc/apache2/ssl
 
-# criacao do certificado digital
+# Geracao da chave privada (Private Key):
+$ sudo openssl genrsa -out /etc/apache2/ssl/particula.key 2048
+
+# Geracao do pedido de certificação (Certificate Signing Request)
+$ sudo openssl req -new -key /etc/apache2/ssl/particula.key -out /etc/apache2/ssl/particula.csr
+
+# Criacao de um certificado auto-assinado
+#
+# O pedido de certificado deveria ser enviado para a entidade 
+# certificadora, que devolveria o certificado assinado. Neste 
+# texto, o pedido de certificado sera usado para criar um 
+# certificado auto-assinado (Self-Signed Certificate) valido 
+# por 365 dias:
+#
+$ sudo openssl x509 -req -days 365 -in /etc/apache2/ssl/particula.csr -signkey /etc/apache2/ssl/particula.crt
+
 $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
 
 # alterando permissao
 $ sudo chmod 400 /etc/apache2/ssl/*
+
+#
+# dominio virtual
+#
 
 # arquivo de configurca
 $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
@@ -72,7 +99,6 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 	
 		# redirecionamento do HTTP para o HTTPS
 	        Redirect permanent / https://www.particula.local/
-
 	</VirtualHost>
 
 	# inicio da configuracao do virtualhost, HTTPS
@@ -98,6 +124,8 @@ $ sudo vi /etc/apache2/sites-enabled/particula.local.conf
 
 		# ativando a engine SSL
 	        SSLEngine on
+
+		# Certificados auto-assinados
 
 		# certificado
 	        SSLCertificateFile /etc/apache2/ssl/apache.crt
