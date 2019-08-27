@@ -51,7 +51,7 @@ $ sudo apt-get install fail2ban -y -d
 #
 
 # copia de seguranca.
-$ sudo cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.conf.origin
+$ sudo cp /etc/fail2ban/fail2ban.conf{,.origin}
 
 # arquivo de configuracao do gerenciamento do
 # daemon, log, socket e pid do fail2ban.
@@ -66,20 +66,37 @@ $ sudo vi /etc/fail2ban/fail2ban.conf
 	dbpurgeage = 86400
 
 # copia de seguranca.
-$ sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.conf.origin
+$ sudo cp /etc/fail2ban/jail.conf{,.origin} 
 
 # arquivo de configuracao do fail2ban priopriamente dito.
 $ /etc/fail2ban/jail.conf
+	ignoreip = 127.0.0.1/8 192.168.0.0/24
+	bantime  = 1800
+	findtime = 1800
+	maxretry = 3
+	destemail = root@localhost
+
+	action = %(action_mwl)s
+
 	[sshd]
 	enabled = true
 	port    = ssh
 	logpath = %(sshd_log)s
 	backend = %(sshd_backend)s
+	filter  = sshd
+	maxretry = 3
 
 	[sshd-ddos]
 	port    = ssh
 	logpath = %(sshd_log)s
 	backend = %(sshd_backend)s
+
+# reinicializar o fail2ban
+$ sudo systemctl restart fail2ban
+
+# obter mais informaoes sobre o status do servico
+$ sudo fail2ban-client status
+$ sudo fail2ban-client status ssh
 
 #
 # CLIENTE
