@@ -70,6 +70,7 @@ $ sudo vi /etc/bind/named.conf.options
 		192.168.0.0/24;
 	};
 
+	// Forward de forma global
 	options {
         	// diretorio de trabalho do servidor dns.
         	directory "/etc/bind";
@@ -127,8 +128,13 @@ $ sudo vi /etc/bind/named.conf.options
 
 		// Omite a versao do Bind
 		version none;
+	};
 
-};
+	// Forward de um dominio
+	zone "particula.local" IN {
+		type forward;
+		forwarders { 192.168.0.5; 192.168.0.6; };
+	};
 
 # checando os arquivos de configuracao
 # named-checkconf [OPCAO] [ARQUIVO]
