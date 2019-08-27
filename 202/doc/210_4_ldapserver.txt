@@ -35,7 +35,7 @@ Terms and Utilities:
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do servidor openldap
-$ sudo apt-get install slapd ldap-utils ldapscripts db-util migrationtools -y -d
+$ sudo apt-get install slapd ldap-utils -y -d
 
 #
 # Configuracao
@@ -70,36 +70,46 @@ $ sudo vi /etc/ldap/ldap.conf
 # Organizational Unit
 #
 
-$ cat vi ou_users.ldif
-	dn: ou=users,dc=particula,dc=local
+$ cat vi ou.ldif
+	dn: ou=People,dc=particula,dc=local
 	objectClass: organizationalUnit
-	ou: users
-$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f ou_users.ldif
+	ou: People
 
-$ cat vi ou_groups.ldif
-	dn: ou=groups,dc=particula,dc=local
+	dn: ou=Groups,dc=particula,dc=local
 	objectClass: organizationalUnit
-	ou: groups
-$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f ou_groups.ldif
+	ou: Groups
+
+$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f ou.ldif
 
 #
 # Usuario
 #
 
 # gerando o hash da senha do usuario admin/rootpw
-$ sudo slappasswd -h {SSHA}
+$ sudo slappasswd
 
 # ldif do usuario
-$ cat caio.ldif
-	dn: cn=caio,ou=users,dc=particula,dc=local
+$  cat caio.ldif
+	dn: uid=caio,ou=People,dc=particula,dc=local
+	objectClass: inetOrgPerson
+	objectClass: posixAccount
+	objectClass: shadowAccount
 	cn: caio
 	sn: ferreira
-	objectClass: inetOrgPerson
-	userPassword: {SSHA}y6l1JNYj9g8Yy/kP5shePMtkKEt8U5H9
-	uid: caio
+	userPassword: {SSHA}xxxxxxxxxxxxxxxx
+	loginShell: /bin/bash
+	uidNumber: 1000
+	gidNumber: 1000
+	homeDirectory: /home/caio
+
+	dn: cn=caio,ou=Groups,dc=particula,dc=local
+	objectClass: posixGroup
+	cn: caio
+	gidNumber: 1000
+	memberUid: caio
 
 # adicionar
-$ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f caio.ldif
+$ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f caio.ldif
 
 # apagar
 $ sudo ldapdelete "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=particula,dc=local -W
@@ -108,6 +118,7 @@ $ sudo ldapdelete "cn=caio,ou=users,dc=particula,dc=local" -D cn=admin,dc=partic
 # Grupo
 #
 
+# adicionar o usuario caio no grupo it
 $ cat group.ldif
 	dn: cn=it,ou=groups,dc=particula,dc=local
 	cn: it
