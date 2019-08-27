@@ -88,8 +88,7 @@ $ sudo vi /etc/bind/named.conf.options
 	};
 
 	options {
-        	// diretorio a onde estao os arquivos de 
-		// configuracao da zona particula.local
+        	// diretorio de trabalho do servidor.
         	directory "/etc/bind";
 
 		// por motivos de seguranca, ocultar a
@@ -106,7 +105,8 @@ $ sudo vi /etc/bind/named.conf.options
         	allow-query { rede; };
 	};
 
-# testando o arquivo de configuracao.
+# o programa named-checonf verifica a o arquivo de configuracao
+# em relacao a sintaxe.
 $ sudo named-checkconf /etc/bind/named.conf.options
 
 # arquivo que contem as entradas das zonas que
@@ -154,7 +154,8 @@ $ sudo vi /etc/bind/named.conf.local
     		notify yes;
 	};
 
-# testando o arquivo de configuracao.
+# o programa named-checonf verifica a o arquivo de configuracao
+# em relacao a sintaxe.
 $ sudo named-checkconf /etc/bind/named.conf.local
 
 // arquivo de configuracao da zona particula.local.
@@ -274,8 +275,7 @@ $ sudo vi /etc/bind/named.conf.options
 	};
 
 	options {
-        	// diretorio a onde estao os arquivos de 
-		// configuracao da zona particula.local
+        	// diretorio de trabalho do servidor.
         	directory "/etc/bind";
 
 		// por motivos de seguranca, ocultar a
@@ -327,7 +327,8 @@ $ sudo vi /etc/bind/named.conf.local
 		allow-notify { 192.168.0.5; };
 	};
 
-# testando o arquivo de configuracao.
+# o programa named-checonf verifica a o arquivo de configuracao
+# em relacao a sintaxe.
 $ sudo named-checkconf /etc/bind/named.conf.options
 
 # reinicializar o bind.
