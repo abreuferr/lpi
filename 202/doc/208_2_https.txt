@@ -73,9 +73,7 @@ $ sudo openssl req -new -key /etc/apache2/ssl/particula.key -out /etc/apache2/ss
 # certificado auto-assinado (Self-Signed Certificate) valido 
 # por 365 dias:
 #
-$ sudo openssl x509 -req -days 365 -in /etc/apache2/ssl/particula.csr -signkey /etc/apache2/ssl/particula.crt
-
-$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/apache2/ssl/apache.key -out /etc/apache2/ssl/apache.crt
+$ sudo openssl x509 -req -days 365 -in /etc/apache2/ssl/particula.csr -signkey /etc/apache2/ssl/particula.key -out /etc/apache2/ssl/particula.crt
 
 # alterando permissao
 $ sudo chmod 400 /etc/apache2/ssl/*
