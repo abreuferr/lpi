@@ -25,19 +25,20 @@ Terms and Utilities:
 # TEORIA
 #
 # a funcao da tecnologia tsig eh a de prover a seguranca na comunicacao
-# entre os servidores de DNS responsavei por uma zona. Alem da comunicao, 
-# a tecnologia tsig tambem eh utilizado na seguranca para a transferencia 
-# dos dados da zona do servidor primario para o servidor secundario.
+# entre os servidores de DNS responsaveis por uma zona. Alem da comunicao, 
+# a tecnologia tsig tambem eh utilizado na seguranca no processo de  
+# transferencia dos dados da zona do servidor primario para o servidor
+# secundario.
 
 #
 # CONFIGURACAO DO DNS PRIMARIO (NS1 - 192.168.0.5)
 #
 
 # criacao da chave de criptografia que sera utilizada na troca
-# de informacoes e configuracao entre os servidores primario e 
-# sencundario.
+# de informacoes e configuracao entre os servidores master e 
+# slave.
 $ cd /etc/bind/
-$ dnssec-keygen -a HMAC-MD5 -b 512 -n USER particula_local
+$ dnssec-keygen -a [HMAC-MD5] -b [512] -n USER [particula_local]
 	-a especificar qual eh o algoritmo que sera utilizado para criar as chaves
 	-b especifica o tamanho da chave
 	-n especifica o tipo de chave
@@ -59,7 +60,7 @@ $ sudo vi /etc/bind/named.conf.local
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
 	};
 
-	// servidor secundario/slave
+	// servidor slave
 	server 192.168.0.6 {
         	keys { particula_local; };
 	};
@@ -104,7 +105,7 @@ $ sudo vi /etc/bind/named.conf.local
 	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
 	};
 
-	// servidor primario
+	// servidor master
 	server 192.168.0.5 {
         	keys { particula_local; };
 	};
