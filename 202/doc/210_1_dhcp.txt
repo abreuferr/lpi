@@ -101,6 +101,14 @@ $ sudo vi /etc/dhcp/dhcpd.conf
         	option broadcast-address 192.168.0.254;
 	}
 
+	// fixar o endereco IP de um determinado host.
+	host workstation {
+        	# endereco mac-address.
+        	hardware ethernet 00:0c:29:fa:9c:1f;
+        	# fixar o endereco deste host.
+        	fixed-address 192.168.0.42;
+	}
+
 # reinicializar o servico
 $ sudo systemctl restart isc-dhcp-server
 $ sudo systemctl status isc-dhcp-server
@@ -137,19 +145,6 @@ $ sudo tcpdump -i ens33 port 67 or port 68 -e -n -vv
 
 # dump atraves do aplicativo dhcpdump
 $ sudo dhcpdump -i ens33
-
-# Servidor - IP fixo
-
-# editando o servidor dhcp
-$ sudo vi /etc/dhcp/dhcpd.conf
-	(...)
-	# fixar o ip para uma estacao
-	host workstation {
-        	# endereco mac-address.
-        	hardware ethernet 00:0c:29:fa:9c:1f;
-        	# fixar o endereco deste host.
-        	fixed-address 192.168.0.42;
-	}
 
 # log do servidor
 $ sudo cat /var/log/syslog
