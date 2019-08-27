@@ -20,19 +20,6 @@ ldapadd
 ldapdelete
 
 #
-# TEORIA
-#
-
-dc=particula,dc=local
-cn=admin,dc=particula,dc=local
-
-ou=users,dc=particula,dc=local
-uid=cosmo,ou=users,dc=particula,dc=local
-
-ou=groups,dc=particula,dc=local
-cn=department,ou=groups,dc=particula,dc=local
-
-#
 # INSTALACAO
 #
 
@@ -56,11 +43,22 @@ $ sudo apt-get install libnss-ldap libpam-ldapnscd ldap-utils ldapscripts libpam
 # CONFIGURACAO
 #
 
+# NSSWITCH
+$ sudo vi /etc/nsswitch.conf
+	passwd:     compat ldap
+	group:     compat ldap
+	shadow:     compat ldap
+
 # PAM configuration
 $ sudo pam-auth-update
 	[selecionar as tres opcoes]
-$ sudo vim /etc/pam.d/common-session
+
+$ sudo vi /etc/pam.d/common-password
+	password     [success=1 user_unknown=ignore default=die]     pam_ldap.so try_first_pass
+
+$ sudo vi /etc/pam.d/common-session
 	session required pam_mkhomedir.so skel=/etc/skel umask=077
+
 $ sudo systemctl restart nscd
 $ sudo systemctl enable nscd
 
