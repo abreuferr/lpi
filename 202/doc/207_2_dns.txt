@@ -168,10 +168,12 @@ $ sudo named-checkconf /etc/bind/named.conf.local
 // arquivo de configuracao da zona particula.local.
 // Hostname > IP.
 $ sudo vi /etc/bind/db.particula.local
-	; Start of Authority (SOA) record
-	$TTL 3D
+	// Start of Authority. Define o nome da zona, o email para contato
+	// e o valor de refresh aplicado na zona.
 	// nome do servidor master da zona - ns1.particula.local
 	// email do admin. da zona - root@particula.local
+	$TTL 3D
+	$ORIGIN particula.local.
 	@ IN SOA ns1.particula.local. root.particula.local. (
 		// determina um numero serial de identificacao
 		// da zona.
@@ -201,14 +203,22 @@ $ sudo vi /etc/bind/db.particula.local
 		IN NS ns2.particula.local.
 
 	; registro do Mail Exchange (MX).
-		IN MX 10 srv.particula.local.
+		IN MX 10 mail1.particula.local.
+		IN MX 20 mail2.particula.local.
 
 	; registro de associacao Hostname e IP Address (A)
 		IN A 192.168.0.5
 		IN A 192.168.0.6
+
 	ns1	IN A 192.168.0.5
 	ns2	IN A 192.168.0.6
-	srv	IN A 192.168.0.7
+
+	mail1	IN A 192.168.0.7
+	mail2	IN A 192.168.0.8
+
+	; balanceamento de carga
+	ftp	IN A 192.168.0.9
+		IN A 192.168.0.10
 
 	; registro do apelido, Canonical Name (CNAME)
 	www	IN CNAME srv
@@ -220,11 +230,12 @@ $ sudo named-checkzone particula.local /etc/bind/db.particula.local
 
 # arquivo de configuracao do dns reverso (IP > Hostname)
 $ sudo vi /etc/bind/db.0.168.192 (master)
-	; Start of Authority (SOA) record
-	$TTL 3D
-	$ORIGIN $ORIGIN 0.168.192.IN-ADDR.ARPA.
+	// Start of Authority. Define o nome da zona, o email para contato
+	// e o valor de refresh aplicado na zona.
 	// nome do servidor master da zona - ns1.particula.local
 	// email do admin. da zona - root@particula.local
+	$TTL 3D
+	$ORIGIN 0.168.192.IN-ADDR.ARPA.
 	@ IN SOA ns1.particula.local. root.particula.local. (
 		// numero de serie.
 		2010101301	; Serial
@@ -249,9 +260,14 @@ $ sudo vi /etc/bind/db.0.168.192 (master)
 		IN NS ns2.particula.local.
 
 	; registro com as associacoes reversas, IP to Hostname.
-	5	IN PTR    ns1.particula.local.
-	6	IN PTR    ns2.particula.local.
-	7	IN PTR    srv.particula.local.
+	5	IN PTR	ns1.particula.local.
+	6	IN PTR	ns2.particula.local.
+
+	7	IN PTR	mail1.particula.local.
+	8	IN PTR	mail2.particula.local.
+
+	9	IN PTR	ftp.particula.local.
+	10	IN PTR	ftp.particula.local.
 
 # testando o arquivo de configuracao da zona reversa.
 $ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192
