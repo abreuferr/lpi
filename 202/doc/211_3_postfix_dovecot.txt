@@ -37,11 +37,32 @@ $ sudo cp /etc/postfix/main.cf{,.origin}
 # configurando o Postfix para trabalhar com o Dovecot.
 $ sudo vi /etc/postfix/main.cf
 	(...)
+	# SASL parameters
+	smtpd_sasl_auth_enable = yes
 	smtpd_sasl_type = dovecot
 	smtpd_sasl_path = private/auth
+	smtpd_sasl_authenticated_header = yes
 	smtpd_sasl_auth_enable = yes
 	broken_sasl_auth_clients = yes
 	(...)
+
+	# Seguranca
+
+	# Aceita conexao apenas a partir da rede 
+	# local ou usuarios autenticados
+	smtpd_client_restrictions = permit_mynetworks,
+        	                    permit_sasl_authenticated,
+                	            reject
+ 
+	# usuarios locais ou autenticados podem 
+	# enviar emails para qualquer endereco
+	# Rejeitar todos os outros
+	smtpd_recipient_restrictions = permit_mynetworks,
+        	                       permit_sasl_authenticated,
+                	               reject_unauth_destination
+
+# verificar o arquivo de configuracao do Postfix
+$ sudo postfix check
 
 # configuracao a conexao do Dovecot.
 $ sudo cp /etc/dovecot/dovecot.conf{,.backup}
@@ -74,8 +95,8 @@ $ sudo vi /etc/dovecot/conf.d/10-master.conf
 	}
 
 	# pop3
-	service imap-login {
-		inet_listener imap {
+	service pop3-login {
+		inet_listener pop3 {
 			port = 110
 		}
 	}
