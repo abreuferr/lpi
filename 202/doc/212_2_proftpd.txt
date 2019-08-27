@@ -107,14 +107,11 @@ $ sudo vi /etc/proftpd/proftpd.conf
 
 # arquivo de configuracao do tls, tls.conf
 $ sudo vi /etc/proftpd/tls.conf
-	TLSRSACertificateFile /etc/ssl/certs/proftpd.crt
-	TLSRSACertificateKeyFile /etc/ssl/private/proftpd.key
 	TLSEngine on
 	TLSLog /var/log/proftpd/tls.log
 	TLSProtocol SSLv23
-	TLSRequired on
-	TLSOptions NoCertRequest EnableDiags NoSessionReuseRequired
-	TLSVerifyClient off
+	TLSRSACertificateFile /etc/ssl/certs/proftpd.crt
+	TLSRSACertificateKeyFile /etc/ssl/private/proftpd.key
 
 # reinicializando o proftpd
 $ sudo systemctl restart proftpd.service
