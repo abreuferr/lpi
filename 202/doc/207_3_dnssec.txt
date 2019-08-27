@@ -44,10 +44,10 @@ $ sudo vi /etc/bind/named.conf.options
 	};
 
 # CRIACAO DO Zone Signing Key(ZSK)
-$ sudo dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n ZONE particula.local
+$ sudo dnssec-keygen -a [NSEC3RSASHA1] -b [204]8 -n ZONE [particula.local]
 
 # CRIACAO DO Key Signing Key(KSK)
-$ sudo dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n ZONE particula.local ; CRIACAO DO Key Signing Key(KSK)
+$ sudo dnssec-keygen -f [KSK] -a [NSEC3RSASHA1] -b [4096] -n ZONE [particula.local]
 
 # alterando as permissoes das chaves de criptografia que foram
 # criadas nos comandos anteriores.
