@@ -57,6 +57,10 @@ $ sudo chmod 755 -R /home/nfs/[USUARIO]
 # editar o arquivos /etc/export para exportar os
 # diretorios.
 $ sudo vi /etc/exports ; configuracao do nfs server
+	# directory machine1(option11,option12) machine2(option21,option22)
+	#
+	# Option:
+	#
 	# rw - permite a leitura e escrita no diretorio
 	# ro - permite somente a opcao de leitura, opcao de escrita fica desabilidatea
 	# sync - escreve e le os dados de forma sincronizada
@@ -68,8 +72,13 @@ $ sudo vi /etc/exports ; configuracao do nfs server
 	# wdelay - atraso no processo de escrita se por acaso outro processo estiver escrevendo no disco rigido
 	#
 	# exemplo
-	# directory hostname(options)
-        # /home/nfs/[USUARIO]  192.168.10.0/24(rw,sync,no_root_squash,no_subtree_check)
+	#
+	# # host
+	# /usr/local   192.168.0.1(ro) 192.168.0.2(ro)
+	# /home        192.168.0.1(rw) 192.168.0.2(rw)
+	# # network
+	# /usr/local 192.168.0.0/255.255.255.0(ro)
+	# /home      192.168.0.0/255.255.255.0(rw)
 
 # exportar todos os diretorios listados no arquivo 
 # /etc/exports.
