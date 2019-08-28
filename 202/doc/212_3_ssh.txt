@@ -192,6 +192,10 @@ $ eval `ssh-agent -k`
 # SERVIDOR
 $ sudo vi /etc/ssh/sshd_config
 	X11Forwarding yes
+	X11DisplayOffset 10
+	X11UseLocalhost no
+
+$ sudo systemctl restart sshd.service
 	
 # CLIENTE
 $ ssh -X USUARIO@SERVIDOR_SSH
