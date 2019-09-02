@@ -173,7 +173,6 @@ $ sudo vi /etc/bind/db.particula.local
 	// nome do servidor master da zona - ns1.particula.local
 	// email do admin. da zona - root@particula.local
 	$TTL 3D
-	$ORIGIN particula.local.
 	@ IN SOA ns1.particula.local. root.particula.local. (
 		// determina um numero serial de identificacao
 		// da zona.
@@ -199,8 +198,8 @@ $ sudo vi /etc/bind/db.particula.local
 		)
 
 	; registro dos Name Server (NS).
-		IN NS ns1.particula.local.
-		IN NS ns2.particula.local.
+	@	IN NS ns1.particula.local.
+	@	IN NS ns2.particula.local.
 
 	; registro do Mail Exchange (MX).
 		IN MX 10 mail1.particula.local.

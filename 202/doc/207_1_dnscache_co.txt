@@ -63,8 +63,7 @@ $ sudo systemctl status named
 # Firewall
 #
 
-$ sudo firewall-cmd --add-port=53/tcp --permanent
-$ sudo firewall-cmd --add-port=53/udp --permanent
+$ sudo firewall-cmd --permanent --zone=public --add-service=dns
 $ sudo firewall-cmd --reload
 
 #
@@ -120,7 +119,7 @@ $ sudo vi /etc/named.conf
 
 		// especifica quais hosts podem ter o acesso ao cache 
 		// do dns-cache.
-		allow-query-cache { localhost; clients };
+		allow-query-cache { localhost; clients; };
 	};
 
 # o aplicativo named-checkconf checa a sintaxe do 

@@ -144,6 +144,9 @@ $ sudo vi /var/named/db.10.168.192.in-addr.arpa
 	7       IN PTR    ns2.particula.local.
 	8       IN PTR    srv.particula.local.
 
+# checando o arquivo de configuracao da zona reversa.
+$ sudo named-checkzone 168.192.in-addr.arpa /var/named/db.10.168.192
+
 # permissao
 $ sudo chown .named /var/named/db.10.168.192.in-addr.arpa
 

@@ -49,8 +49,7 @@ $ sudo systemctl enable named
 $ sudo systemctl status named
 
 # firewall
-$ sudo firewall-cmd --permanent --add-port=53/tcp
-$ sudo firewall-cmd --permanent --add-port=53/udp
+$ sudo firewall-cmd --permanent --zone=public --add-service=dns
 $ sudo firewall-cmd --reload
 
 #
