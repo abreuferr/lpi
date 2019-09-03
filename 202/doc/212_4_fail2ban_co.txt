@@ -53,13 +53,37 @@ $ sudo yum install fail2ban rsyslog -y
 # regra do ssh
 $ sudo vi /etc/fail2ban/jail.d/sshd.local
 	[DEFAULT]
-	bantime = 172800
-	maxretry = 5
+	# ignorar determinado endereco IP.
+	ignoreip = 127.0.0.1
 
-	[sshd]
-	enabled = true
-	filter = sshd
-	action = iptables[name=SSH, port=ssh, protocol=tcp]
+	# numero de segundos que o host eh banido.
+	bantime  = 3600
+
+	# o host é banido se tiver gerado "maxretry" 
+	# durante os ultimos  "findtime" segundos.
+	findtime  = 600
+
+	# o numero de falhas antes do host ser banido.
+	maxretry = 3
+
+	[ssh-iptables]
+	# O valor indica que o monitoramento sobre o login ssh esta ativo.
+	enabled  = true
+
+	# refere-se ao arquivo de configuracao que contem as regras que o fail2ban utilizar.
+	# por exemplo, o o sshd pode-se referir ao arquivo /etc/fail2ban/filter.d/sshd.conf
+	filter   = sshd
+	
+	# descreve os pasos que o fail2ban ira executar para banir os enderecos IP. Cada
+	# acao se refere a um arquivo que se encontra no diretorio action.d/. A acao padrao,
+	# "iptables" pode ser encontrada no arquivo /etc/fail2ban/action.d/iptables.conf
+	action   = iptables[name=SSH, port=ssh, protocol=tcp]
+        	   sendmail-whois[name=SSH, dest=root, sender=root@particula.local]
+
+	# localizacao do arquivo de log do fail2ban.
+	logpath  = /var/log/secure
+
+	# numero de tentativas de falha antes de banir o host.
 	maxretry = 5
 
 $ sudo systemctl start fail2ban
@@ -71,12 +95,16 @@ $ sudo systemctl status fail2ban
 #
 
 # servidor
+#
+# exibindo o conteudo da tabela FILTER
 $ sudo iptables -L
 
 # cliente
-$ ssh root@IP_SERVIDOR
+#
+$ ssh [USUARIO]@[FAIL2BAN_SERVER]
 
 # servidor
+#
 $ sudo iptables -L f2b-SSH
 	Chain f2b-SSH (1 references)
 	target     prot opt source               destination
