@@ -1,6 +1,6 @@
 #: Title : fail2ban
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
-#: Description : instalacao e configuracao do aplicativo fail2ban
+#: Description : instalacao e configuracao do aplicativo fail2ban no Debian
 #: Options : Weight 3
 
 Description: Candidates should be able to receive security alerts 
@@ -22,7 +22,7 @@ Terms and Utilities:
 - iptables
 
 #
-# TEORIA
+# Teoria
 #
 
 # fail2ban eh um framework desenvolvido em Python que monitora os logs, 
@@ -37,73 +37,71 @@ Terms and Utilities:
 # no texto abaixo, o software fail2ban sera instalado no gateway da rede.
 
 #
-# INSTALACAO
+# Instalacao
 #
 
-# atualizacao do gnu/linux debian.
-$ sudo apt-get update && sudo apt-get upgrade
-
-# instalacao do fail2ban
-$ sudo apt-get install fail2ban -y -d
+# instalacao
+$ sudo apt-get install fail2ban
 
 #
-# CONFIGURACAO
+# Configuracao
 #
 
-# copia de seguranca.
-$ sudo cp /etc/fail2ban/fail2ban.conf{,.origin}
+# regra do ssh
+$ sudo vi /etc/fail2ban/jail.d/sshd.local
+	[DEFAULT]
+	# ignorar determinado endereco IP.
+	ignoreip = 127.0.0.1
 
-# arquivo de configuracao do gerenciamento do
-# daemon, log, socket e pid do fail2ban.
-$ sudo vi /etc/fail2ban/fail2ban.conf
-	[Definition]
-	loglevel = ERROR
-	logtarget = /var/log/fail2ban.log
-	syslogsocket = auto
-	socket = /var/run/fail2ban/fail2ban.sock
-	pidfile = /var/run/fail2ban/fail2ban.pid
-	dbfile = /var/lib/fail2ban/fail2ban.sqlite3
-	dbpurgeage = 86400
+	# numero de segundos que o host eh banido.
+	bantime  = 600
 
-# copia de seguranca.
-$ sudo cp /etc/fail2ban/jail.conf{,.origin} 
-
-# arquivo de configuracao do fail2ban priopriamente dito.
-$ /etc/fail2ban/jail.conf
-	ignoreip = 127.0.0.1/8 192.168.0.0/24
-	bantime  = 1800
-	findtime = 1800
-	maxretry = 3
-	destemail = root@localhost
-
-	action = %(action_mwl)s
-
-	[sshd]
-	enabled = true
-	port    = ssh
-	logpath = %(sshd_log)s
-	backend = %(sshd_backend)s
-	filter  = sshd
+	# o numero de falhas antes do host ser banido.
 	maxretry = 3
 
-	[sshd-ddos]
-	port    = ssh
-	logpath = %(sshd_log)s
-	backend = %(sshd_backend)s
+	# "backend" especifica o backend utilizado para acessar o arquivo 
+	de notificacao.
+	backend = auto
+ 
+	# e-mail de destino.
+	destemail = root@particula.local
 
-# reinicializar o fail2ban
+	[ssh]
+	# O valor indica que o monitoramento sobre o login ssh esta ativo.
+	enabled  = true
+
+	# especificar a porta de trabalho do ssh.
+	port     = sshd
+
+	# refere-se ao arquivo de configuracao que contem as regras que o fail2ban utilizar.
+	# por exemplo, o o sshd pode-se referir ao arquivo /etc/fail2ban/filter.d/sshd.conf
+	filter   = sshd
+	
+	# localizacao do arquivo de log do fail2ban.
+	logpath  = /var/log/secure
+
+	# numero de tentativas de falha antes de banir o host.
+	maxretry = 5
+
 $ sudo systemctl restart fail2ban
 
-# obter mais informaoes sobre o status do servico
-$ sudo fail2ban-client status
-$ sudo fail2ban-client status ssh
-
 #
-# CLIENTE
+# Teste
 #
 
-# status do fail2ban
-$ sudo fail2ban-client status
+# servidor
+#
+# exibindo o conteudo da tabela FILTER
+$ sudo iptables -L
 
-# status do fail2ban sshd
-$ sudo fail2ban-client status sshd
+# cliente
+#
+$ ssh [USUARIO]@[FAIL2BAN_SERVER]
+
+# servidor
+#
+$ sudo iptables -L f2b-SSH
+	Chain f2b-SSH (1 references)
+	target     prot opt source               destination
+	REJECT     all  --  192.168.10.1         anywhere             reject-with icmp-port-unreachable
+	RETURN     all  --  anywhere             anywhere
