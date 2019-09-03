@@ -131,7 +131,7 @@ $ sudo vi /etc/nginx/conf.d/particula.local.conf
 		access_log  /var/log/nginx/particula.local.access.log;
 		error_log  /var/log/nginx/particula.local.error.log;
 
-		location / {
+		location /html/ {
 			# diretorio a onde sera armazenado os arquivos do site do
 			# dominio virtual.
 			root   /usr/share/nginx/particula.local/html;
@@ -148,22 +148,25 @@ $ sudo nginx -t
 $ sudo nginx -s reload
 
 # teste
-$ w3m http://www.particula.local
+$ w3m http://www.particula.local/html/
 
 #
 # Autenticacao Basica
 #
 
 # criar o arquivo para armazenar usuario/senha
-$ sudo htpasswd -c /usr/share/nginx/particula.local/webpass <USUARIO>
-$ sudo htpasswd /usr/share/nginx/particula.local/webpass <USUARIO>
+$ sudo mkdir -p /usr/share/nginx/particula.local/webpass
+$ sudo htpasswd -c /usr/share/nginx/particula.local/webpass/webpass <USUARIO>
+$ sudo htpasswd /usr/share/nginx/particula.local/webpass/webpass <USUARIO>
 
 # configuracao do VirtualHost particula.local
 $ sudo vi /etc/nginx/conf.d/particula.local.conf
 	server{
-		location / {
+		location /webpass/ {
+			root   /usr/share/nginx/particula.local/html;
+			index  index.html index.htm;
 			auth_basic "Restricted Content";
-			auth_basic_user_file /usr/share/nginx/particula.local/webpass;
+			auth_basic_user_file /usr/share/nginx/particula.local/webpass/webpass;
 		}
 	}
 
@@ -174,7 +177,7 @@ $ sudo nginx -t
 $ sudo nginx -s reload
 
 # teste
-$ w3m http://www.particula.local
+$ w3m http://www.particula.local/webpass/
 
 #
 # SSL
