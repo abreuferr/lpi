@@ -290,7 +290,7 @@ $ sudo vi /var/www/particula.local/cgi-bin/perltest.pl
 
 # teste
 $ sudo perl -Tw /var/www/particula.local/cgi-bin/perltest.pl
-$ w3m http://www.particula.local/perltest.pl
+$ w3m http://www.particula.local/cgi-bin/perltest.pl
 
 #
 # Autenticacao de acesso via usuario/grupo e senha
@@ -333,7 +333,7 @@ $ sudo /etc/apache2/sites-available/particula.local.conf
 			Allow from all
 		</Directory>
 		(...)
-		</VirtualHost>
+	</VirtualHost>
 
 # checagem da configuracao do apache2
 $ sudo apachectl configtest
