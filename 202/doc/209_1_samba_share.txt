@@ -53,8 +53,7 @@ $ sudo reboot
 #
 
 # atualizacao do gnu/linux debian
-$ sudo apt-get update
-$ sudo apt-get upgrade
+$ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do samba
 $ sudo apt-get install samba samba-common -y -d
@@ -63,8 +62,7 @@ $ sudo apt-get install samba samba-common -y -d
 # SAMBASHARE que sera utilizado mais para a frente.
 
 # status dos servicos do samba
-$ sudo systemctl status smbd
-$ sudo systemctl status nmbd
+$ sudo systemctl status smbd nmbd
 
 #
 # USUARIO
@@ -89,11 +87,16 @@ $ sudo chmod 2770 /home/samba/caio
 # sudo useradd [USER] -m -G [GROUP]
 $ sudo useradd caio -m -G sambashare
 
+# como o Samba NAO trabalha com os arquivos
+# /etc/passwd e /etc/shadow, entao eh necessario
+# criar uma base de dados com os usuarios e suas
+# respectivas senhas.
+#
 # cadastrar a senha o usuario adicionado
 # no comando anterior.
-$ sudo smbpasswd -h
-# sudo smbpasswd -a [USER]
-# sudo smbpasswd -e [USER]
+# sudo smbpasswd -h - help/ajuda
+# sudo smbpasswd -a [USER] - cadastrar a senha
+# sudo smbpasswd -e [USER] - habilitar a conta
 $ sudo smbpasswd -a caio
 $ sudo smbpasswd -e caio
 
@@ -123,7 +126,7 @@ $ sudo chmod -R 0775 /home/samba/guest
 #
 
 # copia de seguranca do arquivo de configuracao
-$ sudo mv /etc/samba/smb.conf /etc/samba/smb.conf.origin
+$ sudo mv /etc/samba/smb.conf{,.origin}
 
 # editando o arquivo de configuracao do samba
 $ sudo vi /etc/samba/smb.conf
