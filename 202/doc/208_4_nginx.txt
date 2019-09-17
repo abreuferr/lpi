@@ -20,8 +20,7 @@ Terms and Utilities:
 #
 
 # atualizacao do gnu/linux debian
-$ sudo apt-get update
-$ sudo apt-get upgrade
+$ sudo apt-get update && sudo apt-get upgrade
 
 # obter a chave de criptografia do repositorio
 $ wget http://nginx.org/keys/nginx_signing.key
@@ -54,7 +53,7 @@ $ sudo systemctl enable nginx
 # nesse arquivo ira afetar todo o nginx.
 
 # copia de seguranca do arquivo de configuracao do nginx
-$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.BKP
+$ sudo cp /etc/nginx/nginx.conf{,.origin}
 
 # arquivo de configuracao do nginx.
 $ sudo vi /etc/nginx/nginx.conf
@@ -115,7 +114,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# porta em que o nginx ira trabalhar, ipv4 e ipv6
 		listen 80;
-		listen [::]:80;
 
 		# diretorio a onde sera armazenado os arquivos do site do
 		# dominio virtual.
@@ -248,7 +246,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 	        # porta em que o nginx ira trabalhar, ipv4 e ipv6
 	        listen 80;
-	        listen [::]:80;
 
 		# nome do dominio
 		server_name *.particula.local;
@@ -313,7 +310,7 @@ $ sudo chmod 770 /var/cache/nginx
 $ sudo find /var/cache/nginx -type f -delete
 
 # copia de seguranca
-$ sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.origin
+$ sudo cp /etc/nginx/nginx.conf{,.origin}
 
 # configuracao do cache
 $ sudo vi /etc/nginx/nginx.conf
@@ -356,7 +353,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# geral
         	listen 80;
-		listen [::]:80;
 	        server_name *.particula.local;
 
 	        # log files
@@ -391,7 +387,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# o nginx fica escutando a porta 80, ipv4/6
 		listen 80;
-		listen [::]:80;
 
 		# redirecionamento do http para o https
 		return 301 https://$host$request_uri;
@@ -402,7 +397,6 @@ $ sudo vi /etc/nginx/sites-available/particula.local
 	server {
 		# geral ssl
 	        listen 443 ssl http2;
-		listen [::]:443 ssl http2;
 
 		# nome do dominio virtual.
 	        server_name particula.local www.particula.local;
