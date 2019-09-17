@@ -80,13 +80,21 @@ $ sudo vi /etc/exports ; configuracao do nfs server
 	# /usr/local 192.168.0.0/255.255.255.0(ro)
 	# /home      192.168.0.0/255.255.255.0(rw)
 
-# exportar todos os diretorios listados no arquivo 
-# /etc/exports.
+# o aplicativo EXPORTFS mantem a tabela do sistema de arquivos
+# atualizada que eh acessivel pelo cliente NFS.
+# a tabela principal esta localizada no aquivo /var/lib/nfs/etab.
+# este arquivo eh lido pelo aplicativo rpc.mountd quando o cliente
+# envia a requisicao NFS MOUNT.
+#
 $ sudo exportfs -av
 	# [none] - exibi quais sao os diretorios que estao exportados (ativos).
-	# -av - export diretorios presentes no arquivo /etc/exports.
-	# -arv - re-export diretorios presentes no arquivo /etc/exports.
-	# -auv - unexport diretorio presentes no arquivo /etc/exports.
+	# -a - export diretorios presentes no arquivo /etc/exports.
+	# -r - reexporta todos os diretorios, sincronizando o arquivo
+	#      /var/lib/nfs/etab com o diretorio /etc/exports. Essa opcao
+	#      remove entradas que estao do arquivo /var/lib/nfs/etab e nao
+	#      estao no arquivo /etc/exports.
+	# -ar - re-export diretorios presentes no arquivo /etc/exports.
+	# -au - unexport diretorio presentes no arquivo /etc/exports.
 	# -vv - modo verbose, com mais detalhes.
 
 #
@@ -110,8 +118,14 @@ $ sudo mkdir -p /home/[USUARIO]/nfs
 $ sudo chown root:users -R /home/[USUARIO]/nfs
 $ sudo chmod 755 -R /home/[USUARIO]/nfs
 
-# informacao sobre o diretorio que esta sendo
-# exportado pelo servidor nfs.
+# o aplicativo EXPORTFS exibe informacoes sobre os diretorios
+# que estao sendo exportados pelo servidor NFS.
+# 
+# showmount [OPCAO] [HOST]
+# -a - lista o hostname ou o endereco IP e o diretorio montado.
+# -d - lista somente o diretorio.
+# -e - exibe a lista de diretorios que estao sendo exportados pelo NFS.
+# 
 $ sudo showmount -e 192.168.0.11
 
 # montando o diretorio exportado pelo servidor NFS
