@@ -1,0 +1,23 @@
+#: Title : X.509 Certificates for Encryption, Signing and Authentication
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : X.509 Certificates for Encryption, Signing and Authentication
+#: Options : Weight: 4
+
+Description: Candidates should know how to use X.509 certificates for both server 
+and client authentication. Candidates should be able to implement user and server 
+authentication for Apache HTTPD. The version of Apache HTTPD covered is 2.4 or higher.
+
+Key Knowledge Areas:
+- Understand SSL, TLS and protocol versions
+- Understand common transport layer security threats, for example Man-in-the-Middle
+- Configure Apache HTTPD with mod_ssl to provide HTTPS service, including SNI and HSTS
+- Configure Apache HTTPD with mod_ssl to authenticate users using certificates
+- Configure Apache HTTPD with mod_ssl to provide OCSP stapling
+- Use OpenSSL for SSL/TLS client and server tests
+
+Terms and Utilities:
+- Intermediate certification authorities
+- Cipher configuration (no cipher-specific knowledge)
+- httpd.conf
+- mod_ssl
+- openssl

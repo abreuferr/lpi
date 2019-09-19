@@ -1,0 +1,33 @@
+#: Title : Host Intrusion Detection
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Host Intrusion Detection
+#: Options : Weight: 4
+
+Description: Candidates should be familiar with the use and 
+configuration of common host intrusion detection software. 
+This includes updates and maintenance as well as automated 
+host scans.
+
+Key Knowledge Areas:
+- Use and configure the Linux Audit system
+- Use chkrootkit
+- Use and configure rkhunter, including updates
+- Use Linux Malware Detect
+- Automate host scans using cron
+- Configure and use AIDE, including rule management
+- Be aware of OpenSCAP
+
+Terms and Utilities:
+auditd
+auditctl
+ausearch, aureport
+auditd.conf
+auditd.rules
+pam_tty_audit.so
+chkrootkit
+rkhunter
+/etc/rkhunter.conf
+maldet
+conf.maldet
+aide
+/etc/aide/aide.conf

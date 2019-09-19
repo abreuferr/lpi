@@ -1,0 +1,20 @@
+#: Title : Discretionary Access Control
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Discretionary Access Control
+#: Options : Weight: 3
+
+Description: Candidates are required to understand Discretionary 
+Access Control and know how to implement it using Access Control 
+Lists. Additionally, candidates are required to understand and 
+know how to use Extended Attributes.
+
+Key Knowledge Areas:
+- Understand and manage file ownership and permissions, including SUID and SGID
+- Understand and manage access control lists
+- Understand and manage extended attributes and attribute classes
+
+Terms and Utilities:
+- getfacl
+- setfacl
+- getfattr
+- setfattr

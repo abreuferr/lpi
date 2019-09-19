@@ -1,0 +1,23 @@
+#: Title : Encrypted File Systems
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Encrypted File Systems
+#: Options : Weight: 3
+
+Description: Candidates should be able to setup and configure 
+encrypted file systems.
+
+Key Knowledge Areas:
+- Understand block device and file system encryption
+- Use dm-crypt with LUKS to encrypt block devices
+- Use eCryptfs to encrypt file systems, including home directories and
+- PAM integration
+- Be aware of plain dm-crypt and EncFS
+
+Terms and Utilities:
+- cryptsetup
+- cryptmount
+- /etc/crypttab
+- ecryptfsd
+- ecryptfs-* commands
+- mount.ecryptfs, umount.ecryptfs
+- pam_ecryptfs

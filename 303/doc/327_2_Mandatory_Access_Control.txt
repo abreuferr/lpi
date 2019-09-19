@@ -1,0 +1,26 @@
+#: Title : Mandatory Access Control
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Mandatory Access Control
+#: Options : Weight: 4
+
+Description: Candidates should be familiar with Mandatory Access 
+Control systems for Linux. Specifically, candidates should have 
+a thorough knowledge of SELinux. Also, candidates should be aware 
+of other Mandatory Access Control systems for Linux. This includes 
+major features of these systems but not configuration and use.
+
+Key Knowledge Areas:
+- Understand the concepts of TE, RBAC, MAC and DAC
+- Configure, manage and use SELinux
+- Be aware of AppArmor and Smack
+
+Terms and Utilities:
+- getenforce, setenforce, selinuxenabled
+- getsebool, setsebool, togglesebool
+- fixfiles, restorecon, setfiles
+- newrole, runcon
+- semanage
+- sestatus, seinfo
+- apol
+- seaudit, seaudit-report, audit2why, audit2allow
+- /etc/selinux/*

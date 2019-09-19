@@ -1,0 +1,28 @@
+#: Title : Packet Filtering
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Packet Filtering
+#: Options : Weight: 5
+
+Description: Candidates should be familiar with the use and 
+configuration of packet filters. This includes netfilter, 
+iptables and ip6tables as well as basic knowledge of nftables, 
+nft and ebtables.
+
+Key Knowledge Areas:
+- Understand common firewall architectures, including DMZ
+- Understand and use netfilter, iptables and ip6tables, including standard modules, tests and targets
+- Implement packet filtering for both IPv4 and IPv6
+- Implement connection tracking and network address translation
+- Define IP sets and use them in netfilter rules
+- Have basic knowledge of nftables and nft
+- Have basic knowledge of ebtables
+- Be aware of conntrackd
+
+Terms and Utilities:
+- iptables
+- ip6tables
+- iptables-save, iptables-restore
+- ip6tables-save, ip6tables-restore
+- ipset
+- nft
+- ebtables

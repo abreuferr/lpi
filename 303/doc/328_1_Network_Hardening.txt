@@ -1,0 +1,27 @@
+#: Title : Network Hardening
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Network Hardening
+#: Options : Weight: 4
+
+Description: Candidates should be able to secure networks against 
+common threats. This includes verification of the effectiveness of 
+security measures.
+
+Key Knowledge Areas:
+- Configure FreeRADIUS to authenticate network nodes
+- Use nmap to scan networks and hosts, including different scan methods
+- Use Wireshark to analyze network traffic, including filters and statistics
+- Identify and deal with rogue router advertisements and DHCP messages
+
+Terms and Utilities:
+- radiusd
+- radmin
+- radtest, radclient
+- radlast, radwho
+- radiusd.conf
+- /etc/raddb/*
+- nmap
+- wireshark
+- tshark
+- tcpdump
+- ndpmon

@@ -1,0 +1,26 @@
+#: Title : Network Intrusion Detection
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Network Intrusion Detection
+#: Options : Weight: 4
+
+Description: Candidates should be familiar with the use 
+and configuration of network security scanning, network 
+monitoring and network intrusion detection software. This 
+includes updating and maintaining the security scanners.
+
+Key Knowledge Areas:
+- Implement bandwidth usage monitoring
+- Configure and use Snort, including rule management
+- Configure and use OpenVAS, including NASL
+
+Terms and Utilities:
+- ntop
+- Cacti
+- snort
+- snort-stat
+- /etc/snort/*
+- openvas-adduser, openvas-rmuser
+- openvas-nvt-sync
+- openvassd
+- openvas-mkcert
+- /etc/openvas/*

@@ -1,0 +1,21 @@
+#: Title : Installation and Samba Integration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Installation and Samba Integration
+#: Options : Weight: 4
+
+Description: Candidates should be familiar with FreeIPA v4.x. This 
+includes installation and maintenance of a server instance with a 
+FreeIPA domain as well as integration of FreeIPA with Active Directory.
+
+Key Knowledge Areas:
+- Understand FreeIPA, including its architecture and components
+- Understand system and configuration prerequisites for installing FreeIPA
+- Install and manage a FreeIPA server and domain
+- Understand and configure Active Directory replication and Kerberos cross-realm trusts
+- Be aware of sudo, autofs, SSH and SELinux integration in FreeIPA
+
+Terms and Utilities:
+- 389 Directory Server, MIT Kerberos, Dogtag Certificate System, NTP, DNS, SSSD, certmonger
+- ipa, including relevant subcommands
+- ipa-server-install, ipa-client-install, ipa-replica-install
+- ipa-replica-prepare, ipa-replica-manage

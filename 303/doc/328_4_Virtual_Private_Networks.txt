@@ -1,0 +1,19 @@
+#: Title : Virtual Private Networks
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Virtual Private Networks
+#: Options : Weight: 4
+
+Description: Candidates should be familiar with the use of 
+OpenVPN and IPsec.
+
+Key Knowledge Areas:
+- Configure and operate OpenVPN server and clients for both bridged and routed VPN networks
+- Configure and operate IPsec server and clients for routed VPN networks using IPsec-Tools / racoon
+- Awareness of L2TP
+
+Terms and Utilities:
+- /etc/openvpn/*
+- openvpn server and client
+- setkey
+- /etc/ipsec-tools.conf
+- /etc/racoon/racoon.conf

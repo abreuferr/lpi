@@ -1,0 +1,35 @@
+#: Title : User Management and Authentication
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : User Management and Authentication
+#: Options : Weight: 5
+
+Description: Candidates should be familiar with management 
+and authentication of user accounts. This includes configuration 
+and use of NSS, PAM, SSSD and Kerberos for both local and remote 
+directories and authentication mechanisms as well as enforcing a 
+password policy.
+
+Key Knowledge Areas:
+- Understand and configure NSS
+- Understand and configure PAM
+- Enforce password complexity policies and periodic password changes
+- Lock accounts automatically after failed login attempts
+- Configure and use SSSD
+- Configure NSS and PAM for use with SSSD
+- Configure SSSD authentication against Active Directory, IPA, LDAP, Kerberos and local domains
+- Kerberos and local domains
+- Obtain and manage Kerberos tickets
+
+Terms and Utilities:
+- nsswitch.conf
+- /etc/login.defs
+- pam_cracklib.so
+- chage
+- pam_tally.so, pam_tally2.so
+- faillog
+- pam_sss.so
+- sssd
+- sssd.conf
+- sss_* commands
+- krb5.conf
+- kinit, klist, kdestroy

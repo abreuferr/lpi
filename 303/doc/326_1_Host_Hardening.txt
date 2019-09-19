@@ -1,0 +1,28 @@
+#: Title : Host Hardening
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Host Hardening
+#: Options : Weight: 3
+
+Description: Candidates should be able to secure computers 
+running Linux against common threats. This includes kernel 
+and software configuration.
+
+Key Knowledge Areas:
+- Configure BIOS and boot loader (GRUB 2) security
+- Disable useless software and services
+- Use sysctl for security related kernel configuration, particularly ASLR, Exec-Shield and IP / ICMP configuration
+- Exec-Shield and IP / ICMP configuration
+- Limit resource usage
+- Work with chroot environments
+- Drop unnecessary capabilities
+- Be aware of the security advantages of virtualization
+
+Terms and Utilities:
+- grub.cfg
+- chkconfig, systemctl
+- ulimit
+- /etc/security/limits.conf
+- pam_limits.so
+- chroot
+- sysctl
+- /etc/sysctl.conf

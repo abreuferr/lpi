@@ -1,0 +1,28 @@
+#: Title : Network File Systems
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Network File Systems
+#: Options : Weight: 3
+
+Description: Candidates should have experience and knowledge 
+of security issues in use and configuration of NFSv4 clients 
+and servers as well as CIFS client services. Earlier versions 
+of NFS are not required knowledge.
+
+Key Knowledge Areas:
+- Understand NFSv4 security issues and improvements
+- Configure NFSv4 server and clients
+- Understand and configure NFSv4 authentication mechanisms (LIPKEY, SPKM, Kerberos)
+- Understand and use NFSv4 pseudo file system
+- Understand and use NFSv4 ACLs
+- Configure CIFS clients
+- Understand and use CIFS Unix Extensions
+- Understand and configure CIFS security modes (NTLM, Kerberos)
+- Understand and manage mapping and handling of CIFS ACLs and SIDs in a Linux system
+
+Terms and Utilities:
+- /etc/exports
+- /etc/idmap.conf
+- nfs4acl
+- mount.cifs parameters related to ownership, permissions and security modes
+- winbind
+- getcifsacl, setcifsacl
