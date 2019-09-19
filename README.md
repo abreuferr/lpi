@@ -1,5 +1,8 @@
-# lpi 101/102
+# LPIC  101/102
 - Material de estudo e exercicios.
 
-# lpi 201/202
+# LPIC 201/202
+- Material de estudo e exercicios.
+
+# LPIC 303
 - Material de estudo e exercicios.
