@@ -1,0 +1,523 @@
+#: Title : DNS and Cryptography
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : DNS and Cryptography
+#: Options : Weight: 5 
+
+Description: Candidates should have experience and knowledge of 
+cryptography in the context of DNS and its implementation using 
+BIND. The version of BIND covered is 9.7 or higher.
+
+Key Knowledge Areas:
+- Understanding of DNSSEC and DANE
+- Configure and troubleshoot BIND as an authoritative name server serving DNSSEC secured zones
+- Configure BIND as an recursive name server that performs DNSSEC validation on behalf of its clients
+- Key Signing Key, Zone Signing Key, Key Tag
+- Key generation, key storage, key management and key rollover
+- Maintenance and re-signing of zones
+- Use DANE to publish X.509 certificate information in DNS
+- Use TSIG for secure communication with BIND
+
+Terms and Utilities:
+- DNS, EDNS, Zones, Resource Records
+- DNS resource records: DS, DNSKEY, RRSIG, NSEC, NSEC3, NSEC3PARAM, TLSA
+- DO-Bit, AD-Bit
+- TSIG
+- named.conf
+- dnssec-keygen
+- dnssec-signzone
+- dnssec-settime
+- dnssec-dsfromkey
+- rndc
+- dig
+- delv
+- openssl
+
+#
+# Instalacao do Bind
+#
+
+# o processo de atualizacao do SO e instalacao deve
+# ser executado tanto no servidor primario, ns1, quanto
+# no secundario, ns2.
+
+# atualizacao
+$ sudo apt-get update && sudo apt-get upgrade
+
+# instalacao do bind e alterando permissao.
+$ sudo apt-get install bind9 dnsutils bind9-doc -y -d
+$ sudo chown -R bind:bind /etc/bind
+
+#
+# Configuracao do servidor Master (ns1)
+#
+
+# a opcao INCLUDE permite a subdivisao do arquivo
+# de configuracao do Bind em varios arquivos. Desta
+# forma, é possivel segmentar a configuracao em varios
+# arquivos.
+$ cat /etc/bind/named.conf
+        include "/etc/bind/named.conf.options";
+        include "/etc/bind/named.conf.local";
+        include "/etc/bind/named.conf.default-zones";
+
+# ajustes no arquivo named.conf.options
+$ sudo cp /etc/bind/named.conf.options{,.origin}
+$ sudo vi /etc/bind/named.conf.options
+	// acl para controle de quem podera fazer requisicao 
+	// de resolucao.
+	acl rede {
+		// rede que podera fazer reqisicao de resolucao
+		// de nome.
+        	192.168.0.0/24;
+	};
+
+	options {
+        	// diretorio de trabalho do servidor.
+        	directory "/etc/bind";
+
+		// por motivos de seguranca, ocultar a
+		// versao do Bind.
+		version none;
+
+                // o bind ficara escutando a porta 53 e ira
+                // responder a requisicoes vindas do 127.0.0.1
+                // e de estacoes provenientes de "rede".
+                listen-on port 53 { localhost; rede; };
+
+        	// quais os hosts ou rede que podem fazer requisicao
+		// de resolucao de um nome.
+        	allow-query { rede; };
+
+		// permitir a requisicao de recursao somente para
+		// hosts presentes na rede local. Se por acaso for
+		// um servidor de dns aberto, nao habilitar essa
+		// opcao.
+		allow-recursion { rede; };
+	};
+
+# o programa named-checonf verifica a o arquivo de configuracao
+# em relacao a sintaxe.
+$ sudo named-checkconf /etc/bind/named.conf.options
+
+# arquivo que contem as entradas das zonas que
+# o bind ira gerenciar.
+#
+$ sudo cp /etc/bind/named.conf.local{,.origin}
+$ sudo vi /etc/bind/named.conf.local
+	// configuracao da zona particula.local
+	zone "particula.local" in {
+		// servidor do tipo master
+		// existem servidores do tipo MASTER, SLAVE
+		// HINT e FORWARD.
+	        type master;
+
+		// arquivo de configuracao da zona particula.local
+	        file "db.particula.local";
+
+		// os dados da configuracao do servidor master serao
+		// transferidos para o servidor slave. essa transferencia
+		// se chama de transferencia de zona.	
+	        allow-transfer { 192.168.0.6; };
+
+		// o servidor master ira notificar o servidor slave de
+		// que houve uma alteracao na configuracao da zona.
+    		notify yes;
+	};
+
+	// configuracao reversa da zona particula.local
+	// o arquivo de nome "addr.arpa" indica que eh um
+	// arquivo de dns reverso.
+	zone "0.168.192.in-addr.arpa" in {
+		// servidor do tipo master.
+		// existem servidores do tipo MASTER, SLAVE
+		// HINT e FORWARD.
+	        type master;
+
+		// arquivo de configuracao da zona particula.local
+	        file "db.0.168.192";
+
+		// os dados da zona serao transferidos para o servidor
+		// slave.
+	    	allow-transfer { 192.168.0.6; };
+
+		// o servidor master ira notificar o servidor slave de
+		// que houve uma alteracao na configuracao da zona.
+    		notify yes;
+	};
+
+# o programa named-checonf verifica a o arquivo de configuracao
+# em relacao a sintaxe.
+$ sudo named-checkconf /etc/bind/named.conf.local
+
+// arquivo de configuracao da zona particula.local.
+// Hostname > IP.
+$ sudo vi /etc/bind/db.particula.local
+	// Start of Authority. Define o nome da zona, o email para contato
+	// e o valor de refresh aplicado na zona.
+	// nome do servidor master da zona - ns1.particula.local
+	// email do admin. da zona - root@particula.local
+	$TTL 3D
+	@ IN SOA ns1.particula.local. root.particula.local. (
+		// determina um numero serial de identificacao
+		// da zona.
+		// pode ser qualquer numero, mas por padrao 
+		// utiliza-se a data de criacao da zona e um serial.
+		// a cada nova alteracao, o serial deve ser alterado
+		// para um valor maior.
+		2010101301	;Serial
+
+		// frequencia com que o servidor slave checa a
+		// procura de alteracao.
+		8H		; Refresh
+
+		// em caso de falha, tempo para nova tentativa.
+		2H		; Retry
+
+		// tempo em que a informacao sobre a zona fica
+		// invalida.
+		4W		; Expire
+
+		// tempo de vida.
+		1D 		; Negative Cache TTL
+		)
+
+	; registro dos Name Server (NS).
+	@	IN NS ns1.particula.local.
+	@	IN NS ns2.particula.local.
+
+	; registro do Mail Exchange (MX).
+		IN MX 10 mail1.particula.local.
+		IN MX 20 mail2.particula.local.
+
+	; registro de associacao Hostname e IP Address (A)
+		IN A 192.168.0.5
+		IN A 192.168.0.6
+
+	ns1	IN A 192.168.0.5
+	ns2	IN A 192.168.0.6
+
+	mail1	IN A 192.168.0.7
+	mail2	IN A 192.168.0.8
+
+	; balanceamento de carga
+	ftp	IN A 192.168.0.9
+		IN A 192.168.0.10
+
+	; registro do apelido, Canonical Name (CNAME)
+	www	IN CNAME srv
+
+# testando o arquivo de configuracao da zona.
+$ sudo named-checkzone particula.local /etc/bind/db.particula.local
+	zone particula.local/IN: loaded serial 2019062204
+	OK
+
+# arquivo de configuracao do dns reverso (IP > Hostname)
+$ sudo vi /etc/bind/db.0.168.192 (master)
+	// Start of Authority. Define o nome da zona, o email para contato
+	// e o valor de refresh aplicado na zona.
+	// nome do servidor master da zona - ns1.particula.local
+	// email do admin. da zona - root@particula.local
+	$TTL 3D
+	$ORIGIN 0.168.192.IN-ADDR.ARPA.
+	@ IN SOA ns1.particula.local. root.particula.local. (
+		// numero de serie.
+		2010101301	; Serial
+
+		// frequencia com que o servidor slave checa a
+		// procura de alteracao.
+		8H		; Refresh
+
+		// em caso de falha, tempo para nova tentativa.
+		2H		; Retry
+
+		// tempo em que a informacao sobre a zona fica
+		// invalida.
+		4W		; Expire
+
+		// tempo de vida.
+                1D 		; Negative Cache TTL
+                )
+
+	; registro com os servidores Name Servers.
+		IN NS ns1.particula.local.
+		IN NS ns2.particula.local.
+
+	; registro com as associacoes reversas, IP to Hostname.
+	5	IN PTR	ns1.particula.local.
+	6	IN PTR	ns2.particula.local.
+
+	7	IN PTR	mail1.particula.local.
+	8	IN PTR	mail2.particula.local.
+
+	9	IN PTR	ftp.particula.local.
+	10	IN PTR	ftp.particula.local.
+
+# testando o arquivo de configuracao da zona reversa.
+$ sudo named-checkzone 0.168.192.in-addr.arpa /etc/bind/db.0.168.192
+	zone 0.168.192.in-addr.arpa/IN: loaded serial 2019062204
+	OK
+
+# reler os arquivos de configuracao do Bind.
+$ sudo rndc reload
+	server reload successful
+
+# conteudo do arquivo resolv.conf
+$ sudo cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.0.5
+	nameserver 192.168.0.6
+
+#
+# Configuracao do servidor Slave (ns2)
+#
+
+# arquivos de configuracao do bind
+$ sudo cp /etc/bind/named.conf.options{,.origin}
+$ sudo vi /etc/bind/named.conf.options
+	// acl para controle de quem podera fazer requisicao 
+	// de resolucao.
+	acl rede {
+		// rede que podera fazer reqisicao de resolucao
+		// de nome.
+        	192.168.0.0/24;
+	};
+
+	options {
+        	// diretorio de trabalho do servidor.
+        	directory "/etc/bind";
+
+		// por motivos de seguranca, ocultar a
+		// versao do Bind.
+		version none;
+
+                // o bind ficara escutando a porta 53 e ira
+                // responder a requisicoes vindas do 127.0.0.1
+                // e de estacoes provenientes de "rede".
+                listen-on port 53 { localhost; rede; };
+
+		// desabilita qualquer requisicao de transferencia
+		// de zona.
+		allow-transfer{"none"};
+
+        	// quais os hosts ou rede que podem fazer requisicao
+		// de resolucao de um nome.
+        	allow-query { rede; };
+
+		// recursividade.
+		// dns fechado - permite que somente hosts locais possam
+		// requisitar recursividade.
+		// dns aberto - remover essa opcao para suportar todos os
+		// hosts.
+		allow-recursion { localhost; rede; };
+	};
+
+$ sudo cp /etc/bind/named.conf.local{,.origin}
+$ sudo vi /etc/bind/named.conf.local
+	// configuracao da zona particula.local
+	zone "particula.local" IN {
+		// servidor do tipo slave
+		type slave;
+
+		// arquivo de configuracao da zona
+		file "db.particula.local";
+
+		// endereco do servidor master
+		masters { 192.168.0.5; };
+
+		// notificar o servidor master
+		allow-notify { 192.168.0.5; };
+	};
+
+	// configuracao reversa da zona particula.local
+	zone "0.168.192.in-addr.arpa" IN {
+		// servidor do tipo slave
+		type slave;
+
+		// arquivo de configuracao da zona
+		file "db.0.168.192";
+
+		// endereco ip do servidor master
+		masters { 192.168.0.5; };
+
+		// notificar o servidor master
+		allow-notify { 192.168.0.5; };
+	};
+
+# o programa named-checonf verifica a o arquivo de configuracao
+# em relacao a sintaxe.
+$ sudo named-checkconf /etc/bind/named.conf.options
+
+# reinicializar o bind.
+$ sudo systemctl restart bind9.service
+
+# conteudo do arquivo resolv.conf
+$ sudo cat /etc/resolv.conf
+	domain particula.local
+	search particula.local
+	nameserver 192.168.0.6
+	nameserver 192.168.0.7
+
+####################################################################################
+
+#
+# Transaction SIGnatures# TSIG (Transaction SIGnatures)
+#
+
+#
+# Teoria
+#
+
+# TSIG eh um mecanismo de autenticacao das mensagens do DNS. O TSIG permite que as
+# mensagens sejam assinadas utilizando uma chave de criptografia compartilhado entre
+# os servidores. A tecnologia TSIG pode ser utilizado por qualquer transacao DNS.
+#
+# O TSIG protege os seguintes tipos de transacoes entre os servidores de dns.
+# - transferencia de zona
+# - notificacao
+# - atualizacao dinamica
+# - mensagens de requisicao recursiva
+#
+# como o tsig funciona:
+# 1 - eh criado e adicionado na configuracao de cada servidor Bind, o registro TSIG
+# 2 - o registro tsig assina as mensagens geradas pelo DNS, fazendo com que as mensagens
+#     trocadas entre o servidores nao podem ser modificados durante a transicao entre os
+#     servidores.
+# 3 - o tsig se utiliza da funcao hash para prover autenticidade e integridade das informacoes
+#     trocadas entre os servidores.
+
+#
+# Configuracao do servidor Master - ns1
+#
+
+# criacao da chave de criptografia que sera utilizada na troca
+# de informacoes e configuracao entre os servidores master e 
+# slave.
+$ cd /etc/bind/
+$ dnssec-keygen -a [HMAC-MD5] -b [512] -n HOST [particula_local]
+	-a especificar qual eh o algoritmo que sera utilizado para criar as chaves
+	-b especifica o tamanho da chave
+	-n especifica o tipo de chave que poder ser do tipo ZONE, HOST, ENTITY ou USER
+
+# sao criados dois arquivos.
+#
+# Kparticula_local.+157+01247.key - Contem a chave publica. O conteudo do arquivos contem o registro DNS KEY que sera inserido no arquivo da zona.
+# Kparticula_local.+157+01247.private - Contem a chave primaria. O arquivo .private contem informacoes referentes ao algoritmo.
+
+# conteudo da chave privada
+$ sudo cat Kparticula_local.+157+11082.private
+	Private-key-format: v1.3
+	Algorithm: 157 (HMAC_MD5)
+	Key: xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==
+	Bits: AAA=
+	Created: 20190102190149
+	Publish: 20190102190149
+	Activate: 20190102190149
+
+$ sudo vi /etc/bind/named.conf.local
+	// define a chave utilizada para controlar e autenticar operacoes.
+	key "particula_local" {
+        	algorithm hmac-md5;
+	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
+	};
+
+	// servidor slave
+	server 192.168.0.6 {
+        	keys { particula_local; };
+	};
+
+	// configuracao da zona particula.local
+	zone "particula.local" {
+        	type master;
+	        file "/etc/bind/db.particula.local";
+        	allow-update { key "particula_local"; };
+	        notify yes;
+	};
+
+	// configuracao do dns reverso da zona particula.local
+	zone "0.168.192.in-addr.arpa" {
+        	type master;
+	        file "/etc/bind/db.0.168.192.in-addr.arpa";
+        	allow-update { key "particula_local"; };
+	};
+
+# testar o arquivo de configuracao
+$ sudo named-checkconf /etc/bind/named.conf.options
+
+# relendo os arquivos de configuracao do bind.
+$ sudo rndc reload
+
+
+#
+# Configuracao do servidor Slave - ns2
+#
+
+$ sudo vi /etc/bind/named.conf.local
+	// chave de criptografia tsig gerada no servidor
+	// primario/master.
+	key "particula_local" {
+        	algorithm hmac-md5;
+	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
+	};
+
+	// servidor master
+	server 192.168.0.5 {
+        	keys { particula_local; };
+	};
+
+	// configuracoes da zona particula.local
+	zone "particula.local" {
+        	type slave;
+	        file "/etc/bind/db.particula.local";
+        	masters { 192.168.0.5; };
+	        allow-transfer { key "particula_local"; };
+	};
+
+	// configuracao do dns reverso da zona particula.local
+	zone "0.168.192.in-addr.arpa" {
+        	type slave;
+	        file "/etc/bind/db.0.168.192.in-addr.arpa";
+        	masters { 192.168.0.5; };
+	        allow-transfer { key "particula_local"; };
+	};
+
+# testar o arquivo de configuracao
+$ sudo named-checkconf /etc/bind/named.conf.options
+
+# relendo os arquivos de configuracao do bind.
+$ sudo rndc reload
+
+####################################################################################
+
+#
+# UTILITARIO
+#
+
+# utilizacao do aplicativo NSLOOKUP
+$ nslookup particula.local ; "A" record do dominio
+$ nslookup 192.168.0.5 ; dominio reverso
+$ nslookup -query=ns particula.local ; NS record
+$ nslookup -debug particula.local ; Debug
+
+# utilizacao do aplicativo DIG
+$ dig particula.local A ; A record
+$ dig particula.local MX ; MX record
+$ dig particula.local SOA ; SOA record
+$ dig particula.local TTL ; TTL record
+$ dig particula.local ANY +noall +answer ; ANY record
+
+# aplicativo HOST
+$ host ns1
+$ host ns1.particula.local
+$ host www.particula.local
+$ host 192.168.0.5
+$ host -t SOA 0.168.192.in-addr.arpa
+
+# aplicativo rndc
+$ sudo rndc [OPCAO]
+	stats/status - exibe estatistica
+	reload - reler os arquivos de configuracao e zona
+	stop - parar o bind
+	halt - parar o servidor sem salvar pendencias
+	flush - apagar todo o cache do servidor
+	reconfig - reler o arquivo de configuracao e somente nova zona
