@@ -438,6 +438,15 @@ $ sudo cat Kparticula_local.+157+01247.private
 	Publish: 20190102190149
 	Activate: 20190102190149
 
+# outra forma de se criar a chave de criptografia utilizada pelo TSIG eh atraves
+# da ferramenta TSIG-KEYGEN
+$ sudo tsig-keygen
+	key "tsig-key" {
+		algorithm hmac-sha256;
+		secret "oY6jQFReEisToLiR7hsWdRwpHvkfJ/dJYUeSOoSiOKo=";
+	};
+
+# configuracao do bind.
 $ sudo vi /etc/bind/named.conf.local
 	// define a chave utilizada para controlar e autenticar operacoes.
 	key "particula_local" {
