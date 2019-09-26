@@ -32,15 +32,17 @@ Terms and Utilities:
 - delv
 - openssl
 
+####################################################################################
+
 #
-# Instalacao do Bind
+# Configuracao Basica
 #
 
 # o processo de atualizacao do SO e instalacao deve
-# ser executado tanto no servidor primario, ns1, quanto
-# no secundario, ns2.
+# ser executado tanto no servidor Master, ns1, quanto
+# no servidor Slave, ns2.
 
-# atualizacao
+# atualizacao do sistema operacional.
 $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do bind e alterando permissao.
@@ -145,8 +147,8 @@ $ sudo vi /etc/bind/named.conf.local
     		notify yes;
 	};
 
-# o programa named-checonf verifica a o arquivo de configuracao
-# em relacao a sintaxe.
+# o programa named-checonf verifica se o arquivo de configuracao
+# em relacao a sintaxe e consistencia.
 $ sudo named-checkconf /etc/bind/named.conf.local
 
 // arquivo de configuracao da zona particula.local.
@@ -336,7 +338,7 @@ $ sudo named-checkconf /etc/bind/named.conf.options
 # reinicializar o bind.
 $ sudo systemctl restart bind9.service
 
-# conteudo do arquivo resolv.conf
+# conteudo do arquivo resolv.conf nos servidores NS e estacoes.
 $ sudo cat /etc/resolv.conf
 	domain particula.local
 	search particula.local
@@ -584,6 +586,7 @@ $ sudo rndc retransfer particula.local
 # - Utiliza o conceito de chaves assimetricas (publica e privada) 
 # - Garante integridade e autenticidade das informacoes
 # - Prove seguranca para a resolucao de enderecos
+# - utiliza o conceito de chaves assimetricas − chave publica e chave privada
 #
 #  O que garante?
 #	- Origem (Autenticidade)
@@ -593,22 +596,35 @@ $ sudo rndc retransfer particula.local
 # 	- Confidencialidade
 #	- Protecao contra ataques de negacao de servico (DOS)
 #
-# DNSSEC utiliza o conceito de chaves assimetricas − chave publica e chave privada
-# DNSKEY Chave publica (incluıda na propria zona)
-# RRSIG Assinatura do RRset (somente registros com autoridade)
+# 	utiliza o conceito de chaves assimetricas − chave publica e chave privada
+#
+# DNSSEC Resource Records:
+#
+# DNSKEY 
+# 	Um registro DNSKEY mantem uma chave publica que os resolvedores podem usar para 
+# 	verificar assinaturas DNSSEC nos registros RRSIG.
+#
+# RRSIG 
+# 	Assinatura do RRset (somente registros com autoridade)
 # 	Representa a assinatura de um RRset especıfico com uma determinada chave (DNSKEY)
 # 	Possui uma validade inicial (inception) e final (expiration)
-# DS Delegation Signer (Ponteiro para a cadeia de confianca) NSEC(3) Next Secure (Prova de nao existencia)
-# 	Representa um hash de um record DNSKEY
-#    	Indica:
-#  	- que a zona delegada esta assinada 
-#	- qual a chave usada na zona delegada
-#	A zona Pai possui autoridade pelo record DS das zonas delegadas
-#	- O record DS nao deve aparecer no Filho
-#	Cadeia de Confianc ̧a
-#	- O Record DS forma uma cadeia de confianca, a qual garante a 
-#	autenticidade das delegacoes de uma zona ate um ponto de 
-#	confianca (uma chave ancorada)
+# DS 
+# 	Um registro de delegação de assinatura (DS) fornece informacoes sobre um arquivo de zona 
+# 	assinado. Como habilitar o DNSSEC (extensoes de seguranca do sistema de nomes de dominio) 
+# 	para seu nome de dominio requer essas informacoes para concluir a configuracao do seu nome 
+# 	de dominio assinado.
+# 	Indica:
+#  		- que a zona delegada esta assinada 
+#		- qual a chave usada na zona delegada
+#		- zona Pai possui autoridade pelo record DS das zonas delegadas
+#		- record DS nao deve aparecer no Filho
+#		- o Record DS forma uma cadeia de confianca, a qual garante a 
+#		autenticidade das delegacoes de uma zona ate um ponto de 
+#		confianca (uma chave ancorada)
+#
+#	$ cat dsset-particula.local.
+#	particula.local.	IN DS 50615 13 1 0291681A871DB11649AE0E4B7AED53E3C40AC8A5
+#	particula.local.	IN DS 50615 13 2 05E69ACC105ADB7F26E213B0DC5EFD287BBE083F74F58B6C24DDB7CF B0E2EC48
 
 #
 # Pratico
@@ -639,7 +655,17 @@ $ sudo named-checkconf
 # "obrigatório para implementar" pela IETF; Atualmente, existem dois algoritmos: RSASHA256 e 
 # ECDSAP256SHA256. ECDSAP256SHA256 é recomendado para implantações atuais e futuras.
 
-# Zone Signing Key(ZSK) - chaves utilizadas para assinar RRsets da zona sobre o qual tem autoridade
+# ZSK - Zone Signing Key
+#
+# Cada zona com DNSSEC ativado possui um par de chaves de assinatura de zona (ZSK): a chave privada 
+# e a chave pública. O ZSK privado é usado para criar assinaturas digitais para cada RRset e as 
+# assinaturas digitais são armazenadas no servidor de nomes como registros RRSIG. Quando um resolvedor 
+# DNSSEC solicita um tipo de registro específico (por exemplo, TXT), além de retornar o próprio registro 
+# TXT, o servidor de nomes também retorna o RRSIG correspondente. O ZSK público é publicado como um 
+# registro DNSKEY, para que o resolvedor possa extrair o registro DNSKEY que contém o ZSK público do 
+# servidor de nomes para verificar a assinatura RRSIG. O RRset, RRSIG e ZSK público juntos podem validar 
+# a resposta.
+# 
 $ sudo dnssec-keygen -r /dev/urandom -a [RSASHA256/ECDSAP256SHA256] -b [2048] -n ZONE [particula.local]
 # -f : Define o tipo da chave
 # -a : Algoritmo
@@ -651,7 +677,14 @@ $ sudo dnssec-keygen -r /dev/urandom -a [RSASHA256/ECDSAP256SHA256] -b [2048] -n
 # - Kparticula.local.+013+33056.key - chave publica
 # - Kparticula.local.+013+33056.private - chave privada
 
-# Key Signing Key(KSK) - cahves utilizadas para assinar as chaves da zona
+# KSK - Key Signing Key
+#
+# A chave de assinatura de chave é usada para evitar a situação em que a chave de assinatura de zona seja 
+# comprometida. O KSK valida o registro DNSKEY do ZSK exatamente da mesma maneira que o ZSK protege os 
+# RRSets. Ele assina o ZSK público (que é armazenado em um registro DNSKEY), criando um RRSIG para o registro 
+# DNSKEY. O KSK público é publicado em outro registro DNSKEY, que pode ser usado pelos resolvedores para 
+# verificar o RRSIG.
+#
 $ sudo dnssec-keygen -r /dev/urandom -f [KSK] -a [RSASHA256/ECDSAP256SHA256] -b [4096] -n ZONE [particula.local]
 # -f : Define o tipo da chave
 # -a : Algoritmo
@@ -708,8 +741,19 @@ $ sudo vi /etc/bind/named.conf.local
 	// Master zones
 	zone "particula.local" {
 	(...)
+		// arquivos de configuracao da zona assinada
+		// digitalmente.
 	        file "/etc/bind/db.particula.local.signed";
-		key-directory “/etc/bind”;
+
+		/Realiza automaticamente a assinatura inicial (não é necessário emitir "rndc
+assinar <zona> ”), assinar novamente os registros periodicamente e manipular
+sobreposições examinando os metadados de tempo nos arquivos principais definidos com
+"Dnssec-settime"/ as diretivas abaixo realizam de forma automatica a 
+		// a assinatura inicial e assina novamente os registros
+		// periodicamente e manipula os metadados de tempo nos
+		// arquivos principais definidos atraves do comando 
+		// "dnssec-settime".
+		key-directory "/etc/bind";
 		auto-dnssec maintain;
 		inline-signing yes;
 	(...)
@@ -741,8 +785,16 @@ $ sudo vi /etc/bind/named.conf.local
 	// Slave zones
 	zone "particula.local" {
 	(...)
+		// arquivos de configuracao da zona assinada
+		// digitalmente.
 	        file "/etc/bind/db.particula.local.signed";
-		key-directory “/etc/bind”;
+
+		// as diretivas abaixo realizam de forma automatica a 
+		// a assinatura inicial e assina novamente os registros
+		// periodicamente e manipula os metadados de tempo nos
+		// arquivos principais definidos atraves do comando 
+		// "dnssec-settime".
+		key-directory "/etc/bind";
 		auto-dnssec maintain;
 		inline-signing yes;
 	(...)
