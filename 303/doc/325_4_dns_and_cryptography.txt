@@ -719,7 +719,7 @@ $ sudo vi /etc/bind/db.particula.local
 # cada zona filho.
 
 # assinando digitalmente a zona particula.local
-$ sudo dnssec-signzone -A -3 $(head -c 10 /dev/random | sha1sum | cut -b 1-16) -N INCREMENT -o particula.local -t /etc/bind/db.particula.local
+$ sudo dnssec-signzone -N increment -o particula.local -o /etc/bind/db.particula.local
 	Verifying the zone using the following algorithms: ECDSAP256SHA256.
 	Zone fully signed:
 	Algorithm: ECDSAP256SHA256: KSKs: 1 active, 0 stand-by, 0 revoked
