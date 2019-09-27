@@ -10,8 +10,10 @@ and software configuration.
 Key Knowledge Areas:
 - Configure BIOS and boot loader (GRUB 2) security
 - Disable useless software and services
-- Use sysctl for security related kernel configuration, particularly ASLR, Exec-Shield and IP / ICMP configuration
-- Exec-Shield and IP / ICMP configuration
+- Use sysctl for security related kernel configuration
+- Particularly ASLR
+- Exec-Shield 
+- IP/ICMP configuration
 - Limit resource usage
 - Work with chroot environments
 - Drop unnecessary capabilities
@@ -191,7 +193,7 @@ $ sudo systemctl hibernate
 $ sudo systemctl hybrid-sleep
 
 ###
-# - Use sysctl for security related kernel configuration, particularly ASLR, Exec-Shield and IP / ICMP configuration
+# - Use sysctl for security related kernel configuration
 ###
 
 # sysctl for security related kernel configuration
@@ -223,8 +225,10 @@ $ sudo sysctl -w [VARIAVEL]=[VALOR]
 $ sudo sysctl [VARIAVEL]=[VALOR] >> /etc/sysctl.conf
 $ sudo sysctl [VARIAVEL]=[VALOR] >> /etc/sysctl.d/security.conf
 
+###
 # ASLR – Address Space Layout Randomization
-#
+###
+
 # A tecnologia ASLR, Address Space Layout Randomization, protege o sistema operacional
 # GNU/Linux de desenvolvedores e/ou aplicativos não autorizados, randomizando o espaço 
 # de endereço do aplicativo. O ASLR foi introduzido no kernel do Linux em 2005, no início
@@ -255,4 +259,135 @@ $ ldd /bin/bash
 $ ldd /bin/bash
 	linux-vdso.so.1 (0x00007ffe6f173000)
 
+###
 # Exec-Shield and NX Protection
+###
+
+# Trabalhando em conjunto co a tecnologia ASLR, a tecnologia Exec-Shield eh utilizada para limitar
+# - stack
+# - buffer
+# - estouro de ponteiro
+#
+# A tecnologia exec-Shield e MX manipula os dados armazenados na memória para impedir intenções maliciosas. Ela
+# foi introduliza no kernel do Linux pela empresa RedHat em 2003, na versao RHEL 7. Ela já não pode mais ser 
+# gerenciada via comando sysctl e é ativada por padrão sem a opção de desativar o recurso. Não existe mais uma 
+# chave no procfs para gerenciar o exec-shield. Essa propriedade tambem ocorre em versoes posteriores do Ubuntu. 
+# Em distribuicoes Linux antigas, a chave usada para gerenciar o exec-shield era a chave "kernel.exec-shield" 
+# com os valores 0 e 1, sendo o valor 1 para ativar e 0 para desativar. Atualmente, para visualizar o suporte da
+# tecnologia exec-shield no kernel do Linux, basta executar o comando "grep -Fw nx /proc/cpuinfo" e verificar se
+# a flag NX (No-Execute Bit) aparece.
+
+$ sudo grep -Fw nx /proc/cpuinfo
+	flags: ... nx ...
+
+# Outra forma de visualizar se a tecnologia Exec-Shield e NX estao habilitadas basta executar o comando abaixo.
+
+$ sudo dmesg | grep -Fw NX
+	[    0.000000] NX (Execute Disable) protection: active
+
+
+###
+# IP/ICMP configuration
+###
+
+# Muitos ataques simples começam com uma varredura de ping da sua rede. Os servidores que respondem ao ping podem 
+# ser examinados mais detalhadamente quanto aos serviços a serem explorados. Mesmo que isso não impeça que seus 
+# serviços sejam descobertos, desabilitar as respostas PING do servidor ajudará a obscurecê-lo.
+#
+# Como desabilitar o ping alterando o kernel atraves do sysctl.
+#
+# visualizar a configuracao.
+$ sudo sysctl -ar 'icmp_echo'
+	net.ipv4.icmp_echo_ignore_all = 0
+	net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# desabilitando o ping.
+$ sudo sysctl -w net.ipv4.icmp_echo_ignore_all=1
+	net.ipv4.icmp_echo_ignore_all = 1
+$ ping localhost
+	3 packets transmitted, 0 received, 100% packet loss, time 54ms
+$ sudo sysctl -w net.ipv4.icmp_echo_ignore_all=0
+	net.ipv4.icmp_echo_ignore_all = 0
+$ ping localhost
+	2 packets transmitted, 2 received, 0% packet loss, time 11ms
+
+# Para que essa configuracao seja ativada de forma permanente,
+# basta criar o arquivo /etc/sysctl.d/security.conf e acrescenta
+# o paramentro "net.ipv4.icmp_echo_ignore_all=1".
+
+###
+# Limit resource usage
+###
+
+###
+# Work with chroot environments
+###
+
+# Muitos serviços oferecem a opção de executar em um ambiente controlado chamado "chroot". De forma
+# simplificada, o chroot faz com que o servico seja executado em um diretorio raiz falso. Tudo o que 
+# o serviço requer para ser executado deve ser copiado para o diretorio chroot. Isso inclui binários,
+# bibliotecas e arquivos de configuracao que o serviço venha a precisar durante a execução. A execução 
+# no ambiente chroot ajuda a proteger o sistema contra ataques maliciosos, os únicos arquivos e diretórios 
+# disponíveis são os da instalação chroot e eles não persistem na reinicialização do serviço. Também 
+# limita a contenção a arquivos que podem ocorrer entre serviços diferentes, pois cada um possui sua 
+# própria cópia enquanto o serviço está sendo executado.
+
+# exemplo de um ambiente chroot.
+# sera criado um ambient bash em modo chroot.
+#
+# criando diretorio onde sera instalado o binario e o arquivo de configuracao.
+$ sudo mkdir -p /bash/{bin,etc}
+
+# criando diretorio onde sera instalado as bibliotecas necessaria para o funcionamento do software.
+$ sudo mkdir -p /bash/{lib64,lib/x86_64-linux-gnu}
+
+# copiando as bilbiotecas necessarias para o funcionamento do bash.
+'/lib/x86_64-linux-gnu/libselinux.so.1' -> '/bash/lib/x86_64-linux-gnu/libselinux.so.1'
+'/lib/x86_64-linux-gnu/libpcre.so.3' -> '/bash/lib/x86_64-linux-gnu/libpcre.so.3'
+'/lib/x86_64-linux-gnu/libdl.so.2' -> '/bash/lib/x86_64-linux-gnu/libdl.so.2'
+'/lib/x86_64-linux-gnu/libpthread.so.0' -> '/bash/lib/x86_64-linux-gnu/libpthread.so.0'
+'/lib/x86_64-linux-gnu/libtinfo.so.5' -> '/bash/lib/x86_64-linux-gnu/libtinfo.so.5'
+'/lib/x86_64-linux-gnu/libtinfo.so.5' -> '/bash/lib/x86_64-linux-gnu/libtinfo.so.6'
+'/lib/x86_64-linux-gnu/libdl.so.2' -> '/bash/lib/x86_64-linux-gnu/libdl.so.2'
+'/lib/x86_64-linux-gnu/libc.so.6' -> '/bash/lib/x86_64-linux-gnu/libc.so.6'
+'/lib64/ld-linux-x86-64.so.2' -> '/bash/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2'
+
+# copiando o ascript de inicializacao do bash para o chroot.
+$ echo "PS1='JAIL $ '" | sudo tee /bash/etc/bash.bashrc
+
+# estrutura de diretorio
+/bash
+|-- bin
+|   |-- bash
+|   `-- ls
+|-- etc
+|   `-- bash.bashrc
+|-- lib
+|   `-- x86_64-linux-gnu
+|       |-- ld-linux-x86-64.so.2
+|       |-- libc.so.6
+|       |-- libdl.so.2
+|       |-- libpcre.so.3
+|       |-- libpthread.so.0
+|       |-- libselinux.so.1
+|       |-- libtinfo.so.5
+|       `-- libtinfo.so.6
+`-- lib64
+    `-- ld-linux-x86-64.so.2
+
+# ativando o bash localizado no ambiente chroot.
+$ sudo chroot /bash /bin/bash
+JAIL $ ls -l
+total 16
+drwxr-xr-x 2 0 0 4096 Sep 27 19:56 bin
+drwxr-xr-x 2 0 0 4096 Sep 27 19:56 etc
+drwxr-xr-x 3 0 0 4096 Sep 27 19:53 lib
+drwxr-xr-x 2 0 0 4096 Sep 27 20:05 lib64
+
+###
+# Drop unnecessary capabilities
+###
+
+###
+# Be aware of the security advantages of virtualization
+###
