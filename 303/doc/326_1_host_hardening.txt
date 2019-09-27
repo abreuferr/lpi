@@ -26,3 +26,233 @@ Terms and Utilities:
 - chroot
 - sysctl
 - /etc/sysctl.conf
+
+###
+# - Configure BIOS and boot loader (GRUB 2) security
+###
+
+# - Criando a senha criptografada
+# 	A senha do Grub eh armazenada em um arquivo do tipo texto e eh armazenado
+# em um formato texto plano. Para gerar o hash da senha que sera armazenada no arquivo 
+# do Grub eh utilizado o aplicativo "grub-mkpasswd-pbkdf2".
+
+$ grub-mkpasswd-pbkdf2
+Enter password:
+Reenter password:
+PBKDF2 hash of your password is grub.pbkdf2.sha512.10000.81A5C85C7AE802652898FB3E619506047CA23E7269997F95D02333168449DD73490C4D7AD0C2FBF9ABAE3D6FFA3D2E7AF442B0F5620D1A648D1EB27F0D54E876.1D6D8441AA527CD7754EAF677DA598E1BF884E12F33EA9FD488799D9786B4C7527C2B4C8127CA908E5E3A5660CBC546039770D0D3CF0095B57A2D3FDC277A63E
+
+# O arquivo principal de configuracao do Grub eh o arquivo /boot/grub/grub.cfg. Esse
+# arquivo eh complexo e nao deve ser editado. Deve-se utilizar os modulos para fazer
+# essa configuracao. 
+# 
+# Deve-se acrescentar as linhas abaixo no arquivo "/etc/grub.d/00_header"
+#
+$ sudo cp /etc/grub.d/00_header{,.origin}
+$ cat /etc/grub.d/00_header
+	#!/bin/bash
+	cat <<EOF
+	set superusers="root"
+	password_pbkdf2 root grub.pbkdf2.sha512.10000.81A5C85C7AE802652898FB3E619506047CA23E7269997F95D02333168449DD73490C4D7AD0C2FBF9ABAE3D6FFA3D2E7AF442B0F5620D1A648D1EB27F0D54E876.1D6D8441AA527CD7754EAF677DA598E1BF884E12F33EA9FD488799D9786B4C7527C2B4C8127CA908E5E3A5660CBC546039770D0D3CF0095B57A2D3FDC277A63E 
+	EOF
+
+# Atualizar o Grub.
+#
+$ sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+###
+# - Disable useless software and services
+###
+
+# CHKCONFIG
+#
+# O utilitario chkconfig eh uma ferramenta de linha de comando que permite 
+# especificar em qual nivel de execucao inicia um servico selecionado, bem 
+# como listar todos os servicos disponveis, juntamente com suas configuracoes 
+# atuais.
+#
+# Os scripts de inicializacao estao localizados no diretorio /etc/rc.d/init.d/
+# (CentOS) ou no diretorio /etc/init.d/ (Debian).
+
+# visualizar o status de todos os servicos.
+$ sudo chkconfig --list
+	NetworkManager  0:off   1:off   2:on    3:on    4:on    5:on    6:off
+	abrtd           0:off   1:off   2:off   3:on    4:off   5:on    6:off
+	acpid           0:off   1:off   2:on    3:on    4:on    5:on    6:off
+	anamon          0:off   1:off   2:off   3:off   4:off   5:off   6:off
+	atd             0:off   1:off   2:off   3:on    4:on    5:on    6:off
+	auditd          0:off   1:off   2:on    3:on    4:on    5:on    6:off
+	avahi-daemon    0:off   1:off   2:off   3:on    4:on    5:on    6:off
+
+# Cada linha consiste no nome do servico seguido por seu status (ativado ou 
+# desativado) para cada um dos sete niveis de execucao numerados. Por exemplo, 
+# na lista acima, o NetworkManager eh ativado nos niveis de execucao 2, 3, 4 e 5, 
+# enquanto o abrtd eh executado nos niveis de execucao 3 e 5. Os servicos baseados 
+# em xinetd sao listados no final, sendo ativados ou desativados.
+
+# visualizar o status de um determinado servico.
+$ sudo chkconfig --list [SERVICO]
+
+# desabilitar um determinado servico.
+$ sudo chkconfig [SERVICO] off
+
+# desabilitar um determinado servico em um determinado runlevel.
+$ sudo chkconfig [SERVICO] off --level [RUNLEVEL]
+
+# habilitar um determinado servico.
+$ sudo chkconfig [SERVICO] on
+
+# habilitar um determinado servico em um determinado runlevel.
+$ sudo chkconfig [SERVICO] on --level [RUNLEVEL]
+
+# apagar um servico
+$ sudo chkconfig del [SERVICO]
+
+# adicionar um servico
+$ sudo chkconfig add [SERVICO]
+
+# SYSTEMD
+#
+# Systemd é um gerenciador de sistemas e serviços para sistemas operacionais Linux. Ele 
+# foi desenvolvido para ser compatível com os scripts de inicialização do SysV e fornece 
+# vários recursos, como inicialização paralela de serviços do sistema no momento da 
+# inicialização, ativação sob demanda de daemons ou lógica de controle de serviço baseada 
+# em dependência.
+#
+# O Systemd apresenta o conceito de unidades systemd. Essas unidades são representadas por 
+# arquivos de configuração de unidades localizados em um dos diretórios /usr/lib/systemd/system/,
+# /run/systemd/system/ ou /etc/systemd/system/ e encapsular informações sobre serviços do 
+# sistema, sockets e outros objetos relevantes para o sistema init. 
+
+# Listar todos os UNITS que estao ativos.
+$ sudo systemctl --list-units
+
+# Lista o status de todos os servicos.
+$ sudo systemctl list-unit-files --type service
+
+# Listar somente os SERVICE que estao ativos.
+$ sudo systemctl list-units --type service --all
+
+# Listar somente os SERVICE que estao em execucao.
+$ sudo systemctl list-units --type service --state running
+
+# Inicializa um servico
+$ sudo systemctl start [SERVICO]
+
+# Visualizar o STATUS de um determinado servico.
+$ sudo systemctl status [SERVICO]
+
+# Para um determinado servico.
+$ sudo systemctl stop [SERVICO]
+
+# Reinicializa um servico.
+$ sudo systemctl restart [SERVICO]
+
+# Re-le as configuracoes do servico.
+$ sudo systemctl reload [SERVICO]
+
+# Habilitar um determinado servico no boot.
+$ sudo systemctl enable [SERVICO]
+
+# Desabilitar um determinado servico no boot.
+$ sudo systemctl disable [SERVICO]
+
+# inicializar o computador em modo de seguranca.
+$ sudo systemctl rescue
+
+# inicializar o computador em modo de emergencia.
+$ sudo systemctl emergency
+
+# exibir em qual runlevel o SO esta em execucao.
+$ sudo systemctl get-default
+
+# alterar o runlevel
+$ sudo systemctl isolate runlevel5.target
+$ sudo systemctl isolate graphical.target
+
+$ sudo systemctl isolate runlevel3.target
+$ sudo systemctl isolate multiuser.target
+
+# definir o runlevel padrao
+$ sudo systemctl set-default runlevel3.target
+$ sudo systemctl set-default runlevel5.target
+
+# Runlevel 0 : desligar o computador
+# Runlevel 1 : executar e modo manutencao
+# Runlevel 3 : multiuser e sem interface grafica
+# Runlevel 4 : multiuser e sem interface grafica
+# Runlevel 5 : multiuser e com interface grafica
+# Runlevel 6 : reinicializar o computador
+
+# como reinicializar, desligar, suspender, hibernar e hibrid-sleep
+$ sudo systemctl reboot
+$ sudo systemctl halt
+$ sudo systemctl suspend
+$ sudo systemctl hibernate
+$ sudo systemctl hybrid-sleep
+
+###
+# - Use sysctl for security related kernel configuration, particularly ASLR, Exec-Shield and IP / ICMP configuration
+###
+
+# sysctl for security related kernel configuration
+#
+# Sysctl eh uma interface para examinar e dinamicamente mudar os parametros 
+# do kernel do sistema operacional GNU/Linux.
+#
+# No Linux, o mecanismo da interface sysctl também é exportado como parte do 
+# procfs no diretório sys. Essa diferença significa que verificar o valor de 
+# algum parâmetro requer a abertura de um arquivo em um sistema de arquivos 
+# virtual, a leitura de seu conteúdo, a análise e o fechamento do arquivo.
+#
+# O diretorio virtual /proc/sys tambem prove uma interface para os paramentros 
+# do sysctl, permitindo que o mesmo seja examinado e alterado. Por exemplo, o
+# arquivo /proc/sys/vm/swappiness eh equivalente ao paramentro vm.swappiness
+# localizado no arquivo /etc/sysctl.conf. 
+
+# Listar todas as variaveis
+$ sudo sysctl -a
+$ sudo sysctl -ar '[VARIAVEL]'
+
+# Visualizar o conteudo de uma determinada variavel.
+$ sudo sysctl [VARIAVEL]
+
+# Alterar o valor da variavel de forma temporaria.
+$ sudo sysctl -w [VARIAVEL]=[VALOR]
+
+# Alterar o valor da variavel de forma permanente.
+$ sudo sysctl [VARIAVEL]=[VALOR] >> /etc/sysctl.conf
+$ sudo sysctl [VARIAVEL]=[VALOR] >> /etc/sysctl.d/security.conf
+
+# ASLR – Address Space Layout Randomization
+#
+# A tecnologia ASLR, Address Space Layout Randomization, protege o sistema operacional
+# GNU/Linux de desenvolvedores e/ou aplicativos não autorizados, randomizando o espaço 
+# de endereço do aplicativo. O ASLR foi introduzido no kernel do Linux em 2005, no início
+#  de 2004, estava disponível como um patch. Com a randomização de memória ativada, o 
+# espaço de endereço no qual um aplicativo eh alocado é randomizado. Significando que um 
+# aplicativo não usa o espaço de endereço em cada execução. Esse é um comportamento 
+# padrão para os módulos Linux, pois eles precisam ser compilados com o suporte ASLR. 
+# Para você observar isso, ele pode ser ativado no Kernel usando o procfs.
+
+# Visualizar o valor da variavel do ASLR no sysctl.
+$ sudo cat /proc/sys/kernel/randomize_va_space
+$ sudo sysctl -a --pattern randomize
+
+# 0 - desabilitado
+# 1 - randomizacao padrao
+# 2 - randomizacao completa
+
+# visualizando a randomizacao do endereco de memoria
+$ ldd /bin/bash
+	linux-vdso.so.1 (0x00007ffe6f173000)
+$ ldd /bin/bash
+	linux-vdso.so.1 (0x00007ffe0a7de000)
+
+# desabilitando o ASLR.
+$ sudo sysctl -w kernel.randomize_va_space=0
+$ ldd /bin/bash
+	linux-vdso.so.1 (0x00007ffe6f173000)
+$ ldd /bin/bash
+	linux-vdso.so.1 (0x00007ffe6f173000)
+
+# Exec-Shield and NX Protection
