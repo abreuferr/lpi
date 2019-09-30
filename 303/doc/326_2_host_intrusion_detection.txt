@@ -31,3 +31,31 @@ maldet
 conf.maldet
 aide
 /etc/aide/aide.conf
+
+###
+# - Use and configure the Linux Audit system
+###
+
+###
+# - Use chkrootkit
+###
+
+###
+# - Use and configure rkhunter, including updates
+###
+
+###
+# - Use Linux Malware Detect
+###
+
+###
+# - Automate host scans using cron
+###
+
+###
+# - Configure and use AIDE, including rule management
+###
+
+###
+# - Be aware of OpenSCAP
+###
