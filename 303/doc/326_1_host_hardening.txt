@@ -226,6 +226,101 @@ $ sudo sysctl [VARIAVEL]=[VALOR] >> /etc/sysctl.conf
 $ sudo sysctl [VARIAVEL]=[VALOR] >> /etc/sysctl.d/security.conf
 
 ###
+# - Reverse Path Filtering (rp_filter)
+###
+
+# host responsavel pelo roteamento entre as redes, 192.168.58.0/24 e 
+# 192.168.59.0/24.
+Host router:
+	NIC: ens33
+	IP Address: 192.168.10.3/24 Default route to Internet
+	NIC: ens36
+	IP Address: 192.168.58.3/24
+	NIC: ens37
+	IP Address: 192.168.59.3/24
+
+# workstation 01
+Host w1:
+	NIC: ens33
+	IP Address: 192.168.58.4/24
+	Default route: 192.168.58.3
+
+# workstation 02
+Host w2:
+	NIC: ens33
+	IP Address: 192.168.59.4/24
+	Default route: 192.168.59.3
+
+# router
+$ sudo sysctl -ar 'rp_filter'
+	net.ipv4.conf.all.arp_filter = 0
+	net.ipv4.conf.all.rp_filter = 0
+	net.ipv4.conf.default.arp_filter = 0
+	net.ipv4.conf.default.rp_filter = 0
+	net.ipv4.conf.ens33.arp_filter = 0
+	net.ipv4.conf.ens33.rp_filter = 0
+	net.ipv4.conf.ens36.arp_filter = 0
+	net.ipv4.conf.ens36.rp_filter = 0
+	net.ipv4.conf.ens37.arp_filter = 0
+	net.ipv4.conf.ens37.rp_filter = 0
+	net.ipv4.conf.lo.arp_filter = 0
+	net.ipv4.conf.lo.rp_filter = 0
+
+# router
+$ sudo sysctl -ar '.rp_filter'
+	net.ipv4.conf.all.arp_filter = 0
+	net.ipv4.conf.all.rp_filter = 0
+	net.ipv4.conf.default.arp_filter = 0
+	net.ipv4.conf.default.rp_filter = 0
+	net.ipv4.conf.ens33.arp_filter = 0
+	net.ipv4.conf.ens33.rp_filter = 0
+	net.ipv4.conf.ens36.arp_filter = 0
+	net.ipv4.conf.ens36.rp_filter = 0
+	net.ipv4.conf.ens37.arp_filter = 0
+	net.ipv4.conf.ens37.rp_filter = 0
+	net.ipv4.conf.lo.arp_filter = 0
+	net.ipv4.conf.lo.rp_filter = 0
+
+# router
+$ sudo sysctl -ar '\.rp_filter'
+	net.ipv4.conf.all.rp_filter = 0
+	net.ipv4.conf.default.rp_filter = 0
+	net.ipv4.conf.ens33.rp_filter = 0
+	net.ipv4.conf.ens36.rp_filter = 0
+	net.ipv4.conf.ens37.rp_filter = 0
+	net.ipv4.conf.lo.rp_filter = 0
+
+# router
+# ativando o roteamento entre as redes.
+$ sudo sysctl -w 'net.ipv4.ip_forward=1'
+
+# w1
+# inicializando o IP Spoofing no w1
+# a partir do comando abaixo, qualquer informacao que nao seja referente a
+# conexao ssh, sera redirecionada para o endereco IP 192.168.59.10
+$ sudo iptables -t nat -A POSTROUTING -p tcp -m tcp --dport 22 -j ACCEPT
+$ sudo iptables -t nat -A POSTROUTING -j SNAT --to-source 192.168.59.10
+
+# ativando o tcpdump no roteador e no w2
+# ens36 no roteador conecta o host W1 ao roteador
+# ens33 eh a interface de rede do host W2
+$ sudo tcpdump -i ens36 -p icmp # router
+$ sudo tcpdump -i ens33 -p icmp # w2
+
+# ping do w1(192.168.58.4) para o w2(192.168.59.4)
+$ ping -c2 192.168.59.4
+
+# resultado do tcpdump no router
+# o resultado abaixo indica que a origem do ping eh o IP
+# 192.168.59.10 e nao o IP 192.168.58.4(host W1)
+10:35:07.472986 IP 192.168.59.10 > 192.168.59.4: ICMP echo request, id 1604, seq 1, length 64
+
+# Host ROUTER
+# ativando o anti ip spoofing.
+$ sudo sysctl -w net.ipv4.conf.all.rp_filter=2 ; host ROUTER.
+11:165:09.385086 IP 192.168.59.10 > 192.168.59.4: ICMP echo request, id 1604, seq 1, length 64
+
+###
 # ASLR – Address Space Layout Randomization
 ###
 
@@ -316,7 +411,86 @@ $ ping localhost
 # o paramentro "net.ipv4.icmp_echo_ignore_all=1".
 
 ###
-# Limit resource usage
+# Limit resource usage - ULIMIT
+###
+
+# soft limit
+$ ulimit -a
+	-t: cpu time (seconds)              unlimited
+	-f: file size (blocks)              unlimited
+	-d: data seg size (kbytes)          unlimited
+	-s: stack size (kbytes)             8192
+	-c: core file size (blocks)         0
+	-m: resident set size (kbytes)      unlimited
+	-u: processes                       701
+	-n: file descriptors                1024
+	-l: locked-in-memory size (kbytes)  65536
+	-v: address space (kbytes)          unlimited
+	-x: file locks                      unlimited
+	-i: pending signals                 701
+	-q: bytes in POSIX msg queues       819200
+	-e: max nice                        0
+	-r: max rt priority                 0
+	-N 15:                              unlimited
+
+# hard limit
+$ ulimit -Ha
+	-t: cpu time (seconds)              unlimited
+	-f: file size (blocks)              unlimited
+	-d: data seg size (kbytes)          unlimited
+	-s: stack size (kbytes)             unlimited
+	-c: core file size (blocks)         unlimited
+	-m: resident set size (kbytes)      unlimited
+	-u: processes                       701
+	-n: file descriptors                1048576
+	-l: locked-in-memory size (kbytes)  65536
+	-v: address space (kbytes)          unlimited
+	-x: file locks                      unlimited
+	-i: pending signals                 701
+	-q: bytes in POSIX msg queues       819200
+	-e: max nice                        0
+	-r: max rt priority                 0
+	-N 15:                              unlimited
+
+# o script abaixo ira chamar a si proprio em um loop ate que consuma
+# todos os recursos em relacao a numero de processos. A partir de um
+# determiando ponto, eh exibido uma mensagem indicando que nao existe
+# mais recurso disponivel, que no caso sao 701, -u. 
+$ cat itself.sh
+	#!/bin/bash
+	echo $
+	$0
+$ chmod +x itself.sh
+$ ./itself.sh
+	$
+	$
+	$
+	$
+	./itself.sh: fork: retry: Resource temporarily unavailable
+	./itself.sh: fork: retry: Resource temporarily unavailable
+	./itself.sh: fork: retry: Resource temporarily unavailable
+	./itself.sh: fork: retry: Resource temporarily unavailable
+	^C
+
+# limitando o numero de processos.
+$ ulimit -Su 100
+$ ulimit -Hu 200
+
+# se por acaso o computador for reinicializado, os valores padrao
+# serao restabelecidos. Para alterar de forma definitiva, basta
+# alterar o arquivo "/etc/security/limits.conf". Eh possivel fazer
+# o controle tanto por usuario, quanto por grupo quanto por todos.
+# Alem de definir qual usuario ou grupo que sera afetado, eh possivel
+# definir o tipo de limite, hard ou soft.
+$ cat /etc/security/limits.conf.
+	#<domain>      <type>  <item>         <value>
+	#*             soft    core            0
+	#root          hard    core            100000
+	#*             hard    rss             10000
+	#@student      hard    nproc           20
+
+###
+# Limit resource usage - PAM/LIMIT.SO
 ###
 
 ###
@@ -383,11 +557,3 @@ drwxr-xr-x 2 0 0 4096 Sep 27 19:56 bin
 drwxr-xr-x 2 0 0 4096 Sep 27 19:56 etc
 drwxr-xr-x 3 0 0 4096 Sep 27 19:53 lib
 drwxr-xr-x 2 0 0 4096 Sep 27 20:05 lib64
-
-###
-# Drop unnecessary capabilities
-###
-
-###
-# Be aware of the security advantages of virtualization
-###
