@@ -96,6 +96,21 @@ $ sudo systemctl restart bind9.service
 $ dig DNSKEY particula.local. @localhost +multiline
 $ dig A particula.local. @localhost +noadditional +dnssec +multiline
 
+# dig utilizado para verificar os registros DNSSEC
+$ dig YOUR-DOMAIN-NAME +dnssec +short
+
+# dig utilizado para verificar a chave publica
+$ dig DNSKEY YOUR-DOMAIN-NAME +short
+
+# dig utilizado para verificar a cadeia DNSSEC se eh verdadeira
+$ dig DS YOUR-DOMAIN-NAME +trace
+
+# exibir a assinatura DNSSEC
+$ dig DNSKEY {domain-name}
+
+# verificar o DNSSEC
+$ dig +dnssec {domain-name}
+
 #
 # NS2 (SLAVE)
 #
