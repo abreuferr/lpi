@@ -59,3 +59,9 @@ $ sudo cryptsetup luksDump /dev/sde1
 
 # visualizar o status do mapeamento
 $ sudo cryptsetup -v status particao_criptografada
+
+# desmontar a particao
+$ sudo umount /mnt/part_cript
+
+# fechar o volume criptografado
+$ sudo cryptsetup luksClose particao_criptorafada
