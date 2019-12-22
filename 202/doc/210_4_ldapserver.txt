@@ -28,6 +28,30 @@ Terms and Utilities:
 - loglevel
 
 #
+# Teoria
+#
+
+Algumas das características do OpenLDAP, são:
+	Suporte a IPv4 e IPv6;
+	Encriptação SSL e TLS;
+	Autenticação (Digest-MD5, GSSAPI, Cyrus Sasl-Kerberos V);
+	Controle de acessos;
+	Replicação de base.
+
+O OpenLDAP conta com dois arquivos de configuração principais e um front-end de acesso:
+	"slapd.conf" - configuração do daemon;
+	"ldap.conf" - configuração para acesso dos clientes à base;
+	"ldapsearch" - utilitário em modo texto capaz de trabalhar com vários front-ends gráficos
+
+NSS - O NSS ou Name Service Switch é um serviço encarregado de realizar pesquisas em diferentes 
+bases de dados para resolução de nomes, como arquivos de configuração locais (/etc/passwd, /etc/group 
+e /etc/hosts), DNS, o Serviço de Informação de Rede (NIS) e o próprio LDAP. Ele é utilizado por outros 
+serviços para consulta de informações de usuários e grupos, entre outras informações da rede. 
+
+PAM - O PAM (Pluggable Authentication Modules) é um conjunto de bibliotecas/funções responsável por 
+fornecer um serviço de autenticação centralizada de usuários. 
+
+#
 # Instalacao
 #
 
@@ -36,6 +60,14 @@ $ sudo apt-get update && sudo apt-get upgrade
 
 # instalacao do servidor openldap
 $ sudo apt-get install slapd ldap-utils -y -d
+
+# pacote "ldap-utils" contém as seguintes ferramentas:
+	ldapsearch - pesquise e exiba entradas.
+	ldapmodify - modifica uma entrada.
+	ldapadd - adicione uma nova entrada.
+	ldapdelete - remover e entrar.
+	ldapmodrdn - renomeia uma entrada.
+	ldappasswd - altera uma senha.
 
 #
 # Configuracao
@@ -51,6 +83,9 @@ $ sudo dpkg-reconfigure slapd
 	Database backend to use: HDB
 	Do you want the database to be removed when slapd is purged? <NO>
 	Move old database? <YES>
+
+# verificando a existencia da base de dados LDAP
+$ sudo ldapsearch -x -b dc=particula,dc=local
 
 # visualizacao da estrutura inicial do openldap.
 $ sudo slapcat
@@ -143,3 +178,37 @@ $ sudo systemctl restart rsyslog slapd
 # comando utilizado para extrair/dump da base de dados do servidor ldap
 # para um arquivo ldif;
 $ sudo slapcat -v -l backup_ldap.ldif
+
+#
+# NSS
+#
+
+# instalacao
+$ sudo apt-get install ldap-client libnss-ldap
+
+# reconfiguracao da biblioteca libnss-ldap
+$ sudo dpkg-reconfigure libnss-ldap
+	- endereco IP do servidor LDAP
+	- DN - dc=particula,dc=local
+	- Versao do LDAP - 3
+	- Conta admin - cn=admin,dc=particula,dc=local
+	- Senha do admin - ****
+
+# reconfiguracao da biblioteca libpam-ldap
+$ sudo dpkg-reconfigure libpam-ldap
+	- endereco IP do servidor LDAP
+	- DN - dc=particula,dc=local
+	- Versao do LDAP - 3
+	- Admin e root - Sim
+	- Autenticacao na base de dados - Nao
+	- Conta admin - cn=admin,dc=particula,dc=local
+	- Senha do admin - ****
+	- Criptografar a base de dados - Nao
+	- Perfil - Create home directory on login	
+
+# PAM
+$ sudo vi /etc/pam.d/commom-account
+
+$ sudo vi /etc/pam.d/commom-auth
+
+$ sudo vi /etc/pam.d/common-password
