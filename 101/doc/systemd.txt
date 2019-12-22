@@ -1,20 +1,35 @@
 # systemd - os scripts podem ser carregados em paralelo
 #	  - novo sistema de runlevel
 
+# inicializar servico 
+$ sudo systemctl start <service name>
+
+# parar servico
+$ sudo systemctl stop <service name>
+
+# desabilitar o servico na inicializacao do SO
+$ sudo systemctl disable <service name>
+
 # mudar de runlevel
-	systemctl isolate rescue.target		- runlevel 1
-	systemctl isolate multi-user.target	- no graphic
- 	systemctl isolate graphical.target	- yes graphic
+$ sudo systemctl isolate rescue.target		- runlevel 1
+$ sudo systemctl isolate multi-user.target	- no graphic
+$ sudo systemctl isolate graphical.target	- yes graphic
 
 # definir o reunlevel padrao
-	systemctl set-default <name of target>.target
+$ sudo 	systemctl set-default <name of target>.target
 
 # runlevel atual
-	systemctl get-default 
+$ sudo 	systemctl get-default 
+
+# exibir os servicos que estao em execucao
+$ sudo systemctl --state=running -t s
+
+# sistemas que tiveram problema na incializacao.
+$ sudo systemctl --state=failed
 
 # arquivos de configuracao do systemd
 #
-cosmo@debian:~/myProject/lpi$ ls -l /etc/systemd/
+$ ls -l /etc/systemd/
 total 44
 -rw-r--r--  1 root root  546 Sep  2  2016 bootchart.conf
 -rw-r--r--  1 root root  812 May  2 14:15 journald.conf
@@ -30,7 +45,7 @@ drwxr-xr-x  2 root root 4096 Sep  2  2016 user
 
 # mais arquivos de configuracao do systemd
 #
-cosmo@debian:~/myProject/lpi$ ls -l /usr/lib/systemd/
+$ ls -l /usr/lib/systemd/
 total 20
 drwxr-xr-x 2 root root 4096 May 10 15:23 catalog
 drwxr-xr-x 2 root root 4096 Sep  2  2016 network
@@ -38,7 +53,7 @@ drwxr-xr-x 2 root root 4096 May 10 15:23 ntp-units.d
 drwxr-xr-x 2 root root 4096 May 10 15:23 user
 drwxr-xr-x 2 root root 4096 Sep  2  2016 user-generators
 
-cosmo@debian:~/myProject/lpi$ ls -l /usr/lib/systemd/user/
+$ ls -l /usr/lib/systemd/user/
 total 16
 -rw-r--r-- 1 root root 457 Apr  8 18:07 basic.target
 lrwxrwxrwx 1 root root  36 Apr  8 18:08 bluetooth.target -> /lib/systemd/system/bluetooth.target
