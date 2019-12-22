@@ -119,6 +119,14 @@ $ sudo vi /etc/hosts.deny
 	sshd : ALL
 
 #
+# autenticacao via senha/password
+#
+
+# modo padrao de funcionamento do SSH
+$ cat /etc/ssh/sshd_config
+	PasswordAuthentication yes
+
+#
 # autenticacao via chave ssh
 #
 
