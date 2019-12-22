@@ -22,6 +22,16 @@ Terms and Utilities:
 - mount.ecryptfs, umount.ecryptfs
 - pam_ecryptfs
 
+#
+# Teoria
+#
+
+# algoritmos de criptografia suportado pelo LUKS
+	AES – Advanced Encryption Standard – FIPS PUB 197
+	Twofish
+	Serpent
+	cast5 – RFC 2144
+	cast6 – RFC 2612
 
 #
 # Instalacao
@@ -40,6 +50,9 @@ $ sudo yum install cryptsetup -y
 # identificar particao a ser criptografada
 $ sudo lsblk
 
+# identificar a particao que ja esta criptografada
+$ sudo blkid -t TYPE=crypto_LUKS
+
 # formatar a particao que sera criptografada
 $ sudo cryptsetup luksFormat /dev/sde1
 
@@ -57,6 +70,10 @@ $ sudo mount /dev/mapper/particao_criptografada /mnt/part_cript
 # exibir informacao
 $ sudo cryptsetup luksDump /dev/sde1
 
+# exibir o algoritmo de criptografia, o hash, tamanho da chave e a chave mestra
+$ sudo cryptsetup luksDump /dev/sde1 | grep cipher
+$ sudo dmsetup table --target crypt --showkey
+
 # visualizar o status do mapeamento
 $ sudo cryptsetup -v status particao_criptografada
 
@@ -65,3 +82,20 @@ $ sudo umount /mnt/part_cript
 
 # fechar o volume criptografado
 $ sudo cryptsetup luksClose particao_criptorafada
+
+#
+# Alterar o Algoritmo de Criptografia
+#
+
+# desmonta o colume
+$ sudo umount /mnt/part_cript
+
+# alterando o algoritmo
+$ sudo cryptsetup -c aes-xts-plain64 luksFormat
+
+#
+# Verificar a chave mestra e algoritmo
+#
+
+# informacao
+$ sudo dmsetup table --target crypt --showkey
