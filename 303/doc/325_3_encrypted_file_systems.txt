@@ -54,11 +54,11 @@ $ sudo lsblk
 $ sudo blkid -t TYPE=crypto_LUKS
 
 # formatar a particao que sera criptografada
-$ sudo cryptsetup luksFormat /dev/sde1
+$ sudo cryptsetup -v -v luksFormat /dev/sde1
 
 # criar o sistema de arquivos criptografado
 # sera mapeado o LUKS device no diretorio /dev/mapper/particao_criptografada
-$ sudo cryptsetup luksOpen /dev/sde1 particao_cpriptografada
+$ sudo cryptsetup -v luksOpen /dev/sde1 particao_cpriptografada
 
 # criar o sistema de arquivos linux
 $ sudo mkfs -t ext4 /dev/mapper/particao_criptografada
