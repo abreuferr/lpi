@@ -76,6 +76,32 @@ $ cat /etc/bind/named.conf
         include "/etc/bind/named.conf.options";
         include "/etc/bind/named.conf.local";
         include "/etc/bind/named.conf.default-zones";
+	include "/etc/bind/named.conf.log";
+
+# Arquivo de configuracao de log
+$ sudo cat /etc/bind/named.conf.log
+	logging {
+	  channel bind_log {
+	    file "/var/log/bind/bind.log" versions 3 size 5m;
+	    severity info;
+	    print-category yes;
+	    print-severity yes;
+	    print-time yes;
+	  };
+	  category default { bind_log; };
+	  category update { bind_log; };
+	  category update-security { bind_log; };
+	  category security { bind_log; };
+	  category queries { bind_log; };
+	  category lame-servers { null; };
+	};
+	
+# criando diretorio a onde o log sera armazenado
+$ sudo mkdir /var/log/bind
+# dado acesso ao processo bind sobre o diretorio
+chown bind:bind /var/log/bind
+# reinicializando o servico
+$ sudo systemctl restart bind9
 
 # ajustes no arquivo named.conf.options
 $ sudo cp /etc/bind/named.conf.options{,.origin}
