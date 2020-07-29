@@ -21,3 +21,26 @@ Terms and Utilities:
 - httpd.conf
 - mod_ssl
 - openssl
+
+1. TLS/SSL
+
+# Como funciona o SSL / TLS?
+# 
+# Ao habilitar um site para SSL, você deve entender como a criptografia funciona com
+# o site. A seguir, são apresentadas as etapas gerais executadas por um cliente que 
+# visita seu site e o servidor:
+# 
+# 1 - O cliente envia uma solicitação para uma página da web para o site seguro usando 
+# https:// na URL. Isso faz uma conexão com a porta 443 por padrão.
+# 
+# 2 - O servidor envia a chave pública para o cliente.
+#
+# 3 - O cliente valida o certificado e garante que ele não expirou ou foi revogado.
+#
+# 4 - O cliente cria uma chave simétrica aleatória (conhecida como chave de sessão) 
+# usada para criptografar o conteúdo da página da web e, em seguida, criptografa a 
+# chave simétrica com a chave pública obtida no servidor da web.
+#
+# 5 - As informações criptografadas são enviadas para o servidor web. O servidor Web 
+# descriptografa e obtém a chave simétrica (chave de sessão). O servidor da web usa 
+# a chave simétrica para criptografar informações entre o cliente e o servidor.

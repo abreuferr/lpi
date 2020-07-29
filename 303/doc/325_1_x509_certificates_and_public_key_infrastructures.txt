@@ -24,9 +24,156 @@ The following is a partial list of the used files, terms and utilities:
 - CRL
 - OCSP
 
+0. Teoria
+
+# PKI (Public Key Infraatructure)
+#
+# A infra-estrutura de chave pública (PKI) fornece os meios para estabelecer confiança, 
+# vinculando chaves e identidades públicas, garantindo, assim, razoável segurança de que 
+# estamos nos comunicando com segurança com quem pensamos com a pessoa certa. A PKI é 
+# importante para o uso eficaz da criptografia de chave pública e é essencial para entender 
+#e usar o protocolo SSL.
+# 
+# Usando criptografia de chave pública, podemos ter certeza de que apenas os dados criptografados 
+# podem ser descriptografados com a chave privada correspondente. Se combinarmos isso com o uso 
+# de um algoritmo de hash de mensagens para calcular uma assinatura, podemos ter certeza de que 
+# os dados criptografados não foram violados. O que falta são alguns meios de garantir que a parte 
+# com a qual estamos nos comunicando seja realmente quem eles dizem que são. Em outras palavras, 
+# a confiança não foi estabelecida. É aqui que a PKI se encaixa.
+
+# Certificado
+#
+# - No coração da PKI está algo chamado certificado.
+#
+# - Em termos simples, um certificado vincula uma chave pública com um nome distinto.
+#
+# - Um nome distinto é simplesmente o nome da pessoa ou entidade que possui a chave 
+#   pública à qual está vinculada.
+#
+# - Um certificado é assinado com a chave privada do emissor e contém quase todas as 
+#   informações necessárias para verificar sua validade. Ele contém informações sobre 
+#   o assunto, o emissor e o período para o qual é válido. O principal componente que 
+#   está faltando é o certificado do emissor. O certificado do emissor é o componente 
+#   chave para verificar a validade de um certificado, pois contém a chave pública do 
+#   emissor, necessária para verificar a assinatura no certificado do sujeito.
+#
+# - Um certificado é assinado com a chave privada do emissor e contém quase todas as 
+#   informações necessárias para verificar sua validade
+#   Os certificados também são criados com um número de série incorporado. O número 
+#   de série é exclusivo apenas para o emissor do certificado. Dois certificados 
+#   emitidos pelo mesmo emissor nunca devem receber o mesmo número de série. O número 
+#   de série do certificado é frequentemente usado para identificar rapidamente um 
+#   certificado
+
+# Tipos de certificados
+# 
+# Wildcard: Os certificados recebem um nome comum quando criados, e o nome comum 
+# corresponde à URL do site ou entidade usando o certificado.
+# 
+# SAN: Um certificado de nome alternativo da entidade (SAN) é um certificado que 
+# pode ter vários nomes comuns associados ao certificado.
+# 
+# Assinatura de código: um certificado de assinatura de código seria usado para 
+# assinar digitalmente o código do aplicativo que você criar.
+#
+# Autoassinado: um certificado autoassinado é usado pela CA root/raiz. Cada entidade 
+# na PKI precisa de um certificado.
+#
+# Root/raiz: quando uma PKI é criada, a primeira autoridade de certificação instalada 
+# é conhecida como CA root/raiz.
+
+# Autoridade certificadora
+#
+# Uma autoridade de certificação (CA) é uma organização ou empresa que emite certificados
+# A CA deve garantir, sem qualquer dúvida razoável, que todo certificado emitido contenha 
+# uma chave pública emitida pela parte que alega ter emitido.
+#
+# Existem dois tipos básicos de CAs.
+# 
+# - CA privada - tem a responsabilidade de emitir certificados apenas para membros de sua 
+# própria organização e também é confiável apenas para membros de sua própria organização.
+# 
+# - CA pública - como a VeriSign ou a Thawte, tem a responsabilidade de emitir certificados 
+# para qualquer membro do público e deve ser confiável pelo público.
+
+# Hierarquias de certificado
+#
+# Um certificado emitido por uma CA pode ser usado para emitir e assinar outro certificado, 
+# se o certificado emitido for criado com as permissões apropriadas para isso. Dessa maneira, 
+# os certificados podem ser encadeados.
+#
+# Na raiz da cadeia está o certificado da root da CA. Como está na raiz da cadeia 
+# e não há outra autoridade para assinar seu certificado, a CA raiz assina seu próprio 
+# certificado. Esse certificado é conhecido como certificado autoassinado.
+
+# Extensões de certificado
+#
+# O formato mais amplamente aceito para certificados é o formato X.509. Existem 
+# três versões do formato, conhecidas como X.509v1, X.509v2 e X.509v3. A revisão 
+# mais recente do padrão foi introduzida em 1996, e a maioria, se não todos, o 
+# software moderno agora o suporta. Um grande número de alterações foram feitas 
+# entre o X.509v1 e o X.509v3, mas talvez um dos recursos mais significativos 
+# introduzidos no padrão X.509v3 seja o suporte a extensões
+
+# Formatos de certificado
+#
+# Existem diferentes formatos de certificado devido à maneira como as informações 
+# são armazenadas no certificado. A seguir, identifica os formatos de arquivo comuns 
+# para certificados:
+#
+# - DER/CER - Distinguished Encoding Rules (DER) e Canonical Encoding Rules (CER) 
+#   são formatos de arquivos binários usados ​​para armazenar informações no arquivo
+#   de certificado. Os arquivos formatados com DER podem ter uma extensão .der ou 
+#   .cer.
+#
+# - PEM - Privacy-enhanced Electronic Mail (PEM) é um formato de arquivo ASCII que
+#   pode ter uma extensão de arquivo .pem, .crt, .cer ou .key. Os arquivos PEM são 
+#   muito comuns e começam com ----- BEGIN CERTIFICATE ----- e terminam com 
+#   ----- END CERTIFICATE -----.
+#
+# - PFX/P12 - O formato Personal Information Exchange(PXF), também conhecido como 
+#   formato P12 ou PKCS#12, é um formato de arquivo binário comum aos ambientes 
+#   Microsoft para importar e exportar certificados. Os arquivos no formato PFX 
+#   têm uma extensão .pfx ou .p12.
+#
+# - P7B -  O formato P7B, também conhecido como PKCS#7, é outro formato de arquivo
+#  ASCII usado para armazenar informações de certificado. Se você abrir o arquivo 
+# ASCII, verá que ele começa com o texto ----- BEGIN PKCS7 ----- e termina com 
+# ----- END PKCS7 -----. Os arquivos P7B podem ter uma extensão .p7b ou .p7c..
+
+# Listas de revogação de certificado
+# 
+# Depois que um certificado é emitido, geralmente é colocado em produção, onde 
+# será distribuído para muitos clientes. Se um invasor comprometer a chave privada 
+# associada, ele poderá usar o certificado, mesmo que não lhe pertença. Supondo 
+# que o proprietário adequado esteja ciente do comprometimento, um novo certificado
+# com um novo par de chaves deve ser obtido e colocado em uso. Nessa situação, 
+# existem dois certificados para a mesma entidade - ambos são tecnicamente válidos, 
+# mas um não deve ser confiável. O certificado comprometido eventualmente expirará, 
+# mas, enquanto isso, como o mundo em geral saberá não confiar nele?
+# 
+# A resposta está em algo chamado lista de revogação de certificado (CRL). Uma 
+# CRL contém uma lista de todos os certificados revogados emitidos por uma CA 
+# que ainda precisam expirar. Quando um certificado é revogado, a CA declara 
+# que o certificado não deve mais ser confiável.
+
+# Protocolo de status de certificado online
+#
+# O Online Certificate Status Protocol (OCSP), formalmente especificado na RFC 2560, 
+# é uma adição relativamente nova à PKI. Seu objetivo principal é resolver alguns dos 
+# problemas de distribuição que tradicionalmente afetam as CRLs.
+#
+# Usando o OCSP, um aplicativo faz uma conexão com um respondente do OCSP e solicita 
+# o status de um certificado, passando o número de série do certificado. O respondente 
+# responde "bom", "revogado" ou "desconhecido". Uma resposta “boa” indica que o certificado
+# é válido, até onde o respondente sabe. Isso não significa necessariamente que o 
+# certificado já foi emitido, apenas que não foi revogado. Uma resposta "revogada" indica
+# que o certificado foi emitido e que realmente foi revogado. Uma resposta "desconhecida"
+# indica que o respondente não sabe nada sobre o certificado. Um motivo típico para essa 
+# resposta pode ser que o certificado foi emitido por uma CA desconhecida pelo respondente.
+
 1. Understand X.509 certificates, X.509 certificate lifecycle, X.509 certificate fields and X.509v3 certificate extensions
 2. Understand trust chains and public key infrastructures
-
 3. Generate and manage public and private keys
 
 3.1 - OpenSSL
