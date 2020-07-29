@@ -18,3 +18,26 @@ Terms and Utilities:
 - setfacl
 - getfattr
 - setfattr
+
+# Permissão
+U - User
+G - Group
+O - Other
+
+R - Read
+W - Write
+X - eXecute
+
+# getfacl
+#
+# comando utilizado para visualizar as ACLs de um arquivo
+# ou diretorio.
+#
+$ getfacl acl
+	# file: acl 	- arquivo ou diretório
+	# owner: cosmo 	- dono do arquivo ou diretorio
+	# group: cosmo 	- grupo dono do arquivo ou diretorio
+	user::rwx 	- permissao do usuario
+	group::r-x	- permissao do grupo
+	other::r-x	- permissao do outro
+
