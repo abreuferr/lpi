@@ -251,12 +251,16 @@ $ openssl help
 #
 # - chave do tipo RSA (genrsa)
 # - a chave eh protegida pelo algoritmo AES-128/192/256 (-aes128/192/256) (KEK)
-# - arquivo de saida (-out private.key)
+# - arquivo de saida (-out particula_private.key)
 # - tamanho da chave (2048)
-$ openssl genrsa -aes128 -out particula_private.key 2048
+$ openssl genrsa -aes128 -out particula_private.key 2048 ; AES
+$ openssl genrsa -des3 -out particula_private.key 4096 ; 3DES
+
+# criação da chave de criptografia SEM SENHA.
+$ openssl genrsa -out particula_private-noenc.key 4096 -nodes
 
 # visualizar a estrutura da chave de criptografia
-$ openssl rsa -text -in private.key
+$ openssl rsa -text -in particula_private.key
 
 # exportar a chave publica
 $ openssl rsa -in particula_private.key -pubout -out particula_public.key
@@ -273,11 +277,11 @@ $ openssl ecparam -genkey -name secp256r1 | openssl ec -out ec.key -aes128
 
 3.2 - Criacao do "Certificate Signing Request" (CSR)
 
-# o certificado contem a chave publica do requerente e algumas informacoes sobre
-# o requerente.
-
 # comando utilizado para criar o certificado CSR.
 $ openssl req -new -key particula_private.key -out particula.csr
+
+# comando utilizado para criar o certificado CSR COM A CHAVE PRIVADA SEM SENHA.
+openssl req -new -key particula_private-noenc.key -out particula-noenc.csr
 
 # antes de se enviar o certificado para a CA para ser assinado, eh interessante dar
 # uma olhada no conteudo do certificado CSR para confirmar as informacoes que foram
@@ -315,18 +319,39 @@ $ cat particula.cnf
 # criacao do arquivo CSR a partir do arquivo "particula.cnf".
 $ openssl req -new -config particula.cnf -key particula_private.key -out particula.csr
 
-3.5 - Assinando o seu proprio certificado
+3.5 - Assinando o seu proprio certificado (CTR)
 
+# o certificado contem a chave publica do requerente e algumas informacoes sobre
+# o requerente.
+#
+# Criar certificado autoassinado usando openssl x509
+# - O comando openssl x509 é um utilitário de certificado multiuso.
+#
+# - Pode ser usado para exibir informações de certificado, converter certificados
+#   em vários formulários, assinar solicitações de certificado como uma "mini CA"
+#   ou editar configurações de confiança de certificado
+#
+# - A última etapa para criar o certificado autoassinado é assinar a solicitação 
+#   de assinatura do certificado.
+#
+# - Neste exemplo, o certificado openssl durará 365 dias.
+#
+# Usaremos nossa chave privada "particula_private.key" com "particula.csr" para
+# assinar o certificado e gerar o certificado autoassinado server.ctr
+#
 # se por acaso "voce" possuir um servidor TLS para uso proprio, nao sera necessario
 # a utilizacao de uma CA para assinar um certificado. DEsta forma, eh possivel auto
 # assinar o certificado.
 #
 # criacao cd um certificado auto-assinado.
-$ openssl x509 -req -days 365 -in particula.csr -signkey particula_private.key -out particula.crt
+$ openssl x509 -req -days 365 -in particula.csr -signkey particula_private.key -out particula.ctr
+
+# criacao cd um certificado auto-assinado SEM SENHA
+$ openssl x509 -req -days 365 -in particula-noenc.csr -signkey particula_private-noenc.key -out particula-noenc.ctr
 
 # eh possivel tambem criar um certificado auto-assinado a partir da chave privada.
-$ openssl req -new -x509 -days 365 -key particula_private.key -out particula.crt
-$ openssl req -new -x509 -days 365 -key particula_private.key -out particula.crt -subj "/C=br/L=sao paulo/O=particula ltda/CN=www.particula.local"
+$ openssl req -new -x509 -days 365 -key particula_private.key -out particula.ctr
+$ openssl req -new -x509 -days 365 -key particula_private.key -out particula.ctr -subj "/C=br/L=sao paulo/O=particula ltda/CN=www.particula.local"
 
 3.6 - Criando um certificado para mais de um hostname
 
@@ -379,7 +404,46 @@ $ openssl crl2pkcs7 -nocrl -out fd.p7b -certfile fd.crt -certfile fd-chain.crt
 
 4. Create, operate and secure a certification authority
 
+# criando chave privada
+$ openssl genrsa -des3 -out ca.key 4096
 
+# visualizar o conteudo da chave privada
+$ openssl rsa -noout -text -in ca.key
+
+# criando uma Certificate Authority Certificate
+$ openssl req -new -x509 -days 365 -key ca.key -out ca.cert.pem
+
+$ visualizar o conteudo do certificado
+$ openssl x509 -noout -text -in ca.cert.pem
+
+# gerando a chave do servidor
+$ openssl genrsa -des3 -out server.key 4096
+
+# assinando o certificado (CSR)
+$ openssl req -new -key server.key -out server.csr
+
+# verificar o conteudo da chave
+$ openssl rsa -noout -text -in server.key
+
+# verificar o conteudo do Certificate Signing Request (CSR)
+$ openssl req -noout -text -in server.csr
+
+# Assinando um certificado com uma CA
+#
+# Neste comando, emitiremos esse certificado server.crt, assinado pelo 
+# certificado raiz da CA ca.cert.pem e pela chave CA ca.key que criamos
+# no comando anterior.
+#
+# O Openssl pega sua solicitação de assinatura (csr) e cria um certificado
+# de servidor assinado (crt) válido por um ano. Ao fazer isso, precisamos 
+# informar qual autoridade de certificação (CA) usar, qual chave de autoridade
+# de certificação usar e qual chave de servidor assinar. Definimos o número
+# de série usando CAcreateserial e produzimos a chave assinada no arquivo 
+# chamado server.crt
+$ openssl x509 -req -days 365 -in server.csr -CA ca.cert.pem -CAkey ca.key -CAcreateserial -out server.crt
+
+# Visualizando o conteudo do certificado
+$ openssl x509 -noout -text -in server.crt
 
 5. Request, sign and manage server and client certificates
 6. Revoke certificates and certification authorities
