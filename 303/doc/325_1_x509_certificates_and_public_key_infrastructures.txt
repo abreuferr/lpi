@@ -260,7 +260,7 @@ $ openssl genrsa -des3 -out particula_private.key 4096 ; 3DES
 $ openssl genrsa -out particula_private-noenc.key 4096 -nodes
 
 # visualizar a estrutura da chave de criptografia
-$ openssl rsa -text -in particula_private.key
+$ openssl rsa -noout -text -in particula_private.key
 
 # exportar a chave publica
 $ openssl rsa -in particula_private.key -pubout -out particula_public.key
@@ -286,7 +286,7 @@ openssl req -new -key particula_private-noenc.key -out particula-noenc.csr
 # antes de se enviar o certificado para a CA para ser assinado, eh interessante dar
 # uma olhada no conteudo do certificado CSR para confirmar as informacoes que foram
 # gravadas no certificado.
-$ openssl req -text -in particula.csr -noout
+$ openssl req -noout -text -in particula.csr
 
 3.3 - Criando um CSR a partir de um certificado jé existente
 
@@ -343,7 +343,7 @@ $ openssl req -new -config particula.cnf -key particula_private.key -out particu
 # a utilizacao de uma CA para assinar um certificado. DEsta forma, eh possivel auto
 # assinar o certificado.
 #
-# criacao cd um certificado auto-assinado.
+# criacao de um certificado auto-assinado.
 $ openssl x509 -req -days 365 -in particula.csr -signkey particula_private.key -out particula.ctr
 
 # criacao cd um certificado auto-assinado SEM SENHA
