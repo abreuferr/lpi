@@ -1,0 +1,20 @@
+#: Title : 330.5 Libvirt and Related Tools
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 330.5 Libvirt and Related Tools
+#: Options : Weight: 5 
+
+Description: Candidates should have basic knowledge and experience with the 
+libvirt library and commonly available tools.
+
+Key Knowledge Areas:
+
+- libvirt architecture, networking and storage
+- Basic technical knowledge of libvirt and virsh
+- Awareness of oVirt
+
+Terms and Utilities:
+
+- libvirtd
+- /etc/libvirt/
+- virsh
+- oVirt

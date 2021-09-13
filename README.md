@@ -6,3 +6,6 @@
 
 # LPIC 303
 - Material de estudo e exercicios.
+
+# LPIC 304
+- Material de estudo e exercicios.
