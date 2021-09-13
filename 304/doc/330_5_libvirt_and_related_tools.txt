@@ -18,3 +18,115 @@ Terms and Utilities:
 - /etc/libvirt/
 - virsh
 - oVirt
+
+
+#
+# virsh
+#
+
+# Listar as vm existentes
+#
+$ sudo virsh list --all
+sudo virsh list --all
+Id   Name       State
+---------------------------
+1    debian11   running
+-    db01       shut off
+-    db02       shut off
+-    db03       shut off
+
+# Desligar a vm
+#
+$ sudo virsh shutdown debian11
+Domain 'debian11' is being shutdown
+
+$ sudo virsh list --all       
+ Id   Name       State
+---------------------------
+ -    db01       shut off
+ -    db02       shut off
+ -    db03       shut off
+ -    debian11   shut off
+
+# Inicializar a vm
+#
+$ sudo virsh start debian11
+Domain 'debian11' started
+
+# Exibir as informações sobre a vm
+#
+$ sudo virsh dumpxml debian11
+
+# Exibir o endereço IP da VM
+#
+$ sudo virsh domifaddr debian11
+ Name       MAC address          Protocol     Address
+-------------------------------------------------------------------------------
+ vnet1      52:54:00:ee:e5:64    ipv4         192.168.122.201/24
+
+# Editar o arquivo XML da vm
+#
+$ sudo virsh edit debian11
+
+# Listar informações referente a configuração de armazenamento da vm no kvm.
+#
+# no exemplo abaixo, o kvm esta utilizando a configuração padrão, kvm/libvirt
+$ sudo virsh pool-list                  
+ Name        State    Autostart
+---------------------------------
+ default     active   no
+ Downloads   active   yes
+
+# informações referente a configuração padrão/default do kvm
+#
+# sudo virsh pool-info default
+Name:           default
+UUID:           1d530fbe-7a50-4f8a-a0ad-1eef57dd1d63
+State:          running
+Persistent:     yes
+Autostart:      no
+Capacity:       218.06 GiB
+Allocation:     47.56 GiB
+Available:      170.50 GiB
+
+# Exibir o caminho onde as VMs estão armazenadas.
+#
+$ sudo virsh pool-dumpxml default | grep -i path                       
+    <path>/var/lib/libvirt/images</path>
+
+# Exibir as VMs que estão armazenadas no disco rígido.
+#
+$ sudo virsh vol-list default | grep "/var/lib/libvirt/images/"
+
+# Para e cancelar a definição do pool de armazenamento padrão
+#
+$ sudo virsh pool-destroy default
+$ sudo virsh pool-undefine default
+
+# Editar o arquivo de configuração referente a localização das imagens
+# das VMs
+#
+$ sudo virsh pool-edit default
+(...)
+	<path>/var/lib/libvirt/images</path>
+(...)
+
+# Inicializar a definição do pool de armazenamento padrão
+#
+$ sudo virsh pool-start default
+
+# Tornar o storage pool para inicializar automaticamente durante o boot
+#
+$ sudo virsh pool-autostart default
+
+# Visualizar o novo diretório de onde estão armazenado as VMs
+#
+$ sudo virsh pool-dumpxml default | grep -i path
+
+# Reinicializar o serviço do libvirt
+#
+$ sudo systemctl restart libvirtd
+
+# Mover os arquivos das VMs
+#
+$ sudo sudo mv /var/lib/libvirt/images/*.qcow2 /mnt/vm/libvirt/images/
