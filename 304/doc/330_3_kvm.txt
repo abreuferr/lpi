@@ -1,0 +1,126 @@
+#: Title : 330.3 kvm
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : 330.3 kvm
+#: Options : Weight: 9
+
+Description: Candidates should be able to install, configure, maintain, migrate and troubleshoot KVM installations.
+
+Key Knowledge Areas:
+
+    KVM architecture, networking and storage
+    KVM configuration
+    KVM utilities
+    Troubleshooting KVM installations
+
+Terms and Utilities:
+
+    Kernel modules: kvm, kvm-intel and kvm-amd
+    /etc/kvm/
+    /dev/kvm
+    kvm
+    KVM monitor
+    qemu
+    qemu-img
+
+#
+# Instalação
+#
+
+# Verificar se o hardware suporta virtualização
+#
+$ grep --color --perl-regexp 'vmx|svm' /proc/cpuinfo
+
+# Instalação do kvm
+#
+$ sudo apt update && sudo apt upgrade
+$ sudo apt -y install qemu-kvm libvirt-daemon bridge-utils virtinst libvirt-daemon-system
+
+# Instalação do gerenciador do kvm
+#
+$ sudo apt -y install virt-top libguestfs-tools libosinfo-bin qemu-system virt-manager
+
+# Adicionar usuário nos grupos
+#
+$ sudo adduser $LOGNAME libvirt
+$ sudo adduser $LOGNAME libvirt-qemu
+
+
+
+# Systemd
+#
+$ sudo systemctl start libvirtd
+$ sudo systemctl status libvirtd
+$ sudo systemctl enable libvirtd
+
+#
+# Modulo
+#
+
+# Ler e ativar o módulo vhost_net
+#
+$ sudo modprobe vhost_net 
+$ echo "vhost_net" | sudo  tee -a /etc/modules vhost_net
+$ lsmod | grep vhost
+vhost_net              32768  1
+vhost                  57344  1 vhost_net
+vhost_iotlb            16384  1 vhost
+tap                    28672  1 vhost_net
+tun                    57344  3 vhost_net
+
+#
+# Rede
+#
+
+sudo virsh net-list --all
+ Name      State    Autostart   Persistent
+--------------------------------------------
+ default   active   no          yes
+
+$ sudo virsh net-start default
+
+$ sudo virsh net-autostart default
+
+$ sudo vi /etc/network/interfaces
+
+auto br0
+iface br0 inet static
+        address 192.168.29.150
+        netmask 255.255.255.0
+        network 192.168.29.1
+        broadcast 192.168.29.255
+        gateway 192.168.29.1
+        bridge_ports ens33
+        bridge_stp off
+        bridge_fd 0
+        bridge_maxwait 0
+        dns-nameservers 8.8.8.8
+
+#
+# Criação
+#
+
+$ sudo virt-install \
+--name deb11 \
+--ram 2048 \
+--vcpus 2 \
+--disk path=/var/lib/libvirt/images/deb11-vm.qcow2,size=20 \
+--os-type linux \
+--os-variant debian9 \
+--network bridge=br0 \
+--graphics none \
+--console pty,target_type=serial \
+--location 'http://ftp.debian.org/debian/dists/bullseye/main/installer-amd64/' \
+--extra-args 'console=ttyS0,115200n8 serial'
+
+$ sudo virt-install \
+--name ubuntu-vm \
+--os-type linux \
+--os-variant ubuntu18.04 \
+--ram 1024 \
+--vcpu 1 \
+--disk path=/var/lib/libvirt/images/ubuntu-vm.qcow2,size=10 \
+--graphics vnc,listen=0.0.0.0 \
+--noautoconsole \
+--hvm \
+--cdrom /home/cferreira/ubuntu-18.04-live-server-amd64.iso \
+--boot cdrom,hd
