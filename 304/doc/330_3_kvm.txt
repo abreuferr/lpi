@@ -33,7 +33,7 @@ $ grep --color --perl-regexp 'vmx|svm' /proc/cpuinfo
 # Instalação do kvm
 #
 $ sudo apt update && sudo apt upgrade
-$ sudo apt -y install qemu-kvm libvirt-daemon bridge-utils virtinst libvirt-daemon-system
+$ sudo apt -y install qemu-kvm libvirt-daemon bridge-utils virtinst libvirt-daemon-system libosinfo-bin
 
 # Instalação do gerenciador do kvm
 #
@@ -43,8 +43,6 @@ $ sudo apt -y install virt-top libguestfs-tools libosinfo-bin qemu-system virt-m
 #
 $ sudo adduser $LOGNAME libvirt
 $ sudo adduser $LOGNAME libvirt-qemu
-
-
 
 # Systemd
 #
@@ -124,3 +122,24 @@ $ sudo virt-install \
 --hvm \
 --cdrom /home/cferreira/ubuntu-18.04-live-server-amd64.iso \
 --boot cdrom,hd
+
+$ sudo mkdir /var/lib/libvirt/images/templates
+$ wget https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-nocloud-amd64.qcow2
+$ sudo mv -i debian-11-nocloud-amd64.qcow2 /var/lib/libvirt/images/templates/debian-11.qcow2
+$ sudo apt update && sudo apt install cloud-utils cloud-init-tools whois -y
+
+#
+# Redimencionamento
+#
+
+# informação
+#
+$ qemu-img  info /var/lib/libvirt/images/Debian-11-Bullseye-root-disk.qcow2
+
+# redimencionando
+#
+$ sudo qemu-img resize /var/lib/libvirt/images/Debian-11-Bullseye-root-disk.qcow2 30G
+
+# informação
+#
+$ $ qemu-img  info /var/lib/libvirt/images/Debian-11-Bullseye-root-disk.qcow2
