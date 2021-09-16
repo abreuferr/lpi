@@ -47,6 +47,11 @@ $ sudo apt-get install fail2ban
 # Configuracao
 #
 
+# log
+$ sudo vi /etc/fail2ban/fail2ban.conf
+	loglevel = 1
+
+
 # regra do ssh
 $ sudo vi /etc/fail2ban/jail.d/sshd.local
 	[DEFAULT]
