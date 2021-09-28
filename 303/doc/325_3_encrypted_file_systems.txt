@@ -219,3 +219,77 @@ cryptpart	UUID=2f4d33a2-edf1-4f00-8673-15a7bf8fca94	none	luks
 
 $ sudo cat /etc/fstab
 /dev/mapper/cryptpart						/media/cryptpart ext4 defaults 0 0
+
+#
+# Criptografando um disco rígido virtual
+#
+
+# Criando o container a onde serão armazenado as informações e serão criptografados.
+$ sudo dd if=/dev/zero of=/luks-container.img bs=1M count=300 
+300+0 records in
+300+0 records out
+314572800 bytes (315 MB, 300 MiB) copied, 0.265478 s, 1.2 GB/s
+
+# Criptografando o container
+$ sudo cryptsetup luksFormat --type=luks1 --hash=sha512 --key-size=512 --cipher=aes-xts-plain64 /luks-container.img 
+
+WARNING!
+========
+This will overwrite data on /luks-container.img irrevocably.
+
+Are you sure? (Type 'yes' in capital letters): YES
+Enter passphrase for /luks-container.img: 
+Verify passphrase: 
+
+# Obtendo informações sobre o container que foi criptografado
+$ sudo cryptsetup luksDump /luks-container.img
+LUKS header information for /luks-container.img
+
+Version:       	1
+Cipher name:   	aes
+Cipher mode:   	xts-plain64
+Hash spec:     	sha512
+Payload offset:	4096
+MK bits:       	512
+MK digest:     	8a 23 93 97 37 97 87 1b 85 56 df e4 5f af 4c f0 f6 48 17 92 
+MK salt:       	03 af 26 00 a1 26 29 8d f1 ab 05 e1 60 af 2a ce 
+               	e7 2c 9b 58 dd 8c 61 d5 e1 aa 71 8d 59 e5 af 9a 
+MK iterations: 	129007
+UUID:          	0cbd207f-dde2-46de-8b17-c5f1fd92b493
+
+Key Slot 0: ENABLED
+	Iterations:         	2235768
+	Salt:               	c2 68 1f 70 ae e0 8b f3 a7 b3 0c d9 29 85 b8 0e 
+	                      	f2 e2 0f 82 1a 8b fc 71 80 54 60 40 25 b4 b6 dd 
+	Key material offset:	8
+	AF stripes:            	4000
+Key Slot 1: DISABLED
+Key Slot 2: DISABLED
+Key Slot 3: DISABLED
+Key Slot 4: DISABLED
+Key Slot 5: DISABLED
+Key Slot 6: DISABLED
+Key Slot 7: DISABLED
+
+# Criando  container onde a chave de criptografaia será armazenada
+$ sudo dd if=/dev/urandom of=/container-key bs=512 count=8 
+8+0 records in
+8+0 records out
+4096 bytes (4.1 kB, 4.0 KiB) copied, 0.000291753 s, 14.0 MB/s
+
+# Transdferindo a chave de criptografia para o container "container-key"
+$ sudo cryptsetup luksAddKey /luks-container.img /container-key
+Enter any existing passphrase: 
+
+# Abrindo o container com a chave de criptografia presente no container "container-key"
+$ sudo cryptsetup luksOpen /luks-container.img luks-container-crypt --key-file=/container-key
+
+# Criando o file system e montando
+$ sudo mkfs.ext4 /dev/mapper/luks-container-crypt && sudo mount /dev/mapper/luks-container-crypt /media/container
+
+$ cat /etc/crypttab
+luks-container-crypt /luks-container.img /container-key luks
+
+$ cat /etc/fstab
+/dev/mapper/luks-container-crypt	/media/container	ext4	defaults	0 2
+
