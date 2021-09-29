@@ -37,85 +37,33 @@ Terms and Utilities:
 # Instalacao
 #
 
-# Debian
+$ sudo apt-get update && sudo apt-get upgrade
 $ sudo apt-get install cryptsetup
 
 #
-# Critografia
+# Critografia de um disco rígido
 #
 
-# identificar particao a ser criptografada
-$ sudo lsblk
-
-# identificar a particao que ja esta criptografada
-$ sudo blkid -t TYPE=crypto_LUKS
-
-# formatar a particao que sera criptografada
-$ sudo cryptsetup -v -v luksFormat /dev/sde1
-
-# criar o sistema de arquivos criptografado
-# sera mapeado o LUKS device no diretorio /dev/mapper/particao_criptografada
-$ sudo cryptsetup -v luksOpen /dev/sde1 particao_cpriptografada
-
-# criar o sistema de arquivos linux
-$ sudo mkfs -t ext4 /dev/mapper/particao_criptografada
-
-# montar a particao
-$ sudo mkdir -p /mnt/part_cript
-$ sudo mount /dev/mapper/particao_criptografada /mnt/part_cript
-
-# exibir informacao
-$ sudo cryptsetup luksDump /dev/sde1
-
-# exibir o algoritmo de criptografia, o hash, tamanho da chave e a chave mestra
-$ sudo cryptsetup luksDump /dev/sde1 | grep cipher
-$ sudo dmsetup table --target crypt --showkey
-
-# visualizar o status do mapeamento
-$ sudo cryptsetup -v status particao_criptografada
-
-# desmontar a particao
-$ sudo umount /mnt/part_cript
-
-# fechar o volume criptografado
-$ sudo cryptsetup luksClose particao_criptorafada
-
+# Identificando a particao a ser criptografada
 #
-# Alterar o Algoritmo de Criptografia
-#
-
-# desmonta o colume
-$ sudo umount /mnt/part_cript
-
-# alterando o algoritmo
-$ sudo cryptsetup -c aes-xts-plain64 luksFormat
-
-#
-# Verificar a chave mestra e algoritmo
-#
-
-# informacao
-$ sudo dmsetup table --target crypt --showkey
-
-#
-# Criptografia de uma partição
-#
-
-# partição do disco rigido
 $ sudo lsblk
 
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-vdb    254:16   0    2G  0 disk 
+vdb    254:16   0    2G  0 disk
 
-# criando partição
+# Criando partição
+#
 $ sudo fdisk /dev/vdb
 
-# formatando o disco rígido com o LUKS
+# Formatando o disco rígido com o LUKS
+#
 $ sudo lsblk           
 NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
 vdb    254:16   0    2G  0 disk 
 └─vdb1 254:17   0    2G  0 part 
 
+# formatar a particao que sera criptografada
+#
 $ sudo cryptsetup luksFormat /dev/vdb1 
 
 WARNING!
@@ -123,15 +71,18 @@ WARNING!
 This will overwrite data on /dev/vdb1 irrevocably.
 
 Are you sure? (Type 'yes' in capital letters): YES
-Enter passphrase for /dev/vdb1: AAaa00--
-Verify passphrase: AAaa00--
+Enter passphrase for /dev/vdb1:
+Verify passphrase:
 
-$ sudo lsblk -f                       
-NAME   FSTYPE      FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINT
-vdb                                                                                
-└─vdb1 crypto_LUKS 2           2f4d33a2-edf1-4f00-8673-15a7bf8fca94                
+$ sudo lsblk -f
+NAME          FSTYPE      FSVER LABEL         UUID                                 FSAVAIL FSUSE% MOUNTPOINT
+vdb                                                                                               
+└─vdb1        crypto_LUKS 2                   248121e2-1c18-48b7-b676-1fa4801b7ace                
+  └─cryptpart ext4        1.0   LuksPartition adc65594-2756-408a-af18-21104b27bc6f    1.8G     0% /media/cryptpart
 
-# Criando um dispositivo lógico device-mapper
+
+# criar o sistema de arquivos criptografado
+# sera mapeado o LUKS device no diretorio /dev/mapper/cryptpart
 #
 $ sudo cryptsetup luksOpen /dev/vdb1 cryptpart
 Enter passphrase for /dev/vdb1:
@@ -139,37 +90,15 @@ Enter passphrase for /dev/vdb1:
 $  ls -l /dev/mapper/cryptpart 
 lrwxrwxrwx 1 root root 7 Sep 28 09:56 /dev/mapper/cryptpart -> ../dm-0
 
-$ sudo lsblk -f                               
-NAME          FSTYPE      FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINT
-vdb                                                                                       
-└─vdb1        crypto_LUKS 2           2f4d33a2-edf1-4f00-8673-15a7bf8fca94                
-  └─cryptpart                                  
-
-$ sudo lsblk -f /dev/mapper/cryptpart 
-NAME      FSTYPE FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINT
-cryptpart ext4   1.0         4dde0a66-d7eb-486c-9c1c-a6205d40e177                
+$ sudo lsblk -f
+NAME          FSTYPE      FSVER LABEL         UUID                                 FSAVAIL FSUSE% MOUNTPOINT
+vdb                                                                                               
+└─vdb1        crypto_LUKS 2                   248121e2-1c18-48b7-b676-1fa4801b7ace                
+  └─cryptpart ext4        1.0   LuksPartition adc65594-2756-408a-af18-21104b27bc6f    1.8G     0% /media/cryptpart
 
 
-# visualizando a configuração da partição criptografada.
+# criar o sistema de arquivos linux
 #
-$ sudo cryptsetup -v status cryptpart         
-/dev/mapper/cryptpart is active.
-  type:    LUKS2
-  cipher:  aes-xts-plain64
-  keysize: 512 bits
-  key location: keyring
-  device:  /dev/vdb1
-  sector size:  512
-  offset:  32768 sectors
-  size:    4159488 sectors
-  mode:    read/write
-Command successful.
-
-$ sudo cryptsetup luksDump /dev/vdb1
-
-# Criando sistema de arquivo EXT4 na partição
-#
-
 $ sudo dd if=/dev/zero of=/dev/mapper/cryptpart 
 dd: writing to '/dev/mapper/cryptpart': No space left on device
 4159489+0 records in
@@ -190,21 +119,71 @@ Writing superblocks and filesystem accounting information: done
 
 $ sudo lsblk -f /dev/mapper/cryptpart
 NAME      FSTYPE FSVER LABEL         UUID                                 FSAVAIL FSUSE% MOUNTPOINT
-cryptpart ext4   1.0   LuksPartition 47e7cb37-183e-4c89-805a-80b4d1bd48c9                
+cryptpart ext4   1.0   LuksPartition adc65594-2756-408a-af18-21104b27bc6f    1.8G     0% /media/cryptpart
 
-# Montando a partição criptografada
+# montar a particao
 #
 $ sudo mkdir /media/cryptpart         
 $ sudo chmod 770 /media/cryptpart             
 $ sudo chown root:users -R /media/cryptpart 
 $ sudo mount /dev/mapper/cryptpart /media/cryptpart
 
-# Montando de forma automática a partição criptografada
+# exibir informacao
+#
+$ sudo cryptsetup luksDump /dev/vdb1
+
+# exibir o algoritmo de criptografia, o hash, tamanho da chave e a chave mestra
+#
+$ sudo cryptsetup luksDump /dev/vdb1 | grep cipher
+	cipher: aes-xts-plain64
+
+$ sudo dmsetup table --target crypt --showkey
+cryptpart: 0 4159488 crypt aes-xts-plain64 :64:logon:cryptsetup:248121e2-1c18-48b7-b676-1fa4801b7ace-d0 0 254:17 32768
+
+# visualizar o status do mapeamento
+#
+$ sudo cryptsetup -v status cryptpart
+/dev/mapper/cryptpart is active and is in use.
+  type:    LUKS2
+  cipher:  aes-xts-plain64
+  keysize: 512 bits
+  key location: keyring
+  device:  /dev/vdb1
+  sector size:  512
+  offset:  32768 sectors
+  size:    4159488 sectors
+  mode:    read/write
+Command successful.
+
+# desmontar a particao
+#
+$ sudo umount /media/cryptpart
+
+# fechar o volume criptografado
+#
+$ sudo cryptsetup luksClose cryptpart
+
+#
+# Alterar o Algoritmo de Criptografia
+#
+
+# desmonta o volume
+#
+$ sudo umount /media/cryptpart
+
+# alterando o algoritmo
+#
+$ sudo cryptsetup -c aes-xts-plain64 luksFormat
+
+#
+# Montando partição de forma automática a partição criptografada
 #
 
 $ sudo mkdir /etc/luks-keys
 $ sudo touch /etc/luks-keys/disk_secret_key
 
+# sudo cryptsetup luksAddKey <encrypted_device> <path_to_key>
+#
 $ sudo cryptsetup -v luksAddKey /dev/vdb1 /etc/luks-keys/disk_secret_key
 Enter any existing passphrase: 
 Key slot 0 unlocked.
@@ -212,25 +191,31 @@ Key slot 1 created.
 Command successful.
 
 $ sudo blkid | grep -i luks
-/dev/vdb1: UUID="2f4d33a2-edf1-4f00-8673-15a7bf8fca94" TYPE="crypto_LUKS" PARTUUID="7a9191ca-01"
+/dev/vdb1: UUID="248121e2-1c18-48b7-b676-1fa4801b7ace" TYPE="crypto_LUKS" PARTUUID="5b623297-01"
 
-$ sudo cat /etc/crypttab 
-cryptpart	UUID=2f4d33a2-edf1-4f00-8673-15a7bf8fca94	none	luks
+
+# Montando de forma automática o disco rígido que esta
+# criptografado.
+#
+$ sudo cat /etc/crypttab
+cryptpart	UUID=248121e2-1c18-48b7-b676-1fa4801b7ace	/etc/luks-keys/disk_secret_key	luks
 
 $ sudo cat /etc/fstab
 /dev/mapper/cryptpart						/media/cryptpart ext4 defaults 0 0
 
 #
-# Criptografando um disco rígido virtual
+# Criptografando uma imagem
 #
 
 # Criando o container a onde serão armazenado as informações e serão criptografados.
-$ sudo dd if=/dev/zero of=/luks-container.img bs=1M count=300 
+#
+$ sudo dd if=/dev/zero of=/luks-container.img bs=1M count=300
 300+0 records in
 300+0 records out
 314572800 bytes (315 MB, 300 MiB) copied, 0.265478 s, 1.2 GB/s
 
 # Criptografando o container
+#
 $ sudo cryptsetup luksFormat --type=luks1 --hash=sha512 --key-size=512 --cipher=aes-xts-plain64 /luks-container.img 
 
 WARNING!
@@ -242,6 +227,7 @@ Enter passphrase for /luks-container.img:
 Verify passphrase: 
 
 # Obtendo informações sobre o container que foi criptografado
+#
 $ sudo cryptsetup luksDump /luks-container.img
 LUKS header information for /luks-container.img
 
@@ -272,24 +258,32 @@ Key Slot 6: DISABLED
 Key Slot 7: DISABLED
 
 # Criando  container onde a chave de criptografaia será armazenada
+#
 $ sudo dd if=/dev/urandom of=/container-key bs=512 count=8 
 8+0 records in
 8+0 records out
 4096 bytes (4.1 kB, 4.0 KiB) copied, 0.000291753 s, 14.0 MB/s
 
-# Transdferindo a chave de criptografia para o container "container-key"
+# Transferindo a chave de criptografia para o container "container-key"
+#
 $ sudo cryptsetup luksAddKey /luks-container.img /container-key
 Enter any existing passphrase: 
 
 # Abrindo o container com a chave de criptografia presente no container "container-key"
+#
 $ sudo cryptsetup luksOpen /luks-container.img luks-container-crypt --key-file=/container-key
 
 # Criando o file system e montando
-$ sudo mkfs.ext4 /dev/mapper/luks-container-crypt && sudo mount /dev/mapper/luks-container-crypt /media/container
+#
+$ sudo mkfs.ext4 /dev/mapper/luks-container-crypt 
+
+$ sudo mkdir /media/container         
+$ sudo chmod 770 /media/container             
+$ sudo chown root:users -R /media/container 
+$ sudo mount /dev/mapper/luks-container-crypt /media/container
 
 $ cat /etc/crypttab
 luks-container-crypt /luks-container.img /container-key luks
 
 $ cat /etc/fstab
 /dev/mapper/luks-container-crypt	/media/container	ext4	defaults	0 2
-
