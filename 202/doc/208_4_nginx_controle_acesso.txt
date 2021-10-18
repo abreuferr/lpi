@@ -1,0 +1,129 @@
+#: Title : nginx web server
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : configuracao controle de acesso basico
+#: Options : None
+#: Reference :  
+
+#
+# INSTALACAO
+#
+
+# adicionar o repositorio do Nginx no debian.
+$ sudo vi /etc/apt/sources.list.d/nginx.list
+	deb http://nginx.org/packages/mainline/debian/ stretch nginx
+$ wget http://nginx.org/keys/nginx_signing.key
+$ sudo apt-key add nginx_signing.key
+$ sudo apt-get update
+$ sudo apt-get install nginx -y -d
+
+#
+# CONFIGURACAO
+#
+
+# SYSTEMD
+# parar o nginx
+$ sudo systemctl stop nginx
+# inicializar o nginx
+$ sudo systemctl start nginx
+# reinicializar o nginx
+$ sudo systemctl restart nginx
+# re-ler a configuracao
+$ sudo systemctl reload nginx
+# ativar o nginx no boot
+$ sudo systemctl enable nginx
+# status do nginx
+
+# STATUS
+$ ps aux | grep nginx
+	root       1385  0.0  1.3  91188  3052 ?        Ss   09:03   0:00 nginx: master process /usr/sbin/nginx -g daemon on; master_process on;
+	www-data   1386  0.0  1.5  91556  3740 ?        S    09:03   0:00 nginx: worker process                           
+	www-data   1388  0.0  1.5  91556  3740 ?        S    09:03   0:00 nginx: worker process                           
+	www-data   1389  0.0  1.5  91556  3740 ?        S    09:03   0:00 nginx: worker process                           
+	www-data   1390  0.0  1.5  91556  3740 ?        S    09:03   0:00 nginx: worker process                           
+$ netstat -tulpn | grep :80
+	(No info could be read for "-p": geteuid()=1000 but you should be root.)
+	tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      -               
+	tcp6       0      0 :::80                   :::*                    LISTEN      -               
+
+#
+# CONFIGURACAO
+#
+
+# criando a senha de acesso do usuario.
+$ sudo openssl passwd [SENHA]
+
+# arquivo com os usuarios e senhas.
+$ sudo vi /var/www/particula.local/passwd
+	# comment
+	usuario1:senha1
+	usuario2:senha2:comentario
+	usuario3:senha3
+
+# criacao do diretorio de trabalho
+$ sudo mkdir /var/www/particula.local/html
+
+# configuracao do site particula.local
+$ sudo vi /etc/nginx/sites-available/particula.local.conf
+	server {
+		# parametro utilizado para definir a porta a ser utilizada pelo nginx.
+	        listen 80;
+
+		# parametro utilizado para especificar o hostname ou virtual server.
+	        server_name www.particula.local;
+
+		# parametro utilizado para definir o diretorio a onde sera arazenado
+		# os arquivos do site.
+        	root /var/www/particula.local;
+	        index index.html;
+
+        	location / {
+			# satisfazer qualquer tipo de condicao abaixo.
+			satisfy any;
+
+			# somente hosts da rede 192.168.0.0/24 podem acessar.
+			allow 192.168.0.0/24; 
+			deny all;
+
+			# titulo da jane pop-up
+			auth_basic "Private site";
+			# arquivo com o usuario e a senha de acesso. 
+			auth_basic_user_file /var/www/particula.local/passwd;
+	        }
+	}
+
+#
+# configuracao do site www.particula.local - link simbolico
+#
+$ sudo ln -s /etc/nginx/sites-available/www.particula.local.conf /etc/nginx/sites-enabled/www.particula.local.conf
+
+#
+# teste do arquivo de configuracao
+#
+$ sudo nginx -t
+	nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+	nginx: configuration file /etc/nginx/nginx.conf test is successful
+
+#
+# releitura dos arquivos de configuracao
+#
+$ sudo systemctl reload nginx
+
+#
+# index.html
+$ sudo vi /var/www/www.particula.local/index.html
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<title>www.particula.local</title>
+	<style>
+	    body {
+	        width: 35em;
+	        margin: 0 auto;
+	        font-family: Tahoma, Verdana, Arial, sans-serif;
+	    }
+	</style>
+	</head>
+	<body>
+	<h1>www.particula.local</h1>
+	</body>
+	</html>

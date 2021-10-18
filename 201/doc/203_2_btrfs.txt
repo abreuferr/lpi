@@ -1,11 +1,18 @@
-# BTRFS
-#
+#: Title : btrfs howto
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Configuracao do btrfs no GNU/Linux Debian Stable
+#: Options : /dev/sd[bc]
+
 # - forte sistema contra possivel falha e erros;
 # - possibilidade de desfragmentar e redimensionar o disco com
 # ele montado;
 # - snapshot com a particao montada;
 # - raid 0/1/10;
 # - sistema de arquivos do tipo copy-on-write.
+
+#
+# Instalação
+#
 
 # instalacao do software
 #
@@ -74,6 +81,15 @@ $ sudo mkfs -t btrfs -d raid1 /dev/sd[bc]
 # -d - dados
 #
 $ sudo mkfs -t btrfs -d raid1 -m raid0 /dev/sd[bc]
+
+# formatacao do sistema de arquivos do tipo BTRFS
+#
+# RAID 0/1
+#
+# -m - metadados
+# -d - dados
+#
+$ sudo mkfs -t btrfs -m raid0 -d raid1 /dev/sd[bc]
 
 # exibit informacoes sobre o btrfs
 #
@@ -249,25 +265,38 @@ $ sudo df -h
 # SUBVOLUME
 #
 
-# criar subvolume
-#
-$ sudo btrfs subvolume create /mnt/btrfs/subvol
-
 # listar subvolume
 #
 $ sudo btrfs subvolume list /mnt/btrfs/
 
+# criar subvolume
+#
+$ sudo btrfs subvolume create /mnt/btrfs/subvolweb
+	Create subvolume '/mnt/btrfs/subvolweb'
+$ sudo btrfs subvolume create /mnt/btrfs/subvolsamba
+	Create subvolume '/mnt/btrfs/subvolsamba'
+
 # apagar subvolume
 #
-$ sudo btrfs subvolume delete /mnt/btrfs/subvol
+$ sudo btrfs subvolume delete /mnt/btrfs/subvolweb
+$ sudo btrfs subvolume delete /mnt/btrfs/subvolsamba
+
+# listar subvolume
+#
+$ sudo btrfs subvolume list /mnt/btrfs/
+	ID 257 gen 13 top level 5 path subvolweb
+	ID 258 gen 14 top level 5 path subvolsamba
 
 # montar subvolume
 #
 $ sudo btrfs subvolume list /mnt/btrfs/
-	ID 257 gen 13 top level 5 path subvol
+	ID 257 gen 13 top level 5 path subvolweb
+	ID 258 gen 14 top level 5 path subvolsamba
 $ sudo umount /mnt/btrfs/
-$ sudo mkdir /mnt/subvol
-$ sudo mount -o subvolid=257 /dev/sdb /mnt/subvol/
+$ sudo mkdir /mnt/subvolweb
+$ sudo mkdir /mnt/subvolsamba
+$ sudo mount -o subvolid=257 /dev/sdb /mnt/subvolweb/
+$ sudo mount -o subvolid=258 /dev/sdb /mnt/subvolsamba/
 
 #
 # SNAPSHOT
@@ -275,8 +304,22 @@ $ sudo mount -o subvolid=257 /dev/sdb /mnt/subvol/
 
 # criar snapshot
 #
-$ sudo btrfs subvolume snapshot /mnt/btrfs/subvol/ /mnt/btrfs/subvol_snap/
+$ sudo btrfs subvolume snapshot /mnt/subvolweb/ /mnt/subvolweb/
+	Create a snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb//subvolweb'
+$ sudo btrfs subvolume snapshot /mnt/subvolsamba/ /mnt/subvolsamba/
+	Create a snapshot of '/mnt/subvolsamba/' in '/mnt/subvolsamba//subvolsamba'
+
+# criar um snapshot dentro de outro diretorio
+#
+$ sudo btrfs subvolume snapshot /mnt/subvolweb/ /mnt/subvolweb/snapshot/
+	Create a snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb/snapshot'
+
+$ ls /mnt/subvolweb/web.txt
+	/mnt/subvolweb/web.txt
+$ ls /mnt/subvolweb/snapshot/web.txt
+	/mnt/subvolweb/snapshot/web.txt
 
 # snapshot em modo read-only
 #
-$ sudo btrfs subvolume snapshot -r /mnt/subvol/ /mnt/subvol_snap_r/
+$ sudo btrfs subvolume snapshot -r /mnt/subvolweb/ /mnt/subvolweb/snapshot_r/
+	Create a readonly snapshot of '/mnt/subvolweb/' in '/mnt/subvolweb/snapshot_r'

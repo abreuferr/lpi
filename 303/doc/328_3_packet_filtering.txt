@@ -26,3 +26,232 @@ Terms and Utilities:
 - ipset
 - nft
 - ebtables
+
+#: Title : Security tasks - Iptables
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Firewall do gateway
+#: Options : None
+
+#
+# TEORIA
+#
+
+# TABELAS DO IPTABLES
+filter 
+- tabela padrao.
+- aplica regras que permite ou bloqueia pacotes.
+	input
+	output
+	forward
+nat 
+- traducao e redirecionamento.
+- aplica regras para mudar o endereco do pacote antes de sair do chain.
+	prerouting
+	postrouting
+	output
+mangle 
+- alteracoes especializadas de pacotes.
+- aplica regras que alteram as caracteristicas do pacote antes de sair do chain.
+	input
+	output
+	forward
+	prerouting
+
+# CHAIN DO IPTABLE
+input
+	- pacote enviado para o host.
+	- lida com pacotes cujo destino eh a rede local.
+output
+	- pacote enviado do host.
+	- pacote saindo do kernel com endereco alterado.
+forward
+	- qdo os pacotes estao sendo encaminhados pelo kernel.
+	- lida com pacotes que serao encaminhados para sistemas remotos.
+postrouting
+	- qdo os pacotes estao saindo apos terem sidos roteados.
+prerouting
+	- qdo os pacotes estao entrando atraves da interface de entrada, antes de softrerem roteamento.
+	- lida com pacotes antes do processo de roteamento, exemplo, roteamento de porta.
+
+# ACAO DO CHAIN
+	accept - o pacote eh aceito e repassado para o proximo chain.
+	drop - o pacote eh descartado de forma silenciosa.
+	reject - o pacote eh rejeitado e envia um comunicado para o emissor, um pacote do tipo icmp.
+	log - registra o pacote e passa para o proximo chain.
+
+# COMANDOS DO IPTABLE
+-A [chain] [rule] - adiciona uma regra ao chain, ADD.
+-D [chain] [rule] - apaga uma regra ao chain, DELETE.
+-F [chain] - apaga todas as regras, FLUSH.
+-I [chain] [index] [rule] - insere uma nova regra em um determinado chain.
+-L [chain] - lista as regras de um determinado chain ou todas quando nao especificado.
+-P [chain] [target] - define como politica default em um determinado chain.
+-R [chain] [index] [rule] - substitui uma regra em um determinado localizacao.
+-S [chain] - lista as regras em detalhes em uma determinada chain.
+
+-t [table] - especifica a tabela em que uma determinada regra deva ser aplicada.
+-p [protocolo] - define o protocolo (protocol).
+-s [endereco] - endereco de origem.
+-d [endereco] - endereco de destino.
+-i [iface] - interface de rede de entrada.
+-o [iface] - interface de rede de destino.
+-j [target] - define a acao padrao para a regra se por acaso a regra for compativel.
+-sport [porta] - porta de origem, source.
+-dport [porta] - porta de destino, destination.
+
+-v - verbose.
+-n - nao resolve host ou porta.
+
+#
+# SIMULACAO
+#
+
+# exibindo a condicao inicial da tabela FILTER
+$ sudo iptables -L
+	Chain INPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain FORWARD (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain OUTPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+# exibindo informacoes sobre a tabela NAT
+$ sudo iptables -L -t nat
+	Chain PREROUTING (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain INPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain POSTROUTING (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain OUTPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+# roteamento desativado
+$ sudo cat /proc/sys/net/ipv4/ip_forward
+	0
+
+# ativando o roteamento do kernel linux
+$ sudo echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# roteamento ativado
+$ sudo cat /proc/sys/net/ipv4/ip_forward
+	1
+# carregando o modulo de iptables no kernel do linux
+$ sudo modprobe iptables_nat
+
+# ativando NAT - roteamento dos pacotes.
+# ens33 - interface de rede de acesso a internet.
+$ sudo iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
+
+# redirecionamento de porta - ssh (22)
+iptables -t nat -A PREROUTING -i ens33 -p tcp --dport 22 -j DNAT --to 192.168.10.42
+
+# exibindo a tabela NAT
+$ sudo iptables -L -t nat
+	Chain PREROUTING (policy ACCEPT)
+	target     prot opt source               destination
+	DNAT       tcp  --  anywhere             anywhere             tcp dpt:ssh to:192.168.10.42
+
+	Chain INPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain POSTROUTING (policy ACCEPT)
+	target     prot opt source               destination
+	MASQUERADE  all  --  anywhere             anywhere
+
+	Chain OUTPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+# se por acaso a politica padrao da tabela FILTER for DROP,
+# sera necessario abrir as portas.
+$ sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# exibindo a tabela FILTER
+$ sudo iptables -L 
+	Chain INPUT (policy ACCEPT)
+	target     prot opt source               destination
+	ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:ssh
+
+	Chain FORWARD (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain OUTPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+# liberando para o acesso externo de uma determinada porta
+$ sudo iptables -A FORWARD -i $lan -o $wan -p tcp --dport 22 -j ACCEPT
+
+# proxy tranparente
+$ sudo iptables -t nat -A PREROUTING -s 192.168.10.0/24 -p tcp --dport 80 -j REDIRECT --to-port 3128
+
+# exibindo a tabela NAT
+$ sudo iptables -L -t NAT
+	Chain PREROUTING (policy ACCEPT)
+	target     prot opt source               destination
+	DNAT       tcp  --  anywhere             anywhere             tcp dpt:ssh to:192.168.10.42
+	REDIRECT   tcp  --  192.168.10.0/24      anywhere             tcp dpt:http redir ports 3128
+
+	Chain INPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+	Chain POSTROUTING (policy ACCEPT)
+	target     prot opt source               destination
+	MASQUERADE  all  --  anywhere             anywhere
+
+	Chain OUTPUT (policy ACCEPT)
+	target     prot opt source               destination
+
+#
+# SCRIPT DE FIREWALL
+#
+
+# script de firewall
+#
+$ /etc/init.d/firewall.sh
+	#!/bin/bash
+
+	# variavel
+	IPTABLES=/sbin/iptables
+	wan = ens33
+	lan = ens36
+
+	# modulo
+	modprobe iptable_nat
+
+	# remove todas as regras
+	iptables -F INPUT
+	iptables -F FORWARD
+	iptables -F OUTPUT
+
+	# ativar ip masquerading
+	echo 1 > /proc/sys/net/ipv4/ip_forward
+	$IPTABLES -t nat -A POSTROUTING -o ens32 -j MASQUERADE
+
+	# fechando (DROP) todas as portas na tabela FILTER.
+	iptables -P INPUT DROP
+	iptables -P FORWARD DROP
+	iptables -P OUTPUT DROP
+
+	# liberando o trafego na interface localhost
+	iptables -A OUTPUT -d 127.0.0.1 -o lo -j ACCEPT
+	iptables -A INPUT -s 127.0.0.1 -i lo -j ACCEPT
+
+	# abrindo porta 22
+	iptables -A OUTPUT -p tcp --dport 22 -j ACCEPT
+
+	# liberando para o acesso externo de uma determinada porta
+	$ iptables -A FORWARD -i $lan -o $wan -p tcp --dport 22 -j ACCEPT
+
+	# redirecionamento de porta
+	iptables -t nat -A PREROUTING -i $wan -p tcp --dport 22 -j DNAT --to 192.168.10.42
+
+	# liberando a internet para as estacoes de trabalho
+	iptables -t nat -A POSTROUTING -o $wan -j MASQUERADE
+
+	# proxy tranparente
+	iptables -t nat -A PREROUTING -s 192.168.10.0/24 -p tcp --dport 80 -j REDIRECT --to-port 3128

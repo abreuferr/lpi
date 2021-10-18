@@ -1,6 +1,8 @@
-#
-# SYSV
-#
+#: Title : SysV
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : SysV
+#: Options : None
+#: Reference :  
 
 #
 # TEORIA
@@ -89,3 +91,79 @@ $ chkconfig --level 45 postfix off
 
 $ chkconfig --level 45 postfix on
 	postfix        	0:off	1:off	2:on	3:on	4:on	5:on	6:off
+
+#: Title : Systemd
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : uma serie de comandos do systemd
+#: Options : None
+#: Reference :  
+
+# Starting and Stopping Services
+$ sudo systemctl start <application.service>
+$ sudo systemctl start <application>
+$ sudo systemctl stop <application.service>
+
+# Restarting and Reloading
+$ sudo systemctl restart <application.service>
+$ sudo systemctl reload <application.service>
+$ sudo systemctl reload/restart <application.service>
+
+# Enabling and Disabling Services
+$ sudo systemctl enable <application.service>
+$ sudo systemctl disable <application.service>
+
+# Checking the Status of Services
+$ sudo systemctl status <application.service>
+$ sudo systemctl is-active <application.service>
+$ sudo systemctl is-failed <application.service>
+
+# Listing Current Units
+$ sudo systemctl list-units
+$ sudo systemctl list-units --all
+$ sudo systemctl list-units --all --state=inactive
+$ sudo systemctl list-units --type=service
+
+# Listing All Unit Files
+$ sudo systemctl list-unit-files
+
+# Displaying a Unit File
+$ sudo systemctl cat <atd.service>
+
+# Displaying Dependencies
+$ sudo systemctl list-dependencies <sshd.service>
+
+# Checking Unit Properties
+$ sudo systemctl show <sshd.service>
+
+# Masking and Unmasking Units
+$ sudo systemctl mask <nginx.service>
+$ sudo systemctl list-unit-files
+$ sudo systemctl unmask <nginx.service>
+
+# Editing Unit Files
+$ sudo systemctl edit <nginx.service>
+$ sudo systemctl edit --full <nginx.service>
+$ sudo rm -r /etc/systemd/system/<nginx.service.d
+$ sudo rm /etc/systemd/system/<nginx.service>
+$ sudo systemctl daemon-reload
+
+# Getting and Setting the Default Target
+$ sudo systemctl get-default
+$ sudo systemctl set-default graphical.target
+
+# Using Shortcuts for Important Events
+$ sudo systemctl rescue
+$ sudo systemctl halt
+$ sudo systemctl poweroff
+$ sudo systemctl reboot
+
+# log
+#
+$ sudo journalctl -b
+$ sudo journalctl -b <n>	; mostra o log de <n> boot atras 
+
+$ ps aux | grep <aplicativo>	; para obter o numero PID do processo
+$ sudo journalctl _PID=<n>	; mostra o log de um determinado processo/PID
+
+$ sudo systemd-analyze blame	; exibe o tempo que um determinado processo levou para ser inicializado
+
