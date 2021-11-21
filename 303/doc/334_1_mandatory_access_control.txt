@@ -1,0 +1,94 @@
+#: Title : Mandatory Access Control
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Mandatory Access Control
+#: Options : Weight: 5
+
+Description: Candidates should be familiar with mandatory access control (MAC) systems for Linux. Specifically, candidates should have a thorough knowledge of SELinux. Also, candidates should be aware of other mandatory access control systems for Linux. This includes major features of these systems but not configuration and use.
+
+Key Knowledge Areas:
+
+- Understand the concepts of type enforcement, role based access control, mandatory access control and discretionary access control 
+- Configure, manage and use SELinux 
+- Awareness of AppArmor and Smack 
+
+Partial list of the used files, terms and utilities:
+
+getenforce
+setenforce
+selinuxenabled
+getsebool
+setsebool
+togglesebool
+fixfiles
+restorecon
+setfiles
+newrole
+setcon
+runcon
+chcon
+semanage
+sestatus
+seinfo
+apol
+seaudit
+audit2why
+audit2allow
+/etc/selinux/*
+
+#
+# AppArmor
+#
+
+1. Teoria
+
+AppArmor é um sistema de Controle de Acesso Mandatório (MAC - Mandatory Access Control) 
+construído sobre a interface LSM (Linux Security Modules) do Linux. Na prática, o kernel 
+consulta o AppArmor antes de cada chamada do sistema para saber se o processo está autorizado 
+a fazer a operação dada. Através desse mecanismo, o AppArmor confina programas a um conjunto 
+limitado de recursos.
+
+O AppArmor aplica um conjunto de regras (conhecido como “perfil/profile”) em cada programa. O 
+perfil aplicado pelo kernel depende do caminho de instalação do programa que está sendo executado. 
+Ao contrário do SELinux, as regras aplicadas não dependem do usuário. Todos os usuários enfrentam 
+o mesmo conjunto de regras quando estão executando o mesmo programa (mas as permissões de usuário 
+tradicionais ainda se aplicam e podem resultar em comportamentos diferentes!).
+
+Os perfis AppArmor são armazenados em /etc/apparmor.d/ e eles contém uma lista de regras de 
+controle de acesso em recursos que cada programa pode fazer uso. Os perfis são compilados e carregados
+no núcleo pelo comando apparmor_parser. Cada perfil pode ser carregado tanto em modo "enforcing" quanto
+em modo "complaining". O primeiro aplica a política e reporta as tentativas de violação, enquanto que 
+o último não aplica a política mas mantém os registros de chamadas de sistema que deveriam ter sido 
+negadas.
+
+Apparmor é uma estrutura de segurança que impede que os aplicativos se tornem mal. Por exemplo, 
+se eu executo o Firefox e visito um site mal intensionado que tenta instalar malware que exclui 
+minha home pasta, o Apparmor coloca limites no Firefox, impedindo-o de fazer o que eu não quero 
+(como acessar minhas músicas, documentos, etc.). Dessa forma, mesmo se seu aplicativo estiver 
+comprometido, nenhum dano poderá ser causado.
+
+2. Instalação
+
+# instalação
+$ apt install apparmor apparmor-profiles apparmor-utils apparmor-profiles-extra
+
+# status do systemctl do Apparmor
+$ sudo systemctl status apparmor
+
+# Apparmor e systemctl
+$ sudo systemctl status apparmor 	; Checks status of the AppArmor service
+$ sudo systemctl start apparmor 	; Starts the service
+$ sudo systemctl enable apparmor 	; Makes apparmor start on boot
+
+3. Comandos
+
+# Comando utilizado para exibir o status dos profiles que estão em execução
+#
+$ sudo aa-status
+
+# comando utilizado para criar um profile para um determinado programa, no exemplo abaixo, 
+# esta sendo utilizado para exemplo o aplicativo W3M.
+#
+# será criado um profile para o aplicativo W3M no diretório "/etc/apparmor.d/"
+# de nome "usr.bin.w3m"
+#
+$ sudo aa-genprof w3m
