@@ -160,14 +160,24 @@ $ sudo rm /etc/apparmor.d/usr.bin.w3m
 
 # Segue abaixo uma lista de permissões que podem ser utilizadas dentro do Apparmor
 # utilizadas para controlar os aplicativos.
+#
+# regra para arquivo
+#
+# 	r - ler
+# 	w - Escreva
+# 	l - ligação/link
+# 	k - lock
+# 	a - append
+#
+# regra para executavel
+#
+# 	ix - Herdar execução
+# 	px - Execução de perfil discreto
+# 	Px - Perfil discreto executado - limpe o ambiente
+# 
+# 	ux - Execução sem restrições
+# 	Ux - Execução sem restrições - limpe o ambiente
+# 
+# 	m  - permitir o mapeamento da execução
 
-r  - ler
-w  - Escreva
-ux - Execução sem restrições
-Ux - Execução sem restrições - limpe o ambiente
-px - Execução de perfil discreto
-Px - Perfil discreto executado - limpe o ambiente
-ix - Herdar execução
-m  - permitir PROT_EXECcom mmap(2)chamadas
-l  - ligação
 
