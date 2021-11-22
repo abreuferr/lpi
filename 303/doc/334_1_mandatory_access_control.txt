@@ -41,43 +41,58 @@ audit2allow
 
 1. Teoria
 
-AppArmor é um sistema de Controle de Acesso Mandatório (MAC - Mandatory Access Control) 
-construído sobre a interface LSM (Linux Security Modules) do Linux. Na prática, o kernel 
-consulta o AppArmor antes de cada chamada do sistema para saber se o processo está autorizado 
-a fazer a operação dada. Através desse mecanismo, o AppArmor confina programas a um conjunto 
-limitado de recursos.
-
-O AppArmor aplica um conjunto de regras (conhecido como “perfil/profile”) em cada programa. O 
-perfil aplicado pelo kernel depende do caminho de instalação do programa que está sendo executado. 
-Ao contrário do SELinux, as regras aplicadas não dependem do usuário. Todos os usuários enfrentam 
-o mesmo conjunto de regras quando estão executando o mesmo programa (mas as permissões de usuário 
-tradicionais ainda se aplicam e podem resultar em comportamentos diferentes!).
-
-Os perfis AppArmor são armazenados em /etc/apparmor.d/ e eles contém uma lista de regras de 
-controle de acesso em recursos que cada programa pode fazer uso. Os perfis são compilados e carregados
-no núcleo pelo comando apparmor_parser. Cada perfil pode ser carregado tanto em modo "enforcing" quanto
-em modo "complaining". O primeiro aplica a política e reporta as tentativas de violação, enquanto que 
-o outro não aplica a política mas mantém os registros de chamadas de sistema que deveriam ter sido 
-negadas.
-
-Apparmor é uma estrutura de segurança que impede que os aplicativos se tornem mal. Por exemplo, 
-se eu executo o Firefox e visito um site mal intensionado que tenta instalar malware que exclui 
-minha home pasta, o Apparmor coloca limites no Firefox, impedindo-o de fazer o que eu não quero 
-(como acessar minhas músicas, documentos, etc.). Dessa forma, mesmo se seu aplicativo estiver 
-comprometido, nenhum dano poderá ser causado.
+# AppArmor é um sistema de Controle de Acesso Mandatório (MAC - Mandatory Access Control) 
+# construído sobre a interface LSM (Linux Security Modules) do Linux. Na prática, o kernel 
+# consulta o AppArmor antes de cada chamada do sistema para saber se o processo está autorizado 
+# a fazer a operação dada. Através desse mecanismo, o AppArmor confina programas a um conjunto 
+# limitado de recursos.
+# 
+# O AppArmor aplica um conjunto de regras (conhecido como “perfil/profile”) em cada programa. O 
+# perfil aplicado pelo kernel depende do caminho de instalação do programa que está sendo executado. 
+# Ao contrário do SELinux, as regras aplicadas não dependem do usuário. Todos os usuários enfrentam 
+# o mesmo conjunto de regras quando estão executando o mesmo programa (mas as permissões de usuário 
+# tradicionais ainda se aplicam e podem resultar em comportamentos diferentes!).
+# 
+# Os perfis AppArmor são armazenados em /etc/apparmor.d/ e eles contém uma lista de regras de 
+# controle de acesso em recursos que cada programa pode fazer uso. Os perfis são compilados e carregados
+# no kernel pelo comando apparmor_parser. Cada perfil pode ser carregado tanto em modo "enforcing" 
+# quanto em modo "complaining". 
+#
+# O perfil em modo "enforcing" detecta violações das regras de perfil do AppArmor, como o programa 
+# com perfil acessando arquivos não permitidos pelo perfil. As violações são registradas e não permitidas. 
+# O padrão é que o modo forçado seja habilitado. Para registrar apenas as violações, mas ainda assim 
+# permiti-las, use o modo "complaining".
+#
+# O perfil em modo "complain" ou em modo reclamação/aprendizagem detecta violações das regras de perfil 
+# do AppArmor, como o programa com perfil acessando arquivos não permitidos pelo perfil. As violações são 
+# permitidas, mas também registradas. Para melhorar o perfil, ative o modo complain, execute o programa 
+# por meio de um conjunto de testes para gerar eventos de registro que caracterizem as necessidades de 
+# acesso do programa e, em seguida, pós-processar o registro com as ferramentas do AppArmor para transformar
+# eventos de registro em perfis aprimorados.
+# 
+# Apparmor é uma estrutura de segurança que impede que os aplicativos se tornem mal. Por exemplo, 
+# se eu executo o Firefox e visito um site mal intensionado que tenta instalar malware que exclui 
+# minha home pasta, o Apparmor coloca limites no Firefox, impedindo-o de fazer o que eu não quero 
+# (como acessar minhas músicas, documentos, etc.). Dessa forma, mesmo se seu aplicativo estiver 
+# comprometido, nenhum dano poderá ser causado.
 
 2. Instalação
 
 # instalação
+#
 $ apt install apparmor apparmor-profiles apparmor-utils apparmor-profiles-extra
 
 # status do systemctl do Apparmor
+#
 $ sudo systemctl status apparmor
 
 # Apparmor e systemctl
-$ sudo systemctl status apparmor 	; Checks status of the AppArmor service
-$ sudo systemctl start apparmor 	; Starts the service
-$ sudo systemctl enable apparmor 	; Makes apparmor start on boot
+#
+$ sudo systemctl status apparmor
+$ sudo systemctl start apparmor
+$ sudo systemctl stop apparmor
+$ sudo systemctl reload apparmor
+$ sudo systemctl enable apparmor
 
 3. Comandos
 
@@ -86,8 +101,9 @@ $ sudo systemctl enable apparmor 	; Makes apparmor start on boot
 # Comando utilizado para exibir o status dos profiles que estão em execução
 #
 $ sudo aa-status
+$ sudo cat /sys/kernel/security/apparmor/profiles
 
-3. Criar um perfil
+3. Criar um perfil Stand-Alone
 
 # comando utilizado para criar um profile para um determinado programa, no exemplo abaixo, 
 # esta sendo utilizado o aplicativo W3M.
@@ -104,25 +120,28 @@ $ sudo aa-genprof w3m
 # será feito uma série de perguntas por parte do aa-genprof com o objetivo de criar
 # o perfil do aplicativo W3M, /etc/apparmor.d/usr.bin.w3m
 
+3. Criar um perfil de forma aproximada
+
+# O comando cria um perfil aproximado para um determinado aplicativo.
+#
+$ sudo aa-autodep w3m
+
 3. Modo Complain
 
-# O comando abaixo ira colocar um determinado perfil e modo "complain". Desta forma, o
-# Apparmor irá somente monitorar a excução do aplicativo e irá logar quando o mesmo seria
-# negado.
-
+# O comando abaixo ira colocar um determinado perfil em modo "complain". 
+#
 $ sudo aa-complain /etc/apparmor.d/usr.bin.w3m
 
 3. Modo Enforce
 
-# O comando abaixo ira colocar um determinado perfil e modo "enforce". Desta forma, o
-# Apparmor irá bloquear a excução do aplicativo.
-
+# O comando abaixo ira colocar um determinado perfil em modo "enforce".
+#
 $ sudo aa-enforce /etc/apparmor.d/usr.bin.w3m
 
-3. Carregar um peril
+3. Carregar um perfil
 
 # O comando abaixo é utilizado para carregar um perfil
-
+#
 $ sudo apparmor_parser -a /etc/apparmor.d/usr.bin.w3m
 
 3. Recarregar um perfil
@@ -130,31 +149,46 @@ $ sudo apparmor_parser -a /etc/apparmor.d/usr.bin.w3m
 # O comando abaixo é utilizado para recarregar um perfil. Esse comando
 # pode ser utilizado para recarregar o perfil depois de foi feito qualquer
 # tipo de alteração no arquivo de configuração do mesmo.
-
+#
 $ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.w3m
+
+3. Desabilitar um perfil de forma permanente
+
+# Os comandos abaixo irão desabilitar o perfil de forma permanente.
+#
+$ sudo ln -s /etc/apparmor.d/usr.bin.w3m /etc/apparmor.d/disable
+$ sudo systemctl restart apparmor
 
 3. Desabilitar um perfil
 
 # Os comandos abaixo irão desabilitar o perfil
 #
-$ sudo ln -s /etc/apparmor.d/usr.bin.w3m /etc/apparmor.d/disable
 $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
+	OU
+$ sudo aa-disable /etc/apparmor.d/usr.bin.w3m
 
 3. Habilitar um perfil
 
 # Os comandos abaixo irão habilitar o perfil
 #
-$ sudo rm /etc/apparmor.d/disable/usr.bin.w3m        
-$ sudo cat /etc/apparmor.d/usr.bin.w3m | sudo apparmor_parser -a
+$ sudo apparmor_parser /etc/apparmor.d/usr.bin.w3m
 
-3. Apagar um perfil
+3. Apagar um perfil de forma permanente
 
 # Os comandos abaixo irão remover o perfil do Apparmor.
 #
 $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
 $ sudo rm /etc/apparmor.d/usr.bin.w3m                
 
-4. Perfil
+3. Apagar um perfil desconhecido
+
+# Os comandos abaixo são utilizados para listar e apagar os
+# profiles que não estão no diretório /etc/apparmor.d/
+#
+$ sudo aa-remove-unknown -n
+$ sudo aa-remove-unknown
+
+4. Profile
 
 4. Permissão
 
@@ -163,21 +197,131 @@ $ sudo rm /etc/apparmor.d/usr.bin.w3m
 #
 # regra para arquivo
 #
-# 	r - ler
-# 	w - Escreva
-# 	l - ligação/link
-# 	k - lock
+# 	r - read - ler arquivo
+# 	w - write - escrever arquivo
+#   m - memory map - permitir o mapeamento da execução
+# 	l - link
+# 	k - lock/travar arquivo
 # 	a - append
 #
 # regra para executavel
 #
-# 	ix - Herdar execução
-# 	px - Execução de perfil discreto
-# 	Px - Perfil discreto executado - limpe o ambiente
+# Inherit (ix) - Herdar execução
 # 
-# 	ux - Execução sem restrições
-# 	Ux - Execução sem restrições - limpe o ambiente
+# O filho herda o perfil do pai, executando com os mesmos controles de acesso que o pai. Este modo é 
+# útil quando um programa confinado precisa chamar outro programa confinado sem obter as permissões 
+# do perfil do alvo ou perder as permissões do perfil atual. Este modo é freqüentemente usado quando 
+# o programa filho é um aplicativo auxiliar, como o cliente / usr / bin / mail usando less como um 
+# pager.
+#
+# Profile (px/Px) - Execução de perfil discreto
 # 
-# 	m  - permitir o mapeamento da execução
+# O filho é executado usando seu próprio perfil, que deve ser carregado no kernel. Se o perfil não 
+# estiver presente, as tentativas de execução do filho falharão com permissão negada. Isso é útil se 
+# o programa pai estiver chamando um serviço global, como pesquisas de DNS ou enviando e-mail com o 
+# MTA do seu sistema.
+#
+# Escolha o perfil com a opção clean exec (Px) para limpar o ambiente de variáveis de ambiente que 
+# podem modificar o comportamento de execução quando passadas para o processo filho.
+# 
+# Unconfined (ux/Ux) - Execução sem restrições
+#
+# O filho é executado completamente não confinado, sem nenhum perfil do AppArmor aplicado ao recurso 
+# executado.
+#
+# Escolha a opção não confinado com clean exec (Ux) para limpar o ambiente de variáveis de ambiente 
+# que podem modificar o comportamento de execução quando passadas para o processo filho. Observe que 
+# a execução de perfis não confinados apresenta uma vulnerabilidade de segurança que pode ser usada 
+# para escapar do AppArmor. Use-o apenas como último recurso.
 
+4. Controle de acesso
 
+- files
+- Linux capabilities
+- network
+- mount, remount and umount
+- pivot_root
+- ptrace
+- signal
+- DBus
+- unix domain sockets
+
+4. Adicional
+
+# variaveis, como por exemplo, @{HOME} são definidas e manipuladas fora do profile. As variáveis
+são definidas no arquivo 
+
+#
+# NMAP
+#
+
+$ sudo cat /etc/apparmor.d/usr.bin.tcpdump 
+
+#vim:syntax=apparmor
+#include <tunables/global>
+
+profile tcpdump /usr/bin/tcpdump {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+
+  # access controls for capabilities are present
+  capability net_raw,
+  capability setuid,
+  capability setgid,
+  capability dac_override,
+  capability chown,
+
+  # access controls for networking are present
+  network raw,
+  network packet,
+
+  # for -D
+  @{PROC}/bus/usb/ r,
+  @{PROC}/bus/usb/** r,
+
+  # for finding an interface
+  /dev/ r,
+  @{PROC}/[0-9]*/net/dev r,
+  /sys/bus/usb/devices/ r,
+  /sys/class/net/ r,
+  /sys/devices/**/net/** r,
+
+  # for -j
+  capability net_admin,
+
+  # for tracing USB bus, which libpcap supports
+  /dev/usbmon* r,
+  /dev/bus/usb/ r,
+  /dev/bus/usb/** r,
+
+  # for init_etherarray(), with -e
+  /etc/ethers r,
+
+  # for USB probing (see libpcap-1.1.x/pcap-usb-linux.c:probe_devices())
+  /dev/bus/usb/**/[0-9]* w,
+
+  # for -z
+  /{usr/,}bin/gzip ixr,
+  /{usr/,}bin/bzip2 ixr,
+
+  # for -F and -w
+  audit deny @{HOME}/.* mrwkl,
+  audit deny @{HOME}/.*/ rw,
+  audit deny @{HOME}/.*/** mrwkl,
+  audit deny @{HOME}/bin/ rw,
+  audit deny @{HOME}/bin/** mrwkl,
+  owner @{HOME}/ r,
+  owner @{HOME}/** rw,
+
+  # for -r, -F and -w
+  /**.[pP][cC][aA][pP] rw,
+
+  # for convenience with -r (ie, read pcap files from other sources)
+  /var/log/snort/*log* r,
+
+  /usr/bin/tcpdump mr,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.bin.tcpdump>
+}
