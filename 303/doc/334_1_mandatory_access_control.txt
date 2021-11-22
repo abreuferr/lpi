@@ -81,18 +81,19 @@ $ sudo systemctl enable apparmor 	; Makes apparmor start on boot
 
 3. Comandos
 
-3.1 Status
+3. Status
+
 # Comando utilizado para exibir o status dos profiles que estão em execução
 #
 $ sudo aa-status
 
-3.2 Criar um perfil
+3. Criar um perfil
 
 # comando utilizado para criar um profile para um determinado programa, no exemplo abaixo, 
 # esta sendo utilizado o aplicativo W3M.
 #
-# será criado um profile para o aplicativo W3M no diretório "/etc/apparmor.d/"
-# de nome "usr.bin.w3m"
+# será criado um profile para o aplicativo W3M no diretório "/etc/apparmor.d/" de nome 
+# "usr.bin.w3m"
 #
 $ sudo aa-genprof w3m
 
@@ -103,16 +104,70 @@ $ sudo aa-genprof w3m
 # será feito uma série de perguntas por parte do aa-genprof com o objetivo de criar
 # o perfil do aplicativo W3M, /etc/apparmor.d/usr.bin.w3m
 
-3.3 Como desabilitar um perfil
+3. Modo Complain
+
+# O comando abaixo ira colocar um determinado perfil e modo "complain". Desta forma, o
+# Apparmor irá somente monitorar a excução do aplicativo e irá logar quando o mesmo seria
+# negado.
+
+$ sudo aa-complain /etc/apparmor.d/usr.bin.w3m
+
+3. Modo Enforce
+
+# O comando abaixo ira colocar um determinado perfil e modo "enforce". Desta forma, o
+# Apparmor irá bloquear a excução do aplicativo.
+
+$ sudo aa-enforce /etc/apparmor.d/usr.bin.w3m
+
+3. Carregar um peril
+
+# O comando abaixo é utilizado para carregar um perfil
+
+$ sudo apparmor_parser -a /etc/apparmor.d/usr.bin.w3m
+
+3. Recarregar um perfil
+
+# O comando abaixo é utilizado para recarregar um perfil. Esse comando
+# pode ser utilizado para recarregar o perfil depois de foi feito qualquer
+# tipo de alteração no arquivo de configuração do mesmo.
+
+$ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.w3m
+
+3. Desabilitar um perfil
 
 # Os comandos abaixo irão desabilitar o perfil
-
+#
 $ sudo ln -s /etc/apparmor.d/usr.bin.w3m /etc/apparmor.d/disable
 $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
 
-3.4 Como habilitar um perfil
+3. Habilitar um perfil
 
 # Os comandos abaixo irão habilitar o perfil
-
+#
 $ sudo rm /etc/apparmor.d/disable/usr.bin.w3m        
 $ sudo cat /etc/apparmor.d/usr.bin.w3m | sudo apparmor_parser -a
+
+3. Apagar um perfil
+
+# Os comandos abaixo irão remover o perfil do Apparmor.
+#
+$ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
+$ sudo rm /etc/apparmor.d/usr.bin.w3m                
+
+4. Perfil
+
+4. Permissão
+
+# Segue abaixo uma lista de permissões que podem ser utilizadas dentro do Apparmor
+# utilizadas para controlar os aplicativos.
+
+r  - ler
+w  - Escreva
+ux - Execução sem restrições
+Ux - Execução sem restrições - limpe o ambiente
+px - Execução de perfil discreto
+Px - Perfil discreto executado - limpe o ambiente
+ix - Herdar execução
+m  - permitir PROT_EXECcom mmap(2)chamadas
+l  - ligação
+
