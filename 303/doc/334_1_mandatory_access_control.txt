@@ -57,7 +57,7 @@ Os perfis AppArmor são armazenados em /etc/apparmor.d/ e eles contém uma lista
 controle de acesso em recursos que cada programa pode fazer uso. Os perfis são compilados e carregados
 no núcleo pelo comando apparmor_parser. Cada perfil pode ser carregado tanto em modo "enforcing" quanto
 em modo "complaining". O primeiro aplica a política e reporta as tentativas de violação, enquanto que 
-o último não aplica a política mas mantém os registros de chamadas de sistema que deveriam ter sido 
+o outro não aplica a política mas mantém os registros de chamadas de sistema que deveriam ter sido 
 negadas.
 
 Apparmor é uma estrutura de segurança que impede que os aplicativos se tornem mal. Por exemplo, 
@@ -81,14 +81,38 @@ $ sudo systemctl enable apparmor 	; Makes apparmor start on boot
 
 3. Comandos
 
+3.1 Status
 # Comando utilizado para exibir o status dos profiles que estão em execução
 #
 $ sudo aa-status
 
+3.2 Criar um perfil
+
 # comando utilizado para criar um profile para um determinado programa, no exemplo abaixo, 
-# esta sendo utilizado para exemplo o aplicativo W3M.
+# esta sendo utilizado o aplicativo W3M.
 #
 # será criado um profile para o aplicativo W3M no diretório "/etc/apparmor.d/"
 # de nome "usr.bin.w3m"
 #
 $ sudo aa-genprof w3m
+
+# depois de executar o comando para criar o profile do aplicativo W3M, deve-se abrir
+# um segundo terminal e acessar qualquer URL com o aplicativo W3M para que o aplicativo
+# aa-genprof possa coletar uma série de informações e criar o profile do aplicativo.
+#
+# será feito uma série de perguntas por parte do aa-genprof com o objetivo de criar
+# o perfil do aplicativo W3M, /etc/apparmor.d/usr.bin.w3m
+
+3.3 Como desabilitar um perfil
+
+# Os comandos abaixo irão desabilitar o perfil
+
+$ sudo ln -s /etc/apparmor.d/usr.bin.w3m /etc/apparmor.d/disable
+$ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
+
+3.4 Como habilitar um perfil
+
+# Os comandos abaixo irão habilitar o perfil
+
+$ sudo rm /etc/apparmor.d/disable/usr.bin.w3m        
+$ sudo cat /etc/apparmor.d/usr.bin.w3m | sudo apparmor_parser -a
