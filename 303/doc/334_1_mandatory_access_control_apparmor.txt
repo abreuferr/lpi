@@ -35,7 +35,7 @@ audit2why
 audit2allow
 /etc/selinux/*
 
-#
+# 
 # AppArmor
 #
 
@@ -375,6 +375,7 @@ $ sudo aa-remove-unknown
 
 	# Essa variável se expande para um valor que pode ser alterado sem alterar todo o perfil.
 	#
+	# As variaveis são definidas nos arquivos que estão armazenadas no diretório "/etc/apparmor.d/tunables/"
 	/@{HOME}/.foo_file    rw,
 	/@{HOME}/.foo_lock    kw,
 	
@@ -408,3 +409,12 @@ $ sudo aa-remove-unknown
 		/var/spool/*          rwl,
 	}
 }
+
+#
+# Apparmor e NGinx
+#
+
+1. Instalação do NGinx
+
+$ sudo apt-get update
+$ sudo apt-get install nginx
