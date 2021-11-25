@@ -413,32 +413,49 @@ $ sudo aa-remove-unknown
 # Apparmor e Nginx
 #
 
-1. Instalação do Nginx
+1. Instalação
 
+# Atualização do GNU/Linux Debian
+#
 $ sudo apt-get update
 
+# Instalação do Nginx
+#
 $ sudo apt-get install nginx
+
+# Instalação do Apparmor
+#
+$ apt install apparmor apparmor-profiles apparmor-utils apparmor-profiles-extra
 
 2. Configuração do Nginx
 
+# Criação do diretório onde será armazenado a pagina do site cujo acesso esta liberado.
+#
 $ sudo mkdir -p /data/www/safe
 
+# Criação do diretório onde será armazenado a pagina do site cujo acesso NÃO esta liberado.
+#
 $ sudo mkdir -p /data/www/unsafe
 
+# Página que será exibida quando o usuário tentar acessar o site no teste inicial.
+#
 $ sudo vi /data/www/safe/index.html
-
 <html>
     <b>Hello! Accessing this file is allowed.</b>
 </html>
 
+# Página que será exibida quando o usuário tentar acessar o site no teste incial. Depois que
+# o Apparmor estiver habilitado, essa página não será exibida, o que será exibido é uma mensagem
+# de erro do browser de acesso negado, erro 403.
+#
 $ sudo vi /data/www/unsafe/index.html
-
 <html>
     <b>Hello! Accessing this file is NOT allowed.</b>
 </html>
 
+# Configuração do Nginx para aceitar o acesso no dominio localhost.
+#
 $ sudo vi /etc/nginx/nginx.conf
-
 (...)
 http {
 	(...)
@@ -454,31 +471,60 @@ http {
     (...)
 }
 
+# O comando abaixo é utilizado para testar o arquivo de configuração do Nginx a procura de
+# algum tipo de erro que possa vir a existir.
+#
 $ sudo nginx -s reload
 
+# Os comandos abaixo são utilizados para testar o Nginx em relação as páginas de teste do
+# Apparmor.
+#
 $ w3m http://localhost:8080/safe/index.html 
-
 $ w3m http://localhost:8080/unsafe/index.html
 
 3. Apparmor
 
+# O comando "aa-autodep" é utilizado para criar um arquivo de configuração do profile do
+# Nginx em branco.
+#
 $ cd /etc/apparmor.d/
-
 $ sudo aa-autodep nginx
 
+# Depois de criado o arquivo de configuração do profile do Nginx, será necessário colocar 
+# o profile em modo "complain".
+#
 $ sudo aa-complain nginx
 
+# Reinicalizaro Nginx.
+#
 $ sudo systemctl restart nginx
 
+# A partir deste ponto, deve-se acessar as páginas "safe" e "unsafe" para que sejam 
+# registradas no log do Nginx e esses logs serão utilizados para a configuração do
+# perfil do Nginx no Apparmor.
+#
+$ w3m http://localhost:8080/safe/index.html 
+$ w3m http://localhost:8080/unsafe/index.html
+
+# Utilizando os logs do Nginx que foram gerados através dos comandos acima, será possivel
+# construir o profile do Nginx junto ao Apparmor.
+#
+$ sudo aa-logprof
+
+# Editando o perfil do Apparmor.
+#
 $ sudo vi /etc/apparmor.d/usr.sbin.nginx
 
 #include <tunables/global>
 
+# Configuracao do binario do Nginx.
 /usr/sbin/nginx {
   #include <abstractions/apache2-common>
   #include <abstractions/base>
   #include <abstractions/nis>
 
+  # Os "capability" permitem que o Nginx crie novos processos.
+  #
   capability chown,
   capability dac_override,
   capability dac_read_search,
@@ -488,15 +534,19 @@ $ sudo vi /etc/apparmor.d/usr.sbin.nginx
   capability sys_resource,
 
   # system files for baseauth and more.
+  #
   /etc/group r,
   /etc/nsswitch.conf r,
   /etc/passwd r,
 
-  # binary, pid
+  # Binário e Processo do Nginx.
+  #
   /usr/sbin/nginx mr,
   /run/nginx.pid rw,
 
-  # configuration
+  # Arquivos de configuraçãoo do Nginx e dos domínios administrados
+  # pelo Nginx.
+  #
   /etc/nginx/conf.d/ r,
   /etc/nginx/conf.d/nginx-mtls.conf r,
   /etc/nginx/fastcgi_params r,
@@ -506,32 +556,49 @@ $ sudo vi /etc/apparmor.d/usr.sbin.nginx
   /etc/ssl/openssl.cnf r,
   /etc/nginx/snippets/ r,
 
-  # site
+  # Arquivos dos sites. Os três sites estao com a configuração de somente
+  # leitura "r", mas o site "unsafe" esta com o acesso negado.
+  #
   /data/www/safe/* r,
   deny /data/www/unsafe/* r,
   /etc/nginx/sites-enabled/* r,
 
-  # logs
-  /var/log/nginx/* w,
+  # Arquivos de log gerados pelo Nginx. Na configuração abaixo,
+  # sera permitido a escrita no arquivos de log.
+  #
+  /var/log/nginx/access.log w,
+  /var/log/nginx/error.log w,
 
 }
 
-
+# O comando "aa-enforce" coloca o profile do Nginx em modo "Enforce"
+#
 $ sudo aa-enforce nginx
 
+# O processo do Nginx sera reinicializado. Verificar o arquivos de log se por
+# acaso existir algum tipo de problema para carregar o Nginx.
+#
 $ sudo systemctl restart nginx
 
-$ sudo systemctl restart apparmor
-
+# Comando utilizado para verificar o status dos profiles que o Apparmor
+# esta monitorando.
+#
 $ sudo apparmor_status
 
 4. Teste
 
+# Os dois comandos abaixo sao utilizados para testar o Apparmor em relacao
+# a exibição ou não das páginas dos sites. O Apparmor permitira que a somente
+# a página "safe" seja exibida. Já a página "unsafe" deve apresentar uma mensagem
+# de erro 403.
+#
 $ w3m http://localhost:8080/safe/index.html 
 $ w3m http://localhost:8080/unsafe/index.html
 
 5. Troubleshooting
 
+# Arquivos que devem ser lidos em caso de algum tipo de problema tanto para
+# carregar o Apparmor quanto o Nginx.
+#
 - /var/log/syslog
-
 - /var/log/nginx/error.log
