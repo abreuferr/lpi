@@ -137,7 +137,7 @@ audit2allow
 # - DBus
 # - unix domain sockets
 
-5. Instalação
+4. Instalação
 
 # instalação
 #
@@ -155,16 +155,16 @@ $ sudo systemctl stop apparmor
 $ sudo systemctl reload apparmor
 $ sudo systemctl enable apparmor
 
-6. Comandos
+5. Comandos
 
-6. Status
+5.1 Status
 
 # Comando utilizado para exibir o status dos profiles que estão em execução
 
 $ sudo aa-status
 $ sudo cat /sys/kernel/security/apparmor/profiles
 
-6. Criar um perfil Stand-Alone
+5.2 Criar um perfil Stand-Alone
 
 # comando utilizado para criar um profile para um determinado programa, no exemplo abaixo, 
 # esta sendo utilizado o aplicativo W3M.
@@ -181,13 +181,13 @@ $ sudo aa-genprof w3m
 # será feito uma série de perguntas por parte do aa-genprof com o objetivo de criar
 # o perfil do aplicativo W3M, /etc/apparmor.d/usr.bin.w3m
 
-6. Criar um perfil de forma aproximada
+5.3 Criar um perfil de forma aproximada
 
 # O comando cria um perfil aproximado para um determinado aplicativo.
 
 $ sudo aa-autodep w3m
 
-6. Criar um perfil de forma facil
+5.4 Criar um perfil de forma facil
 
 # O comando "aa-easyprof" cria o esqueleto do perfil do aplicativo. O arquivo de configuração
 # contem somente o esqueleto de um arquivo de configuração.
@@ -204,25 +204,25 @@ $ sudo apparmor_parser -r  /etc/apparmor.d/usr.bin.w3m
 
 $ sudo aa-logprof
 
-6. Modo Complain
+5.5 Modo Complain
 
 # O comando abaixo ira colocar um determinado perfil em modo "complain". 
 
 $ sudo aa-complain /etc/apparmor.d/usr.bin.w3m
 
-6. Modo Enforce
+5.6 Modo Enforce
 
 # O comando abaixo ira colocar um determinado perfil em modo "enforce".
 
 $ sudo aa-enforce /etc/apparmor.d/usr.bin.w3m
 
-6. Carregar um perfil
+5.7 Carregar um perfil
 
 # O comando abaixo é utilizado para carregar um perfil
 
 $ sudo apparmor_parser -a /etc/apparmor.d/usr.bin.w3m
 
-6. Recarregar um perfil
+5.8 Recarregar um perfil
 
 # O comando abaixo é utilizado para recarregar um perfil. Esse comando
 # pode ser utilizado para recarregar o perfil depois de foi feito qualquer
@@ -230,14 +230,14 @@ $ sudo apparmor_parser -a /etc/apparmor.d/usr.bin.w3m
 
 $ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.w3m
 
-6. Desabilitar um perfil de forma permanente
+5.9 Desabilitar um perfil de forma permanente
 
 # Os comandos abaixo irão desabilitar o perfil de forma permanente.
 
 $ sudo ln -s /etc/apparmor.d/usr.bin.w3m /etc/apparmor.d/disable
 $ sudo systemctl restart apparmor
 
-6. Desabilitar um perfil
+5.10 Desabilitar um perfil
 
 # Os comandos abaixo irão desabilitar o perfil
 
@@ -245,20 +245,20 @@ $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
 	OU
 $ sudo aa-disable /etc/apparmor.d/usr.bin.w3m
 
-6. Habilitar um perfil
+5.11 Habilitar um perfil
 
 # Os comandos abaixo irão habilitar o perfil
 
 $ sudo apparmor_parser /etc/apparmor.d/usr.bin.w3m
 
-6. Apagar um perfil de forma permanente
+5.12 Apagar um perfil de forma permanente
 
 # Os comandos abaixo irão remover o perfil do Apparmor.
 
 $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
 $ sudo rm /etc/apparmor.d/usr.bin.w3m                
 
-6. Apagar um perfil desconhecido
+5.13 Apagar um perfil desconhecido
 
 # Os comandos abaixo são utilizados para listar e apagar os
 # profiles que não estão no diretório /etc/apparmor.d/
@@ -266,9 +266,9 @@ $ sudo rm /etc/apparmor.d/usr.bin.w3m
 $ sudo aa-remove-unknown -n
 $ sudo aa-remove-unknown
 
-4. Profile
+6. Profile
 
-4.1 Introdução
+6.1 Introdução
 
 # Include Files
 # "Include" são usadas para extrair partes de outros perfis do AppArmor para simplificar a estrutura de novos perfis.
@@ -296,8 +296,7 @@ $ sudo aa-remove-unknown
 # rlimit Entries
 # "rlimit entries" defini e controla os limites de recursos de um aplicativo.
 
-
-4.2 Exemplo
+6.2 Exemplo
 
 # O "include" lê um arquivo que contem definição de variaveis.
 #include <tunables/global>
@@ -411,10 +410,128 @@ $ sudo aa-remove-unknown
 }
 
 #
-# Apparmor e NGinx
+# Apparmor e Nginx
 #
 
-1. Instalação do NGinx
+1. Instalação do Nginx
 
 $ sudo apt-get update
+
 $ sudo apt-get install nginx
+
+2. Configuração do Nginx
+
+$ sudo mkdir -p /data/www/safe
+
+$ sudo mkdir -p /data/www/unsafe
+
+$ sudo vi /data/www/safe/index.html
+
+<html>
+    <b>Hello! Accessing this file is allowed.</b>
+</html>
+
+$ sudo vi /data/www/unsafe/index.html
+
+<html>
+    <b>Hello! Accessing this file is NOT allowed.</b>
+</html>
+
+$ sudo vi /etc/nginx/nginx.conf
+
+(...)
+http {
+	(...)
+    
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+        listen 8080;
+        location / { 
+                root /data/www;
+        }
+    }
+    (...)
+}
+
+$ sudo nginx -s reload
+
+$ w3m http://localhost:8080/safe/index.html 
+
+$ w3m http://localhost:8080/unsafe/index.html
+
+3. Apparmor
+
+$ cd /etc/apparmor.d/
+
+$ sudo aa-autodep nginx
+
+$ sudo aa-complain nginx
+
+$ sudo systemctl restart nginx
+
+$ sudo vi /etc/apparmor.d/usr.sbin.nginx
+
+#include <tunables/global>
+
+/usr/sbin/nginx {
+  #include <abstractions/apache2-common>
+  #include <abstractions/base>
+  #include <abstractions/nis>
+
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_resource,
+
+  # system files for baseauth and more.
+  /etc/group r,
+  /etc/nsswitch.conf r,
+  /etc/passwd r,
+
+  # binary, pid
+  /usr/sbin/nginx mr,
+  /run/nginx.pid rw,
+
+  # configuration
+  /etc/nginx/conf.d/ r,
+  /etc/nginx/conf.d/nginx-mtls.conf r,
+  /etc/nginx/fastcgi_params r,
+  /etc/nginx/mime.types r,
+  /etc/nginx/nginx.conf r,
+  /etc/nsswitch.conf r,
+  /etc/ssl/openssl.cnf r,
+  /etc/nginx/snippets/ r,
+
+  # site
+  /data/www/safe/* r,
+  deny /data/www/unsafe/* r,
+  /etc/nginx/sites-enabled/* r,
+
+  # logs
+  /var/log/nginx/* w,
+
+}
+
+
+$ sudo aa-enforce nginx
+
+$ sudo systemctl restart nginx
+
+$ sudo systemctl restart apparmor
+
+$ sudo apparmor_status
+
+4. Teste
+
+$ w3m http://localhost:8080/safe/index.html 
+$ w3m http://localhost:8080/unsafe/index.html
+
+5. Troubleshooting
+
+- /var/log/syslog
+
+- /var/log/nginx/error.log
