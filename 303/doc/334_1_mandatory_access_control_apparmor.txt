@@ -47,25 +47,25 @@ audit2allow
 # a fazer a operação dada. Através desse mecanismo, o AppArmor confina programas a um conjunto 
 # limitado de recursos.
 # 
-# O AppArmor aplica um conjunto de regras (conhecido como “perfil/profile”) em cada programa. O 
-# perfil aplicado pelo kernel depende do caminho de instalação do programa que está sendo executado. 
+# O AppArmor aplica um conjunto de regras (conhecido como “profile/profile”) em cada programa. O 
+# profile aplicado pelo kernel depende do caminho de instalação do programa que está sendo executado. 
 # Ao contrário do SELinux, as regras aplicadas não dependem do usuário. Todos os usuários enfrentam 
 # o mesmo conjunto de regras quando estão executando o mesmo programa (mas as permissões de usuário 
 # tradicionais ainda se aplicam e podem resultar em comportamentos diferentes!).
 # 
 # Os perfis AppArmor são armazenados em /etc/apparmor.d/ e eles contém uma lista de regras de 
 # controle de acesso em recursos que cada programa pode fazer uso. Os perfis são compilados e carregados
-# no kernel pelo comando apparmor_parser. Cada perfil pode ser carregado tanto em modo "enforcing" 
+# no kernel pelo comando apparmor_parser. Cada profile pode ser carregado tanto em modo "enforcing" 
 # quanto em modo "complaining". 
 #
-# O perfil em modo "enforcing" detecta violações das regras de perfil do AppArmor, como o programa 
-# com perfil acessando arquivos não permitidos pelo perfil. As violações são registradas e não permitidas. 
+# O profile em modo "enforcing" detecta violações das regras de profile do AppArmor, como o programa 
+# com profile acessando arquivos não permitidos pelo profile. As violações são registradas e não permitidas. 
 # O padrão é que o modo forçado seja habilitado. Para registrar apenas as violações, mas ainda assim 
 # permiti-las, use o modo "complaining".
 #
-# O perfil em modo "complain" ou em modo reclamação/aprendizagem detecta violações das regras de perfil 
-# do AppArmor, como o programa com perfil acessando arquivos não permitidos pelo perfil. As violações são 
-# permitidas, mas também registradas. Para melhorar o perfil, ative o modo complain, execute o programa 
+# O profile em modo "complain" ou em modo reclamação/aprendizagem detecta violações das regras de profile 
+# do AppArmor, como o programa com profile acessando arquivos não permitidos pelo profile. As violações são 
+# permitidas, mas também registradas. Para melhorar o profile, ative o modo complain, execute o programa 
 # por meio de um conjunto de testes para gerar eventos de registro que caracterizem as necessidades de 
 # acesso do programa e, em seguida, pós-processar o registro com as ferramentas do AppArmor para transformar
 # eventos de registro em perfis aprimorados.
@@ -93,29 +93,29 @@ audit2allow
 # regra para executavel
 #
 # - Inherit (ix) - Herdar execução
-# O filho herda o perfil do pai, executando com os mesmos controles de acesso que o pai. Este modo é 
+# O filho herda o profile do pai, executando com os mesmos controles de acesso que o pai. Este modo é 
 # útil quando um programa confinado precisa chamar outro programa confinado sem obter as permissões 
-# do perfil do alvo ou perder as permissões do perfil atual. Este modo é freqüentemente usado quando 
+# do profile do alvo ou perder as permissões do profile atual. Este modo é freqüentemente usado quando 
 # o programa filho é um aplicativo auxiliar, como o cliente /usr/bin/mail usando less como um pager. 
-# Cria uma regra que é denotada por “ix” no perfil, faz com que o binário executado herde permissões 
-# do perfil pai.
+# Cria uma regra que é denotada por “ix” no profile, faz com que o binário executado herde permissões 
+# do profile pai.
 #
 # - Child (Cx)
-# Cria uma regra que é denotada por “Cx” no perfil, requer que um subperfil seja criado dentro do 
-# perfil pai e as regras devem ser geradas separadamente para este filho (prompts aparecerão ao 
+# Cria uma regra que é denotada por “Cx” no profile, requer que um subprofile seja criado dentro do 
+# profile pai e as regras devem ser geradas separadamente para este filho (prompts aparecerão ao 
 # executar varreduras no pai).
 #
-# - Profile (px/Px) - Execução de perfil discreto
-# O filho é executado usando seu próprio perfil, que deve ser carregado no kernel. Se o perfil não 
+# - Profile (px/Px) - Execução de profile discreto
+# O filho é executado usando seu próprio profile, que deve ser carregado no kernel. Se o profile não 
 # estiver presente, as tentativas de execução do filho falharão com permissão negada. Isso é útil se 
 # o programa pai estiver chamando um serviço global, como pesquisas de DNS ou enviando e-mail com o 
 # MTA do seu sistema.
 #
-# Escolha o perfil com a opção clean exec (Px) para limpar o ambiente de variáveis de ambiente que 
+# Escolha o profile com a opção clean exec (Px) para limpar o ambiente de variáveis de ambiente que 
 # podem modificar o comportamento de execução quando passadas para o processo filho.
 # 
 # - Unconfined (ux/Ux) - Execução sem restrições
-# O filho é executado completamente não confinado, sem nenhum perfil do AppArmor aplicado ao recurso 
+# O filho é executado completamente não confinado, sem nenhum profile do AppArmor aplicado ao recurso 
 # executado.
 #
 # Escolha a opção não confinado com clean exec (Ux) para limpar o ambiente de variáveis de ambiente 
@@ -140,15 +140,15 @@ audit2allow
 4. Instalação
 
 # instalação
-#
-$ apt install apparmor apparmor-profiles apparmor-utils apparmor-profiles-extra
+
+$ apt install apparmor apparmor-utils apparmor-profiles apparmor-profiles-extra
 
 # status do systemctl do Apparmor
-#
+
 $ sudo systemctl status apparmor
 
 # Apparmor e systemctl
-#
+
 $ sudo systemctl status apparmor
 $ sudo systemctl start apparmor
 $ sudo systemctl stop apparmor
@@ -164,7 +164,12 @@ $ sudo systemctl enable apparmor
 $ sudo aa-status
 $ sudo cat /sys/kernel/security/apparmor/profiles
 
-5.2 Criar um perfil Stand-Alone
+# O comando "aa-unconfined" lista os programas que não estão associados a nenhum profile
+# e que acessam a internet.
+
+$ sudo aa-unconfined --paranoid
+
+5.2 Criar um profile Stand-Alone
 
 # comando utilizado para criar um profile para um determinado programa, no exemplo abaixo, 
 # esta sendo utilizado o aplicativo W3M.
@@ -179,17 +184,17 @@ $ sudo aa-genprof w3m
 # aa-genprof possa coletar uma série de informações e criar o profile do aplicativo.
 #
 # será feito uma série de perguntas por parte do aa-genprof com o objetivo de criar
-# o perfil do aplicativo W3M, /etc/apparmor.d/usr.bin.w3m
+# o profile do aplicativo W3M, /etc/apparmor.d/usr.bin.w3m
 
-5.3 Criar um perfil de forma aproximada
+5.3 Criar um profile de forma aproximada
 
-# O comando cria um perfil aproximado para um determinado aplicativo.
+# O comando cria um profile aproximado para um determinado aplicativo.
 
 $ sudo aa-autodep w3m
 
-5.4 Criar um perfil de forma facil
+5.4 Criar um profile de forma facil
 
-# O comando "aa-easyprof" cria o esqueleto do perfil do aplicativo. O arquivo de configuração
+# O comando "aa-easyprof" cria o esqueleto do profile do aplicativo. O arquivo de configuração
 # contem somente o esqueleto de um arquivo de configuração.
 
 $ sudo aa-easyprof /usr/bin/w3m > /etc/apparmor.d/usr.bin.w3m
@@ -206,59 +211,59 @@ $ sudo aa-logprof
 
 5.5 Modo Complain
 
-# O comando abaixo ira colocar um determinado perfil em modo "complain". 
+# O comando abaixo ira colocar um determinado profile em modo "complain". 
 
 $ sudo aa-complain /etc/apparmor.d/usr.bin.w3m
 
 5.6 Modo Enforce
 
-# O comando abaixo ira colocar um determinado perfil em modo "enforce".
+# O comando abaixo ira colocar um determinado profile em modo "enforce".
 
 $ sudo aa-enforce /etc/apparmor.d/usr.bin.w3m
 
-5.7 Carregar um perfil
+5.7 Carregar um profile
 
-# O comando abaixo é utilizado para carregar um perfil
+# O comando abaixo é utilizado para carregar um profile
 
 $ sudo apparmor_parser -a /etc/apparmor.d/usr.bin.w3m
 
-5.8 Recarregar um perfil
+5.8 Recarregar um profile
 
-# O comando abaixo é utilizado para recarregar um perfil. Esse comando
-# pode ser utilizado para recarregar o perfil depois de foi feito qualquer
+# O comando abaixo é utilizado para recarregar um profile. Esse comando
+# pode ser utilizado para recarregar o profile depois de foi feito qualquer
 # tipo de alteração no arquivo de configuração do mesmo.
 
 $ sudo apparmor_parser -r /etc/apparmor.d/usr.bin.w3m
 
-5.9 Desabilitar um perfil de forma permanente
+5.9 Desabilitar um profile de forma permanente
 
-# Os comandos abaixo irão desabilitar o perfil de forma permanente.
+# Os comandos abaixo irão desabilitar o profile de forma permanente.
 
 $ sudo ln -s /etc/apparmor.d/usr.bin.w3m /etc/apparmor.d/disable
 $ sudo systemctl restart apparmor
 
-5.10 Desabilitar um perfil
+5.10 Desabilitar um profile
 
-# Os comandos abaixo irão desabilitar o perfil
+# Os comandos abaixo irão desabilitar o profile
 
 $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
 	OU
 $ sudo aa-disable /etc/apparmor.d/usr.bin.w3m
 
-5.11 Habilitar um perfil
+5.11 Habilitar um profile
 
-# Os comandos abaixo irão habilitar o perfil
+# Os comandos abaixo irão habilitar o profile
 
 $ sudo apparmor_parser /etc/apparmor.d/usr.bin.w3m
 
-5.12 Apagar um perfil de forma permanente
+5.12 Apagar um profile de forma permanente
 
-# Os comandos abaixo irão remover o perfil do Apparmor.
+# Os comandos abaixo irão remover o profile do Apparmor.
 
 $ sudo apparmor_parser -R /etc/apparmor.d/usr.bin.w3m
 $ sudo rm /etc/apparmor.d/usr.bin.w3m                
 
-5.13 Apagar um perfil desconhecido
+5.13 Apagar um profile desconhecido
 
 # Os comandos abaixo são utilizados para listar e apagar os
 # profiles que não estão no diretório /etc/apparmor.d/
@@ -280,7 +285,7 @@ $ sudo aa-remove-unknown
 # "Program chunks" incluem instruções que contêm fragmentos de perfis específicos para conjuntos de programas.
 # 
 # Capability Entries
-# "Capability Entries" são entradas de perfil para qualquer um dos recursos POSIX.1e http://en.wikipedia.org/wiki/POSIX#POSIX.1 
+# "Capability Entries" são entradas de profile para qualquer um dos recursos POSIX.1e http://en.wikipedia.org/wiki/POSIX#POSIX.1 
 # Linux que permitem um controle refinado sobre o que um processo confinado pode fazer por meio de chamadas de sistema 
 # que requerem privilégios.
 # 
@@ -372,7 +377,7 @@ $ sudo aa-remove-unknown
 	/tmp/foo.pid          wr,
 	/tmp/foo.*            lrw,
 
-	# Essa variável se expande para um valor que pode ser alterado sem alterar todo o perfil.
+	# Essa variável se expande para um valor que pode ser alterado sem alterar todo o profile.
 	#
 	# As variaveis são definidas nos arquivos que estão armazenadas no diretório "/etc/apparmor.d/tunables/"
 	/@{HOME}/.foo_file    rw,
@@ -382,15 +387,15 @@ $ sudo aa-remove-unknown
 	# em arquivos pertencentes ao usuário.
 	owner /shared/foo/**  rw,
 
-	# Esta entrada define uma transição para o perfil local /usr/bin/foobar.
+	# Esta entrada define uma transição para o profile local /usr/bin/foobar.
 	/usr/bin/foobar       Cx,
 
-	# Uma transição de perfil nomeado para o perfil bin_generic localizado no escopo global.
+	# Uma transição de profile nomeado para o profile bin_generic localizado no escopo global.
 	/bin/**               Px -> bin_generic,
 
 	# a comment about foo's local (children) profile for /usr/bin/foobar.
 	#
-	# O perfil local /usr/bin/foobar é definido nesta seção.
+	# O profile local /usr/bin/foobar é definido nesta seção.
 	profile /usr/bin/foobar {
 		/bin/bash          rmix,
 		/bin/cat           rmix,
@@ -401,7 +406,7 @@ $ sudo aa-remove-unknown
 
 	# foo's hat, bar.
 	#
-	# Esta seção faz referência a um subperfil “hat” do aplicativo.
+	# Esta seção faz referência a um subprofile “hat” do aplicativo.
 	^bar {
 		/lib/ld-*.so*         mr,
 		/usr/bin/bar          px,
@@ -501,7 +506,7 @@ $ sudo systemctl restart nginx
 
 # A partir deste ponto, deve-se acessar as páginas "safe" e "unsafe" para que sejam 
 # registradas no log do Nginx e esses logs serão utilizados para a configuração do
-# perfil do Nginx no Apparmor.
+# profile do Nginx no Apparmor.
 #
 $ w3m http://localhost:8080/safe/index.html 
 $ w3m http://localhost:8080/unsafe/index.html
@@ -511,7 +516,7 @@ $ w3m http://localhost:8080/unsafe/index.html
 #
 $ sudo aa-logprof
 
-# Editando o perfil do Apparmor.
+# Editando o profile do Apparmor.
 #
 $ sudo vi /etc/apparmor.d/usr.sbin.nginx
 
@@ -602,3 +607,100 @@ $ w3m http://localhost:8080/unsafe/index.html
 #
 - /var/log/syslog
 - /var/log/nginx/error.log
+
+# Log
+#
+$ grep -i -rn -E 'apparmor=.*denied|apparmor=.*allowed' /var/log/
+
+#
+# MYSQL/MARIADB
+#
+
+1. Profile
+
+$ cat /etc/apparmor.d/usr.sbin.mariadbd
+$ cat /etc/apparmor.d/usr.sbin.mysqld
+
+#include <tunables/global>
+
+/usr/sbin/mysqld {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <abstractions/user-tmp>
+  #include <abstractions/mysql>
+  #include <abstractions/winbind>
+
+# Allow system resource access
+  /sys/devices/system/cpu/ r,
+  /sys/devices/system/node/ r,
+  /sys/devices/system/node/** r,
+  /proc/*/status r,
+
+  capability sys_resource,
+  capability dac_override,
+  capability setuid,
+  capability setgid,
+  capability sys_nice,
+
+# Allow network access
+  network tcp,
+
+  /etc/hosts.allow r,
+  /etc/hosts.deny r,
+
+# Allow config access
+  /etc/mysql/** r,
+
+# Allow pid, socket, socket lock and other file access
+  /run/mysqld/* rw,
+  /var/run/mysqld/* rw,
+
+# Allow systemd notify messages
+  /{,var/}run/systemd/notify w,
+
+# Allow execution of server binary
+  /usr/sbin/mysqld mr,
+  /usr/sbin/mysqld-debug mr,
+
+# Allow plugin access
+  /usr/lib/mysql/plugin/ r,
+  /usr/lib/mysql/plugin/*.so* mr,
+
+# Allow error msg and charset access
+  /usr/share/mysql/ r,
+  /usr/share/mysql/** r,
+  /usr/share/mysql-@MYSQL_BASE_VERSION@/ r,
+  /usr/share/mysql-@MYSQL_BASE_VERSION@/** r,
+
+# Allow data dir access
+  /var/lib/mysql/ r,
+  /var/lib/mysql/** rwk,
+
+# Allow data files dir access
+  /var/lib/mysql-files/ r,
+  /var/lib/mysql-files/** rwk,
+
+# Allow keyring dir access
+  /var/lib/mysql-keyring/ r,
+  /var/lib/mysql-keyring/** rwk,
+
+# Allow log file access
+  /var/log/mysql/ r,
+  /var/log/mysql/** rw,
+
+# Allow access to openssl config
+  /etc/ssl/openssl.cnf r,
+
+}
+
+# Re-ler o profile
+#
+$ sudo apparmor_parser -r -T /etc/apparmor.d/usr.sbin.mariadbd
+
+# Colocar o profile do MySQL/MariaDB em modo "enforce"
+#
+$ sudo aa-enforce /etc/apparmor.d/usr.sbin.mariadbd
+
+# Reinicializar o MySQL/MariaDB
+#
+$ systemctl restart mysql.service
