@@ -64,7 +64,10 @@ vdb    254:16   0    2G  0 disk
 
 # formatar a particao que sera criptografada
 #
-$ sudo cryptsetup luksFormat /dev/vdb1 
+$ sudo cryptsetup luksFormat /dev/vdb1
+$ sudo cryptsetup luksFormat --type luks1 /dev/DEVICE
+$ sudo cryptsetup luksFormat --type luks2 /dev/DEVICE
+$ sudo cryptsetup -y -v --type luks2 luksFormat /dev/sdc
 
 WARNING!
 ========
