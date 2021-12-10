@@ -35,9 +35,11 @@ audit2why
 audit2allow
 /etc/selinux/*
 
+#################################
 # 
 # AppArmor
 #
+#################################
 
 1. Introdução
 
@@ -414,9 +416,11 @@ $ sudo aa-remove-unknown
 	}
 }
 
+#################################
 #
 # Apparmor e Nginx
 #
+#################################
 
 1. Instalação
 
@@ -612,9 +616,11 @@ $ w3m http://localhost:8080/unsafe/index.html
 #
 $ grep -i -rn -E 'apparmor=.*denied|apparmor=.*allowed' /var/log/
 
+#################################
 #
-# MYSQL/MARIADB
+# Apparmor e MYSQL/MARIADB
 #
+#################################
 
 1. Profile
 
@@ -704,3 +710,9 @@ $ sudo aa-enforce /etc/apparmor.d/usr.sbin.mariadbd
 # Reinicializar o MySQL/MariaDB
 #
 $ systemctl restart mysql.service
+
+#################################
+#
+# AppArmor e Docker
+#
+#################################
