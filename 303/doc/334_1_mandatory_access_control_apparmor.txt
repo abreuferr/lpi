@@ -716,3 +716,22 @@ $ systemctl restart mysql.service
 # AppArmor e Docker
 #
 #################################
+
+
+#
+# Profile padrão
+#
+
+# quando o contêiner é inicializado, o Apparmor aplica de forma automatica o perfil
+# docker-default. 
+
+$ docker run --rm -it debian:jessie bash -i
+
+root@eac3967143c7:/# cat /proc/sysrq-trigger 
+cat: /proc/sysrq-trigger: Permission denied
+
+#
+# Profile customizado
+#
+
+
