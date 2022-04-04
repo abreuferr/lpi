@@ -63,6 +63,13 @@ $ sudo dpkg-reconfigure slapd
 	Do you want the database to be removed when slapd is purged? <NO>
 	Move old database? <YES>
 
+# verificar a configuração do servidor OpenLDAP
+$ sudo slapcat
+
+# Reinicializar o OpenLDAP
+$ sudo systemctl restart slapd
+$ sudo systemctl status slapd
+
 # banco de dados
 $ sudo cp /usr/share/doc/slapd/examples/DB_CONFIG /var/lib/ldap
 
@@ -119,15 +126,17 @@ $ sudo slappasswd
 # ldif do usuario
 $  cat caio.ldif
 	dn: uid=caio,ou=People,dc=particula,dc=local
-	objectClass: inetOrgPerson
+	objectClass: top
+	objectClass: account
 	objectClass: posixAccount
 	objectClass: shadowAccount
 	cn: caio
 	sn: ferreira
-	userPassword: {SSHA}xxxxxxxxxxxxxxxx
-	loginShell: /bin/bash
+	uid: caio
 	uidNumber: 1000
 	gidNumber: 1000
+	userPassword: {SSHA}xxxxxxxxxxxxxxxx
+	loginShell: /bin/bash
 	homeDirectory: /home/caio
 
 	dn: cn=caio,ou=Groups,dc=particula,dc=local
@@ -153,6 +162,14 @@ $ cat group.ldif
 	objectClass: groupOfNames
 	member: cn=caio,ou=users,dc=particula,dc=local
 $ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f group.ldif
+
+#
+# Busca
+#
+
+# Busca nos registros
+$ sudo ldapsearch -x -b "dc=particula,dc=local" ou
+$ sudo ldapsearch -x -b "ou=People,dc=particulaa,dc=local"
 
 #
 # Log
