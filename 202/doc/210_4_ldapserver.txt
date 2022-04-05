@@ -105,7 +105,7 @@ $ sudo vi /etc/ldap/ldap.conf
 # Organizational Unit
 #
 
-$ cat vi ou.ldif
+$ cat ou.ldif
 	dn: ou=People,dc=particula,dc=local
 	objectClass: organizationalUnit
 	ou: People
@@ -120,28 +120,29 @@ $ sudo ldapadd -D cn=admin,dc=particula,dc=local -W -f ou.ldif
 # Usuario
 #
 
-# gerando o hash da senha do usuario admin/rootpw
-$ sudo slappasswd
+# gerando o hash da senha do usuario
+$ /usr/sbin/slappasswd -h {SSHA}
 
 # ldif do usuario
-$  cat caio.ldif
-	dn: uid=caio,ou=People,dc=particula,dc=local
-	objectClass: inetOrgPerson
+$  cat cferreira.ldif
+	dn: uid=cferreira,ou=People,dc=particula,dc=local
+	objectClass: top
+	objectClass: account
 	objectClass: posixAccount
 	objectClass: shadowAccount
-	cn: caio
-	sn: ferreira
+	cn: cferreira
+	uid: cferreira
 	userPassword: {SSHA}xxxxxxxxxxxxxxxx
 	loginShell: /bin/bash
 	uidNumber: 1000
 	gidNumber: 1000
-	homeDirectory: /home/caio
+	homeDirectory: /home/cferreira
 
-	dn: cn=caio,ou=Groups,dc=particula,dc=local
+	dn: cferreira,ou=Groups,dc=particula,dc=local
 	objectClass: posixGroup
-	cn: caio
+	cn: cferreira
 	gidNumber: 1000
-	memberUid: caio
+	memberUid: cferreira
 
 # adicionar
 $ sudo ldapadd -x -D cn=admin,dc=particula,dc=local -W -f caio.ldif
@@ -212,3 +213,32 @@ $ sudo vi /etc/pam.d/commom-account
 $ sudo vi /etc/pam.d/commom-auth
 
 $ sudo vi /etc/pam.d/common-password
+
+#
+# LDAP Account Manager
+#
+
+# Install Apache Web server & PHP
+$ sudo apt -y install apache2 php php-cgi libapache2-mod-php php-mbstring php-common php-pear
+
+# Enable php-cgi PHP extension
+$ sudo a2enconf php7.4-cgi
+$ sudo systemctl reload apache2
+
+# Install LDAP Account Manager
+$ sudo apt -y install ldap-account-manager
+
+# Configure LDAP Account Manager
+
+http://(server’s hostname or IP address)/lam
+
+LAM configuration
+
+Edit server profiles
+
+lam/lam
+
+Server settings > ldap://192.168.122.24:389 > dc=senhasegura,dc=local
+Security settings > Fixed List > cn=admin,dc=senhasegura,dc=local
+Active account types > Users > ou=People,dc=senhasegura,dc=local
+					   Groups > ou=group,dc=senhasegura,dc=local
