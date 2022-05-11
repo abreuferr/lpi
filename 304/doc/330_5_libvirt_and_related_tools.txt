@@ -23,6 +23,7 @@ Terms and Utilities:
 #
 # virsh
 #
+#####################################
 
 # Listar as vm existentes
 #
@@ -130,3 +131,20 @@ $ sudo systemctl restart libvirtd
 # Mover os arquivos das VMs
 #
 $ sudo sudo mv /var/lib/libvirt/images/*.qcow2 /mnt/vm/libvirt/images/
+
+#
+# Rede
+#
+
+# Visualizar redes
+#
+$ sudo virsh net-list
+
+# Editar as configurações da rede
+#
+$ sudo virsh net-edit [REDE]
+
+# Reinicializar a rede
+#
+$ sudo virsh net-destroy [REDE]
+$ sudo virsh net-start [REDE]
