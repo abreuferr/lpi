@@ -1,3 +1,8 @@
+#: Title : Advanced Network Configuration
+#: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
+#: Description : Advanced Network Configuration
+#: Options : Weight: 4
+
 # LSOF
 #
 # aplicativo utilizado para listar os arquivos que estao abertos,
