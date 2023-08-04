@@ -38,26 +38,17 @@ Terms and Utilities:
 # de informacoes e configuracao entre os servidores master e 
 # slave.
 $ cd /etc/bind/
-$ dnssec-keygen -a [HMAC-MD5] -b [512] -n USER [particula_local]
-	-a especificar qual eh o algoritmo que sera utilizado para criar as chaves
-	-b especifica o tamanho da chave
-	-n especifica o tipo de chave
-
-# conteudo da chave privada
-$ sudo cat Kparticula_local.+157+11082.private
-	Private-key-format: v1.3
-	Algorithm: 157 (HMAC_MD5)
-	Key: xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==
-	Bits: AAA=
-	Created: 20190102190149
-	Publish: 20190102190149
-	Activate: 20190102190149
+$ sudo tsig-keygen -a hmac-sha512 srv1.particula.local
+key "srv1.particula.local" {
+	algorithm hmac-sha512;
+	secret "eajt/vvIOVg/ZxBupOOiPllAtaDe9A/ClKdIKUAhcUV1YNu7sG7tbNNO80W1dse7Wo/HkRHh1qcWJtu6goJQ4A==";
+};
 
 $ sudo vi /etc/bind/named.conf.local
 	// define a chave utilizada para controlar e autenticar operacoes.
 	key "particula_local" {
-        	algorithm hmac-md5;
-	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
+        	algorithm hmac-sha512;
+	        secret "eajt/vvIOVg/ZxBupOOiPllAtaDe9A/ClKdIKUAhcUV1YNu7sG7tbNNO80W1dse7Wo/HkRHh1qcWJtu6goJQ4A==";
 	};
 
 	// servidor slave
@@ -81,17 +72,13 @@ $ sudo vi /etc/bind/named.conf.local
 	};
 
 # testar o arquivo de configuracao
-$ sudo named-checkconf /etc/bind/named.conf.options
+$ sudo named-checkconf /etc/bind/named.conf.local
 
 # relendo os arquivos de configuracao do bind.
-$ sudo rndc reload
+$ sudo systemctl restart named
 
 # visualizando log
-$ sudo cat /var/log/syslog
-Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#58421/key particula_local (particula.local): transfer of 'particula.local/IN': AXFR-style IXFR started: TSIG particula_local (serial 2019061009)
-Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#58421/key particula_local (particula.local): transfer of 'particula.local/IN': AXFR-style IXFR ended
-Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#53429/key particula_local (0.168.192.in-addr.arpa): transfer of '0.168.192.in-addr.arpa/IN': AXFR-style IXFR started: TSIG particula_local (serial 2019061009)
-Jun 10 22:04:53 ns1 named[756]: client 192.168.0.7#53429/key particula_local (0.168.192.in-addr.arpa): transfer of '0.168.192.in-addr.arpa/IN': AXFR-style IXFR ended
+$ sudo tail -f /var/log/bind/bind.log
 
 #
 # CONFIGURACAO DO DNS SECUNDARIO (NS2 - 192.168.0.6)
@@ -102,7 +89,7 @@ $ sudo vi /etc/bind/named.conf.local
 	// primario/master.
 	key "particula_local" {
         	algorithm hmac-md5;
-	        secret "xAl7QKgDoVWyoOV3fy84Xu6ayy/tHEFOVbHqYnemRnad5ByLeETJA4DVdQFkDmdboxc5id40VDI6PTtcnoWI3A==";
+	        secret "eajt/vvIOVg/ZxBupOOiPllAtaDe9A/ClKdIKUAhcUV1YNu7sG7tbNNO80W1dse7Wo/HkRHh1qcWJtu6goJQ4A==";
 	};
 
 	// servidor master
@@ -127,16 +114,10 @@ $ sudo vi /etc/bind/named.conf.local
 	};
 
 # testar o arquivo de configuracao
-$ sudo named-checkconf /etc/bind/named.conf.options
+$ sudo named-checkconf /etc/bind/named.conf.local
 
 # relendo os arquivos de configuracao do bind.
-$ sudo rndc reload
+$ sudo systemctl restart named
 
 # visualizando log
-$ sudo cat /var/log/syslog
-Jun 10 22:04:53 ns2 named[1411]: zone 0.168.192.in-addr.arpa/IN: notify from 192.168.0.6#59970: serial 2019061009
-Jun 10 22:04:53 ns2 named[1411]: zone 0.168.192.in-addr.arpa/IN: Transfer started.
-Jun 10 22:04:53 ns2 named[1411]: transfer of '0.168.192.in-addr.arpa/IN' from 192.168.0.6#53: connected using 192.168.0.7#53429
-Jun 10 22:04:53 ns2 named[1411]: zone 0.168.192.in-addr.arpa/IN: transferred serial 2019061009: TSIG 'particula_local'
-Jun 10 22:04:53 ns2 named[1411]: transfer of '0.168.192.in-addr.arpa/IN' from 192.168.0.6#53: Transfer status: success
-Jun 10 22:04:53 ns2 named[1411]: transfer of '0.168.192.in-addr.arpa/IN' from 192.168.0.6#53: Transfer completed: 1 messages, 8 records, 329 bytes, 0.001 secs (329000 bytes/sec)
+$ sudo tail -f /var/log/bind/bind.log
