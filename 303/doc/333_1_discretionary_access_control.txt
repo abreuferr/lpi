@@ -2,8 +2,11 @@
 #: Author : "Caio Abreu Ferreira" <abreuferr_gmail.com>
 #: Description : Discretionary Access Control
 #: Options : Weight: 3
+#: REF : https://www.usenix.org/legacy/publications/library/proceedings/usenix03/tech/freenix03/full_papers/gruenbacher/gruenbacher_html/main.html
 
-Description: Candidates should understand discretionary access control (DAC) and know how to implement it using access control lists (ACL). Additionally, candidates are required to understand and know how to use extended attributes.
+Description: Candidates should understand discretionary access control (DAC) 
+and know how to implement it using access control lists (ACL). Additionally, 
+candidates are required to understand and know how to use extended attributes.
 
 Key Knowledge Areas:
 
@@ -18,8 +21,78 @@ Partial list of the used files, terms and utilities:
 - getfattr
 - setfattr
 
-#################################
-# 
-# access control lists (ACL)
+
 #
-#################################
+# Teoria
+#
+
+Existem dois tipos de ACL:
+
+Access ACLs: As ACLs de acesso são usadas para conceder permissões em qualquer arquivo ou 
+diretório.
+Default ACLs: As ACLs padrão são usadas para conceder/definir lista de controle de acesso 
+apenas em um diretório específico.
+
+#
+# Prático
+#
+
+# Verificar se a ACL esta habilitada no sistema de arquivo
+#
+$ sudo grep -i acl /boot/config*
+
+# Pacote ACL
+#
+$ sudo apt-get install nfs4-acl-tools acl
+
+# Definir a ACL padrão para um diretório ou arquivo em específico. Para isso, deve-se 
+# utilizar o comando "setfacl". No exemplo abaixo, o comando "setfacl" irá definir a 
+# nova ACL como leitura (read) e execução (execute) na pasta ACL.
+#
+$ sudo setfacl -m d:o:rx ACL/
+
+# Visualizar as definições da ACL padrão para o diretório ACL
+# 
+$ sudo getfacl ACL 
+# file: ACL
+# owner: cferreira
+# group: cferreira
+user::rwx
+group::r-x
+other::r-x
+default:user::rwx
+default:group::r-x
+default:other::r-x
+
+# diretório de trabalho
+#
+$ mkdir -p ACL/user1/exemplo
+
+# O comando ‘setfacl’ permite definir ou modificar qualquer arquivo ou diretório. O
+# comando abaixo define as permissões de leitura/read e escrita/write para o usuário 
+# ‘user1‘.
+#
+$ sudo setfacl -m u:user1:rw ACL/user1/exemplo
+
+# Visualizar as definições da ACL para o diretório ACL/user1/exemplo
+# 
+$ sudo getfacl ACL/user1/exemplo
+# file: ACL/user1/exemplo
+# owner: cferreira
+# group: cferreira
+user::rwx
+user:user1:rw-
+group::r-x
+mask::rwx
+other::r-x
+default:user::rwx
+default:group::r-x
+default:other::r-x
+
+# Remover todas as ACLs de um determinado diretório
+#
+$ sudo setfacl -b ACL/user1/exemplo
+
+# Remover a ACL de nome ACl de um determinado diretório
+#
+$ setfacl -x ACL ACL/user1/exemplo
