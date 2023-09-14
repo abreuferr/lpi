@@ -21,20 +21,20 @@ Partial list of the used files, terms and utilities:
 - getfattr
 - setfattr
 
-
 #
 # Teoria
 #
 
 Existem dois tipos de ACL:
 
-Access ACLs: As ACLs de acesso são usadas para conceder permissões em qualquer arquivo ou 
-diretório.
-Default ACLs: As ACLs padrão são usadas para conceder/definir lista de controle de acesso 
-apenas em um diretório específico.
+Access ACLs: As ACLs de acesso são usadas para conceder permissões 
+em qualquer arquivo ou diretório.
+
+Default ACLs: As ACLs padrão são usadas para conceder/definir lista 
+de controle de acesso apenas em um diretório específico.
 
 #
-# Prático
+# Laboratório
 #
 
 # Verificar se a ACL esta habilitada no sistema de arquivo
@@ -45,9 +45,10 @@ $ sudo grep -i acl /boot/config*
 #
 $ sudo apt-get install nfs4-acl-tools acl
 
-# Definir a ACL padrão para um diretório ou arquivo em específico. Para isso, deve-se 
-# utilizar o comando "setfacl". No exemplo abaixo, o comando "setfacl" irá definir a 
-# nova ACL como leitura (read) e execução (execute) na pasta ACL.
+# Definir a ACL padrão para um diretório ou arquivo em específico. 
+# Para isso, deve-se utilizar o comando "setfacl". No exemplo abaixo, 
+# o comando "setfacl" irá definir a nova ACL como leitura (read) e 
+# execução (execute) na pasta ACL.
 #
 $ sudo setfacl -m d:o:rx ACL/
 
@@ -68,9 +69,9 @@ default:other::r-x
 #
 $ mkdir -p ACL/user1/exemplo
 
-# O comando ‘setfacl’ permite definir ou modificar qualquer arquivo ou diretório. O
-# comando abaixo define as permissões de leitura/read e escrita/write para o usuário 
-# ‘user1‘.
+# O comando ‘setfacl’ permite definir ou modificar qualquer arquivo
+# ou diretório. O comando abaixo define as permissões de leitura/read 
+# e escrita/write para o usuário ‘user1‘.
 #
 $ sudo setfacl -m u:user1:rw ACL/user1/exemplo
 
@@ -96,3 +97,184 @@ $ sudo setfacl -b ACL/user1/exemplo
 # Remover a ACL de nome ACl de um determinado diretório
 #
 $ setfacl -x ACL ACL/user1/exemplo
+
+#
+# Laboratório
+#
+
+# Adicionando usuários e definindo as senhas dos usuários que 
+# serão utilizados nos testes.
+#
+$ sudo adduser user1 && sudo passwd user1
+$ sudo adduser user2 && sudo passwd user2
+
+# Grupos de trabalho
+#
+$ sudo groupadd acl
+$ sudo usermod -G acl tecmint1
+$ sudo usermod -G acl tecmint2
+
+# diretório de trabalho
+#
+$ sudo mkdir /acl
+
+# alterando o dono para user1
+#
+$ sudo chown user1 /acl
+
+# visualizando as permissões do diretório
+#
+$ ls -ld /acl 
+drwxr-xr-x 2 user1 root 4096 Sep 13 17:33 /acl
+
+# visualizando as permissões da acl da pasta de trabalho
+#
+$ sudo getfacl /acl 
+getfacl: Removing leading '/' from absolute path names
+# file: acl
+# owner: user1
+# group: root
+user::rwx
+group::r-x
+other::r-x
+
+# mudando para o usuário user1
+#
+$ su - user1
+
+# visualizar qual usuário esta ativo
+#
+$ whoami
+user1
+
+# criação de diretório para teste
+#
+$ mkdir /acl/teste
+
+# visualizar as permissões do diretório que foi criado no passo
+# anterior.
+#
+$ ls -ld /acl/teste/
+drwxr-xr-x 2 user1 user1 4096 Sep 13 17:41 /acl/teste/
+
+# utilizando o comando ‘setfacl‘ para configura a ACL. O usuário 
+# ‘user1‘ receberá a permissão rwx na pasta /acl/teste/ e o usuário 
+# ‘user2‘ receberá a permissão de somente leitura na pasta /acl/teste/.
+# O grupo ‘outros‘ não vai ter nenhum tipo de permissão.
+#
+$ sudo setfacl -m u:user1:rwx /acl/teste/
+$ sudo setfacl -m u:user2:r-- /acl/teste/
+$ sudo setfacl -m  other:--- /acl/teste/
+
+# visualização do resultado da configuração da ACL.
+#
+$ sudo getfacl /acl/teste/
+
+# file: acl/teste/
+# owner: user1
+# group: user1
+user::rwx
+user:user1:rwx
+user:user2:r--
+group::r-x
+mask::rwx
+other::---
+
+# mudando para o usuário user2
+#
+$ su - user2
+
+# visualizar qual usuário esta ativo
+#
+$ whoami
+user2
+
+# tentativa de acesso a um determinado diretório, mas o acesso
+# foi negado devido a problema de permissão.
+#
+$ cd /acl/teste/
+-bash: cd: teste/: Permission denied
+
+# visualização do resultado da configuração da ACL.
+#
+$ sudo getfacl teste/
+# file: teste/
+# owner: user1
+# group: user1
+user::rwx
+user:user1:rwx
+user:user2:r--
+group::r-x
+mask::rwx
+other::---
+
+# mudando para o usuário user1
+#
+$ su - user1
+
+# visualizar qual usuário esta ativo
+#
+$ whoami
+user1
+
+# Agora, o "user2" possui a permissão de visualizar e acessa o diretório "/acl/teste/", mas
+# não possui permissão de escrita sobre o diretório.
+# 
+$ sudo setfacl -m u:user2:r-x /acl/teste/
+
+# visualização do resultado da configuração da ACL.
+#
+$ sudo getfacl /acl/teste/
+# file: teste/
+# owner: user1
+# group: user1
+user::rwx
+user:user1:rwx
+user:user2:r-x
+group::r-x
+mask::rwx
+other::---
+
+# mudando para o usuário user2
+#
+$ su - user2
+
+# visualizar qual usuário esta ativo
+#
+$ whoami
+user2
+
+$ cd /acl/teste/
+
+# visualização do resultado da configuração da ACL.
+#
+$ sudo getfacl .
+# file: .
+# owner: user1
+# group: user1
+user::rwx
+user:user1:rwx
+user:user2:r-x
+group::r-x
+mask::rwx
+other::---
+
+# tentando criar um diretório com o usuário ‘user2’, mas o usuário
+# possui a permissão "r-x", leitura e execução.
+#
+$ mkdir user2
+mkdir: cannot create directory ‘user2’: Permission denied
+
+# tentando criar um diretório com o usuário ‘user2’, mas o usuário
+# possui a permissão "r-x", leitura e execução.
+#
+$ touch user2
+touch: cannot touch 'user2': Permission denied
+
+$ cd ..
+
+$ ls -la
+total 12
+drwxr-xr-x   3 user1 root  4096 Sep 13 17:56 .
+drwxr-xr-x  19 root  root  4096 Sep 13 17:55 ..
+drwxrwx---+  2 user1 user1 4096 Sep 13 17:56 teste
