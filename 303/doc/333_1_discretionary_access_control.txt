@@ -34,7 +34,7 @@ Default ACLs: As ACLs padrão são usadas para conceder/definir lista
 de controle de acesso apenas em um diretório específico.
 
 #
-# Laboratório
+# Laboratório 01
 #
 
 # Verificar se a ACL esta habilitada no sistema de arquivo
@@ -99,7 +99,7 @@ $ sudo setfacl -b ACL/user1/exemplo
 $ setfacl -x ACL ACL/user1/exemplo
 
 #
-# Laboratório
+# Laboratório 02
 #
 
 # Adicionando usuários e definindo as senhas dos usuários que 
