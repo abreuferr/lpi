@@ -369,6 +369,10 @@ options {
 	allow-recursion { localhost; rede; };
 };
 
+# o programa named-checonf verifica a o arquivo de configuração
+# em relação a sintaxe.
+$ sudo named-checkconf /etc/bind/named.conf.options
+
 $ sudo cp /etc/bind/named.conf.local{,.origin}
 $ sudo vi /etc/bind/named.conf.local
 // configuração da zona particula.local
