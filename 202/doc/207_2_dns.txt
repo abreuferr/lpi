@@ -407,7 +407,7 @@ zone "0.168.192.in-addr.arpa" IN {
 
 # o programa named-checonf verifica a o arquivo de configuração
 # em relação a sintaxe.
-$ sudo named-checkconf /etc/bind/named.conf.options
+$ sudo named-checkconf /etc/bind/named.conf.local
 
 # reinicializar o bind.
 $ sudo systemctl restart bind9.service
