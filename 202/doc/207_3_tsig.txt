@@ -88,7 +88,7 @@ $ sudo vi /etc/bind/named.conf.local
 	// chave de criptografia tsig gerada no servidor
 	// primario/master.
 	key "particula_local" {
-        	algorithm hmac-md5;
+        	algorithm hmac-sha512;
 	        secret "eajt/vvIOVg/ZxBupOOiPllAtaDe9A/ClKdIKUAhcUV1YNu7sG7tbNNO80W1dse7Wo/HkRHh1qcWJtu6goJQ4A==";
 	};
 
