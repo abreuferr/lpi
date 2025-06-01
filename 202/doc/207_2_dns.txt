@@ -51,7 +51,16 @@ Terms and Utilities:
 
 ##########################################
 #
-# Instalação
+# AppArmor (Primário/Secundário)
+#
+##########################################
+
+# removendo o aplicativo apparmor
+$ sudo apt autoremove --purge apparmor
+
+##########################################
+#
+# Instalação (Primário/Secundário)
 #
 ##########################################
 
@@ -68,7 +77,7 @@ $ sudo chown -R bind:bind /etc/bind
 
 ##########################################
 #
-# Configuração do servidor primário/secundário
+# Configuração do servidor (Primário/Secundário)
 #
 ##########################################
 
@@ -76,6 +85,7 @@ $ sudo chown -R bind:bind /etc/bind
 # de configuração do Bind em vários arquivos. Desta
 # forma, é possível segmentar a configuração em vários
 # arquivos.
+$ sudo cp /etc/bind/named.conf{,.origin}
 $ sudo vi /etc/bind/named.conf
 (...)
 include "/etc/bind/named.conf.log";
@@ -84,7 +94,7 @@ include "/etc/bind/named.conf.log";
 $ sudo vi /etc/bind/named.conf.log
 logging {
 	channel bind_log {
-		file "/var/log/bind/bind.log" versions 3 size 5m;
+		syslog daemon;
 	    severity info;
 	    print-category yes;
 	    print-severity yes;
@@ -97,15 +107,26 @@ logging {
 	category queries { bind_log; };
 	category lame-servers { null; };
 };
-	
-# criando diretório a onde o log sera armazenado
-$ sudo mkdir /var/log/bind
-
-# dado acesso ao processo bind sobre o diretório
-$ sudo chown bind:bind /var/log/bind
 
 # reinicializando o serviço
 $ sudo systemctl restart bind9
+
+# Opções para visualizar logs
+
+# Logs do BIND em tempo real:
+$ sudo journalctl -u named -f
+
+# Últimas 20 linhas dos logs do BIND:
+$ sudo journalctl -u named -n 20
+
+# Logs do BIND de hoje:
+$ sudo journalctl -u named --since today
+
+# Logs do BIND com filtro por categoria:
+$ sudo journalctl -u named | grep -E "(queries|security|update)"
+
+# Todos os logs do sistema em tempo real (equivalente ao syslog):
+$ sudo journalctl -f
 
 ##########################################
 #
@@ -128,7 +149,7 @@ acl rede {
 
 options {
         // diretório de trabalho do servidor.
-        directory "/etc/bind";
+        directory "/var/cache/bind";
 
 		// por motivos de segurança, ocultar a
 		// versão do Bind.
@@ -167,7 +188,7 @@ zone "particula.local" in {
     type master;
 
 	// arquivo de configuração da zona particula.local
-    file "db.particula.local";
+    file "/etc/bind/db.particula.local";
 
 	// os dados da configuração do servidor primário serão
 	// transferidos para o servidor secundário. essa transferência
@@ -189,7 +210,7 @@ zone "0.168.192.in-addr.arpa" in {
     type master;
 
 	// arquivo de configuração da zona particula.local
-    file "db.0.168.192";
+    file "/etc/bind/db.0.168.192";
 
 	// os dados da zona serão transferidos para o servidor
 	// secundário.
@@ -204,8 +225,8 @@ zone "0.168.192.in-addr.arpa" in {
 # em relação a sintaxe.
 $ sudo named-checkconf /etc/bind/named.conf.local
 
-// arquivo de configuração da zona particula.local.
-// Hostname > IP.
+# arquivo de configuração da zona particula.local.
+# Hostname > IP.
 $ sudo vi /etc/bind/db.particula.local
 // Start of Authority. Define o nome da zona, o email para contato
 // e o valor de refresh aplicado na zona.
@@ -342,7 +363,7 @@ acl rede {
 
 options {
     // diretório de trabalho do servidor.
-    directory "/etc/bind";
+    directory "/var/cache/bind";
 
 	// por motivos de segurança, ocultar a
 	// versão do Bind.
